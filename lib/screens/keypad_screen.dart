@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/widgets/keypad.dart';
+import 'package:text_call/widgets/keypad_screen_menu_anchor.dart';
+import 'package:text_call/widgets/message_writer.dart';
 
 class KeypadScreen extends ConsumerStatefulWidget {
   const KeypadScreen({super.key});
@@ -90,6 +92,24 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
     );
   }
 
+  void _showModalBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => const MessageWriter(),
+    );
+  }
+
+  void _moreOptions() {
+    PopupMenuButton(
+      icon: Icon(Icons.more_vert),
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          child: Text('hellow'),
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -101,12 +121,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
               onPressed: () {},
               icon: const Icon(Icons.search),
             ),
-            IconButton(
-              onPressed: () {},
-              icon: const Badge(
-                child: Icon(Icons.more_vert),
-              ),
-            )
+            const KeypadScreenMenuAnchor(),
           ],
         ),
         const Spacer(),
@@ -134,26 +149,31 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
               onPressed: () {},
               icon: const Icon(Icons.video_camera_front),
             ),
+
             const SizedBox(
               width: 65,
             ),
+
+            // call button
             IconButton(
-              onPressed: () {},
+              onPressed: _showModalBottomSheet,
               icon: const Padding(
                 padding: EdgeInsets.all(5),
                 child: Icon(
-                  Icons.phone,
+                  Icons.message,
                   size: 35,
                 ),
               ),
               style: IconButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
               ),
             ),
             const SizedBox(
               width: 65,
             ),
+
+            // backspace button
             IconButton(
               onPressed: _backspace,
               icon: const Icon(Icons.backspace),

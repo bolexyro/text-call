@@ -1,14 +1,95 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/widgets/keypad.dart';
 
-class KeypadScreen extends StatefulWidget {
+class KeypadScreen extends ConsumerStatefulWidget {
   const KeypadScreen({super.key});
 
   @override
-  State<KeypadScreen> createState() => _KeypadScreenState();
+  ConsumerState<KeypadScreen> createState() => _KeypadScreenState();
 }
 
-class _KeypadScreenState extends State<KeypadScreen> {
+class _KeypadScreenState extends ConsumerState<KeypadScreen> {
+  final _inputedDigitsTextController = TextEditingController(text: '');
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _inputedDigitsTextController.dispose();
+    super.dispose();
+  }
+
+  void _addDigit(String myText) {
+    // _inputedDigitsTextController.value =
+    //     _inputedDigitsTextController.value.copyWith(
+    //   text: _inputedDigitsTextController.text + digit,
+    //   selection: TextSelection.collapsed(
+    //       offset: _inputedDigitsTextController.text.length + 1),
+    // );
+
+    // _inputedDigitsTextController.text += digit;
+    // _inputedDigitsTextController.selection = TextSelection.collapsed(
+    //     offset: _inputedDigitsTextController.text.length);
+    // void _insertText(String myText) {
+    final text = _inputedDigitsTextController.text;
+    final textSelection = _inputedDigitsTextController.selection;
+    final newText = text.replaceRange(
+      textSelection.start,
+      textSelection.end,
+      myText,
+    );
+    final myTextLength = myText.length;
+    _inputedDigitsTextController.text = newText;
+    _inputedDigitsTextController.selection = textSelection.copyWith(
+      baseOffset: textSelection.start + myTextLength,
+      extentOffset: textSelection.start + myTextLength,
+    );
+  }
+
+  void _backspace() {
+    final text = _inputedDigitsTextController.text;
+    final textSelection = _inputedDigitsTextController.selection;
+    final selectionLength = textSelection.end - textSelection.start;
+
+    // There is a selection.
+    if (selectionLength > 0) {
+      final newText = text.replaceRange(
+        textSelection.start,
+        textSelection.end,
+        '',
+      );
+      _inputedDigitsTextController.text = newText;
+      _inputedDigitsTextController.selection = textSelection.copyWith(
+        baseOffset: textSelection.start,
+        extentOffset: textSelection.start,
+      );
+      return;
+    }
+
+    // The cursor is at the beginning.
+    if (textSelection.start == 0) {
+      return;
+    }
+
+    // Delete the previous character
+    final newStart = textSelection.start - 1;
+    final newEnd = textSelection.start;
+    final newText = text.replaceRange(
+      newStart,
+      newEnd,
+      '',
+    );
+    _inputedDigitsTextController.text = newText;
+    _inputedDigitsTextController.selection = textSelection.copyWith(
+      baseOffset: newStart,
+      extentOffset: newStart,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -28,25 +109,56 @@ class _KeypadScreenState extends State<KeypadScreen> {
             )
           ],
         ),
-        // TextField()
         const Spacer(),
-        const Keypad(),
+        TextField(
+          onChanged: (value) {},
+          autofocus: true,
+          cursorColor: Colors.green,
+          keyboardType: TextInputType.none,
+          textAlign: TextAlign.center,
+          controller: _inputedDigitsTextController,
+          decoration: const InputDecoration(border: InputBorder.none),
+          style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+        ),
+        Keypad(
+          onButtonPressed: _addDigit,
+        ),
         const SizedBox(
           height: 20,
         ),
-        IconButton(
-          onPressed: () {},
-          icon: const Padding(
-            padding: EdgeInsets.all(5),
-            child: Icon(
-              Icons.phone,
-              size: 35,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.video_camera_front),
             ),
-          ),
-          style: IconButton.styleFrom(
-            backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
-          ),
+            const SizedBox(
+              width: 65,
+            ),
+            IconButton(
+              onPressed: () {},
+              icon: const Padding(
+                padding: EdgeInsets.all(5),
+                child: Icon(
+                  Icons.phone,
+                  size: 35,
+                ),
+              ),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            const SizedBox(
+              width: 65,
+            ),
+            IconButton(
+              onPressed: _backspace,
+              icon: const Icon(Icons.backspace),
+            )
+          ],
         ),
         const SizedBox(
           height: 20,

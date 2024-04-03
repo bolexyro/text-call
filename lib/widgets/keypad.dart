@@ -2,42 +2,83 @@ import 'package:flutter/material.dart';
 import 'package:text_call/widgets/keypad_button.dart';
 
 class Keypad extends StatelessWidget {
-  const Keypad({super.key});
+  const Keypad({
+    super.key,
+    required this.onButtonPressed,
+  });
+
+  final void Function(String didit) onButtonPressed;
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            KeypadButton(buttonText: '1'),
-            KeypadButton(buttonText: '2'),
-            KeypadButton(buttonText: '3'),
+            KeypadButton(
+              buttonText: '1',
+              onButtonPressed: onButtonPressed,
+            ),
+            KeypadButton(
+              buttonText: '2',
+              onButtonPressed: onButtonPressed,
+            ),
+            KeypadButton(
+              buttonText: '3',
+              onButtonPressed: onButtonPressed,
+            ),
           ],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            KeypadButton(buttonText: '4'),
-            KeypadButton(buttonText: '5'),
-            KeypadButton(buttonText: '6'),
+            KeypadButton(
+              buttonText: '4',
+              onButtonPressed: onButtonPressed,
+            ),
+            KeypadButton(
+              buttonText: '5',
+              onButtonPressed: onButtonPressed,
+            ),
+            KeypadButton(
+              buttonText: '6',
+              onButtonPressed: onButtonPressed,
+            ),
           ],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            KeypadButton(buttonText: '7'),
-            KeypadButton(buttonText: '8'),
-            KeypadButton(buttonText: '9'),
+            KeypadButton(
+              buttonText: '7',
+              onButtonPressed: onButtonPressed,
+            ),
+            KeypadButton(
+              buttonText: '8',
+              onButtonPressed: onButtonPressed,
+            ),
+            KeypadButton(
+              buttonText: '9',
+              onButtonPressed: onButtonPressed,
+            ),
           ],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            KeypadButton(buttonText: '*'),
-            KeypadButton(buttonText: '0'),
-            KeypadButton(buttonText: '#'),
+            KeypadButton(
+              buttonText: '*',
+              onButtonPressed: onButtonPressed,
+            ),
+            KeypadButton(
+              buttonText: '0',
+              onButtonPressed: onButtonPressed,
+            ),
+            KeypadButton(
+              buttonText: '#',
+              onButtonPressed: onButtonPressed,
+            ),
           ],
         )
       ],

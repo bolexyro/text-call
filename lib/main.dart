@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/screens/contacts_screen.dart';
 import 'package:text_call/screens/keypad_screen.dart';
 import 'package:text_call/screens/recents_screen.dart';
 
 void main() {
   runApp(
-    const TextCall(),
+    const ProviderScope(
+      child: TextCall(),
+    ),
   );
 }
 

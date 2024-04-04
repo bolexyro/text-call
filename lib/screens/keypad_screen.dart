@@ -99,16 +99,6 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
     );
   }
 
-  void _moreOptions() {
-    PopupMenuButton(
-      icon: Icon(Icons.more_vert),
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          child: Text('hellow'),
-        )
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

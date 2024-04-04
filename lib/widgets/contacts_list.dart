@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:text_call/data/contacts.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/widgets/message_writer.dart';
 
 class ContactsList extends StatelessWidget {
   const ContactsList({
@@ -11,6 +13,14 @@ class ContactsList extends StatelessWidget {
 
   final List contactsList;
   final void Function(Contact selectedContact) onContactSelected;
+
+  void _showModalBottomSheet(context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => const MessageWriter(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -50,36 +60,72 @@ class ContactsList extends StatelessWidget {
           child: ListView.builder(
             itemBuilder: (context, index) {
               Contact contactN = contactsList[index];
-              return ListTile(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+              return Slidable(
+                startActionPane: ActionPane(
+                  motion: const BehindMotion(),
+                  children: [
+                    SlidableAction(
+                      onPressed: (context) {
+                        _showModalBottomSheet(context);
+                      },
+                      backgroundColor: const Color(0xFF21B7CA),
+                      foregroundColor: Colors.white,
+                      icon: Icons.message,
+                      label: 'Delete',
+                    ),
+                    SlidableAction(
+                      onPressed: (context) {},
+                      backgroundColor: const Color(0xFFFE4A49),
+                      foregroundColor: Colors.white,
+                      icon: Icons.close,
+                      label: 'Share',
+                    ),
+                  ],
                 ),
-                leading: CircleAvatar(
-                  child: Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.deepPurple,
-                          Colors.blue,
-                        ],
+                endActionPane: ActionPane(
+                  motion: const BehindMotion(),
+                  children: [
+                    SlidableAction(
+                      onPressed: (context) {},
+                      backgroundColor: const Color(0xFFFE4A49),
+                      foregroundColor: Colors.white,
+                      icon: Icons.delete,
+                      label: 'Delete',
+                    ),
+                  ],
+                ),
+                child: ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  leading: CircleAvatar(
+                    child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.deepPurple,
+                            Colors.blue,
+                          ],
+                        ),
+                      ),
+                      child: Text(
+                        contactN.name[0],
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 25),
                       ),
                     ),
-                    child: Text(
-                      contactN.name[0],
-                      style: const TextStyle(color: Colors.white, fontSize: 25),
-                    ),
                   ),
+                  title: Text(contactN.name),
+                  onTap: () {
+                    onContactSelected(contactN);
+                  },
                 ),
-                title: Text(contactN.name),
-                onTap: () {
-                  onContactSelected(contactN);
-                },
               );
             },
             itemCount: contacts.length,

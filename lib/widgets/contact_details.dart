@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/widgets/message_writer.dart';
+import 'dart:io';
 
 class ContactDetails extends StatelessWidget {
   const ContactDetails({
@@ -13,6 +15,13 @@ class ContactDetails extends StatelessWidget {
   final _circleAvatarRadius = 50.0;
   final _transparentAndNonTransparentWidth = 235.0;
 
+  void _showModalBottomSheet(context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => const MessageWriter(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final transparentContainerHeight =
@@ -21,6 +30,7 @@ class ContactDetails extends StatelessWidget {
     Widget activeContent = const Text(
       'Select a contact from the list on the left',
       textAlign: TextAlign.center,
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
     );
     if (contact != null) {
       activeContent = Column(
@@ -78,7 +88,9 @@ class ContactDetails extends StatelessWidget {
                           color: Colors.blue[500],
                         ),
                         child: IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            _showModalBottomSheet(context);
+                          },
                           icon: const Icon(
                             Icons.message,
                             color: Colors.white,
@@ -104,16 +116,40 @@ class ContactDetails extends StatelessWidget {
           const SizedBox(
             height: 20,
           ),
-          ElevatedButton(
-            onPressed: () {},
-            child: const Text('History'),
+          SizedBox(
+            width: 170,
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[300],
+              ),
+              child: const Text(
+                'History',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ),
           const SizedBox(
             height: 20,
           ),
-          ElevatedButton(
-            onPressed: () {},
-            child: const Text('Storage locations'),
+          SizedBox(
+            width: 170,
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[300],
+              ),
+              child: const Text(
+                'Storage locations',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           )
         ],
       );
@@ -121,12 +157,15 @@ class ContactDetails extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.only(top: 40),
       decoration: BoxDecoration(
-        color: Colors.grey[400],
+        color: Colors.grey[200],
         borderRadius: BorderRadius.circular(15),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: contact == null
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),

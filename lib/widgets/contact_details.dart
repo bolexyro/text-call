@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/widgets/contact_avatar_circle.dart';
 import 'package:text_call/widgets/message_writer.dart';
-import 'dart:io';
 
 class ContactDetails extends StatelessWidget {
   const ContactDetails({
@@ -104,11 +104,8 @@ class ContactDetails extends StatelessWidget {
               Positioned(
                 left: (_transparentAndNonTransparentWidth / 2) -
                     _circleAvatarRadius,
-                child: CircleAvatar(
-                  radius: _circleAvatarRadius,
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  child: const Icon(Icons.camera_alt),
+                child: ContactAvatarCircle(
+                  avatarRadius: _circleAvatarRadius,
                 ),
               )
             ],

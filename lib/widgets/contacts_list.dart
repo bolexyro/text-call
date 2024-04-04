@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:text_call/data/contacts.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/widgets/add_contact.dart';
 import 'package:text_call/widgets/message_writer.dart';
 
-class ContactsList extends StatelessWidget {
+class ContactsList extends StatefulWidget {
   const ContactsList({
     super.key,
     required this.contactsList,
@@ -14,11 +15,31 @@ class ContactsList extends StatelessWidget {
   final List contactsList;
   final void Function(Contact selectedContact) onContactSelected;
 
+  @override
+  State<ContactsList> createState() => _ContactsListState();
+}
+
+class _ContactsListState extends State<ContactsList> {
   void _showModalBottomSheet(context) {
     showModalBottomSheet(
       context: context,
       builder: (ctx) => const MessageWriter(),
     );
+  }
+
+  void _showAddContactBottomSheet(context) async {
+    final Contact? newContact = await showAdaptiveDialog(
+      context: context,
+      builder: (context) {
+        return AddContact();
+      },
+    );
+
+    if (newContact != null) {
+      setState(() {
+        contacts.add(newContact);
+      });
+    }
   }
 
   @override
@@ -38,7 +59,9 @@ class ContactsList extends StatelessWidget {
             const Spacer(),
             const SizedBox(width: 10),
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                _showAddContactBottomSheet(context);
+              },
               icon: const Icon(Icons.add),
             ),
             const SizedBox(width: 10),
@@ -59,7 +82,7 @@ class ContactsList extends StatelessWidget {
         Expanded(
           child: ListView.builder(
             itemBuilder: (context, index) {
-              Contact contactN = contactsList[index];
+              Contact contactN = widget.contactsList[index];
               return Slidable(
                 startActionPane: ActionPane(
                   motion: const BehindMotion(),
@@ -123,7 +146,7 @@ class ContactsList extends StatelessWidget {
                   ),
                   title: Text(contactN.name),
                   onTap: () {
-                    onContactSelected(contactN);
+                    widget.onContactSelected(contactN);
                   },
                 ),
               );

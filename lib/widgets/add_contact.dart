@@ -147,15 +147,22 @@ class AddContact extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Cancel')),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
               TextButton(
                 onPressed: () {
                   _addContact(context);
                 },
-                child: const Text('Save'),
+                child: const Text(
+                  'Save',
+                  style: TextStyle(color: Colors.black),
+                ),
               )
             ],
           )

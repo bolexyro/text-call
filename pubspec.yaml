@@ -37,6 +37,9 @@ dependencies:
   cupertino_icons: ^1.0.6
   flutter_riverpod: ^2.5.1
   flutter_slidable: ^3.1.0
+  awesome_notifications: ^0.9.3+1
+  firebase_core: ^2.28.0
+  firebase_messaging: ^14.8.0
 
 dev_dependencies:
   flutter_test:

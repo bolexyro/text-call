@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "432338692225",
+    "project_id": "text-call-7f4b1",
+    "storage_bucket": "text-call-7f4b1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:432338692225:android:96b6f9bcd8b028bd500580",
+        "android_client_info": {
+          "package_name": "com.example.text_call"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEvOSp5JId5qlZHHAGBOtddogp0Y6MSS0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

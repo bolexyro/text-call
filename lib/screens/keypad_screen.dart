@@ -95,7 +95,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
   void _showModalBottomSheet() {
     showModalBottomSheet(
       context: context,
-      builder: (ctx) => const MessageWriter(),
+      builder: (ctx) =>  const MessageWriter(),
     );
   }
 

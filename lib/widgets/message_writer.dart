@@ -2,7 +2,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 
 class MessageWriter extends StatelessWidget {
-  const MessageWriter({super.key});
+   const MessageWriter({super.key});
 
   Future<void> _showNotification() async {
     bool isAllowed = await AwesomeNotifications().isNotificationAllowed();

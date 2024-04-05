@@ -5,7 +5,7 @@ import 'package:text_call/screens/recents_screen.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 
 void main() {
-   AwesomeNotifications().initialize(
+  AwesomeNotifications().initialize(
       // set the icon to null if you want to use the default app icon
       null,
       [
@@ -36,11 +36,11 @@ void main() {
 
 class TextCall extends StatefulWidget {
   const TextCall({super.key});
-   static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
 
   static const String name = 'Awesome Notifications - Example App';
   static const Color mainColor = Colors.deepPurple;
-
 
   @override
   State<TextCall> createState() => _TextCallState();
@@ -51,12 +51,14 @@ class _TextCallState extends State<TextCall> {
 
   @override
   void initState() {
-     AwesomeNotifications().setListeners(
-        onActionReceivedMethod:         NotificationController.onActionReceivedMethod,
-        onNotificationCreatedMethod:    NotificationController.onNotificationCreatedMethod,
-        onNotificationDisplayedMethod:  NotificationController.onNotificationDisplayedMethod,
-        onDismissActionReceivedMethod:  NotificationController.onDismissActionReceivedMethod
-    );
+    AwesomeNotifications().setListeners(
+        onActionReceivedMethod: NotificationController.onActionReceivedMethod,
+        onNotificationCreatedMethod:
+            NotificationController.onNotificationCreatedMethod,
+        onNotificationDisplayedMethod:
+            NotificationController.onNotificationDisplayedMethod,
+        onDismissActionReceivedMethod:
+            NotificationController.onDismissActionReceivedMethod);
 
     super.initState();
   }
@@ -105,30 +107,43 @@ class _TextCallState extends State<TextCall> {
     );
   }
 }
-class NotificationController {
 
+class NotificationController {
   /// Use this method to detect when a new notification or a schedule is created
   @pragma("vm:entry-point")
-  static Future <void> onNotificationCreatedMethod(ReceivedNotification receivedNotification) async {
-    // Your code goes here
+  static Future<void> onNotificationCreatedMethod(
+      ReceivedNotification receivedNotification) async {
+    print('notification created');
   }
 
   /// Use this method to detect every time that a new notification is displayed
   @pragma("vm:entry-point")
-  static Future <void> onNotificationDisplayedMethod(ReceivedNotification receivedNotification) async {
+  static Future<void> onNotificationDisplayedMethod(
+      ReceivedNotification receivedNotification) async {
     // Your code goes here
+    print('notification displayed');
   }
 
   /// Use this method to detect if the user dismissed a notification
   @pragma("vm:entry-point")
-  static Future <void> onDismissActionReceivedMethod(ReceivedAction receivedAction) async {
+  static Future<void> onDismissActionReceivedMethod(
+      ReceivedAction receivedAction) async {
     // Your code goes here
+    print('notification dismissed');
   }
 
   /// Use this method to detect when the user taps on a notification or action button
   @pragma("vm:entry-point")
-  static Future <void> onActionReceivedMethod(ReceivedAction receivedAction) async {
+  static Future<void> onActionReceivedMethod(
+      ReceivedAction receivedAction) async {
     // Your code goes here
+    print('notification action received');
+    print(receivedAction.buttonKeyPressed);
+    if (receivedAction.buttonKeyPressed == 'REJECT') {
+      print('twas accepted');
+    } else if(receivedAction.buttonKeyPressed == 'ACCEPT') {
+      print('twas not accepted');
+    }
 
     // Navigate into pages, avoiding to open the notification details page over another details page already opened
     // TextCall.navigatorKey.currentState?.pushNamedAndRemoveUntil('/notification-page',

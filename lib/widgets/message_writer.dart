@@ -1,7 +1,44 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 
 class MessageWriter extends StatelessWidget {
   const MessageWriter({super.key});
+
+  Future<void> _showNotification() async {
+    bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
+    if (!isAllowed) {
+      // This is just a basic example. For real apps, you must show some
+      // friendly dialog box before call the request method.
+      // This is very important to not harm the user experience
+      await AwesomeNotifications().requestPermissionToSendNotifications();
+    }
+    AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: 123,
+        channelKey: 'basic_channel',
+        color: Colors.white,
+        title: 'It is working bolexyro',
+        body: 'it is working sir',
+        category: NotificationCategory.Call,
+        fullScreenIntent: true,
+        autoDismissible: false,
+        wakeUpScreen: true,
+        backgroundColor: Colors.orange,
+      ),
+      actionButtons: [
+        NotificationActionButton(
+            key: 'ACCEPT',
+            label: 'Accept Call',
+            color: Colors.green,
+            autoDismissible: true),
+        NotificationActionButton(
+            key: 'REJECT',
+            label: 'Reject Call',
+            color: Colors.red,
+            autoDismissible: true),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +69,7 @@ class MessageWriter extends StatelessWidget {
                   height: 30,
                 ),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: _showNotification,
                   icon: const Padding(
                     padding: EdgeInsets.all(5),
                     child: Icon(

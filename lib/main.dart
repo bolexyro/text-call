@@ -1,8 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:text_call/screens/contacts_screen.dart';
-import 'package:text_call/screens/keypad_screen.dart';
-import 'package:text_call/screens/recents_screen.dart';
+import 'package:text_call/screens/auth_screen.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
@@ -60,8 +58,8 @@ void main() async {
             channelGroupName: 'Basic group')
       ],
       debug: true);
-  // await _fcmSetup();
-  // FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
+  await _fcmSetup();
+  FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
   runApp(
     const TextCall(),
   );
@@ -80,8 +78,6 @@ class TextCall extends StatefulWidget {
 }
 
 class _TextCallState extends State<TextCall> {
-  int _currentPageIndex = 0;
-
   @override
   void initState() {
     AwesomeNotifications().setListeners(
@@ -100,42 +96,7 @@ class _TextCallState extends State<TextCall> {
     return MaterialApp(
       navigatorKey: TextCall.navigatorKey,
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _currentPageIndex,
-          indicatorColor: Colors.green,
-          onDestinationSelected: (int index) {
-            setState(() {
-              _currentPageIndex = index;
-            });
-          },
-          height: 60,
-          destinations: const <Widget>[
-            NavigationDestination(
-              icon: Icon(Icons.drag_indicator_sharp),
-              label: 'keypad',
-            ),
-            NavigationDestination(
-              icon: Badge(
-                label: Text('3'),
-                child: Icon(
-                  Icons.recent_actors,
-                ),
-              ),
-              label: 'Recents',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.contacts),
-              label: 'Contacts',
-            ),
-          ],
-        ),
-        body: [
-          const KeypadScreen(),
-          const RecentsScreen(),
-          const ContactsScreen(),
-        ][_currentPageIndex],
-      ),
+      home: const AuthScreen(),
     );
   }
 }

@@ -1,38 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:text_call/main.dart';
+import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/otp_enter_screen.dart';
 
-void main() {
-  runApp(
-    const PhoneApp(),
-  );
-}
-
-class PhoneApp extends StatelessWidget {
-  const PhoneApp({super.key});
+class AuthScreen extends StatefulWidget {
+  const AuthScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: PhoneNumberScreen(),
-    );
-  }
+  State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class PhoneNumberScreen extends StatefulWidget {
-  const PhoneNumberScreen({super.key});
-
-  @override
-  State<PhoneNumberScreen> createState() => _PhoneNumberScreenState();
-}
-
-class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
-  final phoneNoController = TextEditingController();
+class _AuthScreenState extends State<AuthScreen> {
+  final _phoneNoController = TextEditingController();
 
   @override
   void dispose() {
-    phoneNoController.dispose();
+    _phoneNoController.dispose();
     super.dispose();
   }
 
@@ -52,7 +36,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
         );
       },
       verificationFailed: (FirebaseAuthException e) {
-        print(e.message);
+        print('error message ${e.message}');
         if (e.code == 'invalid-phone-number') {
           print('The provided phone number is not valid.');
         }
@@ -62,11 +46,17 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
           MaterialPageRoute(builder: (context) => const OTPScreen()),
         );
         if (smsCode != null) {
+          print(smsCode);
           // Create a PhoneAuthCredential with the code
           PhoneAuthCredential credential = PhoneAuthProvider.credential(
               verificationId: verificationId, smsCode: smsCode);
           // Sign the user in (or link) with the credential
           await auth.signInWithCredential(credential);
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const PhonePageScreen(),
+            ),
+          );
         }
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
@@ -91,7 +81,8 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
               height: 20,
             ),
             TextField(
-              controller: phoneNoController,
+              keyboardType: TextInputType.phone,
+              controller: _phoneNoController,
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.grey[200],
@@ -110,7 +101,7 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
               height: 60,
               child: ElevatedButton(
                 onPressed: () {
-                  _phoneAuthentication(phoneNoController.text);
+                  _phoneAuthentication(_phoneNoController.text);
                 },
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(

@@ -43,16 +43,12 @@ class _OTPScreenState extends State<OTPScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(10.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'CO',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 100),
-            ),
-            const Text(
-              'DE',
+              'CODE',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 100),
             ),
             const Text(
@@ -97,7 +93,6 @@ class _OTPScreenState extends State<OTPScreen> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop(getOTP());
-                  
                 },
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(

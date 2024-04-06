@@ -6,6 +6,7 @@ import 'package:text_call/screens/recents_screen.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/utils/create_awesome_notification.dart';
 import 'firebase_options.dart';
 
 String? kToken;
@@ -15,40 +16,19 @@ Future<void> _fcmSetup() async {
   await fcm.requestPermission();
   kToken = await fcm.getToken();
   print('Token is $kToken');
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('message received');
-    AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id: 123,
-        channelKey: 'basic_channel',
-        color: Colors.white,
-        title: message.notification!.title,
-        body: message.notification!.body,
-        category: NotificationCategory.Call,
-        fullScreenIntent: true,
-        autoDismissible: false,
-        wakeUpScreen: true,
-        backgroundColor: Colors.orange,
-        locked: true,
-        chronometer: Duration.zero, // Chronometer starts to count at 0 seconds
-        timeoutAfter: const Duration(seconds: 20),
-      ),
-      actionButtons: [
-        NotificationActionButton(
-          key: 'ACCEPT',
-          label: 'Accept Call',
-          color: Colors.green,
-          autoDismissible: true,
-        ),
-        NotificationActionButton(
-          key: 'REJECT',
-          label: 'Reject Call',
-          color: Colors.red,
-          autoDismissible: true,
-        ),
-      ],
-    );
-  });
+  FirebaseMessaging.onMessage.listen(
+    (RemoteMessage message) {
+      print('message received');
+      createAwesomeNotification(
+          title: message.notification!.title, body: message.notification!.body);
+    },
+  );
+}
+
+@pragma('vm:entry-point')
+Future<void> _fcmBackgroundHandler(RemoteMessage message) async {
+  createAwesomeNotification(
+      title: message.notification!.title, body: message.notification!.body);
 }
 
 void main() async {
@@ -81,6 +61,7 @@ void main() async {
       ],
       debug: true);
   await _fcmSetup();
+  FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
   runApp(
     const TextCall(),
   );
@@ -193,8 +174,10 @@ class NotificationController {
     } else if (receivedAction.buttonKeyPressed == 'ACCEPT') {
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
-          builder: (context) =>  SentMessageScreen(
-              message: kToken == null ?'Bolexyro making innovations bro.': kToken!),
+          builder: (context) => SentMessageScreen(
+              message: kToken == null
+                  ? 'Bolexyro making innovations bro.'
+                  : kToken!),
         ),
       );
     }

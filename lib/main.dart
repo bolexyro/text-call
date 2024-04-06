@@ -8,7 +8,54 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'firebase_options.dart';
 
+String? kToken;
+
+Future<void> _fcmSetup() async {
+  final fcm = FirebaseMessaging.instance;
+  await fcm.requestPermission();
+  kToken = await fcm.getToken();
+  print('Token is $kToken');
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('message received');
+    AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: 123,
+        channelKey: 'basic_channel',
+        color: Colors.white,
+        title: message.notification!.title,
+        body: message.notification!.body,
+        category: NotificationCategory.Call,
+        fullScreenIntent: true,
+        autoDismissible: false,
+        wakeUpScreen: true,
+        backgroundColor: Colors.orange,
+        locked: true,
+        chronometer: Duration.zero, // Chronometer starts to count at 0 seconds
+        timeoutAfter: const Duration(seconds: 20),
+      ),
+      actionButtons: [
+        NotificationActionButton(
+          key: 'ACCEPT',
+          label: 'Accept Call',
+          color: Colors.green,
+          autoDismissible: true,
+        ),
+        NotificationActionButton(
+          key: 'REJECT',
+          label: 'Reject Call',
+          color: Colors.red,
+          autoDismissible: true,
+        ),
+      ],
+    );
+  });
+}
+
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   AwesomeNotifications().initialize(
       // set the icon to null if you want to use the default app icon
       null,
@@ -33,10 +80,7 @@ void main() async {
             channelGroupName: 'Basic group')
       ],
       debug: true);
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await _fcmSetup();
   runApp(
     const TextCall(),
   );
@@ -67,47 +111,7 @@ class _TextCallState extends State<TextCall> {
             NotificationController.onNotificationDisplayedMethod,
         onDismissActionReceivedMethod:
             NotificationController.onDismissActionReceivedMethod);
-    _initialSetup();
     super.initState();
-  }
-
-  void _initialSetup() async {
-    final fcm = FirebaseMessaging.instance;
-    await fcm.requestPermission();
-    final token = await fcm.getToken();
-    print(token);
-    print('setup done');
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('inside onmessage.listen');
-      AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id: 123,
-          channelKey: 'basic_channel',
-          color: Colors.white,
-          title: message.notification!.title,
-          body: message.notification!.body,
-          category: NotificationCategory.Call,
-          fullScreenIntent: true,
-          autoDismissible: false,
-          wakeUpScreen: true,
-          backgroundColor: Colors.orange,
-          // timeoutAfter: const Duration(seconds: 10),
-          // duration: Duration(seconds: 10),
-        ),
-        actionButtons: [
-          NotificationActionButton(
-              key: 'ACCEPT',
-              label: 'Accept Call',
-              color: Colors.green,
-              autoDismissible: true,),
-          NotificationActionButton(
-              key: 'REJECT',
-              label: 'Reject Call',
-              color: Colors.red,
-              autoDismissible: true,),
-        ],
-      );
-    });
   }
 
   @override
@@ -184,23 +188,15 @@ class NotificationController {
   static Future<void> onActionReceivedMethod(
       ReceivedAction receivedAction) async {
     // Your code goes here
-    print('notification action received');
-    print(receivedAction.buttonKeyPressed);
     if (receivedAction.buttonKeyPressed == 'REJECT') {
       print('twas not accepted');
     } else if (receivedAction.buttonKeyPressed == 'ACCEPT') {
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
-          builder: (context) =>
-               const SentMessageScreen(message: 'Bolexyro making innovations bro.'),
+          builder: (context) =>  SentMessageScreen(
+              message: kToken == null ?'Bolexyro making innovations bro.': kToken!),
         ),
       );
     }
-
-    // TextCll.navigatorKey.push
-    // Navigate into pages, avoiding to open the notification details page over another details page already opened
-    // TextCall.navigatorKey.currentState?.pushNamedAndRemoveUntil('/notification-page',
-    //         (route) => (route.settings.name != '/notification-page') || route.isFirst,
-    //     arguments: receivedAction);
   }
 }

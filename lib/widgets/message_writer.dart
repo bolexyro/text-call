@@ -2,7 +2,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 
 class MessageWriter extends StatelessWidget {
-   const MessageWriter({super.key});
+  const MessageWriter({super.key});
 
   Future<void> _showNotification() async {
     bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
@@ -14,17 +14,21 @@ class MessageWriter extends StatelessWidget {
     }
     AwesomeNotifications().createNotification(
       content: NotificationContent(
-        id: 123,
-        channelKey: 'basic_channel',
-        color: Colors.white,
-        title: 'It is working bolexyro',
-        body: 'it is working sir',
-        category: NotificationCategory.Call,
-        fullScreenIntent: true,
-        autoDismissible: false,
-        wakeUpScreen: true,
-        backgroundColor: Colors.orange,
-      ),
+          id: 123,
+          channelKey: 'basic_channel',
+          color: Colors.white,
+          title: 'It is working bolexyro',
+          body: 'it is working sir',
+          category: NotificationCategory.Call,
+          fullScreenIntent: true,
+          autoDismissible: false,
+          wakeUpScreen: true,
+          backgroundColor: Colors.orange,
+          locked: true,
+          chronometer:
+              Duration.zero, // Chronometer starts to count at 0 seconds
+          timeoutAfter: const Duration(seconds: 20),
+          ),
       actionButtons: [
         NotificationActionButton(
             key: 'ACCEPT',
@@ -53,7 +57,7 @@ class MessageWriter extends StatelessWidget {
             child: Column(
               children: [
                 TextField(
-                  autofocus: true,
+                  // autofocus: true,
                   minLines: 4,
                   maxLines: null,
                   keyboardType: TextInputType.multiline,

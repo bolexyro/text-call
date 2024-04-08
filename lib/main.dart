@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/screens/auth_screen.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -63,7 +64,7 @@ void main() async {
   await _fcmSetup();
   FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
   runApp(
-    const TextCall(),
+    const ProviderScope(child: TextCall()),
   );
 }
 
@@ -84,12 +85,13 @@ class _TextCallState extends State<TextCall> {
 
   Future<bool> isUserLoggedIn() async {
     // Obtain shared preferences.
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
 
-  // Save an boolean value to 'repeat' key.
+    // Save an boolean value to 'repeat' key.
     return isUserLoggedIn ?? false;
   }
+
   @override
   void initState() {
     AwesomeNotifications().setListeners(
@@ -109,18 +111,24 @@ class _TextCallState extends State<TextCall> {
     return MaterialApp(
       navigatorKey: TextCall.navigatorKey,
       debugShowCheckedModeBanner: false,
-      home: FutureBuilder(future: _isUserLoggedIn, builder: (context, snapshot) {
-       if (snapshot.connectionState == ConnectionState.waiting) {
-        return Scaffold(body: Center(child: CircularProgressIndicator(),),);
-       }
-       if (snapshot.hasData){
-        if (snapshot.data!){
-          return const PhonePageScreen();
-        }
-       
-       }
-       return AuthScreen();
-      },),
+      home: FutureBuilder(
+        future: _isUserLoggedIn,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+          if (snapshot.hasData) {
+            if (snapshot.data!) {
+              return const PhonePageScreen();
+            }
+          }
+          return const AuthScreen();
+        },
+      ),
     );
   }
 }

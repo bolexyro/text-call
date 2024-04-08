@@ -40,6 +40,14 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
     );
     state = [...state, newContact];
   }
+
+  void deleteContact(String phoneNumber) async {
+    final db = await _getDatabase();
+    await db.delete('contacts',
+        where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
+    state = List.from(state)
+      ..removeWhere((contact) => contact.phoneNumber == phoneNumber);
+  }
 }
 
 final contactsProvider = StateNotifierProvider<ContactsNotifier, List<Contact>>(

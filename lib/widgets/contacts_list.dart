@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:text_call/data/contacts.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/widgets/add_contact.dart';
@@ -46,7 +45,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
           'Phone',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
         ),
-        Text('${contacts.length} contacts with phone number'),
+        Text('${contactsList.length} contacts with phone number'),
         const SizedBox(
           height: 70,
         ),
@@ -110,7 +109,11 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                     motion: const BehindMotion(),
                     children: [
                       SlidableAction(
-                        onPressed: (context) {},
+                        onPressed: (context) {
+                          ref
+                              .read(contactsProvider.notifier)
+                              .deleteContact(contactN.phoneNumber);
+                        },
                         backgroundColor: const Color(0xFFFE4A49),
                         foregroundColor: Colors.white,
                         icon: Icons.delete,
@@ -152,7 +155,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                   ),
                 );
               },
-              itemCount: contacts.length,
+              itemCount: contactsList.length,
             ),
           ),
       ],

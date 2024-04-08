@@ -64,6 +64,7 @@ class AddContact extends ConsumerWidget {
                         _enteredName = newValue;
                       },
                       keyboardType: TextInputType.name,
+                      textCapitalization: TextCapitalization.words,
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Name',

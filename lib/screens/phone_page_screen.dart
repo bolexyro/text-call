@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/widgets/phone_page_widgets/contacts_screen.dart';
 import 'package:text_call/widgets/phone_page_widgets/keypad_screen.dart';
 import 'package:text_call/widgets/phone_page_widgets/recents_screen.dart';
 
-class PhonePageScreen extends StatefulWidget {
+class PhonePageScreen extends ConsumerStatefulWidget {
   const PhonePageScreen({super.key});
 
   @override
-  State<PhonePageScreen> createState() => _PhonePageScreenState();
+  ConsumerState<PhonePageScreen> createState() => _PhonePageScreenState();
 }
 
-class _PhonePageScreenState extends State<PhonePageScreen> {
+class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
   int _currentPageIndex = 0;
+
+  @override
+  void initState() {
+       ref.read(contactsProvider.notifier).loadContacts();
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

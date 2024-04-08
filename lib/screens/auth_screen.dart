@@ -1,8 +1,10 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:text_call/main.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
@@ -19,6 +21,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _phoneNoController = TextEditingController();
   final Color _textAndButtonColor = const Color.fromARGB(255, 33, 52, 68);
 
+  bool _isAuthenticating = false;
   @override
   void dispose() {
     _phoneNoController.dispose();
@@ -30,8 +33,24 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     prefs.setBool('isUserLoggedIn', true);
     prefs.setString('phoneNumber', _phoneNoController.text);
 
-    ref.read(contactsProvider.notifier).addContact(Contact(name: "Me", phoneNumber: _phoneNoController.text,),);
-    Navigator.of(context).push(
+    ref.read(contactsProvider.notifier).addContact(
+          Contact(
+            name: "Me",
+            phoneNumber: _phoneNoController.text,
+          ),
+        );
+
+    final db = FirebaseFirestore.instance;
+
+    // Add a new document with a specified ID
+    db.collection("users").doc(_phoneNoController.text).set(
+      {'fcmToken': kToken},
+    );
+    setState(() {
+      _isAuthenticating = false;
+    });
+
+    Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const PhonePageScreen(),
       ),
@@ -39,6 +58,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   }
 
   void _phoneAuthentication(String phoneNo) async {
+    setState(() {
+      _isAuthenticating = true;
+    });
     final auth = FirebaseAuth.instance;
     await auth.verifyPhoneNumber(
       phoneNumber: phoneNo,
@@ -129,13 +151,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   backgroundColor: _textAndButtonColor,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text(
-                  'SIGN UP',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
+                child: _isAuthenticating == false
+                    ? const Text(
+                        'SIGN UP',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      )
+                    : const CircularProgressIndicator(),
               ),
             ),
           ],

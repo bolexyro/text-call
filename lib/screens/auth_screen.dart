@@ -1,7 +1,7 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:text_call/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/otp_enter_screen.dart';
 
@@ -30,9 +30,11 @@ class _AuthScreenState extends State<AuthScreen> {
 
         // Sign the user in (or link) with the auto-generated credential
         await auth.signInWithCredential(credential);
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setBool('isUserLoggedIn', true);
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => const TextCall(),
+            builder: (context) => const PhonePageScreen(),
           ),
         );
       },
@@ -53,6 +55,8 @@ class _AuthScreenState extends State<AuthScreen> {
               verificationId: verificationId, smsCode: smsCode);
           // Sign the user in (or link) with the credential
           await auth.signInWithCredential(credential);
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setBool('isUserLoggedIn', true);
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const PhonePageScreen(),
@@ -113,7 +117,6 @@ class _AuthScreenState extends State<AuthScreen> {
               child: ElevatedButton(
                 onPressed: () {
                   _phoneAuthentication(_phoneNoController.text);
-                  
                 },
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(

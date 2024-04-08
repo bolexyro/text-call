@@ -1,8 +1,10 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/screens/auth_screen.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/utils/create_awesome_notification.dart';
 import 'firebase_options.dart';
@@ -78,6 +80,16 @@ class TextCall extends StatefulWidget {
 }
 
 class _TextCallState extends State<TextCall> {
+  late Future<bool> _isUserLoggedIn;
+
+  Future<bool> isUserLoggedIn() async {
+    // Obtain shared preferences.
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
+
+  // Save an boolean value to 'repeat' key.
+    return isUserLoggedIn ?? false;
+  }
   @override
   void initState() {
     AwesomeNotifications().setListeners(
@@ -88,6 +100,7 @@ class _TextCallState extends State<TextCall> {
             NotificationController.onNotificationDisplayedMethod,
         onDismissActionReceivedMethod:
             NotificationController.onDismissActionReceivedMethod);
+    _isUserLoggedIn = isUserLoggedIn();
     super.initState();
   }
 
@@ -96,7 +109,18 @@ class _TextCallState extends State<TextCall> {
     return MaterialApp(
       navigatorKey: TextCall.navigatorKey,
       debugShowCheckedModeBanner: false,
-      home: const AuthScreen(),
+      home: FutureBuilder(future: _isUserLoggedIn, builder: (context, snapshot) {
+       if (snapshot.connectionState == ConnectionState.waiting) {
+        return Scaffold(body: Center(child: CircularProgressIndicator(),),);
+       }
+       if (snapshot.hasData){
+        if (snapshot.data!){
+          return const PhonePageScreen();
+        }
+       
+       }
+       return AuthScreen();
+      },),
     );
   }
 }

@@ -23,7 +23,10 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for ios - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -61,14 +64,5 @@ class DefaultFirebaseOptions {
     messagingSenderId: '432338692225',
     projectId: 'text-call-7f4b1',
     storageBucket: 'text-call-7f4b1.appspot.com',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyD7YkLWoC7XjsJkderW_4bEA26_u-S1Rzc',
-    appId: '1:432338692225:ios:9a2a107467e161a9500580',
-    messagingSenderId: '432338692225',
-    projectId: 'text-call-7f4b1',
-    storageBucket: 'text-call-7f4b1.appspot.com',
-    iosBundleId: 'com.example.textCall',
   );
 }

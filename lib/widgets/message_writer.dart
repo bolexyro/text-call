@@ -4,27 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class MessageWriter extends StatelessWidget {
-  MessageWriter({
+class MessageWriter extends StatefulWidget {
+  const MessageWriter({
     super.key,
     required this.calleePhoneNumber,
   });
 
   final String calleePhoneNumber;
+
+  @override
+  State<MessageWriter> createState() => _MessageWriterState();
+}
+
+class _MessageWriterState extends State<MessageWriter> {
   final TextEditingController _messageController = TextEditingController();
 
   // Future<void> _showNotification() async {
-  //   bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
-  //   if (!isAllowed) {
-  //     // This is just a basic example. For real apps, you must show some
-  //     // friendly dialog box before call the request method.
-  //     // This is very important to not harm the user experience
-  //     await AwesomeNotifications().requestPermissionToSendNotifications();
-  //   }
-
-  //     createAwesomeNotification(title: 'Bolexyro is calling', body: 'Very Important Message');
-  // }
-
   void _callSomeone(context) async {
     final url = Uri.https('text-call-backend.onrender.com', 'call-user/');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -33,7 +28,7 @@ class MessageWriter extends StatelessWidget {
       url,
       body: json.encode({
         'caller_phone_number': phoneNumber,
-        'callee_phone_number': calleePhoneNumber,
+        'callee_phone_number': widget.calleePhoneNumber,
         'message': _messageController.text,
       }),
       headers: {

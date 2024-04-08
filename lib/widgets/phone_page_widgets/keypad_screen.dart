@@ -95,10 +95,11 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
   void _showModalBottomSheet() {
     showModalBottomSheet(
       context: context,
-      builder: (ctx) =>  const MessageWriter(),
+      builder: (ctx) => MessageWriter(
+        calleePhoneNumber: _inputedDigitsTextController.text,
+      ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +129,6 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
         Keypad(
           onButtonPressed: _addDigit,
         ),
-       
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -144,7 +144,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
 
             // call button
             IconButton(
-              onPressed: (){
+              onPressed: () {
                 _showModalBottomSheet();
               },
               icon: const Padding(

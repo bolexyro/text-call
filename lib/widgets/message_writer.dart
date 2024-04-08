@@ -1,20 +1,48 @@
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
-import 'package:text_call/utils/create_awesome_notification.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MessageWriter extends StatelessWidget {
-  const MessageWriter({super.key});
+  MessageWriter({
+    super.key,
+    required this.calleePhoneNumber,
+  });
 
-  Future<void> _showNotification() async {
-    bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
-    if (!isAllowed) {
-      // This is just a basic example. For real apps, you must show some
-      // friendly dialog box before call the request method.
-      // This is very important to not harm the user experience
-      await AwesomeNotifications().requestPermissionToSendNotifications();
+  final String calleePhoneNumber;
+  final TextEditingController _messageController = TextEditingController();
+
+  // Future<void> _showNotification() async {
+  //   bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
+  //   if (!isAllowed) {
+  //     // This is just a basic example. For real apps, you must show some
+  //     // friendly dialog box before call the request method.
+  //     // This is very important to not harm the user experience
+  //     await AwesomeNotifications().requestPermissionToSendNotifications();
+  //   }
+
+  //     createAwesomeNotification(title: 'Bolexyro is calling', body: 'Very Important Message');
+  // }
+
+  void _callSomeone(context) async {
+    final url =
+        Uri.https('https://text-call-backend.onrender.com', 'call-user/');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final phoneNumber = prefs.getString('phoneNumber');
+    final response = await http.post(
+      url,
+      body: {
+        'caller_phone_number': phoneNumber,
+        'callee_phone_number': calleePhoneNumber,
+        'message': _messageController.text,
+      },
+    );
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Call sent successfully"),
+        ),
+      );
     }
-   
-      createAwesomeNotification(title: 'Bolexyro is calling', body: 'Very Important Message');
   }
 
   @override
@@ -31,6 +59,7 @@ class MessageWriter extends StatelessWidget {
               children: [
                 TextField(
                   // autofocus: true,
+                  controller: _messageController,
                   minLines: 4,
                   maxLines: null,
                   keyboardType: TextInputType.multiline,
@@ -46,7 +75,7 @@ class MessageWriter extends StatelessWidget {
                   height: 30,
                 ),
                 IconButton(
-                  onPressed: _showNotification,
+                  onPressed: () => _callSomeone(context),
                   icon: const Padding(
                     padding: EdgeInsets.all(5),
                     child: Icon(

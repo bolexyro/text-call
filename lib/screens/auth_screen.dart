@@ -30,8 +30,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   void _setPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isUserLoggedIn', true);
-    prefs.setString('phoneNumber', _phoneNoController.text);
+    await prefs.setBool('isUserLoggedIn', true);
+    await prefs.setString('phoneNumber', _phoneNoController.text);
 
     ref.read(contactsProvider.notifier).addContact(
           Contact(

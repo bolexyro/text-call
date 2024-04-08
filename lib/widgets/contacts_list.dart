@@ -19,10 +19,12 @@ class ContactsList extends ConsumerStatefulWidget {
 }
 
 class _ContactsListState extends ConsumerState<ContactsList> {
-  void _showModalBottomSheet(context) {
+  void _showModalBottomSheet(context, String calleePhoneNumber) {
     showModalBottomSheet(
       context: context,
-      builder: (ctx) => const MessageWriter(),
+      builder: (ctx) => MessageWriter(
+        calleePhoneNumber: calleePhoneNumber,
+      ),
     );
   }
 
@@ -89,7 +91,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                     children: [
                       SlidableAction(
                         onPressed: (context) {
-                          _showModalBottomSheet(context);
+                          _showModalBottomSheet(context, contactN.phoneNumber);
                         },
                         backgroundColor: const Color(0xFF21B7CA),
                         foregroundColor: Colors.white,

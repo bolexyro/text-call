@@ -47,6 +47,7 @@ dependencies:
   path: ^1.9.0
   riverpod: ^2.5.1
   cloud_firestore: ^4.16.0
+  http: ^1.2.1
 
 dev_dependencies:
   flutter_test:

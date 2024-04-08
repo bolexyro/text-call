@@ -18,7 +18,9 @@ class ContactDetails extends StatelessWidget {
   void _showModalBottomSheet(context) {
     showModalBottomSheet(
       context: context,
-      builder: (ctx) =>  const MessageWriter(),
+      builder: (ctx) => MessageWriter(
+        calleePhoneNumber: contact!.phoneNumber,
+      ),
     );
   }
 

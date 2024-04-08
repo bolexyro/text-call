@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:text_call/screens/auth_screen.dart';
 
 class KeypadScreenMenuAnchor extends StatelessWidget {
   const KeypadScreenMenuAnchor({super.key});
+
+  void _logout(context) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const AuthScreen(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,17 +27,21 @@ class KeypadScreenMenuAnchor extends StatelessWidget {
           },
         );
       },
-      menuChildren: const [
-        MenuItemButton(
+      menuChildren: [
+        const MenuItemButton(
           child: Text('Speed dial numbers'),
         ),
-        MenuItemButton(
+        const MenuItemButton(
           child: Text('Open to last viewed'),
         ),
-        MenuItemButton(
+        const MenuItemButton(
           child: Badge(
             child: Text('Speed dial numbers'),
           ),
+        ),
+        MenuItemButton(
+          child: const Text('Logout'),
+          onPressed: () => _logout(context),
         ),
       ],
     );

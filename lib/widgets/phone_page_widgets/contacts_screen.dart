@@ -4,7 +4,6 @@ import 'package:text_call/models/contact.dart';
 import 'package:text_call/widgets/contact_details.dart';
 import 'package:text_call/widgets/contacts_list.dart';
 
-
 class ContactsScreen extends ConsumerStatefulWidget {
   const ContactsScreen({super.key});
 
@@ -28,19 +27,17 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return 
-         Row(
-          children: [
-            Expanded(
-              child: ContactsList(
-                onContactSelected: _setCurrentContact,
-              ),
-            ),
-            Expanded(
-              child: ContactDetails(contact: _currentContact),
-            ),
-          ],
-        );
-      
+    return Row(
+      children: [
+        Expanded(
+          child: ContactsList(
+            onContactSelected: _setCurrentContact,
+          ),
+        ),
+        Expanded(
+          child: ContactDetails(contact: _currentContact),
+        ),
+      ],
+    );
   }
 }

@@ -128,9 +128,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
         Keypad(
           onButtonPressed: _addDigit,
         ),
-        const SizedBox(
-          height: 20,
-        ),
+       
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -173,7 +171,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
           ],
         ),
         const SizedBox(
-          height: 20,
+          height: 15,
         )
       ],
     );

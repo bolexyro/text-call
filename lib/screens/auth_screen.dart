@@ -1,18 +1,21 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:text_call/models/contact.dart';
+import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/otp_enter_screen.dart';
 
-class AuthScreen extends StatefulWidget {
+class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
 
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
+class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _phoneNoController = TextEditingController();
   final Color _textAndButtonColor = const Color.fromARGB(255, 33, 52, 68);
 
@@ -26,6 +29,8 @@ class _AuthScreenState extends State<AuthScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('isUserLoggedIn', true);
     prefs.setString('phoneNumber', _phoneNoController.text);
+
+    ref.read(contactsProvider.notifier).addContact(Contact(name: "Me", phoneNumber: _phoneNoController.text,),);
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const PhonePageScreen(),

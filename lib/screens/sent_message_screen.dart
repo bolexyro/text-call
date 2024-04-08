@@ -11,25 +11,27 @@ class SentMessageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('From your loved one or not hehe'),
-        ),
-        body: GestureDetector(
-          onLongPress: () {
-            Clipboard.setData(
-              ClipboardData(text: message),
-            );
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Copied to clipboard'),
-              ),
-            );
-          },
-          child: SelectableText(
-            message,
-            style: const TextStyle(fontSize: 20.0),
+    return SafeArea(
+      child: Scaffold(
+          appBar: AppBar(
+            title: const Text('From your loved one or not hehe'),
           ),
-        ));
+          body: GestureDetector(
+            onLongPress: () {
+              Clipboard.setData(
+                ClipboardData(text: message),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Copied to clipboard'),
+                ),
+              );
+            },
+            child: SelectableText(
+              message,
+              style: const TextStyle(fontSize: 20.0),
+            ),
+          )),
+    );
   }
 }

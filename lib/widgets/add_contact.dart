@@ -86,8 +86,7 @@ class AddContact extends ConsumerWidget {
                     child: TextFormField(
                       validator: (value) {
                         if (value == null ||
-                            value.trim().length != 11 ||
-                            int.tryParse(value) == null) {
+                            value.trim().length != 14) {
                           return 'Phone number is invalid';
                         }
                         return null;

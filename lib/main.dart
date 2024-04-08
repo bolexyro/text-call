@@ -11,6 +11,7 @@ import 'package:text_call/utils/create_awesome_notification.dart';
 import 'firebase_options.dart';
 
 String? kToken;
+String? kCallMessage;
 
 Future<void> _fcmSetup() async {
   final fcm = FirebaseMessaging.instance;
@@ -19,6 +20,7 @@ Future<void> _fcmSetup() async {
   print('Token is $kToken');
   FirebaseMessaging.onMessage.listen(
     (RemoteMessage message) {
+      kCallMessage = message.data['message'];
       print('message received');
       createAwesomeNotification(
           title: message.notification!.title, body: message.notification!.body);
@@ -163,14 +165,14 @@ class NotificationController {
       ReceivedAction receivedAction) async {
     // Your code goes here
     if (receivedAction.buttonKeyPressed == 'REJECT') {
-      print('twas not accepted');
+      return;
     } else if (receivedAction.buttonKeyPressed == 'ACCEPT') {
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
           builder: (context) => SentMessageScreen(
-              message: kToken == null
+              message: kCallMessage == null|| kCallMessage!.isEmpty
                   ? 'Bolexyro making innovations bro.'
-                  : kToken!),
+                  : kCallMessage!),
         ),
       );
     }

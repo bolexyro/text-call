@@ -26,8 +26,7 @@ class MessageWriter extends StatelessWidget {
   // }
 
   void _callSomeone(context) async {
-    final url =
-        Uri.https('text-call-backend.onrender.com', 'call-user/');
+    final url = Uri.https('text-call-backend.onrender.com', 'call-user/');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final phoneNumber = prefs.getString('phoneNumber');
     final response = await http.post(
@@ -38,8 +37,8 @@ class MessageWriter extends StatelessWidget {
         'message': _messageController.text,
       }),
       headers: {
-      'Content-Type': 'application/json',
-    },
+        'Content-Type': 'application/json',
+      },
     );
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(

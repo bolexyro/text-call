@@ -1,49 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:text_call/data/contacts.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/widgets/add_contact.dart';
 import 'package:text_call/widgets/message_writer.dart';
 
-class ContactsList extends StatefulWidget {
+class ContactsList extends ConsumerStatefulWidget {
   const ContactsList({
     super.key,
-    required this.contactsList,
     required this.onContactSelected,
   });
 
-  final List contactsList;
   final void Function(Contact selectedContact) onContactSelected;
 
   @override
-  State<ContactsList> createState() => _ContactsListState();
+  ConsumerState<ContactsList> createState() => _ContactsListState();
 }
 
-class _ContactsListState extends State<ContactsList> {
+class _ContactsListState extends ConsumerState<ContactsList> {
   void _showModalBottomSheet(context) {
     showModalBottomSheet(
       context: context,
-      builder: (ctx) =>  const MessageWriter(),
+      builder: (ctx) => const MessageWriter(),
     );
   }
 
-  void _showAddContactBottomSheet(context) async {
-    final Contact? newContact = await showAdaptiveDialog(
+  void _showAddContactDialog(context) async {
+    showAdaptiveDialog(
       context: context,
       builder: (context) {
         return AddContact();
       },
     );
-
-    if (newContact != null) {
-      setState(() {
-        contacts.add(newContact);
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final contactsList = ref.watch(contactsProvider);
+
     return Column(
       children: [
         const Text(
@@ -60,7 +56,7 @@ class _ContactsListState extends State<ContactsList> {
             const SizedBox(width: 10),
             IconButton(
               onPressed: () {
-                _showAddContactBottomSheet(context);
+                _showAddContactDialog(context);
               },
               icon: const Icon(Icons.add),
             ),
@@ -79,81 +75,86 @@ class _ContactsListState extends State<ContactsList> {
             const SizedBox(width: 10),
           ],
         ),
-        Expanded(
-          child: ListView.builder(
-            itemBuilder: (context, index) {
-              Contact contactN = widget.contactsList[index];
-              return Slidable(
-                startActionPane: ActionPane(
-                  motion: const BehindMotion(),
-                  children: [
-                    SlidableAction(
-                      onPressed: (context) {
-                        _showModalBottomSheet(context);
-                      },
-                      backgroundColor: const Color(0xFF21B7CA),
-                      foregroundColor: Colors.white,
-                      icon: Icons.message,
-                      label: 'Delete',
-                    ),
-                    SlidableAction(
-                      onPressed: (context) {},
-                      backgroundColor: const Color(0xFFFE4A49),
-                      foregroundColor: Colors.white,
-                      icon: Icons.close,
-                      label: 'Share',
-                    ),
-                  ],
-                ),
-                endActionPane: ActionPane(
-                  motion: const BehindMotion(),
-                  children: [
-                    SlidableAction(
-                      onPressed: (context) {},
-                      backgroundColor: const Color(0xFFFE4A49),
-                      foregroundColor: Colors.white,
-                      icon: Icons.delete,
-                      label: 'Delete',
-                    ),
-                  ],
-                ),
-                child: ListTile(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
+        if (contactsList.isEmpty)
+          const Center(
+            child: Text("You have no contacts"),
+          ),
+        if (contactsList.isNotEmpty)
+          Expanded(
+            child: ListView.builder(
+              itemBuilder: (context, index) {
+                Contact contactN = contactsList[index];
+                return Slidable(
+                  startActionPane: ActionPane(
+                    motion: const BehindMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) {
+                          _showModalBottomSheet(context);
+                        },
+                        backgroundColor: const Color(0xFF21B7CA),
+                        foregroundColor: Colors.white,
+                        icon: Icons.message,
+                        label: 'Delete',
+                      ),
+                      SlidableAction(
+                        onPressed: (context) {},
+                        backgroundColor: const Color(0xFFFE4A49),
+                        foregroundColor: Colors.white,
+                        icon: Icons.close,
+                        label: 'Share',
+                      ),
+                    ],
                   ),
-                  leading: CircleAvatar(
-                    child: Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      alignment: Alignment.center,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.deepPurple,
-                            Colors.blue,
-                          ],
+                  endActionPane: ActionPane(
+                    motion: const BehindMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) {},
+                        backgroundColor: const Color(0xFFFE4A49),
+                        foregroundColor: Colors.white,
+                        icon: Icons.delete,
+                        label: 'Delete',
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    leading: CircleAvatar(
+                      child: Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.deepPurple,
+                              Colors.blue,
+                            ],
+                          ),
+                        ),
+                        child: Text(
+                          contactN.name[0],
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 25),
                         ),
                       ),
-                      child: Text(
-                        contactN.name[0],
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 25),
-                      ),
                     ),
+                    title: Text(contactN.name),
+                    onTap: () {
+                      widget.onContactSelected(contactN);
+                    },
                   ),
-                  title: Text(contactN.name),
-                  onTap: () {
-                    widget.onContactSelected(contactN);
-                  },
-                ),
-              );
-            },
-            itemCount: contacts.length,
+                );
+              },
+              itemCount: contacts.length,
+            ),
           ),
-        ),
       ],
     );
   }

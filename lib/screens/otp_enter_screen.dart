@@ -10,7 +10,7 @@ class OTPScreen extends StatefulWidget {
 class _OTPScreenState extends State<OTPScreen> {
   List<FocusNode> focusNodes = [];
   List<TextEditingController> textControllers = [];
-  final Color _textAndButtonColor = const Color.fromARGB(255, 33, 52, 68);
+  final Color _textColor = const Color.fromARGB(255, 33, 52, 68);
 
   @override
   void initState() {
@@ -58,7 +58,7 @@ class _OTPScreenState extends State<OTPScreen> {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 100,
-                    color: _textAndButtonColor,
+                    color: _textColor,
                   ),
                   children: [
                     TextSpan(
@@ -66,7 +66,7 @@ class _OTPScreenState extends State<OTPScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
-                        color: _textAndButtonColor,
+                        color: _textColor,
                       ),
                     )
                   ]),

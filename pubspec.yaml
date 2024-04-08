@@ -43,6 +43,9 @@ dependencies:
   firebase_auth: ^4.19.0
   animated_text_kit: ^4.2.2
   shared_preferences: ^2.2.2
+  sqflite: ^2.3.3
+  path: ^1.9.0
+  riverpod: ^2.5.1
 
 dev_dependencies:
   flutter_test:

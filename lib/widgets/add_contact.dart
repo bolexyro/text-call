@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/widgets/contact_avatar_circle.dart';
 
 //ignore: must_be_immutable
-class AddContact extends StatelessWidget {
+class AddContact extends ConsumerWidget {
   AddContact({super.key});
 
   final _formKey = GlobalKey<FormState>();
   String? _enteredName;
   String? _enteredPhoneNumber;
-  String? _enteredEmail;
 
-  void _addContact(context) {
+  void _addContact(context, WidgetRef ref) {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      Navigator.of(context).pop(
-        Contact(
-            name: _enteredName!,
-            phoneNumber: _enteredPhoneNumber!,
-            email: _enteredEmail!),
-      );
+      ref.read(contactsProvider.notifier).addContact(
+            Contact(
+              name: _enteredName!,
+              phoneNumber: _enteredPhoneNumber!,
+            ),
+          );
+      Navigator.of(context).pop();
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return AlertDialog.adaptive(
       scrollable: true,
       shape: RoundedRectangleBorder(
@@ -105,40 +107,6 @@ class AddContact extends StatelessWidget {
                   const SizedBox(
                     height: 14,
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: TextFormField(
-                      validator: (value) {
-                        final emailRegex =
-                            RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                        if (value == null || value.isEmpty) {
-                          return null;
-                        }
-                        if (!emailRegex.hasMatch(value)) {
-                          return "Invalid email.";
-                        }
-                        return null;
-                      },
-                      onSaved: (newValue) {
-                        _enteredEmail = newValue;
-                      },
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Email',
-                        prefixIcon: Icon(
-                          Icons.email_outlined,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 14,
-                  ),
                 ],
               ),
             ),
@@ -157,7 +125,7 @@ class AddContact extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  _addContact(context);
+                  _addContact(context, ref);
                 },
                 child: const Text(
                   'Save',

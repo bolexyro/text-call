@@ -15,10 +15,22 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
   final _phoneNoController = TextEditingController();
   final Color _textAndButtonColor = const Color.fromARGB(255, 33, 52, 68);
+
   @override
   void dispose() {
     _phoneNoController.dispose();
     super.dispose();
+  }
+
+  void _setPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isUserLoggedIn', true);
+    prefs.setString('phoneNumber', _phoneNoController.text);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const PhonePageScreen(),
+      ),
+    );
   }
 
   void _phoneAuthentication(String phoneNo) async {
@@ -30,13 +42,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
         // Sign the user in (or link) with the auto-generated credential
         await auth.signInWithCredential(credential);
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.setBool('isUserLoggedIn', true);
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const PhonePageScreen(),
-          ),
-        );
+        _setPreferences();
       },
       verificationFailed: (FirebaseAuthException e) {
         print('error message ${e.message}');
@@ -49,19 +55,12 @@ class _AuthScreenState extends State<AuthScreen> {
           MaterialPageRoute(builder: (context) => const OTPScreen()),
         );
         if (smsCode != null) {
-          print(smsCode);
           // Create a PhoneAuthCredential with the code
           PhoneAuthCredential credential = PhoneAuthProvider.credential(
               verificationId: verificationId, smsCode: smsCode);
           // Sign the user in (or link) with the credential
           await auth.signInWithCredential(credential);
-          final SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.setBool('isUserLoggedIn', true);
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const PhonePageScreen(),
-            ),
-          );
+          _setPreferences();
         }
       },
       codeAutoRetrievalTimeout: (String verificationId) {},

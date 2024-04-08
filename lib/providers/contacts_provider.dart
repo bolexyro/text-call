@@ -1,0 +1,47 @@
+import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqflite/sqflite.dart' as sql;
+import 'package:path/path.dart' as path;
+import 'package:text_call/models/contact.dart';
+
+Future<sql.Database> _getDatabase() async {
+  final databasesPath = await sql.getDatabasesPath();
+
+  final db = await sql.openDatabase(
+    path.join(databasesPath, 'contacts.db'),
+    version: 1,
+    onCreate: (db, version) async {
+      await db.execute(
+          'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT)');
+    },
+  );
+  return db;
+}
+
+class ContactsNotifier extends StateNotifier<List<Contact>> {
+  ContactsNotifier() : super([]);
+
+  Future<void> loadContacts() async {
+    final db = await _getDatabase();
+    final data = await db.query('contacts');
+    final contactsList = data
+        .map((row) => Contact(
+            name: row['name'].toString(),
+            phoneNumber: row['phoneNumber'].toString()))
+        .toList();
+    state = contactsList;
+  }
+
+  void addContact(Contact newContact) async {
+    final db = await _getDatabase();
+    db.insert(
+      'contacts',
+      {'phoneNumber': newContact.phoneNumber, 'name': newContact.name},
+    );
+    state = [...state, newContact];
+  }
+}
+
+final contactsProvider = StateNotifierProvider<ContactsNotifier, List<Contact>>(
+  (ref) => ContactsNotifier(),
+);

@@ -68,7 +68,7 @@ class Keypad extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             KeypadButton(
-              buttonText: '*',
+              buttonText: '+',
               onButtonPressed: onButtonPressed,
             ),
             KeypadButton(

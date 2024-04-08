@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/screens/auth_screen.dart';
 
 class KeypadScreenMenuAnchor extends StatelessWidget {
   const KeypadScreenMenuAnchor({super.key});
 
-  void _logout(context) {
+  void _logout(context) async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isUserLoggedIn', false);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const AuthScreen(),

@@ -74,8 +74,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       verificationFailed: (FirebaseAuthException e) {
         print('error message ${e.message}');
         if (e.code == 'invalid-phone-number') {
-          print('The provided phone number is not valid.');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.message ?? "An Error ocurred"),
+            ),
+          );
         }
+        setState(() {
+          _isAuthenticating = false;
+        });
       },
       codeSent: (String verificationId, int? resendToken) async {
         String? smsCode = await Navigator.of(context).push(

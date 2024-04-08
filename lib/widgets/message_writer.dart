@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,16 +27,19 @@ class MessageWriter extends StatelessWidget {
 
   void _callSomeone(context) async {
     final url =
-        Uri.https('https://text-call-backend.onrender.com', 'call-user/');
+        Uri.https('text-call-backend.onrender.com', 'call-user/');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final phoneNumber = prefs.getString('phoneNumber');
     final response = await http.post(
       url,
-      body: {
+      body: json.encode({
         'caller_phone_number': phoneNumber,
         'callee_phone_number': calleePhoneNumber,
         'message': _messageController.text,
-      },
+      }),
+      headers: {
+      'Content-Type': 'application/json',
+    },
     );
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(

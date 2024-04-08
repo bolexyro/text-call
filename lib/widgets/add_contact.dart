@@ -126,7 +126,7 @@ class AddContact extends StatelessWidget {
                       onSaved: (newValue) {
                         _enteredEmail = newValue;
                       },
-                      keyboardType: TextInputType.phone,
+                      keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Email',

@@ -1,3 +1,4 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:text_call/main.dart';
@@ -13,7 +14,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final _phoneNoController = TextEditingController();
-
+  final Color _textAndButtonColor = const Color.fromARGB(255, 33, 52, 68);
   @override
   void dispose() {
     _phoneNoController.dispose();
@@ -69,14 +70,24 @@ class _AuthScreenState extends State<AuthScreen> {
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Get on Board',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+            AnimatedTextKit(
+              animatedTexts: [
+                TyperAnimatedText(
+                  'TEXT CALL',
+                  textStyle: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 70,
+                    color: _textAndButtonColor,
+                  ),
+                  speed: const Duration(milliseconds: 100),
+                ),
+              ],
+              displayFullTextOnTap: true,
+              repeatForever: true,
             ),
-            const Text('Create your profile to start your journey.'),
             const SizedBox(
               height: 20,
             ),
@@ -102,15 +113,22 @@ class _AuthScreenState extends State<AuthScreen> {
               child: ElevatedButton(
                 onPressed: () {
                   _phoneAuthentication(_phoneNoController.text);
+                  
                 },
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  backgroundColor: Colors.black,
+                  backgroundColor: _textAndButtonColor,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Sign Up'),
+                child: const Text(
+                  'SIGN UP',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
               ),
             ),
           ],

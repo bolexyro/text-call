@@ -10,9 +10,9 @@
 import firebase_admin
 from firebase_admin import credentials, messaging
 
-# cred = credentials.Certificate()
-default_app = firebase_admin.initialize_app()
-registration_token = 'cQR9udz6SHmH1ChwTww8Pb:APA91bH0mlfiU285u1awLbKxvv7d2ASHrj4PbpTESJrwK9fRQ4BynxKk9jIKPK-ARrCJy-360A3VHugGdkkqQIf3TZxvNWIHk0t1toArvhdQFx0_6cYNaBF9jfeeAxlcdFRuAHHJHUFy'
+cred = credentials.Certificate("c:/users/bolexyro/desktop/text call/text_call/text-call-7f4b1-4496d34751a0.json")
+default_app = firebase_admin.initialize_app(cred)
+registration_token = 'dxUZaIXHQFuRYWFG3GcIqe:APA91bGhYsVojYc7oWKD69X0D0-xr7nTidQlXpPmlqEEeEtgthBMIOgS8ZYD2DSxdZro6cvi-16ctbc-_sMnR8YJ7JJqL0AyuEeDKREfF5NrTNHi_KLie6DdAdTd3lYJ8HNHBVHtf3vN'
 
 # See documentation on defining a message payload.
 message = messaging.Message(

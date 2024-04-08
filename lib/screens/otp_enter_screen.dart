@@ -10,6 +10,7 @@ class OTPScreen extends StatefulWidget {
 class _OTPScreenState extends State<OTPScreen> {
   List<FocusNode> focusNodes = [];
   List<TextEditingController> textControllers = [];
+  final Color _textAndButtonColor = const Color.fromARGB(255, 33, 52, 68);
 
   @override
   void initState() {
@@ -46,14 +47,29 @@ class _OTPScreenState extends State<OTPScreen> {
         padding: const EdgeInsets.all(10.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          // mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'CODE',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 100),
+            const SizedBox(
+              height: 110,
             ),
-            const Text(
-              'VERIFICATION',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            RichText(
+              text: TextSpan(
+                  text: 'CODE',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 100,
+                    color: _textAndButtonColor,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: 'VERIFICATION',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: _textAndButtonColor,
+                      ),
+                    )
+                  ]),
             ),
             const SizedBox(height: 20.0),
             Row(
@@ -76,6 +92,9 @@ class _OTPScreenState extends State<OTPScreen> {
                           FocusScope.of(context)
                               .requestFocus(focusNodes[index - 1]);
                         }
+                        if (value.length == 1 && index == 5) {
+                          Navigator.of(context).pop(getOTP());
+                        }
                       },
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
@@ -85,24 +104,6 @@ class _OTPScreenState extends State<OTPScreen> {
                     ),
                   )
               ],
-            ),
-            const SizedBox(height: 20.0),
-            SizedBox(
-              width: double.infinity,
-              height: 60,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(getOTP());
-                },
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Next'),
-              ),
             ),
           ],
         ),

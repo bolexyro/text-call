@@ -18,7 +18,7 @@ class _PhonePageScreenState extends State<PhonePageScreen> {
     return Scaffold(
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentPageIndex,
-        indicatorColor: Colors.green,
+        indicatorColor: Colors.blue,
         onDestinationSelected: (int index) {
           setState(() {
             _currentPageIndex = index;

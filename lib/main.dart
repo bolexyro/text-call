@@ -162,15 +162,16 @@ class NotificationController {
   static Future<void> onActionReceivedMethod(
       ReceivedAction receivedAction) async {
     // Your code goes here
-    if (receivedAction.buttonKeyPressed == 'REJECT') {
-      return;
-    } else if (receivedAction.buttonKeyPressed == 'ACCEPT') {
+    // if (receivedAction.buttonKeyPressed == 'REJECT') {
+    //   return;
+    // } 
+    if (receivedAction.buttonKeyPressed == 'ACCEPT') {
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
           builder: (context) => SentMessageScreen(
               message: kCallMessage == null || kCallMessage!.isEmpty
                   ? 'Bolexyro making innovations bro.'
-                  : kCallMessage!),
+                  : kCallMessage!,),
         ),
       );
     }

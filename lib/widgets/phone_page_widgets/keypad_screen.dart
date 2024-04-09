@@ -97,7 +97,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
     showModalBottomSheet(
       context: context,
       builder: (ctx) => MessageWriter(
-        calleePhoneNumber: _inputedDigitsTextController.text,
+        calleePhoneNumber: '+234${_inputedDigitsTextController.text.substring(1)}',
       ),
     );
   }
@@ -179,8 +179,9 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
             // call button
             IconButton(
               onPressed: () async {
-                if (await _checkIfNumberExists()) {}
-                _showModalBottomSheet();
+                if (await _checkIfNumberExists()) {
+                  _showModalBottomSheet();
+                }
               },
               icon: const Padding(
                 padding: EdgeInsets.all(5),

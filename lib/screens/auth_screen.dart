@@ -77,7 +77,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         await _setPreferences();
       },
       verificationFailed: (FirebaseAuthException e) {
-        print('error message ${e.message}');
         if (e.code == 'invalid-phone-number') {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

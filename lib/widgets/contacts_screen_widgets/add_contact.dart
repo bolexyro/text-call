@@ -22,8 +22,6 @@ class AddContact extends ConsumerWidget {
           .doc('+234${_enteredPhoneNumber!.substring(1)}');
       final document = await docRef.get();
 
-      print("document exists = ${document.exists}");
-
       if (document.exists == false) {
         showAdaptiveDialog(
           context: context,

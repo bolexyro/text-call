@@ -17,11 +17,9 @@ Future<void> _fcmSetup() async {
   final fcm = FirebaseMessaging.instance;
   await fcm.requestPermission();
   kToken = await fcm.getToken();
-  print('Token is $kToken');
   FirebaseMessaging.onMessage.listen(
     (RemoteMessage message) {
       kCallMessage = message.data['message'];
-      print('message received');
       createAwesomeNotification(
           title: message.notification!.title, body: message.notification!.body);
     },

@@ -40,7 +40,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
   @override
   Widget build(BuildContext context) {
     List<Contact> contactsList = ref.watch(contactsProvider);
-    contactsList = contactsList.map((contact) => Contact(name: contact.name, phoneNumber: '0${contact.phoneNumber.substring(4)}'),).toList();
+    List<Contact> contactsListFormatted = contactsList.map((contact) => Contact(name: contact.name, phoneNumber: '0${contact.phoneNumber.substring(4)}'),).toList();
 
     return Column(
       children: [
@@ -48,7 +48,10 @@ class _ContactsListState extends ConsumerState<ContactsList> {
           'Phone',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
         ),
-        Text('${contactsList.length} contacts with phone number'),
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Text('${contactsListFormatted.length} contacts with phone number', textAlign: TextAlign.center,),
+        ),
         const SizedBox(
           height: 70,
         ),
@@ -77,11 +80,11 @@ class _ContactsListState extends ConsumerState<ContactsList> {
             const SizedBox(width: 10),
           ],
         ),
-        if (contactsList.isEmpty)
+        if (contactsListFormatted.isEmpty)
           const Center(
             child: Text("You have no contacts"),
           ),
-        if (contactsList.isNotEmpty)
+        if (contactsListFormatted.isNotEmpty)
           Expanded(
             child: ListView.builder(
               itemBuilder: (context, index) {
@@ -97,14 +100,14 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                         backgroundColor: const Color(0xFF21B7CA),
                         foregroundColor: Colors.white,
                         icon: Icons.message,
-                        label: 'Delete',
+                        label: 'Call',
                       ),
                       SlidableAction(
                         onPressed: (context) {},
                         backgroundColor: const Color(0xFFFE4A49),
                         foregroundColor: Colors.white,
                         icon: Icons.close,
-                        label: 'Share',
+                        label: 'Cancel',
                       ),
                     ],
                   ),
@@ -158,7 +161,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                   ),
                 );
               },
-              itemCount: contactsList.length,
+              itemCount: contactsListFormatted.length,
             ),
           ),
       ],

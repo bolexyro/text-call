@@ -19,7 +19,7 @@ class AddContact extends ConsumerWidget {
       final db = FirebaseFirestore.instance;
       final docRef = db
           .collection("users")
-          .doc('+234${_enteredPhoneNumber!.substring(1)}');
+          .doc(_enteredPhoneNumber);
       final document = await docRef.get();
 
       if (document.exists == false) {

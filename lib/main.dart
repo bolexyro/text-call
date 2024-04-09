@@ -28,6 +28,7 @@ Future<void> _fcmSetup() async {
 
 @pragma('vm:entry-point')
 Future<void> _fcmBackgroundHandler(RemoteMessage message) async {
+  kCallMessage = message.data['message'];
   createAwesomeNotification(
       title: message.notification!.title, body: message.notification!.body);
 }
@@ -164,14 +165,15 @@ class NotificationController {
     // Your code goes here
     // if (receivedAction.buttonKeyPressed == 'REJECT') {
     //   return;
-    // } 
+    // }
     if (receivedAction.buttonKeyPressed == 'ACCEPT') {
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
           builder: (context) => SentMessageScreen(
-              message: kCallMessage == null || kCallMessage!.isEmpty
-                  ? 'Bolexyro making innovations bro.'
-                  : kCallMessage!,),
+            message: kCallMessage == null || kCallMessage!.isEmpty
+                ? 'Bolexyro making innovations bro.'
+                : kCallMessage!,
+          ),
         ),
       );
     }

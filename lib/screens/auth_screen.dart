@@ -8,7 +8,7 @@ import 'package:text_call/main.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
-import 'package:text_call/screens/otp_enter_screen.dart';
+import 'package:text_call/widgets/otp_modal_bottom_sheet.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -18,32 +18,28 @@ class AuthScreen extends ConsumerStatefulWidget {
 }
 
 class _AuthScreenState extends ConsumerState<AuthScreen> {
-  final _phoneNoController = TextEditingController();
-  final Color _textAndButtonColor = const Color.fromARGB(255, 33, 52, 68);
-
+  late String _enteredPhoneNumber;
+  final Color _textAndButtonColor = const Color.fromARGB(255, 11, 111, 193);
   bool _isAuthenticating = false;
-  @override
-  void dispose() {
-    _phoneNoController.dispose();
-    super.dispose();
-  }
 
-  void _setPreferences() async {
+  final _formKey = GlobalKey<FormState>();
+
+  Future<void> _setPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isUserLoggedIn', true);
-    await prefs.setString('phoneNumber', _phoneNoController.text);
+    await prefs.setString('phoneNumber', _enteredPhoneNumber);
 
     ref.read(contactsProvider.notifier).addContact(
           Contact(
             name: "Me",
-            phoneNumber: _phoneNoController.text,
+            phoneNumber: _enteredPhoneNumber,
           ),
         );
 
     final db = FirebaseFirestore.instance;
 
     // Add a new document with a specified ID
-    db.collection("users").doc(_phoneNoController.text).set(
+    db.collection("users").doc(_enteredPhoneNumber).set(
       {'fcmToken': kToken},
     );
     setState(() {
@@ -57,19 +53,27 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     );
   }
 
-  void _phoneAuthentication(String phoneNo) async {
+  void _validateForm() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      _phoneAuthentication();
+    }
+  }
+
+  void _phoneAuthentication() async {
     setState(() {
       _isAuthenticating = true;
     });
+
     final auth = FirebaseAuth.instance;
     await auth.verifyPhoneNumber(
-      phoneNumber: phoneNo,
+      phoneNumber: _enteredPhoneNumber,
       verificationCompleted: (PhoneAuthCredential credential) async {
         // ANDROID ONLY!
 
         // Sign the user in (or link) with the auto-generated credential
         await auth.signInWithCredential(credential);
-        _setPreferences();
+        await _setPreferences();
       },
       verificationFailed: (FirebaseAuthException e) {
         print('error message ${e.message}');
@@ -85,8 +89,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         });
       },
       codeSent: (String verificationId, int? resendToken) async {
-        String? smsCode = await Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const OTPScreen()),
+        String? smsCode = await showModalBottomSheet(
+          backgroundColor: Colors.transparent,
+          context: context,
+          builder: (context) => const OTPModalBottomSheet(),
+          isDismissible: false,
+          enableDrag: true,
+          isScrollControlled: true,
         );
         if (smsCode != null) {
           // Create a PhoneAuthCredential with the code
@@ -94,7 +103,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               verificationId: verificationId, smsCode: smsCode);
           // Sign the user in (or link) with the credential
           await auth.signInWithCredential(credential);
-          _setPreferences();
+          await _setPreferences();
         }
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
@@ -128,16 +137,33 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             const SizedBox(
               height: 20,
             ),
-            TextField(
-              keyboardType: TextInputType.phone,
-              controller: _phoneNoController,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.grey[200],
-                labelText: 'Phone No',
-                prefixIcon: const Icon(Icons.person_outline),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+            Form(
+              key: _formKey,
+              child: TextFormField(
+                validator: (value) {
+                  if (value == null ||
+                      int.tryParse(value) == null ||
+                      value.length != 10) {
+                    return 'Your number should have 10 all digits';
+                  }
+                  return null;
+                },
+                onSaved: (newValue) => _enteredPhoneNumber = newValue!,
+                keyboardType: TextInputType.phone,
+                maxLength: 10,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  labelText: 'Phone No',
+                  prefixIcon: const Icon(Icons.call),
+                  prefixText: '+234 - ',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.black),
+                  ),
                 ),
               ),
             ),
@@ -149,7 +175,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               height: 60,
               child: ElevatedButton(
                 onPressed: () {
-                  _phoneAuthentication(_phoneNoController.text);
+                  _validateForm();
                 },
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
@@ -160,7 +186,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 ),
                 child: _isAuthenticating == false
                     ? const Text(
-                        'SIGN UP',
+                        'SEND CODE',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,

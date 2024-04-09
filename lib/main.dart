@@ -63,7 +63,7 @@ void main() async {
             channelGroupName: 'Basic group')
       ],
       debug: true);
-  await _fcmSetup();
+  // await _fcmSetup();
   FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
   runApp(
     const ProviderScope(child: TextCall()),
@@ -170,7 +170,7 @@ class NotificationController {
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
           builder: (context) => SentMessageScreen(
-              message: kCallMessage == null|| kCallMessage!.isEmpty
+              message: kCallMessage == null || kCallMessage!.isEmpty
                   ? 'Bolexyro making innovations bro.'
                   : kCallMessage!),
         ),

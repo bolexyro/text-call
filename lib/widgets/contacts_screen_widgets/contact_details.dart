@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:text_call/models/contact.dart';
-import 'package:text_call/widgets/contact_avatar_circle.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 import 'package:text_call/widgets/message_writer.dart';
 
 class ContactDetails extends StatelessWidget {

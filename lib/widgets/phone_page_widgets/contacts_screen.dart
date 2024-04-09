@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
-import 'package:text_call/widgets/contact_details.dart';
-import 'package:text_call/widgets/contacts_list.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/contact_details.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/contacts_list.dart';
 
 class ContactsScreen extends ConsumerStatefulWidget {
   const ContactsScreen({super.key});

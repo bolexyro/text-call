@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/widgets/keypad.dart';
@@ -101,6 +102,39 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
     );
   }
 
+  Future<bool> _checkIfNumberExists() async {
+    final db = FirebaseFirestore.instance;
+    final docRef = db
+        .collection("users")
+        .doc('+234${_inputedDigitsTextController.text.substring(1)}');
+    final document = await docRef.get();
+
+    if (document.exists == false) {
+      showAdaptiveDialog(
+        context: context,
+        builder: (context) => const AlertDialog.adaptive(
+          backgroundColor: Color.fromARGB(255, 255, 166, 160),
+          // i am pretty much using this row to center the text
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Number doesn\'t exist',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 20),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return document.exists;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -144,7 +178,8 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
 
             // call button
             IconButton(
-              onPressed: () {
+              onPressed: () async {
+                if (await _checkIfNumberExists()) {}
                 _showModalBottomSheet();
               },
               icon: const Padding(

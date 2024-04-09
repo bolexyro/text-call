@@ -48,7 +48,7 @@ void main() async {
           channelKey: 'basic_channel',
           channelName: 'Basic notifications',
           channelDescription: 'Notification channel for basic tests',
-          defaultColor: const Color(0xFF9D50DD),
+          defaultColor: const Color.fromARGB(255, 151, 73, 214),
           ledColor: Colors.white,
           defaultRingtoneType: DefaultRingtoneType.Ringtone,
           locked: true,

@@ -39,7 +39,8 @@ class _ContactsListState extends ConsumerState<ContactsList> {
 
   @override
   Widget build(BuildContext context) {
-    final contactsList = ref.watch(contactsProvider);
+    List<Contact> contactsList = ref.watch(contactsProvider);
+    contactsList = contactsList.map((contact) => Contact(name: contact.name, phoneNumber: '0${contact.phoneNumber.substring(4)}'),).toList();
 
     return Column(
       children: [

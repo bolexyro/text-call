@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/widgets/keypad.dart';
-import 'package:text_call/widgets/keypad_screen_menu_anchor.dart';
+import 'package:text_call/widgets/logout_menu_anchor.dart';
 import 'package:text_call/widgets/message_writer.dart';
 
 class KeypadScreen extends ConsumerStatefulWidget {
@@ -112,7 +112,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
               onPressed: () {},
               icon: const Icon(Icons.search),
             ),
-            const KeypadScreenMenuAnchor(),
+            const LogOutMenuAnchor(),
           ],
         ),
         const Spacer(),

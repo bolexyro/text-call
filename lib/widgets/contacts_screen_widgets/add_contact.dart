@@ -63,6 +63,7 @@ class AddContact extends ConsumerWidget {
                       onSaved: (newValue) {
                         _enteredName = newValue;
                       },
+                      maxLength: 50,
                       keyboardType: TextInputType.name,
                       textCapitalization: TextCapitalization.words,
                       decoration: const InputDecoration(
@@ -86,14 +87,16 @@ class AddContact extends ConsumerWidget {
                     child: TextFormField(
                       validator: (value) {
                         if (value == null ||
-                            value.trim().length != 14) {
+                            value.trim().length != 11 ||
+                            int.tryParse(value) == null) {
                           return 'Phone number is invalid';
                         }
                         return null;
                       },
                       onSaved: (newValue) {
-                        _enteredPhoneNumber = newValue;
+                        _enteredPhoneNumber = '+234${newValue!.substring(1)}';
                       },
+                      maxLength: 11,
                       keyboardType: TextInputType.phone,
                       decoration: const InputDecoration(
                         border: InputBorder.none,

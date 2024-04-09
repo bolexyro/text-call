@@ -19,7 +19,7 @@ class ContactDetails extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       builder: (ctx) => MessageWriter(
-        calleePhoneNumber: contact!.phoneNumber,
+        calleePhoneNumber: '+234${contact!.phoneNumber.substring(1)}',
       ),
     );
   }

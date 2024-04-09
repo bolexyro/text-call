@@ -63,7 +63,7 @@ void main() async {
             channelGroupName: 'Basic group')
       ],
       debug: true);
-  // await _fcmSetup();
+  await _fcmSetup();
   FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
   runApp(
     const ProviderScope(child: TextCall()),

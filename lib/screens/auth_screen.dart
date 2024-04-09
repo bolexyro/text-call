@@ -56,6 +56,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   void _validateForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      _enteredPhoneNumber = '+234$_enteredPhoneNumber';
       _phoneAuthentication();
     }
   }
@@ -192,7 +193,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           fontSize: 20,
                         ),
                       )
-                    : const CircularProgressIndicator(),
+                    : const CircularProgressIndicator(
+                        color: Colors.white,
+                      ),
               ),
             ),
           ],

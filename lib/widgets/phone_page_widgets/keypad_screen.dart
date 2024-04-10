@@ -95,6 +95,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
 
   void _showModalBottomSheet() {
     showModalBottomSheet(
+      backgroundColor: Colors.transparent,
       context: context,
       builder: (ctx) => MessageWriter(
         calleePhoneNumber: '+234${_inputedDigitsTextController.text.substring(1)}',

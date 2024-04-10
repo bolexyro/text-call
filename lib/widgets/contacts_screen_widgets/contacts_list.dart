@@ -21,6 +21,7 @@ class ContactsList extends ConsumerStatefulWidget {
 class _ContactsListState extends ConsumerState<ContactsList> {
   void _showModalBottomSheet(context, String calleePhoneNumber) {
     showModalBottomSheet(
+      backgroundColor: Colors.transparent,
       context: context,
       builder: (ctx) => MessageWriter(
         calleePhoneNumber: calleePhoneNumber,

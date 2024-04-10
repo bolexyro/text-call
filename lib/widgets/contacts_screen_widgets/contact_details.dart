@@ -18,6 +18,7 @@ class ContactDetails extends StatelessWidget {
 
   void _showModalBottomSheet(context) {
     showModalBottomSheet(
+      backgroundColor: Colors.transparent,
       context: context,
       builder: (ctx) => MessageWriter(
         calleePhoneNumber: contact!.phoneNumber,

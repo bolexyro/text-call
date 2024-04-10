@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/utils/format_phone_number.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 import 'package:text_call/widgets/message_writer.dart';
 
@@ -19,7 +20,7 @@ class ContactDetails extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       builder: (ctx) => MessageWriter(
-        calleePhoneNumber: '+234${contact!.phoneNumber.substring(1)}',
+        calleePhoneNumber: contact!.phoneNumber,
       ),
     );
   }
@@ -74,7 +75,7 @@ class ContactDetails extends StatelessWidget {
                             width: 7,
                           ),
                           Text(
-                            contact!.phoneNumber,
+                            formatPhoneNumber(phoneNumberWCountryCode: contact!.phoneNumber),
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             ),

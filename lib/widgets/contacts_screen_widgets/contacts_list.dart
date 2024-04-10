@@ -40,7 +40,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
   @override
   Widget build(BuildContext context) {
     List<Contact> contactsList = ref.watch(contactsProvider);
-    List<Contact> contactsListFormatted = contactsList.map((contact) => Contact(name: contact.name, phoneNumber: '0${contact.phoneNumber.substring(4)}'),).toList();
+    // List<Contact> contactsListFormatted = contactsList.map((contact) => Contact(name: contact.name, phoneNumber: '0${contact.phoneNumber.substring(4)}'),).toList();
 
     return Column(
       children: [
@@ -50,7 +50,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
         ),
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: Text('${contactsListFormatted.length} contacts with phone number', textAlign: TextAlign.center,),
+          child: Text('${contactsList.length} contacts with phone number', textAlign: TextAlign.center,),
         ),
         const SizedBox(
           height: 70,
@@ -80,11 +80,11 @@ class _ContactsListState extends ConsumerState<ContactsList> {
             const SizedBox(width: 10),
           ],
         ),
-        if (contactsListFormatted.isEmpty)
+        if (contactsList.isEmpty)
           const Center(
             child: Text("You have no contacts"),
           ),
-        if (contactsListFormatted.isNotEmpty)
+        if (contactsList.isNotEmpty)
           Expanded(
             child: ListView.builder(
               itemBuilder: (context, index) {
@@ -161,7 +161,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                   ),
                 );
               },
-              itemCount: contactsListFormatted.length,
+              itemCount: contactsList.length,
             ),
           ),
       ],

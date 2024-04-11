@@ -14,7 +14,6 @@ class ContactDetails extends StatelessWidget {
 
   final _nonTransparentContainerheight = 180.0;
   final _circleAvatarRadius = 50.0;
-  final _transparentAndNonTransparentWidth = 235.0;
 
   void _showModalBottomSheet(context) {
     showModalBottomSheet(
@@ -31,6 +30,9 @@ class ContactDetails extends StatelessWidget {
     final transparentContainerHeight =
         _circleAvatarRadius + _nonTransparentContainerheight;
 
+    final transparentAndNonTransparentWidth =
+        MediaQuery.sizeOf(context).width * .425;
+
     Widget activeContent = const Text(
       'Select a contact from the list on the left',
       textAlign: TextAlign.center,
@@ -43,14 +45,14 @@ class ContactDetails extends StatelessWidget {
             children: [
               Container(
                 height: transparentContainerHeight,
-                width: _transparentAndNonTransparentWidth,
+                width: transparentAndNonTransparentWidth,
                 color: Colors.transparent,
               ),
               Positioned(
                 bottom: 0,
                 child: Container(
                   height: _nonTransparentContainerheight,
-                  width: _transparentAndNonTransparentWidth,
+                  width: transparentAndNonTransparentWidth,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     color: Colors.white,
@@ -76,7 +78,8 @@ class ContactDetails extends StatelessWidget {
                             width: 7,
                           ),
                           Text(
-                            formatPhoneNumber(phoneNumberWCountryCode: contact!.phoneNumber),
+                            formatPhoneNumber(
+                                phoneNumberWCountryCode: contact!.phoneNumber),
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
@@ -106,7 +109,7 @@ class ContactDetails extends StatelessWidget {
                 ),
               ),
               Positioned(
-                left: (_transparentAndNonTransparentWidth / 2) -
+                left: (transparentAndNonTransparentWidth / 2) -
                     _circleAvatarRadius,
                 child: ContactAvatarCircle(
                   avatarRadius: _circleAvatarRadius,
@@ -119,9 +122,9 @@ class ContactDetails extends StatelessWidget {
           ),
           SizedBox(
             width: 170,
-            child: ElevatedButton(
+            child: TextButton(
               onPressed: () {},
-              style: ElevatedButton.styleFrom(
+              style: TextButton.styleFrom(
                 backgroundColor: Colors.grey[300],
               ),
               child: const Text(
@@ -136,22 +139,6 @@ class ContactDetails extends StatelessWidget {
           const SizedBox(
             height: 20,
           ),
-          SizedBox(
-            width: 170,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[300],
-              ),
-              child: const Text(
-                'Storage locations',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          )
         ],
       );
     }

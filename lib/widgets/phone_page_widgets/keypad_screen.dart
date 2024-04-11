@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/widgets/keypad.dart';
 import 'package:text_call/widgets/logout_menu_anchor.dart';
@@ -98,7 +99,8 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
       backgroundColor: Colors.transparent,
       context: context,
       builder: (ctx) => MessageWriter(
-        calleePhoneNumber: '+234${_inputedDigitsTextController.text.substring(1)}',
+        calleePhoneNumber:
+            '+234${_inputedDigitsTextController.text.substring(1)}',
       ),
     );
   }
@@ -201,9 +203,12 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
             ),
 
             // backspace button
-            IconButton(
-              onPressed: _backspace,
-              icon: const Icon(Icons.backspace),
+            InkWell(
+              splashColor: Colors.grey,
+              onTap: _backspace,
+              onLongPress: () => _inputedDigitsTextController.text = '',
+              // onPressed: _backspace,
+              child: const Icon(Icons.backspace),
             )
           ],
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:text_call/data/contacts.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/add_contact.dart';
@@ -40,7 +41,8 @@ class _ContactsListState extends ConsumerState<ContactsList> {
 
   @override
   Widget build(BuildContext context) {
-    List<Contact> contactsList = ref.watch(contactsProvider);
+    // List<Contact> contactsList = ref.watch(contactsProvider);
+    List<Contact> contactsList = contacts;
     // List<Contact> contactsListFormatted = contactsList.map((contact) => Contact(name: contact.name, phoneNumber: '0${contact.phoneNumber.substring(4)}'),).toList();
 
     return Column(
@@ -51,7 +53,10 @@ class _ContactsListState extends ConsumerState<ContactsList> {
         ),
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: Text('${contactsList.length} contacts with phone number', textAlign: TextAlign.center,),
+          child: Text(
+            '${contactsList.length} contacts with phone number',
+            textAlign: TextAlign.center,
+          ),
         ),
         const SizedBox(
           height: 70,

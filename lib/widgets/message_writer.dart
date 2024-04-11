@@ -25,7 +25,7 @@ class _MessageWriterState extends State<MessageWriter> {
     duration: const Duration(milliseconds: 800),
   );
 
-  late http.Response _response;
+  late Future<http.Response> _response;
   late Future _animationDelay;
 
   bool _callSending = false;
@@ -57,7 +57,7 @@ class _MessageWriterState extends State<MessageWriter> {
     _animationDelay = Future.delayed(
       const Duration(seconds: 4),
     );
-    _response = await http.post(
+    _response = http.post(
       url,
       body: json.encode(
         {
@@ -130,29 +130,42 @@ class _MessageWriterState extends State<MessageWriter> {
         future: _animationDelay,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Lottie.asset('telephone_ringing_3d.json');
+            return Lottie.asset('assets/telephone_ringing_3d.json');
           }
 
-          if (_response.statusCode == 200) {
-            _confettiController.play();
-            return AnimatedTextKit(
-              animatedTexts: [
-                ColorizeAnimatedText(
-                  'Call Sent Successfully',
-                  textAlign: TextAlign.center,
-                  textStyle: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 80,
-                    fontFamily: 'Horizon',
-                  ),
-                  colors: _colorizeColors,
-                )
-              ],
-              displayFullTextOnTap: true,
-              repeatForever: true,
-            );
-          }
-          return const Text('Nothing much');
+          return FutureBuilder(
+            future: _response,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Lottie.asset('assets/telephone_ringing_3d.json');
+              }
+
+              if (snapshot.hasError) {
+                return const Text('An Error Occurred');
+              }
+              if (snapshot.data!.statusCode == 200) {
+                _confettiController.play();
+                return AnimatedTextKit(
+                  animatedTexts: [
+                    ColorizeAnimatedText(
+                      'Call Sent Successfully',
+                      textAlign: TextAlign.center,
+                      textStyle: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 80,
+                        fontFamily: 'Horizon',
+                      ),
+                      colors: _colorizeColors,
+                    )
+                  ],
+                  displayFullTextOnTap: true,
+                  repeatForever: true,
+                );
+              }
+
+              return const Text('Nothing much');
+            },
+          );
         },
       );
     }

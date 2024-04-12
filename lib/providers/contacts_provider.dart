@@ -13,6 +13,7 @@ Future<sql.Database> _getDatabase() async {
     onCreate: (db, version) async {
       await db.execute(
           'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT)');
+      await db.execute('CREATE TABLE recents (callDate TEXT PRIMARY KEY, phoneNumber TEXT, name TEXT, categoryName TEXT)');
     },
   );
   return db;
@@ -32,6 +33,17 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
     state = contactsList;
   }
 
+  Future<Contact?> readAContact(String phoneNumber) async {
+    final db = await _getDatabase();
+    final data = await db
+        .query('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
+
+    if (data.isEmpty) {
+      return null;
+    }
+    return Contact(name: data[0]['name'] as String, phoneNumber: phoneNumber);
+  }
+
   void addContact(Contact newContact) async {
     final db = await _getDatabase();
     db.insert(
@@ -43,8 +55,8 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
 
   void deleteContact(String phoneNumber) async {
     final db = await _getDatabase();
-    await db.delete('contacts',
-        where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
+    await db
+        .delete('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
     state = List.from(state)
       ..removeWhere((contact) => contact.phoneNumber == phoneNumber);
   }

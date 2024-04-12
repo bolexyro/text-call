@@ -103,8 +103,10 @@ class ContactDetailsScreen extends StatelessWidget {
                               child: IconButton(
                                 onPressed: () {
                                   showMessageWriterModalSheet(
-                                      context: context,
-                                      phoneNumber: contact.phoneNumber);
+                                    context: context,
+                                    calleePhoneNumber: contact.phoneNumber,
+                                    calleeName: contact.name,
+                                  );
                                 },
                                 icon: const Icon(
                                   Icons.message,

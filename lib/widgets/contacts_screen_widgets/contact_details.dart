@@ -87,7 +87,8 @@ class ContactDetails extends StatelessWidget {
                           onPressed: () {
                             showMessageWriterModalSheet(
                                 context: context,
-                                phoneNumber: contact!.phoneNumber);
+                                calleeName: contact!.name,
+                                calleePhoneNumber: contact!.phoneNumber);
                           },
                           icon: const Icon(
                             Icons.message,

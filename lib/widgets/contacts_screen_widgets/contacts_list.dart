@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
+import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/add_contact.dart';
-import 'package:text_call/widgets/message_writer.dart';
 
 class ContactsList extends ConsumerStatefulWidget {
   const ContactsList({
@@ -19,15 +19,7 @@ class ContactsList extends ConsumerStatefulWidget {
 }
 
 class _ContactsListState extends ConsumerState<ContactsList> {
-  void _showModalBottomSheet(context, String calleePhoneNumber) {
-    showModalBottomSheet(
-      backgroundColor: Colors.transparent,
-      context: context,
-      builder: (ctx) => MessageWriter(
-        calleePhoneNumber: calleePhoneNumber,
-      ),
-    );
-  }
+  
 
   void _showAddContactDialog(context) async {
     showAdaptiveDialog(
@@ -98,7 +90,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                     children: [
                       SlidableAction(
                         onPressed: (context) {
-                          _showModalBottomSheet(context, contactN.phoneNumber);
+                          showMessageWriterModalSheet(context: context, calleePhoneNumber: contactN.phoneNumber, calleeName: contactN.name);
                         },
                         backgroundColor: const Color(0xFF21B7CA),
                         foregroundColor: Colors.white,

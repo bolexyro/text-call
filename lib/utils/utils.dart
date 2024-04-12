@@ -42,14 +42,15 @@ String formatPhoneNumber({required String phoneNumberWCountryCode}) {
 }
 
 void showMessageWriterModalSheet(
-    {required BuildContext context, required String phoneNumber}) {
+    {required BuildContext context, required String calleeName,required String calleePhoneNumber}) {
   showModalBottomSheet(
     isDismissible: false,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     context: context,
     builder: (ctx) => MessageWriter(
-      calleePhoneNumber: phoneNumber,
+      calleeName: calleeName,
+      calleePhoneNumber: calleePhoneNumber,
     ),
   );
 }

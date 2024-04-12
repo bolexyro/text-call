@@ -2,25 +2,30 @@ import 'dart:convert';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
+import 'package:text_call/models/recent.dart';
+import 'package:text_call/providers/recents_provider.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class MessageWriter extends StatefulWidget {
+class MessageWriter extends ConsumerStatefulWidget {
   const MessageWriter({
     super.key,
     required this.calleePhoneNumber,
+    required this.calleeName,
   });
 
   final String calleePhoneNumber;
+  final String calleeName;
 
   @override
-  State<MessageWriter> createState() => _MessageWriterState();
+  ConsumerState<MessageWriter> createState() => _MessageWriterState();
 }
 
-class _MessageWriterState extends State<MessageWriter> {
+class _MessageWriterState extends ConsumerState<MessageWriter> {
   final TextEditingController _messageController = TextEditingController();
   final ConfettiController _confettiController = ConfettiController(
     duration: const Duration(milliseconds: 800),
@@ -58,7 +63,7 @@ class _MessageWriterState extends State<MessageWriter> {
 
     // the delay before we assume call was not picked
     _animationDelay = Future.delayed(
-      const Duration(seconds: 30),
+      const Duration(seconds: 40),
     );
 
     _channel.sink.add(
@@ -131,6 +136,9 @@ class _MessageWriterState extends State<MessageWriter> {
           if (snapshot.hasData) {
             final snapshotData = json.decode(snapshot.data);
             if (snapshotData['call_status'] == 'rejected') {
+              // create a recent in your table
+              final recent = Recent(name: widget.calleeName, phoneNumber: widget.calleePhoneNumber, category: RecentCategory.outgoingRejected);
+              ref.read(recentsProvider.notifier).addRecent(recent);
               return Padding(
                 padding: const EdgeInsets.only(top: 10.0),
                 child: Column(
@@ -155,6 +163,8 @@ class _MessageWriterState extends State<MessageWriter> {
                 ),
               );
             }
+            final recent = Recent(name: widget.calleeName, phoneNumber: widget.calleePhoneNumber, category: RecentCategory.outgoingAccepted);
+            ref.read(recentsProvider.notifier).addRecent(recent);
             _confettiController.play();
             return AnimatedTextKit(
               animatedTexts: [
@@ -179,6 +189,8 @@ class _MessageWriterState extends State<MessageWriter> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Lottie.asset('assets/telephone_ringing_3d.json');
                 }
+                final recent = Recent(name: widget.calleeName, phoneNumber: widget.calleePhoneNumber, category: RecentCategory.outgoingMissed);
+                ref.read(recentsProvider.notifier).addRecent(recent);
                 return Padding(
                   padding: const EdgeInsets.only(top: 10.0),
                   child: Column(

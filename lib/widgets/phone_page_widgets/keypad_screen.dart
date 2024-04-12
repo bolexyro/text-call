@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:text_call/models/contact.dart';
+import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/keypad.dart';
 import 'package:text_call/widgets/logout_menu_anchor.dart';
@@ -93,7 +95,6 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
     );
   }
 
-
   Future<bool> _checkIfNumberExists() async {
     final db = FirebaseFirestore.instance;
     final docRef = db
@@ -172,7 +173,18 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
             IconButton(
               onPressed: () async {
                 if (await _checkIfNumberExists()) {
-                  showMessageWriterModalSheet(context: context, phoneNumber: '+234${_inputedDigitsTextController.text.substring(1)}');
+                  final Contact callee = await ref
+                          .read(contactsProvider.notifier)
+                          .readAContact(
+                              '+234${_inputedDigitsTextController.text.substring(1)}') ??
+                      const Contact(
+                          name: 'Unknown', phoneNumber: 'phoneNumber');
+
+                  showMessageWriterModalSheet(
+                      context: context,
+                      calleeName: callee.name,
+                      calleePhoneNumber:
+                          '+234${_inputedDigitsTextController.text.substring(1)}');
                 }
               },
               icon: const Padding(

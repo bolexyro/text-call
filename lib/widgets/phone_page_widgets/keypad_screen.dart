@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/keypad.dart';
 import 'package:text_call/widgets/logout_menu_anchor.dart';
-import 'package:text_call/widgets/message_writer.dart';
 
 class KeypadScreen extends ConsumerStatefulWidget {
   const KeypadScreen({super.key});
@@ -93,16 +93,6 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
     );
   }
 
-  void _showModalBottomSheet() {
-    showModalBottomSheet(
-      backgroundColor: Colors.transparent,
-      context: context,
-      builder: (ctx) => MessageWriter(
-        calleePhoneNumber:
-            '+234${_inputedDigitsTextController.text.substring(1)}',
-      ),
-    );
-  }
 
   Future<bool> _checkIfNumberExists() async {
     final db = FirebaseFirestore.instance;
@@ -182,7 +172,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
             IconButton(
               onPressed: () async {
                 if (await _checkIfNumberExists()) {
-                  _showModalBottomSheet();
+                  showMessageWriterModalSheet(context: context, phoneNumber: '+234${_inputedDigitsTextController.text.substring(1)}');
                 }
               },
               icon: const Padding(

@@ -7,7 +7,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
-import 'package:text_call/utils/create_awesome_notification.dart';
+import 'package:text_call/utils/utils.dart';
 import 'firebase_options.dart';
 import 'package:http/http.dart' as http;
 
@@ -22,7 +22,7 @@ Future<void> _fcmSetup() async {
   FirebaseMessaging.onMessage.listen(
     (RemoteMessage message) {
       kCallMessage = message.data['message'];
-        kCallerPhoneNumber = message.data['caller_phone_number'];
+      kCallerPhoneNumber = message.data['caller_phone_number'];
 
       createAwesomeNotification(
           title: message.notification!.title, body: message.notification!.body);
@@ -143,37 +143,32 @@ class NotificationController {
   /// Use this method to detect when a new notification or a schedule is created
   @pragma("vm:entry-point")
   static Future<void> onNotificationCreatedMethod(
-      ReceivedNotification receivedNotification) async {
-    print('notification created');
-  }
+      ReceivedNotification receivedNotification) async {}
 
   /// Use this method to detect every time that a new notification is displayed
   @pragma("vm:entry-point")
   static Future<void> onNotificationDisplayedMethod(
-      ReceivedNotification receivedNotification) async {
-    // Your code goes here
-    print('notification displayed');
-  }
+      ReceivedNotification receivedNotification) async {}
 
   /// Use this method to detect if the user dismissed a notification
   @pragma("vm:entry-point")
   static Future<void> onDismissActionReceivedMethod(
-      ReceivedAction receivedAction) async {
-    // Your code goes here
-    print('notification dismissed');
-  }
+      ReceivedAction receivedAction) async {}
 
   /// Use this method to detect when the user taps on a notification or action button
   @pragma("vm:entry-point")
   static Future<void> onActionReceivedMethod(
       ReceivedAction receivedAction) async {
     // Your code goes here
-    // if (receivedAction.buttonKeyPressed == 'REJECT') {
-    //   return;
-    // }
+    if (receivedAction.buttonKeyPressed == 'REJECT') {
+      final url = Uri.https('text-call-backend.onrender.com',
+          'call/rejected/$kCallerPhoneNumber');
+      http.get(url);
+    }
     if (receivedAction.buttonKeyPressed == 'ACCEPT') {
       // make a request to the server's call accepted endpoint with the caller's phone number
-      final url = Uri.https('text-call-backend.onrender.com', 'call-accepted/$kCallerPhoneNumber');
+      final url = Uri.https('text-call-backend.onrender.com',
+          'call/accepted/$kCallerPhoneNumber');
       http.get(url);
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(

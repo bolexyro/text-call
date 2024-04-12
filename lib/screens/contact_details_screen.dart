@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:text_call/models/contact.dart';
-import 'package:text_call/utils/format_phone_number.dart';
+import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
-import 'package:text_call/widgets/message_writer.dart';
 
 class ContactDetailsScreen extends StatelessWidget {
   const ContactDetailsScreen({
@@ -16,16 +14,6 @@ class ContactDetailsScreen extends StatelessWidget {
   final _nonTransparentContainerheight = 180.0;
   final _circleAvatarRadius = 50.0;
   final _stackPadding = const EdgeInsets.symmetric(horizontal: 10);
-
-  void _showMessageWriter(context) {
-    showModalBottomSheet(
-      backgroundColor: Colors.transparent,
-      context: context,
-      builder: (ctx) => MessageWriter(
-        calleePhoneNumber: contact.phoneNumber,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +84,8 @@ class ContactDetailsScreen extends StatelessWidget {
                                 ),
                                 Text(
                                   formatPhoneNumber(
-                                      phoneNumberWCountryCode: contact.phoneNumber),
+                                      phoneNumberWCountryCode:
+                                          contact.phoneNumber),
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -113,7 +102,9 @@ class ContactDetailsScreen extends StatelessWidget {
                               ),
                               child: IconButton(
                                 onPressed: () {
-                                  _showMessageWriter(context);
+                                  showMessageWriterModalSheet(
+                                      context: context,
+                                      phoneNumber: contact.phoneNumber);
                                 },
                                 icon: const Icon(
                                   Icons.message,

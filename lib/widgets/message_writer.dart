@@ -129,15 +129,41 @@ class _MessageWriterState extends State<MessageWriter> {
         stream: _channel.stream,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
+            final snapshotData = json.decode(snapshot.data);
+            if (snapshotData['call_status'] == 'rejected') {
+              return Padding(
+                padding: const EdgeInsets.only(top: 10.0),
+                child: Column(
+                  children: [
+                    AnimatedTextKit(
+                      animatedTexts: [
+                        TyperAnimatedText(
+                          'Thy call hath been declined, leaving silence to linger in the void. Perhaps another time shall bring forth communion\'s embrace',
+                          textAlign: TextAlign.center,
+                          textStyle: GoogleFonts.pacifico(
+                              fontSize: 32,
+                              color: const Color.fromARGB(255, 199, 32, 76)),
+                          speed: const Duration(milliseconds: 100),
+                        ),
+                      ],
+                      displayFullTextOnTap: true,
+                      repeatForever: false,
+                      totalRepeatCount: 1,
+                    ),
+                    Lottie.asset('assets/call_rejected.json', height: 300),
+                  ],
+                ),
+              );
+            }
             _confettiController.play();
             return AnimatedTextKit(
               animatedTexts: [
                 ColorizeAnimatedText(
-                  'Call Sent Successfully',
+                  'Thy call hath been answered, yet no voice meets thee. A preordained missive shall henceforth guide thy callee',
                   textAlign: TextAlign.center,
                   textStyle: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 80,
+                    fontSize: 50,
                     fontFamily: 'Horizon',
                   ),
                   colors: _colorizeColors,
@@ -160,7 +186,7 @@ class _MessageWriterState extends State<MessageWriter> {
                       AnimatedTextKit(
                         animatedTexts: [
                           TyperAnimatedText(
-                            'Sorry Bro, Call Not Picked',
+                            'Alas, the call remained unanswered. Thy message may find solace in the echoes of time.',
                             textAlign: TextAlign.center,
                             textStyle: GoogleFonts.pacifico(
                                 fontSize: 32,
@@ -172,7 +198,7 @@ class _MessageWriterState extends State<MessageWriter> {
                         repeatForever: false,
                         totalRepeatCount: 2,
                       ),
-                      Lottie.asset('assets/sad_animation.json'),
+                      Lottie.asset('assets/call_missed.json'),
                     ],
                   ),
                 );
@@ -182,29 +208,27 @@ class _MessageWriterState extends State<MessageWriter> {
         },
       );
     }
-    return SizedBox(
-      height: double.infinity,
+    return Container(
+      height: MediaQuery.sizeOf(context).height * .7,
       width: double.infinity,
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Color.fromARGB(255, 207, 222, 234),
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(40),
+      decoration: const BoxDecoration(
+        color: Color.fromARGB(255, 207, 222, 234),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(40),
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          SingleChildScrollView(child: messageWriterContent),
+          ConfettiWidget(
+            confettiController: _confettiController,
+            shouldLoop: true,
+            blastDirectionality: BlastDirectionality.explosive,
+            numberOfParticles: 30,
+            emissionFrequency: 0.1,
           ),
-        ),
-        child: Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            messageWriterContent,
-            ConfettiWidget(
-              confettiController: _confettiController,
-              shouldLoop: true,
-              blastDirectionality: BlastDirectionality.explosive,
-              numberOfParticles: 30,
-              emissionFrequency: 0.1,
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

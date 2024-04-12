@@ -124,14 +124,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   'TEXT CALL',
                   textStyle: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 70,
+                    fontSize: 55,
                     color: _textAndButtonColor,
                   ),
                   speed: const Duration(milliseconds: 100),
                 ),
               ],
               displayFullTextOnTap: true,
-              repeatForever: true,
+              repeatForever: false,
+              totalRepeatCount: 2,
             ),
             const SizedBox(
               height: 20,

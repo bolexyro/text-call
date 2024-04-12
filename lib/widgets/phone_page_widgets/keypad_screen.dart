@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/widgets/keypad.dart';
 import 'package:text_call/widgets/logout_menu_anchor.dart';
@@ -161,7 +160,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
           textAlign: TextAlign.center,
           controller: _inputedDigitsTextController,
           decoration: const InputDecoration(border: InputBorder.none),
-          style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 43, fontWeight: FontWeight.bold),
         ),
         Keypad(
           onButtonPressed: _addDigit,

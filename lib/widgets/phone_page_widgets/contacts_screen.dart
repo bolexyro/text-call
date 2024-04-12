@@ -30,11 +30,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => Scaffold(
-          // appBar: AppBar(),
-          body: Scaffold(
-            body: ContactDetailsScreen(
-              contact: selectedContact,
-            ),
+          body: ContactDetailsScreen(
+            contact: selectedContact,
           ),
         ),
       ),

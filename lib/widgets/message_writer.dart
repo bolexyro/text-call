@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MessageWriter extends StatefulWidget {
   const MessageWriter({
@@ -25,8 +26,9 @@ class _MessageWriterState extends State<MessageWriter> {
     duration: const Duration(milliseconds: 800),
   );
 
-  late Future<http.Response> _response;
   late Future _animationDelay;
+
+  late WebSocketChannel _channel;
 
   bool _callSending = false;
   final _colorizeColors = [
@@ -38,37 +40,35 @@ class _MessageWriterState extends State<MessageWriter> {
 
   @override
   void dispose() {
+    _channel.sink.close();
     _confettiController.dispose();
     _messageController.dispose();
     super.dispose();
   }
 
   void _callSomeone(context) async {
-    final url = Uri.https('text-call-backend.onrender.com', 'call-user/');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final phoneNumber = prefs.getString('phoneNumber');
+    final callerPhoneNumber = prefs.getString('phoneNumber');
+    _channel = WebSocketChannel.connect(
+      Uri.parse('wss://text-call-backend.onrender.com/ws/$callerPhoneNumber'),
+    );
     setState(() {
       _callSending = true;
     });
 
-    // this delay will never complete before the request is done because of the await attached to http.post
-    // So, our animation will play for minimum 4 seconds and maximum the amount of time it takes the post
-    // request to finish if it is greater than 4 seconds.
+    // the delay before we assume call was not picked
     _animationDelay = Future.delayed(
-      const Duration(seconds: 4),
+      const Duration(seconds: 30),
     );
-    _response = http.post(
-      url,
-      body: json.encode(
+
+    _channel.sink.add(
+      json.encode(
         {
-          'caller_phone_number': phoneNumber,
+          'caller_phone_number': callerPhoneNumber,
           'callee_phone_number': widget.calleePhoneNumber,
           'message': _messageController.text,
         },
       ),
-      headers: {
-        'Content-Type': 'application/json',
-      },
     );
   }
 
@@ -82,7 +82,6 @@ class _MessageWriterState extends State<MessageWriter> {
           child: Column(
             children: [
               TextField(
-                // autofocus: true,
                 controller: _messageController,
                 minLines: 4,
                 maxLines: null,
@@ -126,46 +125,60 @@ class _MessageWriterState extends State<MessageWriter> {
     );
 
     if (_callSending) {
-      messageWriterContent = FutureBuilder(
-        future: _animationDelay,
+      messageWriterContent = StreamBuilder(
+        stream: _channel.stream,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Lottie.asset('assets/telephone_ringing_3d.json');
-          }
-
-          return FutureBuilder(
-            future: _response,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Lottie.asset('assets/telephone_ringing_3d.json');
-              }
-
-              if (snapshot.hasError) {
-                return const Text('An Error Occurred');
-              }
-              if (snapshot.data!.statusCode == 200) {
-                _confettiController.play();
-                return AnimatedTextKit(
-                  animatedTexts: [
-                    ColorizeAnimatedText(
-                      'Call Sent Successfully',
-                      textAlign: TextAlign.center,
-                      textStyle: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 80,
-                        fontFamily: 'Horizon',
+          if (snapshot.hasData) {
+            _confettiController.play();
+            return AnimatedTextKit(
+              animatedTexts: [
+                ColorizeAnimatedText(
+                  'Call Sent Successfully',
+                  textAlign: TextAlign.center,
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 80,
+                    fontFamily: 'Horizon',
+                  ),
+                  colors: _colorizeColors,
+                )
+              ],
+              displayFullTextOnTap: true,
+              repeatForever: true,
+            );
+          } else {
+            return FutureBuilder(
+              future: _animationDelay,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Lottie.asset('assets/telephone_ringing_3d.json');
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Column(
+                    children: [
+                      AnimatedTextKit(
+                        animatedTexts: [
+                          TyperAnimatedText(
+                            'Sorry Bro, Call Not Picked',
+                            textAlign: TextAlign.center,
+                            textStyle: GoogleFonts.pacifico(
+                                fontSize: 32,
+                                color: const Color.fromARGB(255, 139, 105, 2)),
+                            speed: const Duration(milliseconds: 100),
+                          ),
+                        ],
+                        displayFullTextOnTap: true,
+                        repeatForever: false,
+                        totalRepeatCount: 2,
                       ),
-                      colors: _colorizeColors,
-                    )
-                  ],
-                  displayFullTextOnTap: true,
-                  repeatForever: true,
+                      Lottie.asset('assets/sad_animation.json'),
+                    ],
+                  ),
                 );
-              }
-
-              return const Text('Nothing much');
-            },
-          );
+              },
+            );
+          }
         },
       );
     }

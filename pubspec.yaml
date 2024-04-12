@@ -50,6 +50,8 @@ dependencies:
   http: ^1.2.1
   confetti: ^0.7.0
   lottie: ^3.1.0
+  web_socket_channel: ^2.4.5
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:

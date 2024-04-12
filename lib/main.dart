@@ -9,9 +9,11 @@ import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/utils/create_awesome_notification.dart';
 import 'firebase_options.dart';
+import 'package:http/http.dart' as http;
 
 String? kToken;
 String? kCallMessage;
+String? kCallerPhoneNumber;
 
 Future<void> _fcmSetup() async {
   final fcm = FirebaseMessaging.instance;
@@ -20,6 +22,8 @@ Future<void> _fcmSetup() async {
   FirebaseMessaging.onMessage.listen(
     (RemoteMessage message) {
       kCallMessage = message.data['message'];
+        kCallerPhoneNumber = message.data['caller_phone_number'];
+
       createAwesomeNotification(
           title: message.notification!.title, body: message.notification!.body);
     },
@@ -29,6 +33,7 @@ Future<void> _fcmSetup() async {
 @pragma('vm:entry-point')
 Future<void> _fcmBackgroundHandler(RemoteMessage message) async {
   kCallMessage = message.data['message'];
+  kCallerPhoneNumber = message.data['caller_phone_number'];
   createAwesomeNotification(
       title: message.notification!.title, body: message.notification!.body);
 }
@@ -167,6 +172,9 @@ class NotificationController {
     //   return;
     // }
     if (receivedAction.buttonKeyPressed == 'ACCEPT') {
+      // make a request to the server's call accepted endpoint with the caller's phone number
+      final url = Uri.https('text-call-backend.onrender.com', 'call-accepted/$kCallerPhoneNumber');
+      http.get(url);
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
           builder: (context) => SentMessageScreen(

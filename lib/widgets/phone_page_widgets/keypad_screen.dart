@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/utils.dart';
-import 'package:text_call/widgets/keypad.dart';
-import 'package:text_call/widgets/logout_menu_anchor.dart';
+import 'package:text_call/widgets/keypad_screen_widgets/keypad.dart';
+import 'package:text_call/widgets/keypad_screen_widgets/logout_menu_anchor.dart';
 
 class KeypadScreen extends ConsumerStatefulWidget {
   const KeypadScreen({super.key});

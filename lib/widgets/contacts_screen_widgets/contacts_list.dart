@@ -19,8 +19,6 @@ class ContactsList extends ConsumerStatefulWidget {
 }
 
 class _ContactsListState extends ConsumerState<ContactsList> {
-  
-
   void _showAddContactDialog(context) async {
     showAdaptiveDialog(
       context: context,
@@ -32,7 +30,11 @@ class _ContactsListState extends ConsumerState<ContactsList> {
 
   @override
   Widget build(BuildContext context) {
-    List<Contact> contactsList = ref.watch(contactsProvider);
+    final List<Contact> contactsList = ref.watch(contactsProvider);
+    // final contactsList = [
+    //   const Contact(name: 'Bolexyro', phoneNumber: '09027929326'),
+    //   const Contact(name: 'Mom', phoneNumber: '07034744820'),
+    // ];
 
     return Column(
       children: [
@@ -90,7 +92,10 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                     children: [
                       SlidableAction(
                         onPressed: (context) {
-                          showMessageWriterModalSheet(context: context, calleePhoneNumber: contactN.phoneNumber, calleeName: contactN.name);
+                          showMessageWriterModalSheet(
+                              context: context,
+                              calleePhoneNumber: contactN.phoneNumber,
+                              calleeName: contactN.name);
                         },
                         backgroundColor: const Color(0xFF21B7CA),
                         foregroundColor: Colors.white,

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/providers/contacts_provider.dart';
-import 'package:text_call/widgets/phone_page_widgets/contacts_screen.dart';
+import 'package:text_call/widgets/phone_page_widgets/contacts_recents_screen.dart';
 import 'package:text_call/widgets/phone_page_widgets/keypad_screen.dart';
-import 'package:text_call/widgets/phone_page_widgets/recents_screen.dart';
 
 class PhonePageScreen extends ConsumerStatefulWidget {
   const PhonePageScreen({super.key});
@@ -17,7 +16,7 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
 
   @override
   void initState() {
-       ref.read(contactsProvider.notifier).loadContacts();
+    ref.read(contactsProvider.notifier).loadContacts();
 
     super.initState();
   }
@@ -57,8 +56,12 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
         ),
         body: [
           const KeypadScreen(),
-          const RecentsScreen(),
-          const ContactsScreen(),
+          const ContactsRecentsScreen(
+            purpose: Purpose.forRecents,
+          ),
+          const ContactsRecentsScreen(
+            purpose: Purpose.forContacts,
+          ),
         ][_currentPageIndex],
       ),
     );

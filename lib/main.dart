@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:text_call/models/recent.dart';
 import 'package:text_call/screens/auth_screen.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -14,28 +15,42 @@ import 'package:http/http.dart' as http;
 String? kToken;
 String? kCallMessage;
 String? kCallerPhoneNumber;
+String? kCallerName;
+
+Future<void> _messageHandler(RemoteMessage message) async {
+  kCallMessage = message.data['message'];
+  kCallerPhoneNumber = message.data['caller_phone_number'];
+  final db = await getDatabase();
+  final data = await db.query('contacts',
+      where: 'phoneNumber = ?', whereArgs: [kCallerPhoneNumber]);
+
+  if (data.isEmpty) {
+    kCallerName = null;
+  } else {
+    kCallerName = data[0]['name'] as String;
+  }
+  await db.close();
+  createAwesomeNotification(
+      title: kCallerName != null
+          ? '$kCallerName is calling '
+          : message.notification!.title,
+      body: message.notification!.body);
+}
 
 Future<void> _fcmSetup() async {
   final fcm = FirebaseMessaging.instance;
   await fcm.requestPermission();
   kToken = await fcm.getToken();
   FirebaseMessaging.onMessage.listen(
-    (RemoteMessage message) {
-      kCallMessage = message.data['message'];
-      kCallerPhoneNumber = message.data['caller_phone_number'];
-
-      createAwesomeNotification(
-          title: message.notification!.title, body: message.notification!.body);
+    (RemoteMessage message) async {
+      await _messageHandler(message);
     },
   );
 }
 
 @pragma('vm:entry-point')
 Future<void> _fcmBackgroundHandler(RemoteMessage message) async {
-  kCallMessage = message.data['message'];
-  kCallerPhoneNumber = message.data['caller_phone_number'];
-  createAwesomeNotification(
-      title: message.notification!.title, body: message.notification!.body);
+  await _messageHandler(message);
 }
 
 void main() async {
@@ -67,7 +82,7 @@ void main() async {
             channelGroupName: 'Basic group')
       ],
       debug: true);
-  await _fcmSetup();
+  // await _fcmSetup();
   FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
   runApp(
     const ProviderScope(child: TextCall()),
@@ -132,7 +147,7 @@ class _TextCallState extends State<TextCall> {
               return const PhonePageScreen();
             }
           }
-          return const AuthScreen();
+          return const PhonePageScreen();
         },
       ),
     );
@@ -166,10 +181,26 @@ class NotificationController {
       http.get(url);
     }
     if (receivedAction.buttonKeyPressed == 'ACCEPT') {
-      // make a request to the server's call accepted endpoint with the caller's phone number
       final url = Uri.https('text-call-backend.onrender.com',
           'call/accepted/$kCallerPhoneNumber');
       http.get(url);
+
+      final db = await getDatabase();
+      final newRecent = Recent(
+          name: kCallerPhoneNumber!,
+          phoneNumber: kCallerPhoneNumber!,
+          category: RecentCategory.incomingAccepted);
+
+      db.insert(
+        'recents',
+        {
+          'callTime': newRecent.callTime.toString(),
+          'phoneNumber': newRecent.phoneNumber,
+          'name': newRecent.name,
+          'categoryName': newRecent.category.name,
+        },
+      );
+      await db.close();
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
           builder: (context) => SentMessageScreen(

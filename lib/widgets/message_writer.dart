@@ -137,7 +137,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             final snapshotData = json.decode(snapshot.data);
             if (snapshotData['call_status'] == 'rejected') {
               // create a recent in your table
-              final recent = Recent(name: widget.calleeName, phoneNumber: widget.calleePhoneNumber, category: RecentCategory.outgoingRejected);
+              final recent = Recent(
+                name: widget.calleeName,
+                phoneNumber: widget.calleePhoneNumber,
+                category: RecentCategory.outgoingRejected,
+              );
               ref.read(recentsProvider.notifier).addRecent(recent);
               return Padding(
                 padding: const EdgeInsets.only(top: 10.0),
@@ -163,7 +167,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 ),
               );
             }
-            final recent = Recent(name: widget.calleeName, phoneNumber: widget.calleePhoneNumber, category: RecentCategory.outgoingAccepted);
+            final recent = Recent(
+              name: widget.calleeName,
+              phoneNumber: widget.calleePhoneNumber,
+              category: RecentCategory.outgoingAccepted,
+            );
             ref.read(recentsProvider.notifier).addRecent(recent);
             _confettiController.play();
             return AnimatedTextKit(
@@ -189,7 +197,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Lottie.asset('assets/telephone_ringing_3d.json');
                 }
-                final recent = Recent(name: widget.calleeName, phoneNumber: widget.calleePhoneNumber, category: RecentCategory.outgoingMissed);
+                final recent = Recent(
+                  name: widget.calleeName,
+                  phoneNumber: widget.calleePhoneNumber,
+                  category: RecentCategory.outgoingMissed,
+                );
                 ref.read(recentsProvider.notifier).addRecent(recent);
                 return Padding(
                   padding: const EdgeInsets.only(top: 10.0),
@@ -221,7 +233,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       );
     }
     return Container(
-      height: MediaQuery.sizeOf(context).height * .7,
+      height: MediaQuery.sizeOf(context).height * .6,
       width: double.infinity,
       decoration: const BoxDecoration(
         color: Color.fromARGB(255, 207, 222, 234),

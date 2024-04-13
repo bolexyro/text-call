@@ -52,6 +52,7 @@ dependencies:
   lottie: ^3.1.0
   web_socket_channel: ^2.4.5
   google_fonts: ^6.2.1
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:

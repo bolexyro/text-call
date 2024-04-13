@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sqflite/sqflite.dart' as sql;
-import 'package:path/path.dart' as path;
 import 'package:text_call/models/recent.dart';
+import 'package:text_call/utils/utils.dart';
 
 RecentCategory? _getCategoryEnumFromText({required String recentCategoryText}) {
   for (final recentCategoryEnum in RecentCategory.values) {
@@ -15,27 +14,11 @@ RecentCategory? _getCategoryEnumFromText({required String recentCategoryText}) {
   return null;
 }
 
-Future<sql.Database> _getDatabase() async {
-  final databasesPath = await sql.getDatabasesPath();
-
-  final db = await sql.openDatabase(
-    path.join(databasesPath, 'contacts.db'),
-    version: 1,
-    onCreate: (db, version) async {
-      await db.execute(
-          'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT)');
-      await db.execute(
-          'CREATE TABLE recents (callTime TEXT PRIMARY KEY, phoneNumber TEXT, name TEXT, categoryName TEXT)');
-    },
-  );
-  return db;
-}
-
 class RecentsNotifier extends StateNotifier<List> {
   RecentsNotifier() : super([]);
 
   Future<void> loadContacts() async {
-    final db = await _getDatabase();
+    final db = await getDatabase();
     final data = await db.query('recents');
     final recentsList = data
         .map(
@@ -53,7 +36,7 @@ class RecentsNotifier extends StateNotifier<List> {
   }
 
   void addRecent(Recent newRecent) async {
-    final db = await _getDatabase();
+    final db = await getDatabase();
     db.insert(
       'recents',
       {

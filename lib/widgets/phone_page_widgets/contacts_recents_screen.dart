@@ -4,15 +4,22 @@ import 'package:text_call/models/contact.dart';
 import 'package:text_call/screens/contact_details_screen.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_details.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contacts_list.dart';
+import 'package:text_call/widgets/recents_screen_widgets/recents_list.dart';
 
-class ContactsScreen extends ConsumerStatefulWidget {
-  const ContactsScreen({super.key});
+enum Purpose { forContacts, forRecents }
 
+class ContactsRecentsScreen extends ConsumerStatefulWidget {
+  const ContactsRecentsScreen({
+    super.key,
+    required this.purpose,
+  });
+
+  final Purpose purpose;
   @override
-  ConsumerState<ContactsScreen> createState() => _ContactsScreenState();
+  ConsumerState<ContactsRecentsScreen> createState() => _ContactsScreenState();
 }
 
-class _ContactsScreenState extends ConsumerState<ContactsScreen> {
+class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
   Contact? _currentContact;
 
   @override
@@ -41,24 +48,30 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   @override
   Widget build(BuildContext context) {
     double availableWidth = MediaQuery.sizeOf(context).width;
-    print(availableWidth);
-    if (availableWidth > 500) {
-      return Row(
-        children: [
-          Expanded(
-            child: ContactsList(
-              onContactSelected: _setCurrentContact,
+
+    if (widget.purpose == Purpose.forContacts) {
+      if (availableWidth > 500) {
+        return Row(
+          children: [
+            Expanded(
+              child: ContactsList(
+                onContactSelected: _setCurrentContact,
+              ),
             ),
-          ),
-          Expanded(
-            child: ContactDetails(contact: _currentContact),
-          ),
-        ],
+            Expanded(
+              child: ContactDetails(contact: _currentContact),
+            ),
+          ],
+        );
+      }
+
+      return Scaffold(
+        body: ContactsList(onContactSelected: _goToContactPage),
       );
     }
 
-    return Scaffold(
-      body: ContactsList(onContactSelected: _goToContactPage),
+    return const Scaffold(
+      body: RecentsList(),
     );
   }
 }

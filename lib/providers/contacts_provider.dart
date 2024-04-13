@@ -1,40 +1,24 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sqflite/sqflite.dart' as sql;
-import 'package:path/path.dart' as path;
 import 'package:text_call/models/contact.dart';
-
-Future<sql.Database> _getDatabase() async {
-  final databasesPath = await sql.getDatabasesPath();
-
-  final db = await sql.openDatabase(
-    path.join(databasesPath, 'contacts.db'),
-    version: 1,
-    onCreate: (db, version) async {
-      await db.execute(
-          'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT)');
-      await db.execute('CREATE TABLE recents (callDate TEXT PRIMARY KEY, phoneNumber TEXT, name TEXT, categoryName TEXT)');
-    },
-  );
-  return db;
-}
+import 'package:text_call/utils/utils.dart';
 
 class ContactsNotifier extends StateNotifier<List<Contact>> {
   ContactsNotifier() : super([]);
 
   Future<void> loadContacts() async {
-    final db = await _getDatabase();
+    final db = await getDatabase();
     final data = await db.query('contacts');
     final contactsList = data
         .map((row) => Contact(
-            name: row['name'].toString(),
-            phoneNumber: row['phoneNumber'].toString()))
+            name: row['name'] as String,
+            phoneNumber: row['phoneNumber'] as String))
         .toList();
     state = contactsList;
   }
 
   Future<Contact?> readAContact(String phoneNumber) async {
-    final db = await _getDatabase();
+    final db = await getDatabase();
     final data = await db
         .query('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
 
@@ -45,7 +29,7 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
   }
 
   void addContact(Contact newContact) async {
-    final db = await _getDatabase();
+    final db = await getDatabase();
     db.insert(
       'contacts',
       {'phoneNumber': newContact.phoneNumber, 'name': newContact.name},
@@ -54,7 +38,7 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
   }
 
   void deleteContact(String phoneNumber) async {
-    final db = await _getDatabase();
+    final db = await getDatabase();
     await db
         .delete('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
     state = List.from(state)

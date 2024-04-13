@@ -5,6 +5,7 @@ import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';
 import 'package:intl/intl.dart';
+import 'package:grouped_list/grouped_list.dart';
 
 class RecentsList extends ConsumerStatefulWidget {
   const RecentsList({super.key});
@@ -15,6 +16,31 @@ class RecentsList extends ConsumerStatefulWidget {
 
 class _RecentsListState extends ConsumerState<RecentsList> {
   final List<bool> _listExpandedBools = [];
+  // final recentsList = [
+  //   Recent(
+  //     name: 'Bolexyro',
+  //     phoneNumber: '09027929326',
+  //     category: RecentCategory.incomingAccepted,
+  //   ),
+  //   Recent(
+  //     name: 'Bolexyronn',
+  //     phoneNumber: '09027929326',
+  //     category: RecentCategory.incomingRejected,
+  //     callTime: DateTime(2024, 4, 13, 2),
+  //   ),
+  //   Recent(
+  //     name: 'Bolexyrorrr',
+  //     phoneNumber: '09027929326',
+  //     category: RecentCategory.outgoingMissed,
+  //     callTime: DateTime(2000, 0, 0, 0, 9),
+  //   ),
+  //   Recent(
+  //     name: 'Giannis',
+  //     phoneNumber: 'phoneNumber',
+  //     category: RecentCategory.incomingAccepted,
+  //     callTime: DateTime(2024, 4, 12),
+  //   ),
+  // ];
 
   void _changeTileExpandedStatus(index) {
     setState(() {
@@ -30,24 +56,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
   @override
   Widget build(BuildContext context) {
     final recentsList = ref.watch(recentsProvider);
-    // final recentsList = [
-    //   Recent(
-    //     name: 'Bolexyro',
-    //     phoneNumber: '09027929326',
-    //     category: RecentCategory.incomingAccepted,
-    //   ),
-    //   Recent(
-    //     name: 'Bolexyronn',
-    //     phoneNumber: '09027929326',
-    //     category: RecentCategory.incomingRejected,
-    //   ),
-    //   Recent(
-    //     name: 'Bolexyrorrr',
-    //     phoneNumber: '09027929326',
-    //     category: RecentCategory.outgoingMissed,
-    //     callTime: DateTime(2000, 0, 0, 0, 9),
-    //   ),
-    // ];
+
     recentsList.sort(
       (a, b) => a.callTime.compareTo(b.callTime),
     );
@@ -76,11 +85,26 @@ class _RecentsListState extends ConsumerState<RecentsList> {
           ],
         ),
         Expanded(
-          child: ListView.builder(
-            itemCount: recentsList.length,
-            itemBuilder: (context, index) {
+          child: GroupedListView(
+            useStickyGroupSeparators: true,
+            // floatingHeader: true,
+            stickyHeaderBackgroundColor:
+                const Color.fromARGB(255, 240, 248, 255),
+            elements: recentsList,
+            groupBy: (recentN) => DateTime(recentN.callTime.year,
+                recentN.callTime.month, recentN.callTime.day),
+            groupSeparatorBuilder: (DateTime commonDateTime) => Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                DateFormat('d MMMM').format(commonDateTime),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            // order: GroupedListOrder.DESC,
+            itemBuilder: (context, recentN) {
+              int index = recentsList.indexOf(recentN);
               _listExpandedBools.add(false);
-              final recentN = recentsList[index];
+
               return ExpandableListTile(
                 tileOnTapped: () {
                   _changeTileExpandedStatus(index);

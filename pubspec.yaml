@@ -53,6 +53,7 @@ dependencies:
   web_socket_channel: ^2.4.5
   google_fonts: ^6.2.1
   intl: ^0.19.0
+  grouped_list: ^5.1.2
 
 dev_dependencies:
   flutter_test:

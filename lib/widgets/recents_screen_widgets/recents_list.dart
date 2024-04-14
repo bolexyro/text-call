@@ -53,12 +53,28 @@ class _RecentsListState extends ConsumerState<RecentsList> {
     });
   }
 
+  String _groupHeaderText(DateTime headerDateTime) {
+    if (DateTime(
+            DateTime.now().year, DateTime.now().month, DateTime.now().day) ==
+        DateTime(
+            headerDateTime.year, headerDateTime.month, headerDateTime.day)) {
+      return "Today";
+    } else if (DateTime(DateTime.now().year, DateTime.now().month,
+            DateTime.now().day - 1) ==
+        DateTime(
+            headerDateTime.year, headerDateTime.month, headerDateTime.day)) {
+      return 'Yesterday';
+    }
+    return DateFormat('d MMMM').format(headerDateTime);
+  }
+
   @override
   Widget build(BuildContext context) {
     final recentsList = ref.watch(recentsProvider);
 
+    // from the most recent date to the least recent. Descending order
     recentsList.sort(
-      (a, b) => a.callTime.compareTo(b.callTime),
+      (a, b) => b.callTime.compareTo(a.callTime),
     );
 
     return Column(
@@ -93,18 +109,17 @@ class _RecentsListState extends ConsumerState<RecentsList> {
             elements: recentsList,
             groupBy: (recentN) => DateTime(recentN.callTime.year,
                 recentN.callTime.month, recentN.callTime.day),
-            groupSeparatorBuilder: (DateTime commonDateTime) => Padding(
+            groupSeparatorBuilder: (DateTime groupHeaderDateTime) => Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                DateFormat('d MMMM').format(commonDateTime),
+                _groupHeaderText(groupHeaderDateTime),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-            // order: GroupedListOrder.DESC,
+            order: GroupedListOrder.DESC,
             itemBuilder: (context, recentN) {
               int index = recentsList.indexOf(recentN);
               _listExpandedBools.add(false);
-
               return ExpandableListTile(
                 tileOnTapped: () {
                   _changeTileExpandedStatus(index);

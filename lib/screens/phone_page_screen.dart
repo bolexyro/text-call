@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/providers/contacts_provider.dart';
+import 'package:text_call/providers/recents_provider.dart';
+
 import 'package:text_call/widgets/phone_page_widgets/contacts_recents_screen.dart';
 import 'package:text_call/widgets/phone_page_widgets/keypad_screen.dart';
 
@@ -17,7 +19,7 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
   @override
   void initState() {
     ref.read(contactsProvider.notifier).loadContacts();
-
+    ref.read(recentsProvider.notifier).loadRecents();
     super.initState();
   }
 

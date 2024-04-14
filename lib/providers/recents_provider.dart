@@ -17,7 +17,7 @@ RecentCategory? _getCategoryEnumFromText({required String recentCategoryText}) {
 class RecentsNotifier extends StateNotifier<List> {
   RecentsNotifier() : super([]);
 
-  Future<void> loadContacts() async {
+  Future<void> loadRecents() async {
     final db = await getDatabase();
     final data = await db.query('recents');
     final recentsList = data

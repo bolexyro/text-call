@@ -72,6 +72,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
   @override
   Widget build(BuildContext context) {
     final recentsList = ref.watch(recentsProvider);
+    print(recentsList);
 
     // from the most recent date to the least recent. Descending order
     recentsList.sort(
@@ -117,9 +118,10 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-            order: GroupedListOrder.DESC,
+            // order: GroupedListOrder.DESC,
             itemBuilder: (context, recentN) {
               int index = recentsList.indexOf(recentN);
+              print(index);
               _listExpandedBools.add(false);
               return ExpandableListTile(
                 tileOnTapped: () {

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/utils/utils.dart';
 
@@ -23,8 +24,9 @@ class RecentsNotifier extends StateNotifier<List> {
     final recentsList = data
         .map(
           (row) => Recent(
-            name: row['name'] as String,
-            phoneNumber: row['phoneNumber'] as String,
+            contact: Contact(
+                name: row['name'] as String,
+                phoneNumber: row['phoneNumber'] as String),
             category: _getCategoryEnumFromText(
               recentCategoryText: row['categoryName'] as String,
             )!,
@@ -41,8 +43,8 @@ class RecentsNotifier extends StateNotifier<List> {
       'recents',
       {
         'callTime': newRecent.callTime.toString(),
-        'phoneNumber': newRecent.phoneNumber,
-        'name': newRecent.name,
+        'phoneNumber': newRecent.contact.phoneNumber,
+        'name': newRecent.contact.name,
         'categoryName': newRecent.category.name,
       },
     );
@@ -56,8 +58,8 @@ class RecentsNotifier extends StateNotifier<List> {
     final recentsList = data
         .map(
           (row) => Recent(
-            name: row['name'] as String,
-            phoneNumber: row['phoneNumber'] as String,
+            contact:
+                Contact(name: row['name'] as String, phoneNumber: phoneNumber),
             category: _getCategoryEnumFromText(
               recentCategoryText: row['categoryName'] as String,
             )!,

@@ -42,11 +42,8 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
               label: 'keypad',
             ),
             NavigationDestination(
-              icon: Badge(
-                label: Text('3'),
-                child: Icon(
-                  Icons.recent_actors,
-                ),
+              icon: Icon(
+                Icons.recent_actors,
               ),
               label: 'Recents',
             ),

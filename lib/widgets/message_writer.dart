@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
+import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -138,8 +139,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             if (snapshotData['call_status'] == 'rejected') {
               // create a recent in your table
               final recent = Recent(
-                name: widget.calleeName,
-                phoneNumber: widget.calleePhoneNumber,
+                contact: Contact(
+                    name: widget.calleeName,
+                    phoneNumber: widget.calleePhoneNumber),
                 category: RecentCategory.outgoingRejected,
               );
               ref.read(recentsProvider.notifier).addRecent(recent);
@@ -168,8 +170,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               );
             }
             final recent = Recent(
-              name: widget.calleeName,
-              phoneNumber: widget.calleePhoneNumber,
+              contact: Contact(
+                  name: widget.calleeName,
+                  phoneNumber: widget.calleePhoneNumber),
               category: RecentCategory.outgoingAccepted,
             );
             ref.read(recentsProvider.notifier).addRecent(recent);
@@ -198,8 +201,10 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   return Lottie.asset('assets/telephone_ringing_3d.json');
                 }
                 final recent = Recent(
-                  name: widget.calleeName,
-                  phoneNumber: widget.calleePhoneNumber,
+                  contact: Contact(
+                    name: widget.calleeName,
+                    phoneNumber: widget.calleePhoneNumber,
+                  ),
                   category: RecentCategory.outgoingMissed,
                 );
                 ref.read(recentsProvider.notifier).addRecent(recent);

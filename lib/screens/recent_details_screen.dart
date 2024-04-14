@@ -34,13 +34,11 @@ class RecentDetailsScreen extends ConsumerWidget {
     return DateFormat('d MMMM').format(headerDateTime);
   }
 
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final contactHistory = ref
         .read(recentsProvider.notifier)
-        .getRecentForAContact(recent.phoneNumber);
-
+        .getRecentForAContact(recent.contact.phoneNumber);
 
     final transparentAndNonTransparentWidth =
         MediaQuery.sizeOf(context).width - _stackPadding.horizontal;
@@ -96,7 +94,7 @@ class RecentDetailsScreen extends ConsumerWidget {
                                       height: _circleAvatarRadius,
                                     ),
                                     Text(
-                                      recent.name,
+                                      recent.contact.name,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 25,
@@ -115,7 +113,7 @@ class RecentDetailsScreen extends ConsumerWidget {
                                         Text(
                                           formatPhoneNumber(
                                               phoneNumberWCountryCode:
-                                                  recent.phoneNumber),
+                                                  recent.contact.phoneNumber),
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -135,8 +133,8 @@ class RecentDetailsScreen extends ConsumerWidget {
                                           showMessageWriterModalSheet(
                                             context: context,
                                             calleePhoneNumber:
-                                                recent.phoneNumber,
-                                            calleeName: recent.name,
+                                                recent.contact.phoneNumber,
+                                            calleeName: recent.contact.name,
                                           );
                                         },
                                         icon: const Icon(
@@ -210,7 +208,16 @@ class RecentDetailsScreen extends ConsumerWidget {
                                     onTap: () {},
                                     leading:
                                         recentCategoryIconMap[recentN.category],
-                                    title: Text(recentN.name),
+                                    title: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(DateFormat.Hm()
+                                            .format(recentN.callTime)),
+                                        Text(recentN.category.name),
+                                      ],
+                                    ),
                                   ),
                                   const Divider(
                                     indent: 45,

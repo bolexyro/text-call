@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/screens/auth_screen.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -189,16 +190,16 @@ class NotificationController {
 
       final db = await getDatabase();
       final newRecent = Recent(
-          name: kCallerPhoneNumber!,
-          phoneNumber: kCallerPhoneNumber!,
-          category: RecentCategory.incomingAccepted);
+        contact: Contact(name: kCallerName!, phoneNumber: kCallerPhoneNumber!),
+        category: RecentCategory.incomingAccepted,
+      );
 
       db.insert(
         'recents',
         {
           'callTime': newRecent.callTime.toString(),
-          'phoneNumber': newRecent.phoneNumber,
-          'name': newRecent.name,
+          'phoneNumber': newRecent.contact.phoneNumber,
+          'name': newRecent.contact.name,
           'categoryName': newRecent.category.name,
         },
       );

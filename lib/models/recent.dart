@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:text_call/models/contact.dart';
 
 enum RecentCategory {
   outgoingAccepted,
@@ -23,14 +24,12 @@ const Map<RecentCategory, Icon> recentCategoryIconMap = {
 
 class Recent {
   Recent({
-    required this.name,
-    required this.phoneNumber,
+    required this.contact,
     required this.category,
     DateTime? callTime,
-  }) : callTime = callTime ?? DateTime.now();
+  }) : this.callTime = callTime ?? DateTime.now();
 
-  final String name;
-  final String phoneNumber;
+  final Contact contact;
   final RecentCategory category;
   final DateTime callTime;
 }

@@ -85,7 +85,9 @@ void main() async {
   await _fcmSetup();
   FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
   runApp(
-    const ProviderScope(child: TextCall()),
+    const ProviderScope(
+      child: TextCall(),
+    ),
   );
 }
 

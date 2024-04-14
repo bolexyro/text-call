@@ -30,11 +30,11 @@ class _ContactsListState extends ConsumerState<ContactsList> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Contact> contactsList = ref.watch(contactsProvider);
-    // final contactsList = [
-    //   const Contact(name: 'Bolexyro', phoneNumber: '09027929326'),
-    //   const Contact(name: 'Mom', phoneNumber: '07034744820'),
-    // ];
+    // final List<Contact> contactsList = ref.watch(contactsProvider);
+    final contactsList = [
+      const Contact(name: 'Bolexyro', phoneNumber: '09027929326'),
+      const Contact(name: 'Mom', phoneNumber: '07034744820'),
+    ];
 
     return Column(
       children: [

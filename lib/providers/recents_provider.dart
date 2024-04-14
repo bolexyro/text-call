@@ -49,6 +49,25 @@ class RecentsNotifier extends StateNotifier<List> {
     state = [...state, newRecent];
   }
 
+  Future<List<Recent>> getRecentForAContact(String phoneNumber) async {
+    final db = await getDatabase();
+    final data = await db
+        .query('recents', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
+    final recentsList = data
+        .map(
+          (row) => Recent(
+            name: row['name'] as String,
+            phoneNumber: row['phoneNumber'] as String,
+            category: _getCategoryEnumFromText(
+              recentCategoryText: row['categoryName'] as String,
+            )!,
+            callTime: DateTime.parse(row['callTime'] as String),
+          ),
+        )
+        .toList();
+
+    return recentsList;
+  }
 }
 
 final recentsProvider =

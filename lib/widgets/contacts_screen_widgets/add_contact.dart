@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
+import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 
 //ignore: must_be_immutable
@@ -125,7 +126,7 @@ class AddContact extends ConsumerWidget {
                         return null;
                       },
                       onSaved: (newValue) {
-                        _enteredPhoneNumber = '+234${newValue!.substring(1)}';
+                        _enteredPhoneNumber = changeLocalToIntl(localPhoneNumber: newValue!);
                       },
                       maxLength: 11,
                       keyboardType: TextInputType.phone,

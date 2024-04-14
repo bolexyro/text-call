@@ -97,9 +97,8 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
 
   Future<bool> _checkIfNumberExists() async {
     final db = FirebaseFirestore.instance;
-    final docRef = db
-        .collection("users")
-        .doc('+234${_inputedDigitsTextController.text.substring(1)}');
+    final docRef = db.collection("users").doc(
+        changeLocalToIntl(localPhoneNumber: _inputedDigitsTextController.text));
     final document = await docRef.get();
 
     if (document.exists == false) {

@@ -15,7 +15,7 @@ RecentCategory? _getCategoryEnumFromText({required String recentCategoryText}) {
   return null;
 }
 
-class RecentsNotifier extends StateNotifier<List> {
+class RecentsNotifier extends StateNotifier<List<Recent>> {
   RecentsNotifier() : super([]);
 
   Future<void> loadRecents() async {
@@ -72,5 +72,6 @@ class RecentsNotifier extends StateNotifier<List> {
   }
 }
 
-final recentsProvider =
-    StateNotifierProvider<RecentsNotifier, List>((ref) => RecentsNotifier());
+final recentsProvider = StateNotifierProvider<RecentsNotifier, List<Recent>>(
+  (ref) => RecentsNotifier(),
+);

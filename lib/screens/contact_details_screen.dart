@@ -83,9 +83,7 @@ class ContactDetailsScreen extends StatelessWidget {
                                   width: 7,
                                 ),
                                 Text(
-                                  formatPhoneNumber(
-                                      phoneNumberWCountryCode:
-                                          contact.phoneNumber),
+                                  contact.localPhoneNumber,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),

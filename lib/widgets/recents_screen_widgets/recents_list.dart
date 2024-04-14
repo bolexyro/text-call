@@ -132,14 +132,14 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                 trailing: Text(
                   DateFormat.Hm().format(recentN.callTime),
                 ),
-                title: Text(recentsList[index].name),
+                title: Text(recentsList[index].contact.name),
                 expandedContent: Column(
                   children: [
                     const SizedBox(
                       height: 10,
                     ),
                     Text(
-                      'Mobile ${recentN.phoneNumber}',
+                      'Mobile ${recentN.contact.phoneNumber}',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const Text('Incoming Call'),
@@ -152,8 +152,8 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                         IconButton(
                           onPressed: () {
                             showMessageWriterModalSheet(
-                              calleeName: recentN.name,
-                              calleePhoneNumber: recentN.phoneNumber,
+                              calleeName: recentN.contact.name,
+                              calleePhoneNumber: recentN.contact.phoneNumber,
                               context: context,
                             );
                           },

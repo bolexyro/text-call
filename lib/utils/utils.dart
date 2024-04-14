@@ -39,9 +39,8 @@ void createAwesomeNotification({String? title, String? body}) {
   );
 }
 
-String formatPhoneNumber({required String phoneNumberWCountryCode}) {
-  return '0${phoneNumberWCountryCode.substring(4)}';
-}
+String changeLocalToIntl({required String localPhoneNumber}) =>
+    '+234${localPhoneNumber.substring(1)}';
 
 void showMessageWriterModalSheet(
     {required BuildContext context,

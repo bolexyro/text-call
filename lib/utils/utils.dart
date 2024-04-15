@@ -34,7 +34,7 @@ void createAwesomeNotification({String? title, String? body}) {
         label: 'Reject Call',
         color: Colors.red,
         autoDismissible: true,
-        actionType: ActionType.SilentBackgroundAction,
+        actionType: ActionType.SilentAction,
       ),
     ],
   );

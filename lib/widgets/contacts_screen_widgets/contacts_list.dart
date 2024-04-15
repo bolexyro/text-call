@@ -5,6 +5,7 @@ import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/add_contact.dart';
+import 'package:text_call/widgets/expandable_list_tile.dart';
 
 class ContactsList extends ConsumerStatefulWidget {
   const ContactsList({
@@ -19,6 +20,8 @@ class ContactsList extends ConsumerStatefulWidget {
 }
 
 class _ContactsListState extends ConsumerState<ContactsList> {
+  final List<bool> _listExpandedBools = [];
+
   void _showAddContactDialog(context) async {
     showAdaptiveDialog(
       context: context,
@@ -26,6 +29,17 @@ class _ContactsListState extends ConsumerState<ContactsList> {
         return AddContact();
       },
     );
+  }
+
+  void _changeTileExpandedStatus(index) {
+    setState(() {
+      _listExpandedBools[index] = !_listExpandedBools[index];
+      for (int i = 0; i < _listExpandedBools.length; i++) {
+        if (i != index && _listExpandedBools[i] == true) {
+          _listExpandedBools[i] = false;
+        }
+      }
+    });
   }
 
   @override
@@ -79,6 +93,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
             child: ListView.builder(
               itemBuilder: (context, index) {
                 Contact contactN = contactsList[index];
+                _listExpandedBools.add(false);
                 return Slidable(
                   startActionPane: ActionPane(
                     motion: const BehindMotion(),
@@ -120,10 +135,9 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                       ),
                     ],
                   ),
-                  child: ListTile(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+                  child: ExpandableListTile(
+                    isExpanded: _listExpandedBools[index],
+                    title: Text(contactN.name),
                     leading: CircleAvatar(
                       child: Container(
                         width: double.infinity,
@@ -147,10 +161,45 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                         ),
                       ),
                     ),
-                    title: Text(contactN.name),
-                    onTap: () {
-                      widget.onContactSelected(contactN);
+                    tileOnTapped: () {
+                      _changeTileExpandedStatus(index);
                     },
+                    expandedContent: Column(
+                      children: [
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          'Mobile ${contactN.localPhoneNumber}',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const Text('Incoming Call'),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                showMessageWriterModalSheet(
+                                  calleeName: contactN.name,
+                                  calleePhoneNumber: contactN.phoneNumber,
+                                  context: context,
+                                );
+                              },
+                              icon: const Icon(Icons.message),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                widget.onContactSelected(contactN);
+                              },
+                              icon: const Icon(Icons.info_outlined),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

@@ -26,16 +26,16 @@ Future<void> _messageHandler(RemoteMessage message) async {
       where: 'phoneNumber = ?', whereArgs: [kCallerPhoneNumber]);
 
   if (data.isEmpty) {
-    kCallerName = null;
+    kCallerName = 'Unknown';
   } else {
     kCallerName = data[0]['name'] as String;
   }
   await db.close();
   createAwesomeNotification(
-      title: kCallerName != null
+      title: kCallerName != 'Unknown'
           ? '$kCallerName is calling '
           : message.notification!.title,
-      body: message.notification!.body);
+      body: message.notification!.body,);
 }
 
 Future<void> _fcmSetup() async {
@@ -133,6 +133,7 @@ class _TextCallState extends State<TextCall> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData.from(colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),),
       navigatorKey: TextCall.navigatorKey,
       debugShowCheckedModeBanner: false,
       home: FutureBuilder(

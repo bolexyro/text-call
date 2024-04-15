@@ -68,13 +68,6 @@ class _ContactsListState extends ConsumerState<ContactsList> {
               icon: const Icon(Icons.search),
             ),
             const SizedBox(width: 10),
-            Badge(
-              child: IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.more_vert),
-              ),
-            ),
-            const SizedBox(width: 10),
           ],
         ),
         if (contactsList.isEmpty)

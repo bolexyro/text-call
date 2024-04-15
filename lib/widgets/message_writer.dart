@@ -152,7 +152,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     AnimatedTextKit(
                       animatedTexts: [
                         TyperAnimatedText(
-                          'Thy call hath been declined, leaving silence to linger in the void. Perhaps another time shall bring forth communion\'s embrace',
+                          'Thy call hath been declined, leaving silence to linger in the void.',
                           textAlign: TextAlign.center,
                           textStyle: GoogleFonts.pacifico(
                               fontSize: 32,
@@ -180,7 +180,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             return AnimatedTextKit(
               animatedTexts: [
                 ColorizeAnimatedText(
-                  'Thy call hath been answered, yet no voice meets thee. A preordained missive shall henceforth guide thy callee',
+                  'Thy call hath been answered',
                   textAlign: TextAlign.center,
                   textStyle: const TextStyle(
                     fontWeight: FontWeight.bold,
@@ -215,7 +215,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       AnimatedTextKit(
                         animatedTexts: [
                           TyperAnimatedText(
-                            'Alas, the call remained unanswered. Thy message may find solace in the echoes of time.',
+                            'Alas, the call remained unanswered.',
                             textAlign: TextAlign.center,
                             textStyle: GoogleFonts.pacifico(
                                 fontSize: 32,
@@ -225,7 +225,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                         ],
                         displayFullTextOnTap: true,
                         repeatForever: false,
-                        totalRepeatCount: 2,
+                        totalRepeatCount: 1,
                       ),
                       Lottie.asset('assets/call_missed.json'),
                     ],
@@ -243,7 +243,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       decoration: const BoxDecoration(
         color: Color.fromARGB(255, 207, 222, 234),
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(40),
+          top: Radius.circular(25),
         ),
       ),
       child: Stack(

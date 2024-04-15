@@ -5,8 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
-import 'package:text_call/utils/utils.dart';
-import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/contact_card_w_profile_pic_stack.dart';
 
 class ContactDetailsWHistoryScreen extends ConsumerWidget {
   const ContactDetailsWHistoryScreen({
@@ -15,10 +14,6 @@ class ContactDetailsWHistoryScreen extends ConsumerWidget {
   });
 
   final Contact contact;
-
-  final _nonTransparentContainerheight = 180.0;
-  final _circleAvatarRadius = 50.0;
-  final _stackPadding = const EdgeInsets.symmetric(horizontal: 10);
 
   String _groupHeaderText(DateTime headerDateTime) {
     if (DateTime(
@@ -40,11 +35,6 @@ class ContactDetailsWHistoryScreen extends ConsumerWidget {
     final contactHistory = ref
         .read(recentsProvider.notifier)
         .getRecentForAContact(contact.phoneNumber);
-
-    final transparentAndNonTransparentWidth =
-        MediaQuery.sizeOf(context).width - _stackPadding.horizontal;
-    final transparentContainerHeight =
-        _circleAvatarRadius + _nonTransparentContainerheight;
 
     return SafeArea(
       child: Scaffold(
@@ -72,89 +62,8 @@ class ContactDetailsWHistoryScreen extends ConsumerWidget {
                   child: Column(
                     children: [
                       Padding(
-                        padding: _stackPadding,
-                        child: Stack(
-                          children: [
-                            Container(
-                              height: transparentContainerHeight,
-                              width: transparentAndNonTransparentWidth,
-                              color: Colors.transparent,
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              child: Container(
-                                height: _nonTransparentContainerheight,
-                                width: transparentAndNonTransparentWidth,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: Colors.white,
-                                ),
-                                child: Column(
-                                  children: [
-                                    SizedBox(
-                                      height: _circleAvatarRadius,
-                                    ),
-                                    Text(
-                                      contact.name,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 25,
-                                      ),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        const Text('Mobile'),
-                                        const SizedBox(
-                                          width: 7,
-                                        ),
-                                        Text(
-                                          contact.localPhoneNumber,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.blue[500],
-                                      ),
-                                      child: IconButton(
-                                        onPressed: () {
-                                          showMessageWriterModalSheet(
-                                            context: context,
-                                            calleePhoneNumber:
-                                                contact.phoneNumber,
-                                            calleeName: contact.name,
-                                          );
-                                        },
-                                        icon: const Icon(
-                                          Icons.message,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              left: (transparentAndNonTransparentWidth / 2) -
-                                  _circleAvatarRadius,
-                              child: ContactAvatarCircle(
-                                avatarRadius: _circleAvatarRadius,
-                              ),
-                            )
-                          ],
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: ContactCardWProfilePicStack(contact: contact,)
                       ),
                       const SizedBox(
                         height: 30,

@@ -111,7 +111,7 @@ class RecentDetailsScreen extends ConsumerWidget {
                                           width: 7,
                                         ),
                                         Text(
-                                         recent.contact.localPhoneNumber,
+                                          recent.contact.localPhoneNumber,
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                           ),

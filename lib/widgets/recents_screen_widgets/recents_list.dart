@@ -72,12 +72,10 @@ class _RecentsListState extends ConsumerState<RecentsList> {
   @override
   Widget build(BuildContext context) {
     final recentsList = ref.watch(recentsProvider);
-    print(recentsList);
 
-    // from the most recent date to the least recent. Descending order
-    recentsList.sort(
-      (a, b) => b.callTime.compareTo(a.callTime),
-    );
+    for (int i = 0; i < recentsList.length; i++) {
+      _listExpandedBools.add(false);
+    }
 
     return Column(
       children: [
@@ -118,10 +116,9 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-            // order: GroupedListOrder.DESC,
+            order: GroupedListOrder.DESC,
             itemBuilder: (context, recentN) {
               int index = recentsList.indexOf(recentN);
-              print(index);
               _listExpandedBools.add(false);
               return ExpandableListTile(
                 tileOnTapped: () {
@@ -139,7 +136,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                       height: 10,
                     ),
                     Text(
-                      'Mobile ${recentN.contact.phoneNumber}',
+                      'Mobile ${recentN.contact.localPhoneNumber}',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const Text('Incoming Call'),

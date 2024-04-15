@@ -27,7 +27,7 @@ class Recent {
     required this.contact,
     required this.category,
     DateTime? callTime,
-  }) : this.callTime = callTime ?? DateTime.now();
+  }) : callTime = callTime ?? DateTime.now();
 
   final Contact contact;
   final RecentCategory category;

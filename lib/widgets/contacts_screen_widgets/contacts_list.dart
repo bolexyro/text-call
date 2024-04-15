@@ -5,6 +5,7 @@ import 'package:grouped_list/grouped_list.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/utils.dart';
+import 'package:text_call/widgets/confirm_delete_dialog.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/add_contact.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';
 
@@ -43,16 +44,34 @@ class _ContactsListState extends ConsumerState<ContactsList> {
     });
   }
 
+  void _showDeleteDialog(BuildContext context, Contact contact) async{
+    final bool? toDelete = await showAdaptiveDialog(
+      context: context,
+      builder: (context) => const ConfirmDeleteDialog(),
+    );
+    if (toDelete != true){
+      return;
+    }
+     ref
+                              .read(contactsProvider.notifier)
+                              .deleteContact(contact.phoneNumber);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // final List<Contact> contactsList = ref.watch(contactsProvider);
-    final contactsList = [
-      const Contact(name: 'Bolexyro', phoneNumber: '09027929326'),
-      const Contact(name: 'Mom', phoneNumber: '07034744820'),
-      const Contact(name: 'Mosh', phoneNumber: '07034744820'),
-      const Contact(name: 'Giannis', phoneNumber: '07034744820'),
-      const Contact(name: 'Banjo', phoneNumber: '07034744820'),
-    ];
+    final List<Contact> contactsList = ref.watch(contactsProvider);
+    // final contactsList = [
+    //   const Contact(name: 'Bolexyro', phoneNumber: '09027929326'),
+    //   const Contact(name: 'Mom', phoneNumber: '07034744820'),
+    //   const Contact(name: 'Mosh', phoneNumber: '07034744820'),
+    //   const Contact(name: 'Giannis', phoneNumber: '07034744820'),
+    //   const Contact(name: 'Banjo', phoneNumber: '07034744820'),
+    //   const Contact(name: 'LeBron', phoneNumber: '07034744820'),
+    //   const Contact(name: 'Samuel', phoneNumber: '07034744820'),
+    //   const Contact(name: 'Wisdom', phoneNumber: '07034744820'),
+    //   const Contact(name: 'Oba', phoneNumber: '07034744820'),
+    //   const Contact(name: 'Someone', phoneNumber: '07034744820'),
+    // ];
 
     contactsList.sort(
       (a, b) => a.name.compareTo(b.name),
@@ -100,7 +119,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
           Expanded(
             child: GroupedListView(
               useStickyGroupSeparators: true,
-              // floatingHeader: true,
+              floatingHeader: true,
               stickyHeaderBackgroundColor:
                   const Color.fromARGB(255, 240, 248, 255),
               elements: contactsList,
@@ -137,10 +156,8 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                     motion: const BehindMotion(),
                     children: [
                       SlidableAction(
-                        onPressed: (context) {
-                          ref
-                              .read(contactsProvider.notifier)
-                              .deleteContact(contactN.phoneNumber);
+                        onPressed: (context){
+                          _showDeleteDialog(context, contactN);
                         },
                         backgroundColor: const Color(0xFFFE4A49),
                         foregroundColor: Colors.white,

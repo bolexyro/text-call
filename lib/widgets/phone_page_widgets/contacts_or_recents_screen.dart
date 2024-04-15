@@ -34,12 +34,9 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
   }
 
   void _goToContactPage(Contact selectedContact) {
-    // so I am using the
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => ContactDetailsWHistoryScreen(
-          contact: selectedContact,
-        ),
+        builder: (context) => ContactDetailsWHistoryScreen(contact: selectedContact),
       ),
     );
   }
@@ -50,6 +47,17 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
 
     if (widget.purpose == Purpose.forContacts) {
       if (availableWidth > 500) {
+        final activeContent = _currentContact == null
+            ? const Text(
+                'Select a contact from the list on the left',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              )
+            : ContactDetails(
+                contact: _currentContact!,
+                stackContainerWidths: MediaQuery.sizeOf(context).width * .425,
+              );
+
         return Row(
           children: [
             Expanded(
@@ -58,15 +66,31 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
               ),
             ),
             Expanded(
-              child: ContactDetails(contact: _currentContact),
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.only(top: 40),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  mainAxisAlignment: _currentContact == null
+                      ? MainAxisAlignment.center
+                      : MainAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: activeContent,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         );
       }
 
-      return Scaffold(
-        body: ContactsList(onContactSelected: _goToContactPage),
-      );
+      return ContactsList(onContactSelected: _goToContactPage);
     }
 
     return const Scaffold(

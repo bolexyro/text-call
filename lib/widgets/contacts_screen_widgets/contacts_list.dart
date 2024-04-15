@@ -101,7 +101,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
               onPressed: () {
                 _showAddContactDialog(context);
               },
-              icon: const Icon(Icons.add),
+              icon: const Icon(Icons.person_add),
             ),
             const SizedBox(width: 10),
             IconButton(

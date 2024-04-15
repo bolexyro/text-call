@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 
-import 'package:text_call/widgets/phone_page_widgets/contacts_recents_screen.dart';
+import 'package:text_call/widgets/phone_page_widgets/contacts_or_recents_screen.dart';
 import 'package:text_call/widgets/phone_page_widgets/keypad_screen.dart';
 
 class PhonePageScreen extends ConsumerStatefulWidget {

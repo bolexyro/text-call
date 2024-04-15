@@ -10,10 +10,12 @@ import 'package:text_call/widgets/contacts_screen_widgets/contact_card_w_profile
 class ContactDetails extends ConsumerWidget {
   const ContactDetails({
     super.key,
-    this.contact,
+    required this.contact,
+    required this.stackContainerWidths,
   });
 
-  final Contact? contact;
+  final Contact contact;
+  final double stackContainerWidths;
 
   String _groupHeaderText(DateTime headerDateTime) {
     if (DateTime(
@@ -32,136 +34,95 @@ class ContactDetails extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Widget activeContent = const Text(
-      'Select a contact from the list on the left',
-      textAlign: TextAlign.center,
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-    );
-
-    if (contact != null) {
-      final contactHistory = ref
-          .read(recentsProvider.notifier)
-          .getRecentForAContact(contact!.phoneNumber);
-
-      activeContent = Column(
-        children: [
-          ContactCardWProfilePicStack(
-            contact: contact!,
-            transparentAndNonTransparentWidth:
-                MediaQuery.sizeOf(context).width * .425,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          SizedBox(
-            width: 170,
-            child: TextButton(
-              onPressed: () {},
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.grey[300],
-              ),
-              child: const Text(
-                'History',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          FutureBuilder(
-            future: contactHistory,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              if (snapshot.hasError) {
-                return const Center(
-                  child: Text(
-                    'There was an error fetching the data, Please go back to the previous page and come back.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.red),
-                  ),
-                );
-              }
-
-              final recentsList = snapshot.data!;
-              if (recentsList.isEmpty) {
-                return Text(
-                  'Start conversing with ${contact!.name} to see your history.',
-                  textAlign: TextAlign.center,
-                );
-              }
-              return GroupedListView(
-                shrinkWrap: true,
-                useStickyGroupSeparators: true,
-                // floatingHeader: true,
-                stickyHeaderBackgroundColor:
-                    const Color.fromARGB(255, 240, 248, 255),
-                elements: recentsList,
-                groupBy: (recentN) => DateTime(recentN.callTime.year,
-                    recentN.callTime.month, recentN.callTime.day),
-                groupSeparatorBuilder: (DateTime groupHeaderDateTime) =>
-                    Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    _groupHeaderText(groupHeaderDateTime),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                order: GroupedListOrder.DESC,
-                itemBuilder: (context, recentN) {
-                  return Column(
-                    children: [
-                      ListTile(
-                        onTap: () {},
-                        leading: recentCategoryIconMap[recentN.category],
-                        title: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(DateFormat.Hm().format(recentN.callTime)),
-                            Text(recentN.category.name),
-                          ],
-                        ),
-                      ),
-                      const Divider(
-                        indent: 45,
-                        endIndent: 15,
-                      )
-                    ],
-                  );
-                },
+    final contactHistory = ref
+        .read(recentsProvider.notifier)
+        .getRecentForAContact(contact.phoneNumber);
+    return Column(
+      children: [
+        ContactCardWProfilePicStack(
+          contact: contact,
+          transparentAndNonTransparentWidth: stackContainerWidths,
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+        FutureBuilder(
+          future: contactHistory,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
               );
-            },
-          ),
-        ],
-      );
-    }
+            }
+            if (snapshot.hasError) {
+              return const Center(
+                child: Text(
+                  'There was an error fetching the data, Please go back to the previous page and come back.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red),
+                ),
+              );
+            }
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      padding: const EdgeInsets.only(top: 40),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Column(
-        mainAxisAlignment: contact == null
-            ? MainAxisAlignment.center
-            : MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: activeContent,
-          ),
-        ],
-      ),
+            final recentsList = snapshot.data!;
+            if (recentsList.isEmpty) {
+              return Column(
+                children: [
+                  Text(
+                    'Start conversing with ${contact.name} to see your history.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const Icon(
+                    Icons.history,
+                    size: 110,
+                    color: Colors.grey,
+                  ),
+                ],
+              );
+            }
+            return GroupedListView(
+              shrinkWrap: true,
+              useStickyGroupSeparators: true,
+              // floatingHeader: true,
+              stickyHeaderBackgroundColor:
+                  const Color.fromARGB(255, 240, 248, 255),
+              elements: recentsList,
+              groupBy: (recentN) => DateTime(recentN.callTime.year,
+                  recentN.callTime.month, recentN.callTime.day),
+              groupSeparatorBuilder: (DateTime groupHeaderDateTime) => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  _groupHeaderText(groupHeaderDateTime),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              order: GroupedListOrder.DESC,
+              itemBuilder: (context, recentN) {
+                return Column(
+                  children: [
+                    ListTile(
+                      onTap: () {},
+                      leading: recentCategoryIconMap[recentN.category],
+                      title: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(DateFormat.Hm().format(recentN.callTime)),
+                          Text(recentN.category.name),
+                        ],
+                      ),
+                    ),
+                    const Divider(
+                      indent: 45,
+                      endIndent: 15,
+                    )
+                  ],
+                );
+              },
+            );
+          },
+        ),
+      ],
     );
   }
 }

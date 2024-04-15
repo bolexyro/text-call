@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:grouped_list/grouped_list.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/utils.dart';
@@ -44,11 +45,18 @@ class _ContactsListState extends ConsumerState<ContactsList> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Contact> contactsList = ref.watch(contactsProvider);
-    // final contactsList = [
-    //   const Contact(name: 'Bolexyro', phoneNumber: '09027929326'),
-    //   const Contact(name: 'Mom', phoneNumber: '07034744820'),
-    // ];
+    // final List<Contact> contactsList = ref.watch(contactsProvider);
+    final contactsList = [
+      const Contact(name: 'Bolexyro', phoneNumber: '09027929326'),
+      const Contact(name: 'Mom', phoneNumber: '07034744820'),
+      const Contact(name: 'Mosh', phoneNumber: '07034744820'),
+      const Contact(name: 'Giannis', phoneNumber: '07034744820'),
+      const Contact(name: 'Banjo', phoneNumber: '07034744820'),
+    ];
+
+    contactsList.sort(
+      (a, b) => a.name.compareTo(b.name),
+    );
 
     return Column(
       children: [
@@ -90,9 +98,22 @@ class _ContactsListState extends ConsumerState<ContactsList> {
           ),
         if (contactsList.isNotEmpty)
           Expanded(
-            child: ListView.builder(
-              itemBuilder: (context, index) {
-                Contact contactN = contactsList[index];
+            child: GroupedListView(
+              useStickyGroupSeparators: true,
+              // floatingHeader: true,
+              stickyHeaderBackgroundColor:
+                  const Color.fromARGB(255, 240, 248, 255),
+              elements: contactsList,
+              groupBy: (contactN) => contactN.name[0],
+              groupSeparatorBuilder: (String groupHeader) => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  groupHeader,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              itemBuilder: (context, contactN) {
+                int index = contactsList.indexOf(contactN);
                 _listExpandedBools.add(false);
                 return Slidable(
                   startActionPane: ActionPane(
@@ -109,13 +130,6 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                         foregroundColor: Colors.white,
                         icon: Icons.message,
                         label: 'Call',
-                      ),
-                      SlidableAction(
-                        onPressed: (context) {},
-                        backgroundColor: const Color(0xFFFE4A49),
-                        foregroundColor: Colors.white,
-                        icon: Icons.close,
-                        label: 'Cancel',
                       ),
                     ],
                   ),
@@ -203,7 +217,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                   ),
                 );
               },
-              itemCount: contactsList.length,
+              // itemCount: contactsList.length,
             ),
           ),
       ],

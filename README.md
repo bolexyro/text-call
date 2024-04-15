@@ -1,16 +1,45 @@
-# text_call
+# Text Call
 
-A new Flutter project.
+Text Call is an innovative communication app that combines the urgency of a phone call with the convenience of text messaging. With Text Call, you can send important messages to your contacts without the need for a live conversation.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Text Call**: Initiate a call to someone, and when they answer, they'll see a pre-written message from you instead of engaging in a conversation.
+- **Future Plans**: Visit the [Roadmap](#roadmap) section to learn about planned features and enhancements.
 
-A few resources to get you started if this is your first Flutter project:
+## Getting Started / Installation
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+To install Text Call on your device, follow these steps:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Clone the repository from GitHub:
+
+    ```bash
+    git clone https://github.com/adebola-duf/text-call.git
+    ```
+
+2. Navigate to the project directory:
+
+    ```bash
+    cd text-call
+    ```
+
+3. Install dependencies using Flutter:
+
+    ```bash
+    flutter pub get
+    ```
+
+4. Run the app on your preferred device:
+
+    ```bash
+    flutter run
+    ```
+
+## Roadmap
+
+Here are some planned features and enhancements for Text Call:
+
+- [ ] Video and audio messages.
+- [ ] Message previews.
+- [ ] Customization options for messages like background color, font, etc.
+- [ ] Improved user interface and user experience.

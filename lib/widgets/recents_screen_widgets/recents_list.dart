@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
-import 'package:text_call/screens/recent_details_screen.dart';
+import 'package:text_call/screens/contact_details_w_history_screen.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';
 import 'package:intl/intl.dart';
@@ -226,8 +226,9 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                             onPressed: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (context) => RecentDetailsScreen(
-                                    recent: recentN,
+                                  builder: (context) =>
+                                      ContactDetailsWHistoryScreen(
+                                    contact: recentN.contact,
                                   ),
                                 ),
                               );

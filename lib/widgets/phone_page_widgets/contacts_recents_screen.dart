@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
-import 'package:text_call/models/recent.dart';
-import 'package:text_call/screens/recent_details_screen.dart';
+import 'package:text_call/screens/contact_details_w_history_screen.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_details.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contacts_list.dart';
 import 'package:text_call/widgets/recents_screen_widgets/recents_list.dart';
@@ -38,11 +37,8 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
     // so I am using the
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => RecentDetailsScreen(
-          recent: Recent(
-            contact: selectedContact,
-            category: RecentCategory.incomingRejected,
-          ),
+        builder: (context) => ContactDetailsWHistoryScreen(
+          contact: selectedContact,
         ),
       ),
     );

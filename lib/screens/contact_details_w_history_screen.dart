@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
+import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 
-class RecentDetailsScreen extends ConsumerWidget {
-  const RecentDetailsScreen({
+class ContactDetailsWHistoryScreen extends ConsumerWidget {
+  const ContactDetailsWHistoryScreen({
     super.key,
-    required this.recent,
+    required this.contact,
   });
 
-  final Recent recent;
+  final Contact contact;
 
   final _nonTransparentContainerheight = 180.0;
   final _circleAvatarRadius = 50.0;
@@ -38,7 +39,7 @@ class RecentDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final contactHistory = ref
         .read(recentsProvider.notifier)
-        .getRecentForAContact(recent.contact.phoneNumber);
+        .getRecentForAContact(contact.phoneNumber);
 
     final transparentAndNonTransparentWidth =
         MediaQuery.sizeOf(context).width - _stackPadding.horizontal;
@@ -94,7 +95,7 @@ class RecentDetailsScreen extends ConsumerWidget {
                                       height: _circleAvatarRadius,
                                     ),
                                     Text(
-                                      recent.contact.name,
+                                      contact.name,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 25,
@@ -111,7 +112,7 @@ class RecentDetailsScreen extends ConsumerWidget {
                                           width: 7,
                                         ),
                                         Text(
-                                          recent.contact.localPhoneNumber,
+                                          contact.localPhoneNumber,
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -131,8 +132,8 @@ class RecentDetailsScreen extends ConsumerWidget {
                                           showMessageWriterModalSheet(
                                             context: context,
                                             calleePhoneNumber:
-                                                recent.contact.phoneNumber,
-                                            calleeName: recent.contact.name,
+                                                contact.phoneNumber,
+                                            calleeName: contact.name,
                                           );
                                         },
                                         icon: const Icon(
@@ -178,6 +179,12 @@ class RecentDetailsScreen extends ConsumerWidget {
                           }
 
                           final recentsList = snapshot.data!;
+                          if (recentsList.isEmpty) {
+                            return Text(
+                              'Start conversing with ${contact.name} to see your history.',
+                              textAlign: TextAlign.center,
+                            );
+                          }
                           return GroupedListView(
                             shrinkWrap: true,
                             useStickyGroupSeparators: true,

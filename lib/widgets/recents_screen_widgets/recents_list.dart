@@ -145,7 +145,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
     return Column(
       children: [
         const Text(
-          'Phone',
+          'Recents',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
         ),
         const SizedBox(

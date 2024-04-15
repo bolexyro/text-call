@@ -80,7 +80,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
     return Column(
       children: [
         const Text(
-          'Phone',
+          'Contacts',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
         ),
         Padding(

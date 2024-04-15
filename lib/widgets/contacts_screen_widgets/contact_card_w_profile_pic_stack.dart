@@ -7,9 +7,11 @@ class ContactCardWProfilePicStack extends StatelessWidget {
   const ContactCardWProfilePicStack({
     super.key,
     required this.contact,
+    required this.transparentAndNonTransparentWidth,
   });
 
   final Contact contact;
+  final double transparentAndNonTransparentWidth;
 
   final _nonTransparentContainerheight = 180.0;
   final _circleAvatarRadius = 50.0;
@@ -18,9 +20,6 @@ class ContactCardWProfilePicStack extends StatelessWidget {
   Widget build(BuildContext context) {
     final transparentContainerHeight =
         _circleAvatarRadius + _nonTransparentContainerheight;
-
-    final transparentAndNonTransparentWidth =
-        MediaQuery.sizeOf(context).width * .425;
 
     return Stack(
       children: [

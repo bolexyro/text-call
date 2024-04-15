@@ -126,9 +126,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
             onKeyPressed: _addDigit,
           ),
         ),
-        const SizedBox(
-          height: 15,
-        )
+       
       ],
     );
   }

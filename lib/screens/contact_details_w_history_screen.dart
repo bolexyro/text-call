@@ -14,6 +14,7 @@ class ContactDetailsWHistoryScreen extends ConsumerWidget {
   });
 
   final Contact contact;
+  final _stackPadding = const EdgeInsets.symmetric(horizontal: 10);
 
   String _groupHeaderText(DateTime headerDateTime) {
     if (DateTime(
@@ -62,8 +63,13 @@ class ContactDetailsWHistoryScreen extends ConsumerWidget {
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: ContactCardWProfilePicStack(contact: contact,)
+                        padding: _stackPadding,
+                        child: ContactCardWProfilePicStack(
+                          contact: contact,
+                          transparentAndNonTransparentWidth:
+                              MediaQuery.sizeOf(context).width -
+                                  _stackPadding.horizontal,
+                        ),
                       ),
                       const SizedBox(
                         height: 30,
@@ -86,12 +92,20 @@ class ContactDetailsWHistoryScreen extends ConsumerWidget {
                               ),
                             );
                           }
-
                           final recentsList = snapshot.data!;
                           if (recentsList.isEmpty) {
-                            return Text(
-                              'Start conversing with ${contact.name} to see your history.',
-                              textAlign: TextAlign.center,
+                            return Column(
+                              children: [
+                                Text(
+                                  'Start conversing with ${contact.name} to see your history.',
+                                  textAlign: TextAlign.center,
+                                ),
+                                const Icon(
+                                  Icons.history,
+                                  size: 110,
+                                  color: Colors.grey,
+                                ),
+                              ],
                             );
                           }
                           return GroupedListView(

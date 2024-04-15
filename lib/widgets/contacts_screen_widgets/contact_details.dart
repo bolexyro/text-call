@@ -45,7 +45,11 @@ class ContactDetails extends ConsumerWidget {
 
       activeContent = Column(
         children: [
-          ContactCardWProfilePicStack(contact: contact!),
+          ContactCardWProfilePicStack(
+            contact: contact!,
+            transparentAndNonTransparentWidth:
+                MediaQuery.sizeOf(context).width * .425,
+          ),
           const SizedBox(
             height: 20,
           ),

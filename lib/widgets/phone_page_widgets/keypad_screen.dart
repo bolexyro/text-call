@@ -1,9 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:text_call/models/contact.dart';
-import 'package:text_call/providers/contacts_provider.dart';
-import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/keypad_screen_widgets/keypad.dart';
 import 'package:text_call/widgets/keypad_screen_widgets/logout_menu_anchor.dart';
 
@@ -29,17 +25,6 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
   }
 
   void _addDigit(String myText) {
-    // _inputedDigitsTextController.value =
-    //     _inputedDigitsTextController.value.copyWith(
-    //   text: _inputedDigitsTextController.text + digit,
-    //   selection: TextSelection.collapsed(
-    //       offset: _inputedDigitsTextController.text.length + 1),
-    // );
-
-    // _inputedDigitsTextController.text += digit;
-    // _inputedDigitsTextController.selection = TextSelection.collapsed(
-    //     offset: _inputedDigitsTextController.text.length);
-    // void _insertText(String myText) {
     final text = _inputedDigitsTextController.text;
     final textSelection = _inputedDigitsTextController.selection;
     final newText = text.replaceRange(
@@ -48,14 +33,22 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
       myText,
     );
     final myTextLength = myText.length;
-    _inputedDigitsTextController.text = newText;
-    _inputedDigitsTextController.selection = textSelection.copyWith(
-      baseOffset: textSelection.start + myTextLength,
-      extentOffset: textSelection.start + myTextLength,
-    );
+    setState(() {
+      _inputedDigitsTextController.text = newText;
+      _inputedDigitsTextController.selection = textSelection.copyWith(
+        baseOffset: textSelection.start + myTextLength,
+        extentOffset: textSelection.start + myTextLength,
+      );
+    });
   }
 
-  void _backspace() {
+  void _backspace({bool? longPress}) {
+    if (longPress == true) {
+      setState(() {
+        _inputedDigitsTextController.text = '';
+      });
+      return;
+    }
     final text = _inputedDigitsTextController.text;
     final textSelection = _inputedDigitsTextController.selection;
     final selectionLength = textSelection.end - textSelection.start;
@@ -67,11 +60,14 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
         textSelection.end,
         '',
       );
-      _inputedDigitsTextController.text = newText;
-      _inputedDigitsTextController.selection = textSelection.copyWith(
-        baseOffset: textSelection.start,
-        extentOffset: textSelection.start,
-      );
+      setState(() {
+        _inputedDigitsTextController.text = newText;
+        _inputedDigitsTextController.selection = textSelection.copyWith(
+          baseOffset: textSelection.start,
+          extentOffset: textSelection.start,
+        );
+      });
+
       return;
     }
 
@@ -88,43 +84,13 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
       newEnd,
       '',
     );
-    _inputedDigitsTextController.text = newText;
-    _inputedDigitsTextController.selection = textSelection.copyWith(
-      baseOffset: newStart,
-      extentOffset: newStart,
-    );
-  }
-
-  Future<bool> _checkIfNumberExists() async {
-    final db = FirebaseFirestore.instance;
-    final docRef = db.collection("users").doc(
-        changeLocalToIntl(localPhoneNumber: _inputedDigitsTextController.text));
-    final document = await docRef.get();
-
-    if (document.exists == false) {
-      showAdaptiveDialog(
-        context: context,
-        builder: (context) => const AlertDialog.adaptive(
-          backgroundColor: Color.fromARGB(255, 255, 166, 160),
-          // i am pretty much using this row to center the text
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Number doesn\'t exist',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontSize: 20),
-              ),
-            ],
-          ),
-        ),
+    setState(() {
+      _inputedDigitsTextController.text = newText;
+      _inputedDigitsTextController.selection = textSelection.copyWith(
+        baseOffset: newStart,
+        extentOffset: newStart,
       );
-    }
-
-    return document.exists;
+    });
   }
 
   @override
@@ -152,65 +118,13 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
           decoration: const InputDecoration(border: InputBorder.none),
           style: const TextStyle(fontSize: 43, fontWeight: FontWeight.bold),
         ),
-        Keypad(
-          onButtonPressed: _addDigit,
-        ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.video_camera_front),
-            ),
-
-            const SizedBox(
-              width: 65,
-            ),
-
-            // call button
-            IconButton(
-              onPressed: () async {
-                if (await _checkIfNumberExists()) {
-                  final Contact callee = await ref
-                          .read(contactsProvider.notifier)
-                          .readAContact(
-                              '+234${_inputedDigitsTextController.text.substring(1)}') ??
-                      const Contact(
-                          name: 'Unknown', phoneNumber: 'phoneNumber');
-
-                  showMessageWriterModalSheet(
-                      context: context,
-                      calleeName: callee.name,
-                      calleePhoneNumber:
-                          '+234${_inputedDigitsTextController.text.substring(1)}');
-                }
-              },
-              icon: const Padding(
-                padding: EdgeInsets.all(5),
-                child: Icon(
-                  Icons.message,
-                  size: 35,
-                ),
-              ),
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-              ),
-            ),
-            const SizedBox(
-              width: 65,
-            ),
-
-            // backspace button
-            InkWell(
-              splashColor: Colors.grey,
-              onTap: _backspace,
-              onLongPress: () => _inputedDigitsTextController.text = '',
-              // onPressed: _backspace,
-              child: const Icon(Icons.backspace),
-            )
-          ],
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 50.0),
+          child: Keypad(
+            typedInPhoneNumber: _inputedDigitsTextController.text,
+            onBackButtonPressed: _backspace,
+            onKeyPressed: _addDigit,
+          ),
         ),
         const SizedBox(
           height: 15,

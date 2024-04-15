@@ -13,19 +13,20 @@ class KeypadButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-      child: TextButton(
-        // style: ButtonStyle(fixedSize: MaterialStateProperty.all(Size(70, 70))),
-        onPressed: () {
-          onButtonPressed(buttonText);
-        },
-        child: Text(
-          buttonText,
-          style: const TextStyle(
-            fontSize: 40,
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
+    return Center(
+      child: Container(
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+        child: TextButton(
+          onPressed: () {
+            onButtonPressed(buttonText);
+          },
+          child: Text(
+            buttonText,
+            style: const TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
         ),
       ),

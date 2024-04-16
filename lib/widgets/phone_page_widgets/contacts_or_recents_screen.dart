@@ -21,6 +21,7 @@ class ContactsRecentsScreen extends ConsumerStatefulWidget {
 
 class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
   Contact? _currentContact;
+  Contact? _currentRecent;
 
   @override
   void initState() {
@@ -33,10 +34,16 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
     });
   }
 
+   void _setCurrentRecent(Contact selectedRecent){
+    setState(() {
+      _currentRecent = selectedRecent;
+    });
+  }
   void _goToContactPage(Contact selectedContact) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => ContactDetailsWHistoryScreen(contact: selectedContact),
+        builder: (context) =>
+            ContactDetailsWHistoryScreen(contact: selectedContact),
       ),
     );
   }
@@ -45,8 +52,10 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
   Widget build(BuildContext context) {
     double availableWidth = MediaQuery.sizeOf(context).width;
 
+    double tabletWidth = 300;
+
     if (widget.purpose == Purpose.forContacts) {
-      if (availableWidth > 500) {
+      if (availableWidth > tabletWidth) {
         final activeContent = _currentContact == null
             ? const Text(
                 'Select a contact from the list on the left',
@@ -93,8 +102,49 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
       return ContactsList(onContactSelected: _goToContactPage);
     }
 
-    return const Scaffold(
-      body: RecentsList(),
-    );
+    if (availableWidth > tabletWidth) {
+      final activeContent = _currentRecent == null
+          ? const Text(
+              'Select a call from the list on the left',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            )
+          : ContactDetails(
+              contact: _currentRecent!,
+              stackContainerWidths: MediaQuery.sizeOf(context).width * .425,
+            );
+
+      return Row(
+        children: [
+          Expanded(
+            child: RecentsList(
+              onRecentSelected: _setCurrentRecent,
+            ),
+          ),
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.only(top: 40),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                mainAxisAlignment: _currentRecent == null
+                    ? MainAxisAlignment.center
+                    : MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: activeContent,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    return RecentsList(onRecentSelected: _goToContactPage);
   }
 }

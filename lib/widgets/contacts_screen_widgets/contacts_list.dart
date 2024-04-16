@@ -44,17 +44,15 @@ class _ContactsListState extends ConsumerState<ContactsList> {
     });
   }
 
-  void _showDeleteDialog(BuildContext context, Contact contact) async{
+  void _showDeleteDialog(BuildContext context, Contact contact) async {
     final bool? toDelete = await showAdaptiveDialog(
       context: context,
       builder: (context) => const ConfirmDeleteDialog(),
     );
-    if (toDelete != true){
+    if (toDelete != true) {
       return;
     }
-     ref
-                              .read(contactsProvider.notifier)
-                              .deleteContact(contact.phoneNumber);
+    ref.read(contactsProvider.notifier).deleteContact(contact.phoneNumber);
   }
 
   @override
@@ -79,6 +77,9 @@ class _ContactsListState extends ConsumerState<ContactsList> {
 
     return Column(
       children: [
+        const SizedBox(
+          height: 45,
+        ),
         const Text(
           'Contacts',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
@@ -89,9 +90,6 @@ class _ContactsListState extends ConsumerState<ContactsList> {
             '${contactsList.length} contacts with phone number',
             textAlign: TextAlign.center,
           ),
-        ),
-        const SizedBox(
-          height: 70,
         ),
         Row(
           children: [
@@ -156,7 +154,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                     motion: const BehindMotion(),
                     children: [
                       SlidableAction(
-                        onPressed: (context){
+                        onPressed: (context) {
                           _showDeleteDialog(context, contactN);
                         },
                         backgroundColor: const Color(0xFFFE4A49),

@@ -7,6 +7,13 @@ Text Call is an innovative communication app that combines the urgency of a phon
 - **Text Call**: Initiate a call to someone, and when they answer, they'll see a pre-written message from you instead of engaging in a conversation.
 - **Future Plans**: Visit the [Roadmap](#roadmap) section to learn about planned features and enhancements.
 
+## Demo
+<video width="1000" height="500" controls>
+  <source src="Demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+
 ## Getting Started / Installation
 
 To install Text Call on your device, follow these steps:

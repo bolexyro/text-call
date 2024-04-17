@@ -53,16 +53,19 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
   Widget build(BuildContext context) {
     double availableWidth = MediaQuery.sizeOf(context).width;
 
-    double tabletWidth = 520;
+    double tabletWidth = 500;
 
     if (widget.purpose == Purpose.forContacts) {
       if (availableWidth > tabletWidth) {
         final activeContent = _currentContact == null
-            ? const Center(
-                child: Text(
-                  'Select a contact from the list on the left',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ? const Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Center(
+                  child: Text(
+                    'Select a contact from the list on the left',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                 ),
               )
             : ContactDetails(
@@ -97,10 +100,15 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
 
     if (availableWidth > tabletWidth) {
       final activeContent = _currentRecent == null
-          ? const Text(
-              'Select a call from the list on the left',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ? const Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Center(
+                child: Text(
+                  'Select a call from the list on the left',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
             )
           : ContactDetails(
               contact: _currentRecent!,
@@ -122,17 +130,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
                 color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: Column(
-                mainAxisAlignment: _currentRecent == null
-                    ? MainAxisAlignment.center
-                    : MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: activeContent,
-                  ),
-                ],
-              ),
+              child: activeContent,
             ),
           ),
         ],

@@ -36,12 +36,10 @@ class ContactDetailsWHistoryScreen extends StatelessWidget {
                 ],
               ),
               Expanded(
-                child: SingleChildScrollView(
-                  child: ContactDetails(
-                    contact: contact,
-                    stackContainerWidths: MediaQuery.sizeOf(context).width -
-                        stackPadding.horizontal,
-                  ),
+                child: ContactDetails(
+                  contact: contact,
+                  stackContainerWidths: MediaQuery.sizeOf(context).width -
+                      stackPadding.horizontal,
                 ),
               )
             ],

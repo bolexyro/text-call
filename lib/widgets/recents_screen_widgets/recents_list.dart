@@ -24,27 +24,35 @@ class RecentsList extends ConsumerStatefulWidget {
 class _RecentsListState extends ConsumerState<RecentsList> {
   final List<bool> _listExpandedBools = [];
   CallFilters _selectedFilter = CallFilters.allCalls;
-  // final recentsList = [
+  //  final recentsList = [
   //   Recent(
-  //     name: 'Bolexyro',
-  //     phoneNumber: '09027929326',
+  //     contact: const Contact(
+  //       name: 'Bolexyro',
+  //       phoneNumber: '09027929326',
+  //     ),
   //     category: RecentCategory.incomingAccepted,
   //   ),
   //   Recent(
-  //     name: 'Bolexyronn',
-  //     phoneNumber: '09027929326',
+  //     contact: const Contact(
+  //       name: 'Bolexyronn',
+  //       phoneNumber: '09027929326',
+  //     ),
   //     category: RecentCategory.incomingRejected,
   //     callTime: DateTime(2024, 4, 13, 2),
   //   ),
   //   Recent(
-  //     name: 'Bolexyrorrr',
-  //     phoneNumber: '09027929326',
+  //     contact: const Contact(
+  //       name: 'Bolexyrorrr',
+  //       phoneNumber: '09027929326',
+  //     ),
   //     category: RecentCategory.outgoingMissed,
   //     callTime: DateTime(2000, 0, 0, 0, 9),
   //   ),
   //   Recent(
-  //     name: 'Giannis',
-  //     phoneNumber: 'phoneNumber',
+  //     contact: const Contact(
+  //       name: 'Giannis',
+  //       phoneNumber: 'phoneNumber',
+  //     ),
   //     category: RecentCategory.incomingAccepted,
   //     callTime: DateTime(2024, 4, 12),
   //   ),

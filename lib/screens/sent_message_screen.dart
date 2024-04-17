@@ -5,18 +5,21 @@ class SentMessageScreen extends StatelessWidget {
   const SentMessageScreen({
     super.key,
     required this.message,
+    required this.backgroundColor,
   });
 
   final String message;
+  final Color backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
+          forceMaterialTransparency: true,
           title: const Text('From your loved one or not hehe'),
         ),
-        backgroundColor: Colors.red,
+        backgroundColor: backgroundColor,
         body: Center(
           child: AnimatedTextKit(
             animatedTexts: [

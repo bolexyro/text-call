@@ -17,10 +17,12 @@ String? kToken;
 String? kCallMessage;
 String? kCallerPhoneNumber;
 String? kCallerName;
+Map<String, int>? kBackgroundColorMap;
 
 Future<void> _messageHandler(RemoteMessage message) async {
   kCallMessage = message.data['message'];
   kCallerPhoneNumber = message.data['caller_phone_number'];
+  kBackgroundColorMap = message.data['background_color'];
   final db = await getDatabase();
   final data = await db.query('contacts',
       where: 'phoneNumber = ?', whereArgs: [kCallerPhoneNumber]);
@@ -32,10 +34,11 @@ Future<void> _messageHandler(RemoteMessage message) async {
   }
   await db.close();
   createAwesomeNotification(
-      title: kCallerName != 'Unknown'
-          ? '$kCallerName is calling '
-          : message.notification!.title,
-      body: message.notification!.body,);
+    title: kCallerName != 'Unknown'
+        ? '$kCallerName is calling '
+        : message.notification!.title,
+    body: message.notification!.body,
+  );
 }
 
 Future<void> _fcmSetup() async {
@@ -133,7 +136,9 @@ class _TextCallState extends State<TextCall> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData.from(colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),),
+      theme: ThemeData.from(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+      ),
       navigatorKey: TextCall.navigatorKey,
       debugShowCheckedModeBanner: false,
       home: FutureBuilder(
@@ -208,6 +213,7 @@ class NotificationController {
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
           builder: (context) => SentMessageScreen(
+            backgroundColor: deJsonifyColor(kBackgroundColorMap!),
             message: kCallMessage == null || kCallMessage!.isEmpty
                 ? 'Bolexyro making innovations bro.'
                 : kCallMessage!,

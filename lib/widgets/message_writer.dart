@@ -75,9 +75,19 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           'caller_phone_number': callerPhoneNumber,
           'callee_phone_number': widget.calleePhoneNumber,
           'message': _messageController.text,
+          'background_color': jsonifyColor(_selectedColor),
         },
       ),
     );
+  }
+
+  Map<String, int> jsonifyColor(Color color) {
+    return {
+      'red': color.red,
+      'blue': color.blue,
+      'green': color.green,
+      'alpha': color.alpha,
+    };
   }
 
   void _showColorPicker() async {

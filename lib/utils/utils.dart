@@ -108,3 +108,12 @@ Future<bool> checkIfNumberExists(
 
   return document.exists;
 }
+
+Color deJsonifyColor(Map<String, int> colorMap) {
+  return Color.fromARGB(
+    colorMap['alpha']!,
+    colorMap['red']!,
+    colorMap['green']!,
+    colorMap['blue']!,
+  );
+}

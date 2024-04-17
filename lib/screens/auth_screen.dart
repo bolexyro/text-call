@@ -42,9 +42,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     db.collection("users").doc(_enteredPhoneNumber).set(
       {'fcmToken': kToken},
     );
-    setState(() {
-      _isAuthenticating = false;
-    });
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(

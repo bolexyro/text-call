@@ -9,6 +9,7 @@ import 'package:confetti/confetti.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
+import 'package:text_call/widgets/choose_color_dialog.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -33,6 +34,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   );
 
   late Future _animationDelay;
+  Color _selectedColor = Colors.red;
 
   late WebSocketChannel _channel;
 
@@ -78,6 +80,22 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     );
   }
 
+  void _showColorPicker() async {
+    Color? selectedColor = await showAdaptiveDialog(
+      context: context,
+      builder: (context) {
+        return ChooseColorDialog(initialPickerColor: _selectedColor);
+      },
+    );
+
+    if (selectedColor == null) {
+      return;
+    }
+    setState(() {
+      _selectedColor = selectedColor;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget messageWriterContent = Padding(
@@ -110,6 +128,55 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               const SizedBox(
                 height: 30,
               ),
+              Row(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 3,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _showColorPicker,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 16),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.color_lens,
+                                  color: _selectedColor // Icon color
+                                  ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Selected Color',
+                                style: TextStyle(
+                                  color: _selectedColor, // Text color
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
               IconButton(
                 onPressed: () => _callSomeone(context),
                 icon: const Padding(
@@ -120,7 +187,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   ),
                 ),
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor: const Color.fromARGB(255, 32, 114, 181),
                   foregroundColor: Colors.white,
                 ),
               ),

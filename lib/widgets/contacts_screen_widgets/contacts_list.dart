@@ -103,7 +103,9 @@ class _ContactsListState extends ConsumerState<ContactsList> {
             ),
             const SizedBox(width: 10),
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                createAwesomeNotification(title: 'Bolexyro');
+              },
               icon: const Icon(Icons.search),
             ),
             const SizedBox(width: 10),

@@ -34,11 +34,12 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
     });
   }
 
-   void _setCurrentRecent(Contact selectedRecent){
+  void _setCurrentRecent(Contact selectedRecent) {
     setState(() {
       _currentRecent = selectedRecent;
     });
   }
+
   void _goToContactPage(Contact selectedContact) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -52,15 +53,17 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
   Widget build(BuildContext context) {
     double availableWidth = MediaQuery.sizeOf(context).width;
 
-    double tabletWidth = 300;
+    double tabletWidth = 520;
 
     if (widget.purpose == Purpose.forContacts) {
       if (availableWidth > tabletWidth) {
         final activeContent = _currentContact == null
-            ? const Text(
-                'Select a contact from the list on the left',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ? const Center(
+                child: Text(
+                  'Select a contact from the list on the left',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
               )
             : ContactDetails(
                 contact: _currentContact!,
@@ -82,17 +85,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: Column(
-                  mainAxisAlignment: _currentContact == null
-                      ? MainAxisAlignment.center
-                      : MainAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: activeContent,
-                    ),
-                  ],
-                ),
+                child: activeContent,
               ),
             ),
           ],

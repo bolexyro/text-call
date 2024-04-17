@@ -34,7 +34,7 @@ class ContactDetails extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final contactHistory = ref
+    final contactRecentHistory = ref
         .read(recentsProvider.notifier)
         .getRecentForAContact(contact.phoneNumber);
     return Column(
@@ -47,7 +47,7 @@ class ContactDetails extends ConsumerWidget {
           height: 20,
         ),
         FutureBuilder(
-          future: contactHistory,
+          future: contactRecentHistory,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -80,45 +80,47 @@ class ContactDetails extends ConsumerWidget {
                 ],
               );
             }
-            return GroupedListView(
-              shrinkWrap: true,
-              useStickyGroupSeparators: true,
-              // floatingHeader: true,
-              stickyHeaderBackgroundColor:
-                  const Color.fromARGB(255, 240, 248, 255),
-              elements: recentsList,
-              groupBy: (recentN) => DateTime(recentN.callTime.year,
-                  recentN.callTime.month, recentN.callTime.day),
-              groupSeparatorBuilder: (DateTime groupHeaderDateTime) => Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  _groupHeaderText(groupHeaderDateTime),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+            return Expanded(
+              child: GroupedListView(
+                shrinkWrap: true,
+                useStickyGroupSeparators: true,
+                stickyHeaderBackgroundColor:
+                    const Color.fromARGB(255, 240, 248, 255),
+                elements: recentsList,
+                groupBy: (recentN) => DateTime(recentN.callTime.year,
+                    recentN.callTime.month, recentN.callTime.day),
+                groupSeparatorBuilder: (DateTime groupHeaderDateTime) =>
+                    Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    _groupHeaderText(groupHeaderDateTime),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
-              order: GroupedListOrder.DESC,
-              itemBuilder: (context, recentN) {
-                return Column(
-                  children: [
-                    ListTile(
-                      onTap: () {},
-                      leading: recentCategoryIconMap[recentN.category],
-                      title: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(DateFormat.Hm().format(recentN.callTime)),
-                          Text(recentN.category.name),
-                        ],
+                order: GroupedListOrder.DESC,
+                itemBuilder: (context, recentN) {
+                  return Column(
+                    children: [
+                      ListTile(
+                        onTap: () {},
+                        leading: recentCategoryIconMap[recentN.category],
+                        title: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(DateFormat.Hm().format(recentN.callTime)),
+                            Text(recentN.category.name),
+                          ],
+                        ),
                       ),
-                    ),
-                    const Divider(
-                      indent: 45,
-                      endIndent: 15,
-                    )
-                  ],
-                );
-              },
+                      const Divider(
+                        indent: 45,
+                        endIndent: 15,
+                      )
+                    ],
+                  );
+                },
+              ),
             );
           },
         ),

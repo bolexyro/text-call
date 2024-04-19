@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +24,7 @@ Map<String, int>? kBackgroundColorMap;
 Future<void> _messageHandler(RemoteMessage message) async {
   kCallMessage = message.data['message'];
   kCallerPhoneNumber = message.data['caller_phone_number'];
-  kBackgroundColorMap = message.data['background_color'];
+  kBackgroundColorMap = json.decode(message.data['background_color']);
   final db = await getDatabase();
   final data = await db.query('contacts',
       where: 'phoneNumber = ?', whereArgs: [kCallerPhoneNumber]);

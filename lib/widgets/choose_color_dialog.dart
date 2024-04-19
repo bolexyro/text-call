@@ -48,8 +48,10 @@ class _ChooseColorDialogState extends State<ChooseColorDialog> {
     return AlertDialog(
       title: const Text('Pick a color!'),
       content: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
+          SizedBox(
+            height: 370,
             child: SingleChildScrollView(child: colorPikcer),
           ),
           const SizedBox(

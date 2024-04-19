@@ -59,7 +59,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     final callerPhoneNumber = prefs.getString('phoneNumber');
     _channel = WebSocketChannel.connect(
       Uri.parse('wss://text-call-backend.onrender.com/ws/$callerPhoneNumber'),
+      // Uri.parse('ws://192.168.111.72:8000/ws/$callerPhoneNumber'),
     );
+    print('yessss');
     setState(() {
       _callSending = true;
     });

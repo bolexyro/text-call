@@ -23,7 +23,12 @@ Future<void> _messageHandler(RemoteMessage message) async {
   kCallMessage = message.data['message'];
   kCallerPhoneNumber = message.data['caller_phone_number'];
   kBackgroundColorMap = message.data['background_color'];
-  kBackgroundColorMap = {'red': int.parse(message.data['red']), 'blue': int.parse(message.data['blue']), 'green': int.parse(message.data['green']), 'alpha': int.parse(message.data['alpha'])};
+  kBackgroundColorMap = {
+    'red': int.parse(message.data['red']),
+    'blue': int.parse(message.data['blue']),
+    'green': int.parse(message.data['green']),
+    'alpha': int.parse(message.data['alpha']),
+  };
   final db = await getDatabase();
   final data = await db.query('contacts',
       where: 'phoneNumber = ?', whereArgs: [kCallerPhoneNumber]);
@@ -37,8 +42,8 @@ Future<void> _messageHandler(RemoteMessage message) async {
   createAwesomeNotification(
     title: kCallerName != 'Unknown'
         ? '$kCallerName is calling '
-        : message.notification!.title,
-    body: message.notification!.body,
+        : '$kCallerPhoneNumber is calling',
+    body: 'Might be urgent. Schrödinger\'s message',
   );
 }
 

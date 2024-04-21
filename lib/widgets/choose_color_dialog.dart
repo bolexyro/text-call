@@ -66,12 +66,14 @@ class _ChooseColorDialogState extends State<ChooseColorDialog> {
                   });
                 },
                 child: const SizedBox(
-                  height: 40,
+                  height: 60,
                   width: 90,
-                  child: Text(
-                    'Change color picker',
-                    maxLines: 2,
-                    textAlign: TextAlign.center,
+                  child: Center(
+                    child: Text(
+                      'Change color picker',
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
               ),

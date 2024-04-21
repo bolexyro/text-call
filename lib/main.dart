@@ -94,10 +94,25 @@ void main() async {
       debug: true);
   await _fcmSetup();
   FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
+  ReceivedAction? receivedAction =
+      await AwesomeNotifications().getInitialNotificationAction(
+    removeFromActionEvents: false,
+  );
+
   runApp(
-    const ProviderScope(
-      child: TextCall(),
-    ),
+    receivedAction == null
+        ? const ProviderScope(
+            child: TextCall(),
+          )
+        : MaterialApp(
+            home: SentMessageScreen(
+              backgroundColor: deJsonifyColor(kBackgroundColorMap!),
+              message: kCallMessage == null || kCallMessage!.isEmpty
+                  ? 'Bolexyro making innovations bro.'
+                  : kCallMessage!,
+              fromTerminated: true,
+            ),
+          ),
   );
 }
 

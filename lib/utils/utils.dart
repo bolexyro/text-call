@@ -69,7 +69,7 @@ Future<sql.Database> getDatabase() async {
       await db.execute(
           'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT)');
       await db.execute(
-          'CREATE TABLE recents (callTime TEXT PRIMARY KEY, phoneNumber TEXT, name TEXT, categoryName TEXT)');
+          'CREATE TABLE recents (callTime TEXT PRIMARY KEY, phoneNumber TEXT, name TEXT, categoryName TEXT, message TEXT, backgroundColorJson TEXT)');
     },
   );
   return db;
@@ -109,11 +109,20 @@ Future<bool> checkIfNumberExists(
   return document.exists;
 }
 
-Color deJsonifyColor(Map<String, int> colorMap) {
+Color deJsonifyColor(Map<String, dynamic> colorMap) {
   return Color.fromARGB(
     colorMap['alpha']!,
     colorMap['red']!,
     colorMap['green']!,
     colorMap['blue']!,
   );
+}
+
+Map<String, int> jsonifyColor(Color color) {
+  return {
+    'red': color.red,
+    'blue': color.blue,
+    'green': color.green,
+    'alpha': color.alpha,
+  };
 }

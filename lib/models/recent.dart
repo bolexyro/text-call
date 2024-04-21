@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/models/message.dart';
 
 enum RecentCategory {
   outgoingAccepted,
@@ -26,10 +27,12 @@ class Recent {
   Recent({
     required this.contact,
     required this.category,
+    required this.message,
     DateTime? callTime,
   }) : callTime = callTime ?? DateTime.now();
 
   final Contact contact;
   final RecentCategory category;
   final DateTime callTime;
+  final Message message;
 }

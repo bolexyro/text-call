@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/utils/utils.dart';
@@ -18,7 +17,7 @@ class RecentsList extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<RecentsList> createState() => _RecentsListState();
-  final void Function(Contact selectedRecent) onRecentSelected;
+  final void Function(Recent selectedRecent) onRecentSelected;
 }
 
 class _RecentsListState extends ConsumerState<RecentsList> {
@@ -260,7 +259,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                             ),
                             IconButton(
                               onPressed: () {
-                                widget.onRecentSelected(recentN.contact);
+                                widget.onRecentSelected(recentN);
                               },
                               icon: const Icon(Icons.info_outlined),
                             ),

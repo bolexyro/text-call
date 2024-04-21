@@ -5,16 +5,21 @@ import 'package:intl/intl.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
+import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_card_w_profile_pic_stack.dart';
+
+enum Purpose { forContact, forRecent }
 
 class ContactDetails extends ConsumerWidget {
   const ContactDetails({
     super.key,
-    required this.contact,
+    this.contact,
+    this.recent,
     required this.stackContainerWidths,
   });
 
-  final Contact contact;
+  final Contact? contact;
+  final Recent? recent;
   final double stackContainerWidths;
 
   String _groupHeaderText(DateTime headerDateTime) {
@@ -34,13 +39,47 @@ class ContactDetails extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final purpose = contact == null ? Purpose.forRecent : Purpose.forContact;
+
+    if (purpose == Purpose.forRecent) {
+      return Column(
+        children: [
+          ContactCardWProfilePicStack(
+            contact: recent!.contact,
+            transparentAndNonTransparentWidth: stackContainerWidths,
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => SentMessageScreen(
+                      message: recent!.message.message,
+                      backgroundColor: recent!.message.backgroundColor),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text('Show Message'),
+          ),
+        ],
+      );
+    }
+
     final contactRecentHistory = ref
         .read(recentsProvider.notifier)
-        .getRecentForAContact(contact.phoneNumber);
+        .getRecentForAContact(contact!.phoneNumber);
+
     return Column(
       children: [
         ContactCardWProfilePicStack(
-          contact: contact,
+          contact: contact!,
           transparentAndNonTransparentWidth: stackContainerWidths,
         ),
         const SizedBox(
@@ -69,7 +108,7 @@ class ContactDetails extends ConsumerWidget {
               return Column(
                 children: [
                   Text(
-                    'Start conversing with ${contact.name} to see your history.',
+                    'Start conversing with ${contact!.name} to see your history.',
                     textAlign: TextAlign.center,
                   ),
                   const Icon(
@@ -80,6 +119,7 @@ class ContactDetails extends ConsumerWidget {
                 ],
               );
             }
+
             return Expanded(
               child: GroupedListView(
                 shrinkWrap: true,

@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
-import 'package:text_call/screens/contact_details_w_history_screen.dart';
+import 'package:text_call/models/recent.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_details.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contacts_list.dart';
 import 'package:text_call/widgets/recents_screen_widgets/recents_list.dart';
 
-enum Purpose { forContacts, forRecents }
+enum WhichScreen { contact, recent }
 
 class ContactsRecentsScreen extends ConsumerStatefulWidget {
   const ContactsRecentsScreen({
     super.key,
-    required this.purpose,
+    required this.whichScreen,
   });
 
-  final Purpose purpose;
+  final WhichScreen whichScreen;
   @override
   ConsumerState<ContactsRecentsScreen> createState() => _ContactsScreenState();
 }
 
 class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
   Contact? _currentContact;
-  Contact? _currentRecent;
+  Recent? _currentRecent;
 
   @override
   void initState() {
@@ -34,17 +34,57 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
     });
   }
 
-  void _setCurrentRecent(Contact selectedRecent) {
+  void _setCurrentRecent(Recent selectedRecent) {
     setState(() {
       _currentRecent = selectedRecent;
     });
   }
 
-  void _goToContactPage(Contact selectedContact) {
+  void _goToPage({Contact? selectedContact, Recent? selectedRecent}) {
+    const stackPadding = EdgeInsets.symmetric(horizontal: 10);
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) =>
-            ContactDetailsWHistoryScreen(contact: selectedContact),
+        builder: (context) => SafeArea(
+          child: Scaffold(
+            body: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: const Icon(Icons.arrow_back_ios_new),
+                        ),
+                      ),
+                      const Spacer(),
+                    ],
+                  ),
+                  Expanded(
+                    child: selectedRecent == null
+                        ? ContactDetails(
+                            contact: selectedContact,
+                            stackContainerWidths:
+                                MediaQuery.sizeOf(context).width -
+                                    stackPadding.horizontal,
+                          )
+                        : ContactDetails(
+                            recent: selectedRecent,
+                            stackContainerWidths:
+                                MediaQuery.sizeOf(context).width -
+                                    stackPadding.horizontal,
+                          ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -53,9 +93,9 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
   Widget build(BuildContext context) {
     double availableWidth = MediaQuery.sizeOf(context).width;
 
-    double tabletWidth = 500;
+    double tabletWidth = 520;
 
-    if (widget.purpose == Purpose.forContacts) {
+    if (widget.whichScreen == WhichScreen.contact) {
       if (availableWidth > tabletWidth) {
         final activeContent = _currentContact == null
             ? const Padding(
@@ -95,7 +135,10 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
         );
       }
 
-      return ContactsList(onContactSelected: _goToContactPage);
+      return ContactsList(
+        onContactSelected: (Contact selectedContact) =>
+            _goToPage(selectedContact: selectedContact),
+      );
     }
 
     if (availableWidth > tabletWidth) {
@@ -111,7 +154,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
               ),
             )
           : ContactDetails(
-              contact: _currentRecent!,
+              recent: _currentRecent,
               stackContainerWidths: MediaQuery.sizeOf(context).width * .425,
             );
 
@@ -136,6 +179,8 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
         ],
       );
     }
-    return RecentsList(onRecentSelected: _goToContactPage);
+    return RecentsList(onRecentSelected: (Recent selectedRecent) {
+      _goToPage(selectedRecent: selectedRecent);
+    });
   }
 }

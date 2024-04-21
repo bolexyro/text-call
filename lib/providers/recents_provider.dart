@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/utils/utils.dart';
 
@@ -24,6 +26,12 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
     final recentsList = data
         .map(
           (row) => Recent(
+            message: Message(
+              message: row['message'] as String,
+              backgroundColor: deJsonifyColor(
+                json.decode(row['backgroundColorJson'] as String),
+              ),
+            ),
             contact: Contact(
                 name: row['name'] as String,
                 phoneNumber: row['phoneNumber'] as String),
@@ -42,6 +50,10 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
     db.insert(
       'recents',
       {
+        'backgroundColorJson':
+            json.encode(jsonifyColor(newRecent.message.backgroundColor))
+                .toString(),
+        'message': newRecent.message.message,
         'callTime': newRecent.callTime.toString(),
         'phoneNumber': newRecent.contact.phoneNumber,
         'name': newRecent.contact.name,
@@ -58,6 +70,12 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
     final recentsList = data
         .map(
           (row) => Recent(
+            message: Message(
+              message: row['message'] as String,
+              backgroundColor: deJsonifyColor(
+                json.decode(row['backgroundColorJson'] as String),
+              ),
+            ),
             contact:
                 Contact(name: row['name'] as String, phoneNumber: phoneNumber),
             category: _getCategoryEnumFromText(

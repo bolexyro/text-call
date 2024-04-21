@@ -3,27 +3,25 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 
-
 // Bolexyro, make sure you handle the notifiaction controller stuff oo.
 class SentMessageScreen extends StatefulWidget {
   const SentMessageScreen({
     super.key,
+
     required this.message,
     required this.backgroundColor,
-    this.fromTerminated,
+    this.fromTerminated = false,
   });
 
   final String message;
   final Color backgroundColor;
-  final bool? fromTerminated;
+  final bool fromTerminated;
 
   @override
   State<SentMessageScreen> createState() => _SentMessageScreenState();
 }
 
 class _SentMessageScreenState extends State<SentMessageScreen> {
-
-  
   @override
   void initState() {
     // AwesomeNotifications().setListeners(
@@ -37,6 +35,7 @@ class _SentMessageScreenState extends State<SentMessageScreen> {
     // _isUserLoggedIn = isUserLoggedIn();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -69,13 +68,13 @@ class _SentMessageScreenState extends State<SentMessageScreen> {
                 ),
               ),
             ),
-            
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const PhonePageScreen(),
-              )),
-              child: const Icon(Icons.home),
-            ),
+            if (widget.fromTerminated)
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const PhonePageScreen(),
+                )),
+                child: const Icon(Icons.home),
+              ),
           ],
         ),
       ),

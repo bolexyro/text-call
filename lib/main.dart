@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/screens/auth_screen.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -217,6 +218,10 @@ class NotificationController {
 
       final db = await getDatabase();
       final newRecent = Recent(
+        message: Message(
+          message: kCallMessage!,
+          backgroundColor: deJsonifyColor(kBackgroundColorMap!),
+        ),
         contact: Contact(name: kCallerName!, phoneNumber: kCallerPhoneNumber!),
         category: RecentCategory.incomingAccepted,
       );
@@ -224,6 +229,9 @@ class NotificationController {
       db.insert(
         'recents',
         {
+          'backgroundColorJson':
+              jsonifyColor(newRecent.message.backgroundColor),
+          'message': newRecent.message.message,
           'callTime': newRecent.callTime.toString(),
           'phoneNumber': newRecent.contact.phoneNumber,
           'name': newRecent.contact.name,

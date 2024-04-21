@@ -56,10 +56,10 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
         body: [
           const KeypadScreen(),
           const ContactsRecentsScreen(
-            purpose: Purpose.forRecents,
+            whichScreen: WhichScreen.recent,
           ),
           const ContactsRecentsScreen(
-            purpose: Purpose.forContacts,
+            whichScreen: WhichScreen.contact,
           ),
         ][_currentPageIndex],
       ),

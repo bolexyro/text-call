@@ -7,8 +7,10 @@ import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
+import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/choose_color_dialog.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -81,14 +83,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     );
   }
 
-  Map<String, int> jsonifyColor(Color color) {
-    return {
-      'red': color.red,
-      'blue': color.blue,
-      'green': color.green,
-      'alpha': color.alpha,
-    };
-  }
 
   void _showColorPicker() async {
     Color? selectedColor = await showAdaptiveDialog(
@@ -216,6 +210,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             if (snapshotData['call_status'] == 'rejected') {
               // create a recent in your table
               final recent = Recent(
+                message: Message(message: _messageController.text, backgroundColor: _selectedColor),
                 contact: Contact(
                     name: widget.calleeName,
                     phoneNumber: widget.calleePhoneNumber),
@@ -247,6 +242,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               );
             }
             final recent = Recent(
+              message: Message(message: _messageController.text, backgroundColor: _selectedColor),
               contact: Contact(
                   name: widget.calleeName,
                   phoneNumber: widget.calleePhoneNumber),
@@ -278,6 +274,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   return Lottie.asset('assets/telephone_ringing_3d.json');
                 }
                 final recent = Recent(
+                  message: Message(message: _messageController.text, backgroundColor: _selectedColor),
                   contact: Contact(
                     name: widget.calleeName,
                     phoneNumber: widget.calleePhoneNumber,

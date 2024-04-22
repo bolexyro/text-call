@@ -13,9 +13,11 @@ class ContactsList extends ConsumerStatefulWidget {
   const ContactsList({
     super.key,
     required this.onContactSelected,
+    required this.screen,
   });
 
   final void Function(Contact selectedContact) onContactSelected;
+  final Screen screen;
 
   @override
   ConsumerState<ContactsList> createState() => _ContactsListState();
@@ -168,72 +170,110 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                       ),
                     ],
                   ),
-                  child: ExpandableListTile(
-                    isExpanded: _listExpandedBools[index],
-                    title: Text(contactN.name),
-                    leading: CircleAvatar(
-                      child: Container(
-                        width: double.infinity,
-                        height: double.infinity,
-                        alignment: Alignment.center,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Colors.deepPurple,
-                              Colors.blue,
+                  child: widget.screen == Screen.phone
+                      ? ExpandableListTile(
+                          isExpanded: _listExpandedBools[index],
+                          title: Text(contactN.name),
+                          leading: CircleAvatar(
+                            child: Container(
+                              width: double.infinity,
+                              height: double.infinity,
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Colors.deepPurple,
+                                    Colors.blue,
+                                  ],
+                                ),
+                              ),
+                              child: Text(
+                                contactN.name[0],
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 25),
+                              ),
+                            ),
+                          ),
+                          tileOnTapped: () {
+                            _changeTileExpandedStatus(index);
+                          },
+                          expandedContent: Column(
+                            children: [
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                'Mobile ${contactN.localPhoneNumber}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              const Text('Incoming Call'),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      showMessageWriterModalSheet(
+                                        calleeName: contactN.name,
+                                        calleePhoneNumber: contactN.phoneNumber,
+                                        context: context,
+                                      );
+                                    },
+                                    icon: const Icon(Icons.message),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      widget.onContactSelected(contactN);
+                                    },
+                                    icon: const Icon(Icons.info_outlined),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
-                        ),
-                        child: Text(
-                          contactN.name[0],
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 25),
-                        ),
-                      ),
-                    ),
-                    tileOnTapped: () {
-                      _changeTileExpandedStatus(index);
-                    },
-                    expandedContent: Column(
-                      children: [
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          'Mobile ${contactN.localPhoneNumber}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const Text('Incoming Call'),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        )
+                      : Column(
                           children: [
-                            IconButton(
-                              onPressed: () {
-                                showMessageWriterModalSheet(
-                                  calleeName: contactN.name,
-                                  calleePhoneNumber: contactN.phoneNumber,
-                                  context: context,
-                                );
-                              },
-                              icon: const Icon(Icons.message),
+                            ListTile(
+                              title: Text(contactN.name),
+                              leading: CircleAvatar(
+                                child: Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  alignment: Alignment.center,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Colors.deepPurple,
+                                        Colors.blue,
+                                      ],
+                                    ),
+                                  ),
+                                  child: Text(
+                                    contactN.name[0],
+                                    style: const TextStyle(
+                                        color: Colors.white, fontSize: 25),
+                                  ),
+                                ),
+                              ),
+                              onTap: () => widget.onContactSelected(contactN),
                             ),
-                            IconButton(
-                              onPressed: () {
-                                widget.onContactSelected(contactN);
-                              },
-                              icon: const Icon(Icons.info_outlined),
+                            const Divider(
+                              indent: 45,
+                              endIndent: 15,
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
                 );
               },
               // itemCount: contactsList.length,

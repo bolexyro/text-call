@@ -6,6 +6,8 @@ import 'package:text_call/widgets/message_writer.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
 
+enum Screen { phone, tablet }
+
 void createAwesomeNotification({String? title, String? body}) {
   AwesomeNotifications().createNotification(
     content: NotificationContent(

@@ -17,8 +17,9 @@ class AddContact extends ConsumerWidget {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      final bool numberExists = await checkIfNumberExists(_enteredPhoneNumber!, context);
-      if (numberExists == false){
+      final bool numberExists =
+          await checkIfNumberExists(_enteredPhoneNumber!, context);
+      if (numberExists == false) {
         return;
       }
 
@@ -86,7 +87,8 @@ class AddContact extends ConsumerWidget {
                       return null;
                     },
                     onSaved: (newValue) {
-                      _enteredPhoneNumber = changeLocalToIntl(localPhoneNumber: newValue!);
+                      _enteredPhoneNumber =
+                          changeLocalToIntl(localPhoneNumber: newValue!);
                     },
                     maxLength: 11,
                     keyboardType: TextInputType.phone,
@@ -111,10 +113,9 @@ class AddContact extends ConsumerWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(color: Colors.black),
-                ),
+                child: Text('Cancel',
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.error)),
               ),
               TextButton(
                 onPressed: () {
@@ -122,7 +123,6 @@ class AddContact extends ConsumerWidget {
                 },
                 child: const Text(
                   'Save',
-                  style: TextStyle(color: Colors.black),
                 ),
               )
             ],

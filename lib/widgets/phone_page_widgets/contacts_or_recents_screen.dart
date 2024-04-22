@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
+import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_details.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contacts_list.dart';
 import 'package:text_call/widgets/recents_screen_widgets/recents_list.dart';
@@ -95,7 +96,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
   Widget build(BuildContext context) {
     final double availableWidth = MediaQuery.sizeOf(context).width;
 
-    const double tabletWidth = 300;
+    const double tabletWidth = 520;
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     if (widget.whichScreen == WhichScreen.contact) {
@@ -120,6 +121,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
           children: [
             Expanded(
               child: ContactsList(
+                screen: Screen.tablet,
                 onContactSelected: _setCurrentContact,
               ),
             ),
@@ -146,6 +148,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
       }
 
       return ContactsList(
+        screen: Screen.phone,
         onContactSelected: (Contact selectedContact) =>
             _goToPage(selectedContact: selectedContact),
       );
@@ -172,6 +175,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
         children: [
           Expanded(
             child: RecentsList(
+              screen: Screen.tablet,
               onRecentSelected: _setCurrentRecent,
             ),
           ),
@@ -197,8 +201,11 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
         ],
       );
     }
-    return RecentsList(onRecentSelected: (Recent selectedRecent) {
-      _goToPage(selectedRecent: selectedRecent);
-    });
+    return RecentsList(
+      onRecentSelected: (Recent selectedRecent) {
+        _goToPage(selectedRecent: selectedRecent);
+      },
+      screen: Screen.phone,
+    );
   }
 }

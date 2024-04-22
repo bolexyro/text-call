@@ -13,11 +13,14 @@ class RecentsList extends ConsumerStatefulWidget {
   const RecentsList({
     super.key,
     required this.onRecentSelected,
+    required this.screen,
   });
+
+  final void Function(Recent selectedRecent) onRecentSelected;
+  final Screen screen;
 
   @override
   ConsumerState<RecentsList> createState() => _RecentsListState();
-  final void Function(Recent selectedRecent) onRecentSelected;
 }
 
 class _RecentsListState extends ConsumerState<RecentsList> {
@@ -219,55 +222,75 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                       ),
                     ],
                   ),
-                  child: ExpandableListTile(
-                    tileOnTapped: () {
-                      _changeTileExpandedStatus(index);
-                    },
-                    isExpanded: _listExpandedBools[index],
-                    leading:
-                        recentCategoryIconMap[recentsList[index].category]!,
-                    trailing: Text(
-                      DateFormat.Hm().format(recentN.callTime),
-                    ),
-                    title: Text(recentsList[index].contact.name),
-                    expandedContent: Column(
-                      children: [
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          'Mobile ${recentN.contact.localPhoneNumber}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const Text('Incoming Call'),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  child: widget.screen == Screen.phone
+                      ? ExpandableListTile(
+                          tileOnTapped: () {
+                            _changeTileExpandedStatus(index);
+                          },
+                          isExpanded: _listExpandedBools[index],
+                          leading: recentCategoryIconMap[
+                              recentsList[index].category]!,
+                          trailing: Text(
+                            DateFormat.Hm().format(recentN.callTime),
+                          ),
+                          title: Text(recentsList[index].contact.name),
+                          expandedContent: Column(
+                            children: [
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                'Mobile ${recentN.contact.localPhoneNumber}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              const Text('Incoming Call'),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      showMessageWriterModalSheet(
+                                        calleeName: recentN.contact.name,
+                                        calleePhoneNumber:
+                                            recentN.contact.phoneNumber,
+                                        context: context,
+                                      );
+                                    },
+                                    icon: const Icon(Icons.message),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      widget.onRecentSelected(recentN);
+                                    },
+                                    icon: const Icon(Icons.info_outlined),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
+                      : Column(
                           children: [
-                            IconButton(
-                              onPressed: () {
-                                showMessageWriterModalSheet(
-                                  calleeName: recentN.contact.name,
-                                  calleePhoneNumber:
-                                      recentN.contact.phoneNumber,
-                                  context: context,
-                                );
-                              },
-                              icon: const Icon(Icons.message),
+                            ListTile(
+                              leading: recentCategoryIconMap[
+                                  recentsList[index].category]!,
+                              trailing: Text(
+                                DateFormat.Hm().format(recentN.callTime),
+                              ),
+                              title: Text(recentsList[index].contact.name),
+                              onTap: () => widget.onRecentSelected(recentN),
                             ),
-                            IconButton(
-                              onPressed: () {
-                                widget.onRecentSelected(recentN);
-                              },
-                              icon: const Icon(Icons.info_outlined),
+                            const Divider(
+                              indent: 45,
+                              endIndent: 15,
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
                 );
               },
             ),

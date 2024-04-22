@@ -1,6 +1,7 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:text_call/models/recent.dart';
 import 'package:text_call/widgets/message_writer.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
@@ -69,7 +70,7 @@ Future<sql.Database> getDatabase() async {
       await db.execute(
           'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT)');
       await db.execute(
-          'CREATE TABLE recents (callTime TEXT PRIMARY KEY, phoneNumber TEXT, name TEXT, categoryName TEXT, message TEXT, backgroundColorJson TEXT)');
+          'CREATE TABLE recents (callTime TEXT PRIMARY KEY, phoneNumber TEXT, name TEXT, categoryName TEXT, message TEXT, backgroundColorRed INTEGER, backgroundColorGreen INTEGER, backgroundColorBlue INTEGER, backgroundColorAlpha INTEGER)');
     },
   );
   return db;
@@ -78,9 +79,7 @@ Future<sql.Database> getDatabase() async {
 Future<bool> checkIfNumberExists(
     String phoneNumber, BuildContext context) async {
   final db = FirebaseFirestore.instance;
-  final docRef = db
-      .collection("users")
-      .doc(phoneNumber);
+  final docRef = db.collection("users").doc(phoneNumber);
   final document = await docRef.get();
 
   if (document.exists == false) {
@@ -149,3 +148,8 @@ Map<String, int> jsonifyColor(Color color) {
     'alpha': color.alpha,
   };
 }
+
+List<Recent> getRecentsForAContact(List<Recent> allRecents, String phoneNumber)  {
+    final recentsForThatContact = allRecents.where((element) => element.contact.phoneNumber == phoneNumber ,).toList();
+    return recentsForThatContact;
+  }

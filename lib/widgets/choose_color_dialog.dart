@@ -46,6 +46,14 @@ class _ChooseColorDialogState extends State<ChooseColorDialog> {
     }
 
     return AlertDialog(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? Theme.of(context)
+              .colorScheme
+              .primaryContainer
+              .withRed(11)
+              .withGreen(18)
+              .withBlue(25)
+          : null,
       title: const Text('Pick a color!'),
       content: Column(
         mainAxisSize: MainAxisSize.min,

@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/message.dart';
@@ -28,8 +28,11 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
           (row) => Recent(
             message: Message(
               message: row['message'] as String,
-              backgroundColor: deJsonifyColor(
-                json.decode(row['backgroundColorJson'] as String),
+              backgroundColor: Color.fromARGB(
+                row['backgroundColorAlpha'] as int,
+                row['backgroundColorRed'] as int,
+                row['backgroundColorGreen'] as int,
+                row['backgroundColorBlue'] as int,
               ),
             ),
             contact: Contact(
@@ -50,9 +53,10 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
     db.insert(
       'recents',
       {
-        'backgroundColorJson':
-            json.encode(jsonifyColor(newRecent.message.backgroundColor))
-                .toString(),
+        'backgroundColorAlpha': newRecent.message.backgroundColor.alpha,
+        'backgroundColorRed': newRecent.message.backgroundColor.red,
+        'backgroundColorGreen': newRecent.message.backgroundColor.green,
+        'backgroundColorBlue': newRecent.message.backgroundColor.blue,
         'message': newRecent.message.message,
         'callTime': newRecent.callTime.toString(),
         'phoneNumber': newRecent.contact.phoneNumber,
@@ -61,32 +65,6 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
       },
     );
     state = [...state, newRecent];
-  }
-
-  Future<List<Recent>> getRecentForAContact(String phoneNumber) async {
-    final db = await getDatabase();
-    final data = await db
-        .query('recents', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
-    final recentsList = data
-        .map(
-          (row) => Recent(
-            message: Message(
-              message: row['message'] as String,
-              backgroundColor: deJsonifyColor(
-                json.decode(row['backgroundColorJson'] as String),
-              ),
-            ),
-            contact:
-                Contact(name: row['name'] as String, phoneNumber: phoneNumber),
-            category: _getCategoryEnumFromText(
-              recentCategoryText: row['categoryName'] as String,
-            )!,
-            callTime: DateTime.parse(row['callTime'] as String),
-          ),
-        )
-        .toList();
-
-    return recentsList;
   }
 }
 

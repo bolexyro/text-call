@@ -3,14 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_card_w_profile_pic_stack.dart';
+import 'package:text_call/widgets/expandable_list_tile.dart';
 
 enum Purpose { forContact, forRecent }
 
-class ContactDetails extends ConsumerWidget {
+class ContactDetails extends ConsumerStatefulWidget {
   const ContactDetails({
     super.key,
     this.contact,
@@ -21,6 +24,20 @@ class ContactDetails extends ConsumerWidget {
   final Contact? contact;
   final Recent? recent;
   final double stackContainerWidths;
+
+  @override
+  ConsumerState<ContactDetails> createState() => _ContactDetailsState();
+}
+
+class _ContactDetailsState extends ConsumerState<ContactDetails> {
+  void _goToSentMessageScreen(Message message) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => SentMessageScreen(
+            message: message.message, backgroundColor: message.backgroundColor),
+      ),
+    );
+  }
 
   String _groupHeaderText(DateTime headerDateTime) {
     if (DateTime(
@@ -37,29 +54,36 @@ class ContactDetails extends ConsumerWidget {
     return DateFormat('d MMMM').format(headerDateTime);
   }
 
+  final List<bool> _listExpandedBools = [];
+  void _changeTileExpandedStatus(index) {
+    setState(() {
+      _listExpandedBools[index] = !_listExpandedBools[index];
+      for (int i = 0; i < _listExpandedBools.length; i++) {
+        if (i != index && _listExpandedBools[i] == true) {
+          _listExpandedBools[i] = false;
+        }
+      }
+    });
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final purpose = contact == null ? Purpose.forRecent : Purpose.forContact;
+  Widget build(BuildContext context) {
+    final purpose =
+        widget.contact == null ? Purpose.forRecent : Purpose.forContact;
 
     if (purpose == Purpose.forRecent) {
       return Column(
         children: [
           ContactCardWProfilePicStack(
-            contact: recent!.contact,
-            transparentAndNonTransparentWidth: stackContainerWidths,
+            contact: widget.recent!.contact,
+            transparentAndNonTransparentWidth: widget.stackContainerWidths,
           ),
           const SizedBox(
             height: 20,
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => SentMessageScreen(
-                      message: recent!.message.message,
-                      backgroundColor: recent!.message.backgroundColor),
-                ),
-              );
+              _goToSentMessageScreen(widget.recent!.message);
             },
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
@@ -72,98 +96,80 @@ class ContactDetails extends ConsumerWidget {
       );
     }
 
-    final contactRecentHistory = ref
-        .read(recentsProvider.notifier)
-        .getRecentForAContact(contact!.phoneNumber);
-
+    final allRecents = ref.watch(recentsProvider);
+    final recentsForAContact =
+        getRecentsForAContact(allRecents, widget.contact!.phoneNumber);
+    recentsForAContact.sort(
+      (a, b) => b.callTime.compareTo(a.callTime),
+    );
     return Column(
       children: [
         ContactCardWProfilePicStack(
-          contact: contact!,
-          transparentAndNonTransparentWidth: stackContainerWidths,
+          contact: widget.contact!,
+          transparentAndNonTransparentWidth: widget.stackContainerWidths,
         ),
         const SizedBox(
           height: 20,
         ),
-        FutureBuilder(
-          future: contactRecentHistory,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            if (snapshot.hasError) {
-              return const Center(
-                child: Text(
-                  'There was an error fetching the data, Please go back to the previous page and come back.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.red),
-                ),
-              );
-            }
-
-            final recentsList = snapshot.data!;
-            if (recentsList.isEmpty) {
-              return Column(
-                children: [
-                  Text(
-                    'Start conversing with ${contact!.name} to see your history.',
-                    textAlign: TextAlign.center,
-                  ),
-                  const Icon(
-                    Icons.history,
-                    size: 110,
-                    color: Colors.grey,
-                  ),
-                ],
-              );
-            }
-
-            return Expanded(
-              child: GroupedListView(
-                shrinkWrap: true,
-                useStickyGroupSeparators: true,
-                stickyHeaderBackgroundColor:
-                    const Color.fromARGB(255, 240, 248, 255),
-                elements: recentsList,
-                groupBy: (recentN) => DateTime(recentN.callTime.year,
-                    recentN.callTime.month, recentN.callTime.day),
-                groupSeparatorBuilder: (DateTime groupHeaderDateTime) =>
-                    Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    _groupHeaderText(groupHeaderDateTime),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                order: GroupedListOrder.DESC,
-                itemBuilder: (context, recentN) {
-                  return Column(
-                    children: [
-                      ListTile(
-                        onTap: () {},
-                        leading: recentCategoryIconMap[recentN.category],
-                        title: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(DateFormat.Hm().format(recentN.callTime)),
-                            Text(recentN.category.name),
-                          ],
-                        ),
-                      ),
-                      const Divider(
-                        indent: 45,
-                        endIndent: 15,
-                      )
-                    ],
-                  );
-                },
+        if (recentsForAContact.isEmpty)
+          Column(
+            children: [
+              Text(
+                'Start conversing with ${widget.contact!.name} to see your history.',
+                textAlign: TextAlign.center,
               ),
-            );
-          },
-        ),
+              const Icon(
+                Icons.history,
+                size: 110,
+                color: Colors.grey,
+              ),
+            ],
+          ),
+        if (recentsForAContact.isNotEmpty)
+          Expanded(
+            child: GroupedListView(
+              shrinkWrap: true,
+              useStickyGroupSeparators: true,
+              stickyHeaderBackgroundColor:
+                  Theme.of(context).colorScheme.primaryContainer,
+              elements: recentsForAContact,
+              groupBy: (recentN) => DateTime(recentN.callTime.year,
+                  recentN.callTime.month, recentN.callTime.day),
+              groupSeparatorBuilder: (DateTime groupHeaderDateTime) => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  _groupHeaderText(groupHeaderDateTime),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              itemBuilder: (context, recentN) {
+                int index = recentsForAContact.indexOf(recentN);
+                _listExpandedBools.add(false);
+                return Column(
+                  children: [
+                    ExpandableListTile(
+                      leading: recentCategoryIconMap[recentN.category]!,
+                      title: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(DateFormat.Hm().format(recentN.callTime)),
+                          Text(recentN.category.name),
+                        ],
+                      ),
+                      expandedContent: ElevatedButton(
+                          onPressed: () {
+                            _goToSentMessageScreen(recentN.message);
+                          },
+                          child: const Text('Show Message')),
+                      isExpanded: _listExpandedBools[index],
+                      tileOnTapped: () => _changeTileExpandedStatus(index),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
       ],
     );
   }

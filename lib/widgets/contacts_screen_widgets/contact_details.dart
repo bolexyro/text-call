@@ -74,6 +74,9 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
     if (purpose == Purpose.forRecent) {
       return Column(
         children: [
+          const SizedBox(
+            height: 40,
+          ),
           ContactCardWProfilePicStack(
             contact: widget.recent!.contact,
             transparentAndNonTransparentWidth: widget.stackContainerWidths,
@@ -158,10 +161,16 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
                         ],
                       ),
                       expandedContent: ElevatedButton(
-                          onPressed: () {
-                            _goToSentMessageScreen(recentN.message);
-                          },
-                          child: const Text('Show Message')),
+                        onPressed: () {
+                          _goToSentMessageScreen(recentN.message);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text('Show Message'),
+                      ),
                       isExpanded: _listExpandedBools[index],
                       tileOnTapped: () => _changeTileExpandedStatus(index),
                     ),

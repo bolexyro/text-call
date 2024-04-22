@@ -296,8 +296,26 @@ class _RecentsListState extends ConsumerState<RecentsList> {
             ),
           ),
         if (recentsList.isEmpty)
-          const Center(
-            child: Text('No Recents'),
+          const Expanded(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Start calling to see your history.',
+                    textAlign: TextAlign.center,
+                  ),
+                  Icon(
+                    Icons.history,
+                    size: 110,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(
+                    height: 100,
+                  ),
+                ],
+              ),
+            ),
           ),
       ],
     );

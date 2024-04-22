@@ -78,56 +78,63 @@ Future<sql.Database> getDatabase() async {
   return db;
 }
 
+void showErrorDialog(String text, BuildContext context) {
+  final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+  showAdaptiveDialog(
+    context: context,
+    builder: (context) => AlertDialog.adaptive(
+      backgroundColor: isDarkMode
+          ? Theme.of(context).colorScheme.errorContainer
+          : Theme.of(context).colorScheme.error,
+      // i am pretty much using this row to center the text
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text(
+            'Error!!',
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            text,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
+          ),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('OK'),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 Future<bool> checkIfNumberExists(
     String phoneNumber, BuildContext context) async {
+  if (phoneNumber.length != 14) {
+    showErrorDialog('Enter a valid phone number', context);
+    return false;
+  }
   final db = FirebaseFirestore.instance;
   final docRef = db.collection("users").doc(phoneNumber);
   final document = await docRef.get();
 
   if (document.exists == false) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    showAdaptiveDialog(
-      context: context,
-      builder: (context) => AlertDialog.adaptive(
-        backgroundColor: isDarkMode
-            ? Theme.of(context).colorScheme.errorContainer
-            : Theme.of(context).colorScheme.error,
-        // i am pretty much using this row to center the text
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Text(
-              'Error!!',
-              style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const Text(
-              'Number doesn\'t exist',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 15),
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('OK'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    showErrorDialog('Number doesn\'t exist', context);
   }
 
   return document.exists;
@@ -151,7 +158,12 @@ Map<String, int> jsonifyColor(Color color) {
   };
 }
 
-List<Recent> getRecentsForAContact(List<Recent> allRecents, String phoneNumber)  {
-    final recentsForThatContact = allRecents.where((element) => element.contact.phoneNumber == phoneNumber ,).toList();
-    return recentsForThatContact;
-  }
+List<Recent> getRecentsForAContact(
+    List<Recent> allRecents, String phoneNumber) {
+  final recentsForThatContact = allRecents
+      .where(
+        (element) => element.contact.phoneNumber == phoneNumber,
+      )
+      .toList();
+  return recentsForThatContact;
+}

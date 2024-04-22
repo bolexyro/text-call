@@ -18,6 +18,8 @@ class ContactCardWProfilePicStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkTheme =
+        Theme.of(context).brightness == Brightness.dark ? true : false;
     final transparentContainerHeight =
         _circleAvatarRadius + _nonTransparentContainerheight;
 
@@ -35,7 +37,9 @@ class ContactCardWProfilePicStack extends StatelessWidget {
             width: transparentAndNonTransparentWidth,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: Colors.white,
+              color: isDarkTheme
+                  ? Theme.of(context).colorScheme.inversePrimary
+                  : Colors.white,
             ),
             child: Column(
               children: [
@@ -71,7 +75,9 @@ class ContactCardWProfilePicStack extends StatelessWidget {
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.blue[500],
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Theme.of(context).colorScheme.onSecondary
+                        : Colors.blue[500],
                   ),
                   child: IconButton(
                     onPressed: () {

@@ -76,7 +76,7 @@ class Keypad extends ConsumerWidget {
         Center(
           child: IconButton(
             onPressed: () async {
-              if (await checkIfNumberExists(typedInPhoneNumber, context)) {
+              if (await checkIfNumberExists(changeLocalToIntl(localPhoneNumber: typedInPhoneNumber), context)) {
                 final Contact callee =
                     await ref.read(contactsProvider.notifier).readAContact(
                               changeLocalToIntl(

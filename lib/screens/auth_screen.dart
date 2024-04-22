@@ -19,7 +19,6 @@ class AuthScreen extends ConsumerStatefulWidget {
 
 class _AuthScreenState extends ConsumerState<AuthScreen> {
   late String _enteredPhoneNumber;
-  final Color _textAndButtonColor = const Color.fromARGB(255, 11, 111, 193);
   bool _isAuthenticating = false;
 
   final _formKey = GlobalKey<FormState>();
@@ -108,6 +107,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Color textAndButtonColor =
+        Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context)
+                .colorScheme
+                .primary
+                .withBlue(200)
+                .withRed(50)
+                .withGreen(120)
+            : Theme.of(context).colorScheme.primary.withBlue(200);
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -122,14 +131,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   textStyle: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 55,
-                    color: _textAndButtonColor,
+                    color: textAndButtonColor,
                   ),
                   speed: const Duration(milliseconds: 100),
                 ),
               ],
               displayFullTextOnTap: true,
               repeatForever: false,
-              totalRepeatCount: 2,
+              totalRepeatCount: 1,
             ),
             const SizedBox(
               height: 20,
@@ -149,8 +158,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 keyboardType: TextInputType.phone,
                 maxLength: 10,
                 decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[200],
+                  filled: Theme.of(context).brightness == Brightness.dark
+                      ? null
+                      : true,
                   labelText: 'Phone No',
                   prefixIcon: const Icon(Icons.call),
                   prefixText: '+234 - ',
@@ -178,7 +188,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  backgroundColor: _textAndButtonColor,
+                  backgroundColor: textAndButtonColor,
                   foregroundColor: Colors.white,
                 ),
                 child: _isAuthenticating == false

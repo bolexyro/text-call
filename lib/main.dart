@@ -161,6 +161,10 @@ class _TextCallState extends State<TextCall> {
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
+      darkTheme: ThemeData.from(
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue, brightness: Brightness.dark),
+      ),
       navigatorKey: TextCall.navigatorKey,
       debugShowCheckedModeBanner: false,
       home: FutureBuilder(

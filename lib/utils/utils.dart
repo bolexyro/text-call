@@ -80,25 +80,48 @@ Future<bool> checkIfNumberExists(
   final db = FirebaseFirestore.instance;
   final docRef = db
       .collection("users")
-      .doc(changeLocalToIntl(localPhoneNumber: phoneNumber));
+      .doc(phoneNumber);
   final document = await docRef.get();
 
   if (document.exists == false) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     showAdaptiveDialog(
       context: context,
-      builder: (context) => const AlertDialog.adaptive(
-        backgroundColor: Color.fromARGB(255, 255, 166, 160),
+      builder: (context) => AlertDialog.adaptive(
+        backgroundColor: isDarkMode
+            ? Theme.of(context).colorScheme.errorContainer
+            : Theme.of(context).colorScheme.error,
         // i am pretty much using this row to center the text
-        content: Row(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
+            const Text(
+              'Error!!',
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Text(
               'Number doesn\'t exist',
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  fontSize: 20),
+                  fontSize: 15),
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('OK'),
+              ),
             ),
           ],
         ),

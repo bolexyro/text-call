@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
 class ConfirmDeleteDialog extends StatefulWidget {
-  const ConfirmDeleteDialog({super.key});
+  const ConfirmDeleteDialog({
+    super.key,
+    required this.contactName,
+  });
+
+  final String contactName;
 
   @override
   State<ConfirmDeleteDialog> createState() => _ConfirmDeleteDialogState();
@@ -10,25 +15,40 @@ class ConfirmDeleteDialog extends StatefulWidget {
 class _ConfirmDeleteDialogState extends State<ConfirmDeleteDialog> {
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return AlertDialog.adaptive(
-      title: const Text(
-        'Are you sure you want to delete',
+      title: Text(
+        'Are you sure you want to delete ${widget.contactName}',
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 25),
+        style: TextStyle(
+          fontSize: 25,
+          color: isDarkMode
+              ? Theme.of(context).colorScheme.onErrorContainer
+              : Theme.of(context).colorScheme.onError,
+        ),
       ),
-      backgroundColor: const Color.fromARGB(255, 255, 174, 168),
+      backgroundColor: isDarkMode
+          ? Theme.of(context).colorScheme.errorContainer
+          : Theme.of(context).colorScheme.error,
       actions: [
         TextButton(
-          onPressed: () {Navigator.of(context).pop();},
-                    style: TextButton.styleFrom(foregroundColor: Colors.white),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          style: TextButton.styleFrom(
+            foregroundColor: isDarkMode
+                ? Theme.of(context).colorScheme.onErrorContainer
+                : Theme.of(context).colorScheme.onError,
+          ),
           child: const Text('Cancel'),
-
         ),
         TextButton(
           onPressed: () {
             Navigator.of(context).pop(true);
           },
-          style: TextButton.styleFrom(foregroundColor: Colors.red),
+          style: TextButton.styleFrom(
+              foregroundColor: const Color.fromARGB(255, 42, 6, 3)),
           child: const Text('Delete'),
         ),
       ],

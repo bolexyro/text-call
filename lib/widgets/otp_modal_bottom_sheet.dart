@@ -44,16 +44,12 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
     return SizedBox(
       width: double.infinity,
       child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.white,
-              Color.fromARGB(255, 174, 218, 253),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-          borderRadius: BorderRadius.vertical(
+        decoration: BoxDecoration(
+          color: Theme.of(context)
+              .colorScheme
+              .primaryContainer,
+
+          borderRadius: const BorderRadius.vertical(
             top: Radius.circular(30),
           ),
         ),
@@ -81,6 +77,7 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
                     SizedBox(
                       width: 50,
                       child: TextFormField(
+                        autofocus: index == 0 ? true: false,
                         controller: textControllers[index],
                         focusNode: focusNodes[index],
                         keyboardType: TextInputType.number,

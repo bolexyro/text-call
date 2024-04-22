@@ -186,7 +186,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
               useStickyGroupSeparators: true,
               // floatingHeader: true,
               stickyHeaderBackgroundColor:
-                  const Color.fromARGB(255, 240, 248, 255),
+                  Theme.of(context).colorScheme.primaryContainer,
               elements: recentsList,
               groupBy: (recentN) => DateTime(recentN.callTime.year,
                   recentN.callTime.month, recentN.callTime.day),

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
@@ -17,34 +16,9 @@ class AddContact extends ConsumerWidget {
   void _addContact(context, WidgetRef ref) async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final db = FirebaseFirestore.instance;
-      final docRef = db
-          .collection("users")
-          .doc(_enteredPhoneNumber);
-      final document = await docRef.get();
 
-      if (document.exists == false) {
-        showAdaptiveDialog(
-          context: context,
-          builder: (context) => const AlertDialog.adaptive(
-            backgroundColor: Color.fromARGB(255, 255, 166, 160),
-            // i am pretty much using this row to center the text
-            content: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Number doesn\'t exist',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontSize: 20
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
+      final bool numberExists = await checkIfNumberExists(_enteredPhoneNumber!, context);
+      if (numberExists == false){
         return;
       }
 

@@ -48,7 +48,9 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
           child: Scaffold(
             body: Container(
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? null
+                    : Colors.grey[200],
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Column(
@@ -91,9 +93,10 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double availableWidth = MediaQuery.sizeOf(context).width;
+    final double availableWidth = MediaQuery.sizeOf(context).width;
 
-    double tabletWidth = 520;
+    const double tabletWidth = 300;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     if (widget.whichScreen == WhichScreen.contact) {
       if (availableWidth > tabletWidth) {
@@ -125,7 +128,14 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
                 margin: const EdgeInsets.symmetric(vertical: 10),
                 padding: const EdgeInsets.only(top: 40),
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
+                  color: isDarkMode
+                      ? Theme.of(context)
+                          .colorScheme
+                          .primaryContainer
+                          .withRed(11)
+                          .withGreen(18)
+                          .withBlue(25)
+                      : Colors.grey[200],
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: activeContent,
@@ -165,12 +175,20 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
               onRecentSelected: _setCurrentRecent,
             ),
           ),
+          // Color.fromARGB(255, 11, 18, 25)
           Expanded(
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 10),
               padding: const EdgeInsets.only(top: 40),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: isDarkMode
+                    ? Theme.of(context)
+                        .colorScheme
+                        .primaryContainer
+                        .withRed(11)
+                        .withGreen(18)
+                        .withBlue(25)
+                    : Colors.grey[200],
                 borderRadius: BorderRadius.circular(15),
               ),
               child: activeContent,

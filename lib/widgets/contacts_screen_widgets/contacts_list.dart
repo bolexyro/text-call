@@ -47,7 +47,9 @@ class _ContactsListState extends ConsumerState<ContactsList> {
   void _showDeleteDialog(BuildContext context, Contact contact) async {
     final bool? toDelete = await showAdaptiveDialog(
       context: context,
-      builder: (context) => const ConfirmDeleteDialog(),
+      builder: (context) => ConfirmDeleteDialog(
+        contactName: contact.name,
+      ),
     );
     if (toDelete != true) {
       return;
@@ -121,7 +123,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
               useStickyGroupSeparators: true,
               floatingHeader: true,
               stickyHeaderBackgroundColor:
-                  const Color.fromARGB(255, 240, 248, 255),
+                  Theme.of(context).colorScheme.secondary,
               elements: contactsList,
               groupBy: (contactN) => contactN.name[0],
               groupSeparatorBuilder: (String groupHeader) => Padding(

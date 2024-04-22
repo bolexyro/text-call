@@ -22,11 +22,12 @@ class KeypadButton extends ConsumerWidget {
           },
           child: Text(
             buttonText,
-            style: const TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
+            style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color.fromARGB(255, 255, 251, 251)
+                    : Colors.black),
           ),
         ),
       ),

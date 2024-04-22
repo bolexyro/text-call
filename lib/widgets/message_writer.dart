@@ -36,7 +36,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   );
 
   late Future _animationDelay;
-  Color _selectedColor = Colors.red;
+  Color _selectedColor = const Color.fromARGB(255, 13, 214, 214);
 
   late WebSocketChannel _channel;
 
@@ -83,7 +83,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     );
   }
 
-
   void _showColorPicker() async {
     Color? selectedColor = await showAdaptiveDialog(
       context: context,
@@ -114,6 +113,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 minLines: 4,
                 maxLines: null,
                 keyboardType: TextInputType.multiline,
+                textCapitalization: TextCapitalization.sentences,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
                     hintText: 'Enter the message you want to call them with',
@@ -148,7 +148,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     ),
                     child: Material(
                       borderRadius: BorderRadius.circular(8),
-                      color: Colors.transparent,
+                      color: Theme.of(context).primaryColor,
                       child: InkWell(
                         onTap: _showColorPicker,
                         borderRadius: BorderRadius.circular(8),
@@ -191,7 +191,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   ),
                 ),
                 style: IconButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 32, 114, 181),
+                  backgroundColor: Theme.of(context).primaryColor,
                   foregroundColor: Colors.white,
                 ),
               ),
@@ -210,7 +210,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             if (snapshotData['call_status'] == 'rejected') {
               // create a recent in your table
               final recent = Recent(
-                message: Message(message: _messageController.text, backgroundColor: _selectedColor),
+                message: Message(
+                    message: _messageController.text,
+                    backgroundColor: _selectedColor),
                 contact: Contact(
                     name: widget.calleeName,
                     phoneNumber: widget.calleePhoneNumber),
@@ -242,7 +244,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               );
             }
             final recent = Recent(
-              message: Message(message: _messageController.text, backgroundColor: _selectedColor),
+              message: Message(
+                  message: _messageController.text,
+                  backgroundColor: _selectedColor),
               contact: Contact(
                   name: widget.calleeName,
                   phoneNumber: widget.calleePhoneNumber),
@@ -274,7 +278,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   return Lottie.asset('assets/telephone_ringing_3d.json');
                 }
                 final recent = Recent(
-                  message: Message(message: _messageController.text, backgroundColor: _selectedColor),
+                  message: Message(
+                      message: _messageController.text,
+                      backgroundColor: _selectedColor),
                   contact: Contact(
                     name: widget.calleeName,
                     phoneNumber: widget.calleePhoneNumber,
@@ -314,9 +320,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     return Container(
       height: MediaQuery.sizeOf(context).height * .6,
       width: double.infinity,
-      decoration: const BoxDecoration(
-        color: Color.fromARGB(255, 207, 222, 234),
-        borderRadius: BorderRadius.vertical(
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).colorScheme.surfaceContainerHigh.withBlue(50)
+            : const Color.fromARGB(255, 207, 222, 234),
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(25),
         ),
       ),

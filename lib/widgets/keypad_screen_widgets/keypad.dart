@@ -17,6 +17,39 @@ class Keypad extends ConsumerWidget {
   final void Function({bool? longPress}) onBackButtonPressed;
   final String typedInPhoneNumber;
 
+  void phoneNumberVerification(BuildContext context, WidgetRef ref) async {
+    String phoneNumber =
+        changeLocalToIntl(localPhoneNumber: typedInPhoneNumber);
+    final bool phoneNumberIsValid = isPhoneNumberValid(phoneNumber);
+    if (phoneNumberIsValid == false) {
+      showErrorDialog('Enter a valid phone number', context);
+      return;
+    }
+    final bool numberExists = await checkIfNumberExists(
+      phoneNumber,
+    );
+    if (numberExists == false) {
+      showErrorDialog('Number doesn\'t exist', context);
+      return;
+    }
+    final Contact callee =
+        await ref.read(contactsProvider.notifier).readAContact(
+                  changeLocalToIntl(localPhoneNumber: typedInPhoneNumber),
+                ) ??
+            Contact(
+              name: 'Unknown',
+              phoneNumber:
+                  changeLocalToIntl(localPhoneNumber: typedInPhoneNumber),
+            );
+
+    showMessageWriterModalSheet(
+      context: context,
+      calleeName: callee.name,
+      calleePhoneNumber:
+          changeLocalToIntl(localPhoneNumber: typedInPhoneNumber),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GridView.count(
@@ -75,26 +108,8 @@ class Keypad extends ConsumerWidget {
         Container(),
         Center(
           child: IconButton(
-            onPressed: () async {
-              if (await checkIfNumberExists(changeLocalToIntl(localPhoneNumber: typedInPhoneNumber), context)) {
-                final Contact callee =
-                    await ref.read(contactsProvider.notifier).readAContact(
-                              changeLocalToIntl(
-                                  localPhoneNumber: typedInPhoneNumber),
-                            ) ??
-                        Contact(
-                          name: 'Unknown',
-                          phoneNumber: changeLocalToIntl(
-                              localPhoneNumber: typedInPhoneNumber),
-                        );
-
-                showMessageWriterModalSheet(
-                  context: context,
-                  calleeName: callee.name,
-                  calleePhoneNumber:
-                      changeLocalToIntl(localPhoneNumber: typedInPhoneNumber),
-                );
-              }
+            onPressed: ()  {
+              phoneNumberVerification(context, ref);
             },
             icon: const Padding(
               padding: EdgeInsets.all(5),

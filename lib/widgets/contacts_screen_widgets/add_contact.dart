@@ -6,20 +6,32 @@ import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 
 //ignore: must_be_immutable
-class AddContact extends ConsumerWidget {
-  AddContact({super.key});
+class AddContact extends ConsumerStatefulWidget {
+  const AddContact({super.key});
 
+  @override
+  ConsumerState<AddContact> createState() => _AddContactState();
+}
+
+class _AddContactState extends ConsumerState<AddContact> {
   final _formKey = GlobalKey<FormState>();
   String? _enteredName;
   String? _enteredPhoneNumber;
+  bool _isAddingContact = false;
 
-  void _addContact(context, WidgetRef ref) async {
+  void _addContact(context) async {
+    setState(() {
+      _isAddingContact = true;
+    });
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      final bool numberExists =
-          await checkIfNumberExists(_enteredPhoneNumber!, context);
+      final bool numberExists = await checkIfNumberExists(_enteredPhoneNumber!);
       if (numberExists == false) {
+        showErrorDialog('Number doesn\'t exist', context);
+        setState(() {
+          _isAddingContact = false;
+        });
         return;
       }
 
@@ -31,10 +43,13 @@ class AddContact extends ConsumerWidget {
           );
       Navigator.of(context).pop();
     }
+    setState(() {
+      _isAddingContact = false;
+    });
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return AlertDialog.adaptive(
       scrollable: true,
       shape: RoundedRectangleBorder(
@@ -118,12 +133,14 @@ class AddContact extends ConsumerWidget {
                         TextStyle(color: Theme.of(context).colorScheme.error)),
               ),
               TextButton(
-                onPressed: () {
-                  _addContact(context, ref);
-                },
-                child: const Text(
-                  'Save',
-                ),
+                onPressed: _isAddingContact == true
+                    ? null
+                    : () {
+                        _addContact(context);
+                      },
+                child: _isAddingContact == false
+                    ? const Text('Save')
+                    : const CircularProgressIndicator(),
               )
             ],
           )
@@ -132,3 +149,4 @@ class AddContact extends ConsumerWidget {
     );
   }
 }
+>ppp

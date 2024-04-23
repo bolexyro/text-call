@@ -123,19 +123,19 @@ void showErrorDialog(String text, BuildContext context) {
   );
 }
 
-Future<bool> checkIfNumberExists(
-    String phoneNumber, BuildContext context) async {
-  if (phoneNumber.length != 14) {
-    showErrorDialog('Enter a valid phone number', context);
-    return false;
+
+bool isPhoneNumberValid(String phoneNumber){
+  if (phoneNumber.length == 14){
+    return true;
   }
+  return false;
+}
+
+Future<bool> checkIfNumberExists(
+    String phoneNumber) async {
   final db = FirebaseFirestore.instance;
   final docRef = db.collection("users").doc(phoneNumber);
   final document = await docRef.get();
-
-  if (document.exists == false) {
-    showErrorDialog('Number doesn\'t exist', context);
-  }
 
   return document.exists;
 }

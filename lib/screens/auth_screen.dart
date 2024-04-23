@@ -196,9 +196,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               width: double.infinity,
               height: 60,
               child: ElevatedButton(
-                onPressed: () {
-                  _validateForm();
-                },
+                onPressed: _isAuthenticating == true
+                    ? null
+                    : () {
+                        _validateForm();
+                      },
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),

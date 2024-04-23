@@ -45,10 +45,7 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
       width: double.infinity,
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context)
-              .colorScheme
-              .primaryContainer,
-
+          color: Theme.of(context).colorScheme.primaryContainer,
           borderRadius: const BorderRadius.vertical(
             top: Radius.circular(30),
           ),
@@ -69,6 +66,10 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
                   fontSize: 50,
                 ),
               ),
+              const Text(
+                'If the code has not been sent please just be patient and remain on this page. Thank you.',
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 20.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -77,7 +78,7 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
                     SizedBox(
                       width: 50,
                       child: TextFormField(
-                        autofocus: index == 0 ? true: false,
+                        autofocus: index == 0 ? true : false,
                         controller: textControllers[index],
                         focusNode: focusNodes[index],
                         keyboardType: TextInputType.number,

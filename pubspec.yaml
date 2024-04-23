@@ -58,6 +58,7 @@ dependencies:
     git:
       url: https://github.com/mchome/flutter_colorpicker
       ref: master  # or 786d04363f587b818ce585d25b9c2bb62de95aba
+  another_flushbar: ^1.12.30
 
 dev_dependencies:
   flutter_test:

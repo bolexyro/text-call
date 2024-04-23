@@ -84,6 +84,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   }
 
   void _showColorPicker() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+
     Color? selectedColor = await showAdaptiveDialog(
       context: context,
       builder: (context) {
@@ -322,7 +324,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
-            ? Theme.of(context).colorScheme.surfaceContainerHigh.withBlue(50)
+            ? Theme.of(context).colorScheme.primary.withOpacity(180)
             : const Color.fromARGB(255, 207, 222, 234),
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(25),

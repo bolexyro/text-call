@@ -1,4 +1,5 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:another_flushbar/flushbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -53,6 +54,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       _enteredPhoneNumber = '+234$_enteredPhoneNumber';
+      FocusManager.instance.primaryFocus?.unfocus();
+      Flushbar(
+        backgroundColor: const Color.fromARGB(255, 0, 63, 114),
+        margin: const EdgeInsets.only(top: 20, left: 10, right: 10),
+        messageText: const Text(
+          'You might be redirected to your browsser. But don\'t panick. It is to verify you are not a bot...IKR',
+          style: TextStyle(fontSize: 16, color: Colors.white),
+        ),
+        duration: const Duration(seconds: 4),
+        flushbarPosition: FlushbarPosition.TOP,
+        borderRadius: BorderRadius.circular(20),
+        icon: const Icon(Icons.notifications),
+        flushbarStyle: FlushbarStyle.FLOATING,
+      ).show(context);
       _phoneAuthentication();
     }
   }

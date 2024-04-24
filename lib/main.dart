@@ -188,8 +188,6 @@ class _TextCallState extends State<TextCall> {
           if (snapshot.data!) {
             if (widget.fromTerminated) {
               return const SentMessageScreen(
-                message: 'message',
-                backgroundColor: Colors.red,
                 fromTerminated: true,
               );
             }
@@ -225,23 +223,14 @@ class NotificationController {
       ReceivedAction receivedAction) async {
     if (receivedAction.buttonKeyPressed == 'REJECT') {
       final prefs = await SharedPreferences.getInstance();
+      await prefs.reload();
+      final String? callMessage = prefs.getString('callMessage');
+      final String? callerName = prefs.getString('callerName');
+      final String? backgroundColor = prefs.getString('backgroundColor');
       final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
 
       final url = Uri.https(
           'text-call-backend.onrender.com', 'call/rejected/$callerPhoneNumber');
-      http.get(url);
-    }
-
-    if (receivedAction.buttonKeyPressed == 'ACCEPT') {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.reload();
-      final String? callMessage = prefs.getString('callMessage');
-      final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
-      final String? callerName = prefs.getString('callerName');
-      final String? backgroundColor = prefs.getString('backgroundColor');
-
-      final url = Uri.https(
-          'text-call-backend.onrender.com', 'call/accepted/$callerPhoneNumber');
       http.get(url);
 
       final db = await getDatabase();
@@ -269,19 +258,24 @@ class NotificationController {
         },
       );
       await db.close();
+    }
+
+    if (receivedAction.buttonKeyPressed == 'ACCEPT') {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.reload();
+      final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
+
+      final url = Uri.https(
+          'text-call-backend.onrender.com', 'call/accepted/$callerPhoneNumber');
+      http.get(url);
 
       final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
-      if (isUserLoggedIn == false){
+      if (isUserLoggedIn == false) {
         return;
       }
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
-          builder: (context) => SentMessageScreen(
-            backgroundColor: deJsonifyColor(json.decode(backgroundColor)),
-            message: callMessage.isEmpty
-                ? 'Bolexyro making innovations bro.'
-                : callMessage,
-          ),
+          builder: (context) => const SentMessageScreen(),
         ),
       );
     }

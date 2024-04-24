@@ -33,12 +33,11 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
   final Map<Recent, bool> _expandedBoolsMap = {};
 
   void _goToSentMessageScreen(Message message) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => SentMessageScreen(
-            message: message.message, backgroundColor: message.backgroundColor),
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => SentMessageScreen(
+        message: message,
       ),
-    );
+    ));
   }
 
   String _groupHeaderText(DateTime headerDateTime) {
@@ -145,9 +144,13 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
-              itemComparator: (element1, element2) => element1.callTime.compareTo(element2.callTime),
+              itemComparator: (element1, element2) =>
+                  element1.callTime.compareTo(element2.callTime),
               itemBuilder: (context, recentN) {
-                _expandedBoolsMap[recentN] = _expandedBoolsMap.containsKey(recentN) ? _expandedBoolsMap[recentN]! : false;
+                _expandedBoolsMap[recentN] =
+                    _expandedBoolsMap.containsKey(recentN)
+                        ? _expandedBoolsMap[recentN]!
+                        : false;
                 return Column(
                   children: [
                     ExpandableListTile(

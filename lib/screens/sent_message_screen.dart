@@ -2,50 +2,32 @@ import 'dart:convert';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/utils/utils.dart';
+import 'package:text_call/models/recent.dart';
+import 'package:text_call/models/message.dart';
+import 'package:text_call/models/contact.dart';
 
-class SentMessageScreen extends StatefulWidget {
+class SentMessageScreen extends ConsumerWidget {
   const SentMessageScreen({
     super.key,
-    required this.message,
-    required this.backgroundColor,
     this.fromTerminated = false,
+    this.message,
   });
 
-  final String message;
-  final Color backgroundColor;
   final bool fromTerminated;
+  final Message? message;
 
   @override
-  State<SentMessageScreen> createState() => _SentMessageScreenState();
-}
-
-class _SentMessageScreenState extends State<SentMessageScreen> {
-  // NB: if a user is not logged in, they will still be
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final prefs = SharedPreferences.getInstance();
 
-    return widget.fromTerminated == false
-        ? SafeArea(
-            child: Scaffold(
-              appBar: AppBar(
-                forceMaterialTransparency: true,
-                title: const Text('From your loved one or not hehe'),
-              ),
-              backgroundColor: widget.backgroundColor,
-              body: TheColumnWidget(message: widget.message),
-            ),
-          )
-        : SafeArea(
-            child: FutureBuilder(
+    return SafeArea(
+      child: message == null
+          ? FutureBuilder(
               future: prefs,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -64,6 +46,22 @@ class _SentMessageScreenState extends State<SentMessageScreen> {
                 final String? callMessage = prefs.getString('callMessage');
                 final String? backgroundColor =
                     prefs.getString('backgroundColor');
+                final String? callerName = prefs.getString('callerName');
+                final String? callerPhoneNumber =
+                    prefs.getString('callerPhoneNumber');
+
+                final newRecent = Recent(
+                  message: Message(
+                    message: callMessage!,
+                    backgroundColor:
+                        deJsonifyColor(json.decode(backgroundColor!)),
+                  ),
+                  contact: Contact(
+                      name: callerName!, phoneNumber: callerPhoneNumber!),
+                  category: RecentCategory.incomingAccepted,
+                );
+
+                ref.read(recentsProvider.notifier).addRecent(newRecent);
 
                 return Scaffold(
                   appBar: AppBar(
@@ -71,16 +69,23 @@ class _SentMessageScreenState extends State<SentMessageScreen> {
                     title: const Text('From your loved one or not hehe'),
                   ),
                   backgroundColor: deJsonifyColor(
-                    json.decode(backgroundColor!),
+                    json.decode(backgroundColor),
                   ),
                   body: TheColumnWidget(
-                    message: callMessage!,
-                    fromTerminated: true,
+                    message: callMessage,
+                    fromTerminated: fromTerminated,
                   ),
                 );
               },
+            )
+          : Scaffold(
+              appBar: AppBar(),
+              backgroundColor: message!.backgroundColor,
+              body: TheColumnWidget(
+                message: message!.message,
+              ),
             ),
-          );
+    );
   }
 }
 

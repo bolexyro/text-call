@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
+import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_details.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contacts_list.dart';
@@ -203,7 +204,13 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
     }
     return RecentsList(
       onRecentSelected: (Recent selectedRecent) {
-        _goToPage(selectedRecent: selectedRecent);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => SentMessageScreen(
+                message: selectedRecent.message.message,
+                backgroundColor: selectedRecent.message.backgroundColor),
+          ),
+        );
       },
       screen: Screen.phone,
     );

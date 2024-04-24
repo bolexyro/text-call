@@ -244,7 +244,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold),
                               ),
-                              const Text('Incoming Call'),
+                              Text(recentN.category.name),
                               const SizedBox(
                                 height: 10,
                               ),

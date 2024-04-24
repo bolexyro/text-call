@@ -30,7 +30,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
     showAdaptiveDialog(
       context: context,
       builder: (context) {
-        return AddContact();
+        return const AddContact();
       },
     );
   }
@@ -210,7 +210,6 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold),
                               ),
-                              const Text('Incoming Call'),
                               const SizedBox(
                                 height: 10,
                               ),

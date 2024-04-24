@@ -45,7 +45,6 @@ Future<void> _messageHandler(RemoteMessage message) async {
     'backgroundColor',
     json.encode(backgroundColorMap),
   );
-
   createAwesomeNotification(
     title: callerName != 'Unknown'
         ? '$callerName is calling '
@@ -106,6 +105,10 @@ void main() async {
 
   await _fcmSetup();
   FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
+  ReceivedAction? receivedAction =
+      await AwesomeNotifications().getInitialNotificationAction(
+    removeFromActionEvents: true,
+  );
   AwesomeNotifications().setListeners(
     onActionReceivedMethod: NotificationController.onActionReceivedMethod,
     onNotificationCreatedMethod:
@@ -114,10 +117,6 @@ void main() async {
         NotificationController.onNotificationDisplayedMethod,
     onDismissActionReceivedMethod:
         NotificationController.onDismissActionReceivedMethod,
-  );
-  ReceivedAction? receivedAction =
-      await AwesomeNotifications().getInitialNotificationAction(
-    removeFromActionEvents: false,
   );
   runApp(
     ProviderScope(

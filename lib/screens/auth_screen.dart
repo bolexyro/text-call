@@ -52,24 +52,36 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     );
   }
 
+  void _showFlushBar(Color color, String message, FlushbarPosition position) {
+    Flushbar().dismiss();
+
+    Flushbar(
+      backgroundColor: color,
+      margin: position == FlushbarPosition.TOP
+          ? const EdgeInsets.only(top: 20, left: 10, right: 10)
+          : const EdgeInsets.only(left: 10, right: 10, bottom: 20),
+      messageText: Text(
+        message,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+      duration: const Duration(seconds: 4),
+      flushbarPosition: position,
+      borderRadius: BorderRadius.circular(20),
+      icon: const Icon(Icons.notifications),
+      flushbarStyle: FlushbarStyle.FLOATING,
+    ).show(context);
+  }
+
   void _validateForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       _enteredPhoneNumber = '+234$_enteredPhoneNumber';
       FocusManager.instance.primaryFocus?.unfocus();
-      Flushbar(
-        backgroundColor: const Color.fromARGB(255, 0, 63, 114),
-        margin: const EdgeInsets.only(top: 20, left: 10, right: 10),
-        messageText: const Text(
+      _showFlushBar(
+          const Color.fromARGB(255, 0, 63, 114),
           'You might be redirected to your browsser. But don\'t panick. It is to verify you are not a bot...IKR',
-          style: TextStyle(fontSize: 16, color: Colors.white),
-        ),
-        duration: const Duration(seconds: 4),
-        flushbarPosition: FlushbarPosition.TOP,
-        borderRadius: BorderRadius.circular(20),
-        icon: const Icon(Icons.notifications),
-        flushbarStyle: FlushbarStyle.FLOATING,
-      ).show(context);
+          FlushbarPosition.TOP);
+
       _phoneAuthentication();
     }
   }
@@ -90,12 +102,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         await _setPreferences();
       },
       verificationFailed: (FirebaseAuthException e) {
-        if (e.code == 'invalid-phone-number') {}
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.message ?? "An Error ocurred"),
-          ),
-        );
+        // if (e.code == 'invalid-phone-number') {}
+        _showFlushBar(
+            Colors.red,
+            e.message ?? 'An Error occurred. Please Try again',
+            FlushbarPosition.BOTTOM);
+
         setState(() {
           _isAuthenticating = false;
         });

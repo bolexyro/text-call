@@ -86,7 +86,7 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
                         onChanged: (value) {
                           if (value.length == 1 && index < 5) {
                             FocusScope.of(context)
-                                .requestFocus(focusNodes[index + 1]);
+                                .nextFocus();
                           }
                           if (value.isEmpty && index > 0) {
                             FocusScope.of(context)

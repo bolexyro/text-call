@@ -233,8 +233,10 @@ class NotificationController {
       db.insert(
         'recents',
         {
-          'backgroundColorJson':
-              jsonifyColor(newRecent.message.backgroundColor),
+          'backgroundColorAlpha': newRecent.message.backgroundColor.alpha,
+          'backgroundColorRed': newRecent.message.backgroundColor.red,
+          'backgroundColorGreen': newRecent.message.backgroundColor.green,
+          'backgroundColorBlue': newRecent.message.backgroundColor.blue,
           'message': newRecent.message.message,
           'callTime': newRecent.callTime.toString(),
           'phoneNumber': newRecent.contact.phoneNumber,

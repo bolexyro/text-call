@@ -104,7 +104,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           context: context,
           builder: (context) => const OTPModalBottomSheet(),
           isDismissible: false,
-          enableDrag: true,
           isScrollControlled: true,
         );
         if (smsCode != null) {

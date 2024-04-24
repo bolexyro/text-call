@@ -324,7 +324,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
-            ? Theme.of(context).colorScheme.primary.withOpacity(180)
+            ? Theme.of(context).colorScheme.primary
             : const Color.fromARGB(255, 207, 222, 234),
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(25),

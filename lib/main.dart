@@ -269,6 +269,11 @@ class NotificationController {
         },
       );
       await db.close();
+
+      final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
+      if (isUserLoggedIn == false){
+        return;
+      }
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
           builder: (context) => SentMessageScreen(

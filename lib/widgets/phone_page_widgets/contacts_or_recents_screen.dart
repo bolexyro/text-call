@@ -207,8 +207,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => SentMessageScreen(
-                message: selectedRecent.message.message,
-                backgroundColor: selectedRecent.message.backgroundColor),
+                message: selectedRecent.message),
           ),
         );
       },

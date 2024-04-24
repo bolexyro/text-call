@@ -5,7 +5,7 @@ import 'package:text_call/models/message.dart';
 enum RecentCategory {
   outgoingAccepted,
   outgoingRejected,
-  outgoingMissed,
+  outgoingUnanswered,
   incomingAccepted,
   incomingRejected,
   incomingMissed,
@@ -16,7 +16,8 @@ const Map<RecentCategory, Icon> recentCategoryIconMap = {
     Icons.call,
     color: Colors.green,
   ),
-  RecentCategory.outgoingMissed: Icon(Icons.call_missed, color: Colors.green),
+  RecentCategory.outgoingUnanswered:
+      Icon(Icons.call_missed, color: Colors.green),
   RecentCategory.outgoingRejected: Icon(Icons.call_end, color: Colors.green),
   RecentCategory.incomingAccepted: Icon(Icons.call, color: Colors.blue),
   RecentCategory.incomingMissed: Icon(Icons.call_missed, color: Colors.blue),

@@ -287,7 +287,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     name: widget.calleeName,
                     phoneNumber: widget.calleePhoneNumber,
                   ),
-                  category: RecentCategory.outgoingMissed,
+                  category: RecentCategory.outgoingUnanswered,
                 );
                 ref.read(recentsProvider.notifier).addRecent(recent);
                 return Padding(

@@ -10,6 +10,7 @@ import 'package:text_call/utils/utils.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/models/message.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:http/http.dart' as http;
 
 class SentMessageScreen extends ConsumerWidget {
   const SentMessageScreen({
@@ -49,6 +50,12 @@ class SentMessageScreen extends ConsumerWidget {
                 final String? callerName = prefs.getString('callerName');
                 final String? callerPhoneNumber =
                     prefs.getString('callerPhoneNumber');
+
+                if (fromTerminated) {
+                  final url = Uri.https('text-call-backend.onrender.com',
+                      'call/accepted/$callerPhoneNumber');
+                  http.get(url);
+                }
 
                 final newRecent = Recent(
                   message: Message(

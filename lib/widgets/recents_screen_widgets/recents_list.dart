@@ -27,7 +27,6 @@ class _RecentsListState extends ConsumerState<RecentsList> {
   final Map<Recent, bool> _expandedBoolsMap = {};
   CallFilters _selectedFilter = CallFilters.allCalls;
 
-
   void _changeTileExpandedStatus(Recent recent) {
     setState(() {
       _expandedBoolsMap[recent] = !_expandedBoolsMap[recent]!;
@@ -89,7 +88,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
           .where(
             (element) => [
               RecentCategory.outgoingAccepted,
-              RecentCategory.outgoingMissed,
+              RecentCategory.outgoingUnanswered,
               RecentCategory.outgoingRejected
             ].contains(element.category),
           )
@@ -100,7 +99,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
       return allRecents
           .where(
             (element) => [
-              RecentCategory.outgoingMissed,
+              RecentCategory.outgoingUnanswered,
               RecentCategory.incomingMissed
             ].contains(element.category),
           )
@@ -164,10 +163,14 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                 ),
               ),
               order: GroupedListOrder.DESC,
-              itemComparator: (element1, element2) => element1.callTime.compareTo(element2.callTime),
+              itemComparator: (element1, element2) =>
+                  element1.callTime.compareTo(element2.callTime),
               itemBuilder: (context, recentN) {
-                _expandedBoolsMap[recentN] = _expandedBoolsMap.containsKey(recentN) ? _expandedBoolsMap[recentN]! : false;
-              
+                _expandedBoolsMap[recentN] =
+                    _expandedBoolsMap.containsKey(recentN)
+                        ? _expandedBoolsMap[recentN]!
+                        : false;
+
                 return Slidable(
                   startActionPane: ActionPane(
                     motion: const BehindMotion(),
@@ -192,8 +195,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                             _changeTileExpandedStatus(recentN);
                           },
                           isExpanded: _expandedBoolsMap[recentN]!,
-                          leading: recentCategoryIconMap[
-                              recentN.category]!,
+                          leading: recentCategoryIconMap[recentN.category]!,
                           trailing: Text(
                             DateFormat.Hm().format(recentN.callTime),
                           ),
@@ -241,8 +243,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                       : Column(
                           children: [
                             ListTile(
-                              leading: recentCategoryIconMap[
-                                  recentN.category]!,
+                              leading: recentCategoryIconMap[recentN.category]!,
                               trailing: Text(
                                 DateFormat.Hm().format(recentN.callTime),
                               ),

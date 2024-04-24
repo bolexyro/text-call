@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,36 +16,40 @@ import 'package:text_call/utils/utils.dart';
 import 'firebase_options.dart';
 import 'package:http/http.dart' as http;
 
-String? kToken;
-String? kCallMessage;
-String? kCallerPhoneNumber;
-String? kCallerName;
-Map<String, int>? kBackgroundColorMap;
-
 Future<void> _messageHandler(RemoteMessage message) async {
-  kCallMessage = message.data['message'];
-  kCallerPhoneNumber = message.data['caller_phone_number'];
-  kBackgroundColorMap = message.data['background_color'];
-  kBackgroundColorMap = {
+  late String callerName;
+  final String callMessage = message.data['message'];
+  final String callerPhoneNumber = message.data['caller_phone_number'];
+  final Map<String, int> backgroundColorMap = {
     'red': int.parse(message.data['red']),
     'blue': int.parse(message.data['blue']),
     'green': int.parse(message.data['green']),
     'alpha': int.parse(message.data['alpha']),
   };
+
   final db = await getDatabase();
   final data = await db.query('contacts',
-      where: 'phoneNumber = ?', whereArgs: [kCallerPhoneNumber]);
+      where: 'phoneNumber = ?', whereArgs: [callerPhoneNumber]);
 
   if (data.isEmpty) {
-    kCallerName = 'Unknown';
+    callerName = 'Unknown';
   } else {
-    kCallerName = data[0]['name'] as String;
+    callerName = data[0]['name'] as String;
   }
   await db.close();
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('callMessage', callMessage);
+  await prefs.setString('callerPhoneNumber', callerPhoneNumber);
+  await prefs.setString('callerName', callerPhoneNumber);
+  await prefs.setString(
+    'backgroundColor',
+    json.encode(backgroundColorMap),
+  );
+
   createAwesomeNotification(
-    title: kCallerName != 'Unknown'
-        ? '$kCallerName is calling '
-        : '$kCallerPhoneNumber is calling',
+    title: callerName != 'Unknown'
+        ? '$callerName is calling '
+        : '$callerPhoneNumber is calling',
     body: 'Might be urgent. Schrödinger\'s message',
   );
 }
@@ -51,7 +57,6 @@ Future<void> _messageHandler(RemoteMessage message) async {
 Future<void> _fcmSetup() async {
   final fcm = FirebaseMessaging.instance;
   await fcm.requestPermission();
-  kToken = await fcm.getToken();
   FirebaseMessaging.onMessage.listen(
     (RemoteMessage message) async {
       await _messageHandler(message);
@@ -59,6 +64,10 @@ Future<void> _fcmSetup() async {
   );
 }
 
+// From what I understand, the onBackgroudMessage handler is in a different isolate and thus has no access to the data from the main isolate.
+// Hence everything is pretty much null.
+// https://stackoverflow.com/questions/65664203/flutter-global-variable-becomes-null-when-app-is-in-background
+// https://github.com/firebase/flutterfi  re/issues/1878
 @pragma('vm:entry-point')
 Future<void> _fcmBackgroundHandler(RemoteMessage message) async {
   await _messageHandler(message);
@@ -69,56 +78,63 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  AwesomeNotifications().initialize(
-      // set the icon to null if you want to use the default app icon
-      null,
-      [
-        NotificationChannel(
+  await AwesomeNotifications().initialize(
+    // set the icon to null if you want to use the default app icon
+    null,
+    [
+      NotificationChannel(
+        channelGroupKey: 'basic_channel_group',
+        channelKey: 'basic_channel',
+        channelName: 'Basic notifications',
+        channelDescription: 'Notification channel for basic tests',
+        defaultColor: const Color.fromARGB(255, 151, 73, 214),
+        ledColor: Colors.white,
+        defaultRingtoneType: DefaultRingtoneType.Ringtone,
+        locked: true,
+        channelShowBadge: true,
+        importance: NotificationImportance.Max,
+      )
+    ],
+    // Channel groups are only visual and are not required
+    channelGroups: [
+      NotificationChannelGroup(
           channelGroupKey: 'basic_channel_group',
-          channelKey: 'basic_channel',
-          channelName: 'Basic notifications',
-          channelDescription: 'Notification channel for basic tests',
-          defaultColor: const Color.fromARGB(255, 151, 73, 214),
-          ledColor: Colors.white,
-          defaultRingtoneType: DefaultRingtoneType.Ringtone,
-          locked: true,
-          channelShowBadge: true,
-          importance: NotificationImportance.Max,
-        )
-      ],
-      // Channel groups are only visual and are not required
-      channelGroups: [
-        NotificationChannelGroup(
-            channelGroupKey: 'basic_channel_group',
-            channelGroupName: 'Basic group')
-      ],
-      debug: true);
+          channelGroupName: 'Basic group')
+    ],
+    debug: true,
+  );
+
   await _fcmSetup();
   FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
+  AwesomeNotifications().setListeners(
+    onActionReceivedMethod: NotificationController.onActionReceivedMethod,
+    onNotificationCreatedMethod:
+        NotificationController.onNotificationCreatedMethod,
+    onNotificationDisplayedMethod:
+        NotificationController.onNotificationDisplayedMethod,
+    onDismissActionReceivedMethod:
+        NotificationController.onDismissActionReceivedMethod,
+  );
   ReceivedAction? receivedAction =
       await AwesomeNotifications().getInitialNotificationAction(
     removeFromActionEvents: false,
   );
-
   runApp(
-    receivedAction == null
-        ? const ProviderScope(
-            child: TextCall(),
-          )
-        : MaterialApp(
-            home: SentMessageScreen(
-              backgroundColor: deJsonifyColor(kBackgroundColorMap!),
-              message: kCallMessage == null || kCallMessage!.isEmpty
-                  ? 'Bolexyro making innovations bro.'
-                  : kCallMessage!,
-              fromTerminated: true,
-            ),
-          ),
+    ProviderScope(
+      child: receivedAction == null
+          ? const TextCall(fromTerminated: false)
+          : const TextCall(fromTerminated: true),
+    ),
   );
 }
 
 class TextCall extends StatefulWidget {
-  const TextCall({super.key});
+  const TextCall({
+    super.key,
+    required this.fromTerminated,
+  });
+  final bool fromTerminated;
+
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
@@ -133,24 +149,14 @@ class _TextCallState extends State<TextCall> {
   late Future<bool> _isUserLoggedIn;
 
   Future<bool> isUserLoggedIn() async {
-    // Obtain shared preferences.
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
 
-    // Save an boolean value to 'repeat' key.
     return isUserLoggedIn ?? false;
   }
 
   @override
   void initState() {
-    AwesomeNotifications().setListeners(
-        onActionReceivedMethod: NotificationController.onActionReceivedMethod,
-        onNotificationCreatedMethod:
-            NotificationController.onNotificationCreatedMethod,
-        onNotificationDisplayedMethod:
-            NotificationController.onNotificationDisplayedMethod,
-        onDismissActionReceivedMethod:
-            NotificationController.onDismissActionReceivedMethod);
     _isUserLoggedIn = isUserLoggedIn();
     super.initState();
   }
@@ -177,11 +183,20 @@ class _TextCallState extends State<TextCall> {
               ),
             );
           }
-          if (snapshot.hasData) {
-            if (snapshot.data!) {
-              return const PhonePageScreen();
-            }
+          if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
           }
+          if (snapshot.data!) {
+            if (widget.fromTerminated) {
+              return const SentMessageScreen(
+                message: 'message',
+                backgroundColor: Colors.red,
+                fromTerminated: true,
+              );
+            }
+            return const PhonePageScreen();
+          }
+
           return const AuthScreen();
         },
       ),
@@ -209,24 +224,34 @@ class NotificationController {
   @pragma("vm:entry-point")
   static Future<void> onActionReceivedMethod(
       ReceivedAction receivedAction) async {
-    // Your code goes here
     if (receivedAction.buttonKeyPressed == 'REJECT') {
-      final url = Uri.https('text-call-backend.onrender.com',
-          'call/rejected/$kCallerPhoneNumber');
+      final prefs = await SharedPreferences.getInstance();
+      final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
+
+      final url = Uri.https(
+          'text-call-backend.onrender.com', 'call/rejected/$callerPhoneNumber');
       http.get(url);
     }
+
     if (receivedAction.buttonKeyPressed == 'ACCEPT') {
-      final url = Uri.https('text-call-backend.onrender.com',
-          'call/accepted/$kCallerPhoneNumber');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.reload();
+      final String? callMessage = prefs.getString('callMessage');
+      final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
+      final String? callerName = prefs.getString('callerName');
+      final String? backgroundColor = prefs.getString('backgroundColor');
+
+      final url = Uri.https(
+          'text-call-backend.onrender.com', 'call/accepted/$callerPhoneNumber');
       http.get(url);
 
       final db = await getDatabase();
       final newRecent = Recent(
         message: Message(
-          message: kCallMessage!,
-          backgroundColor: deJsonifyColor(kBackgroundColorMap!),
+          message: callMessage!,
+          backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
         ),
-        contact: Contact(name: kCallerName!, phoneNumber: kCallerPhoneNumber!),
+        contact: Contact(name: callerName!, phoneNumber: callerPhoneNumber!),
         category: RecentCategory.incomingAccepted,
       );
 
@@ -248,10 +273,10 @@ class NotificationController {
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
           builder: (context) => SentMessageScreen(
-            backgroundColor: deJsonifyColor(kBackgroundColorMap!),
-            message: kCallMessage == null || kCallMessage!.isEmpty
+            backgroundColor: deJsonifyColor(json.decode(backgroundColor)),
+            message: callMessage.isEmpty
                 ? 'Bolexyro making innovations bro.'
-                : kCallMessage!,
+                : callMessage,
           ),
         ),
       );

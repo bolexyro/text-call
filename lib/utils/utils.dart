@@ -13,7 +13,7 @@ void createAwesomeNotification({String? title, String? body}) {
     content: NotificationContent(
       id: 123,
       channelKey: 'basic_channel',
-      color: Colors.white,
+      color: Colors.black,
       title: title,
       body: body,
       category: NotificationCategory.Call,
@@ -123,16 +123,14 @@ void showErrorDialog(String text, BuildContext context) {
   );
 }
 
-
-bool isPhoneNumberValid(String phoneNumber){
-  if (phoneNumber.length == 14){
+bool isPhoneNumberValid(String phoneNumber) {
+  if (phoneNumber.length == 14) {
     return true;
   }
   return false;
 }
 
-Future<bool> checkIfNumberExists(
-    String phoneNumber) async {
+Future<bool> checkIfNumberExists(String phoneNumber) async {
   final db = FirebaseFirestore.instance;
   final docRef = db.collection("users").doc(phoneNumber);
   final document = await docRef.get();

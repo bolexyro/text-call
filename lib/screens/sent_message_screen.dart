@@ -1,13 +1,14 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
-// import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:flutter/material.dart';
-import 'package:text_call/screens/phone_page_screen.dart';
+import 'dart:convert';
 
-// Bolexyro, make sure you handle the notifiaction controller stuff oo.
+import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:text_call/screens/phone_page_screen.dart';
+import 'package:text_call/utils/utils.dart';
+
 class SentMessageScreen extends StatefulWidget {
   const SentMessageScreen({
     super.key,
-
     required this.message,
     required this.backgroundColor,
     this.fromTerminated = false,
@@ -22,62 +23,110 @@ class SentMessageScreen extends StatefulWidget {
 }
 
 class _SentMessageScreenState extends State<SentMessageScreen> {
+  // NB: if a user is not logged in, they will still be
   @override
   void initState() {
-    // AwesomeNotifications().setListeners(
-    //     onActionReceivedMethod: NotificationController.onActionReceivedMethod,
-    //     onNotificationCreatedMethod:
-    //         NotificationController.onNotificationCreatedMethod,
-    //     onNotificationDisplayedMethod:
-    //         NotificationController.onNotificationDisplayedMethod,
-    //     onDismissActionReceivedMethod:
-    //         NotificationController.onDismissActionReceivedMethod);
-    // _isUserLoggedIn = isUserLoggedIn();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          forceMaterialTransparency: true,
-          title: const Text('From your loved one or not hehe'),
-        ),
-        backgroundColor: widget.backgroundColor,
-        body: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: AnimatedTextKit(
-                  animatedTexts: [
-                    TyperAnimatedText(
-                      widget.message,
-                      textAlign: TextAlign.center,
-                      textStyle: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 40,
-                        color: Colors.white,
-                      ),
-                      speed: const Duration(milliseconds: 100),
-                    ),
-                  ],
-                  displayFullTextOnTap: true,
-                  repeatForever: false,
-                  totalRepeatCount: 1,
-                ),
+    final prefs = SharedPreferences.getInstance();
+
+    return widget.fromTerminated == false
+        ? SafeArea(
+            child: Scaffold(
+              appBar: AppBar(
+                forceMaterialTransparency: true,
+                title: const Text('From your loved one or not hehe'),
               ),
+              backgroundColor: widget.backgroundColor,
+              body: TheColumnWidget(message: widget.message),
             ),
-            if (widget.fromTerminated)
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const PhonePageScreen(),
-                )),
-                child: const Icon(Icons.home),
-              ),
-          ],
+          )
+        : SafeArea(
+            child: FutureBuilder(
+              future: prefs,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error ${snapshot.error}'),
+                  );
+                }
+                final prefs = snapshot.data;
+                prefs!.reload();
+
+                final String? callMessage = prefs.getString('callMessage');
+                final String? backgroundColor =
+                    prefs.getString('backgroundColor');
+
+                return Scaffold(
+                  appBar: AppBar(
+                    forceMaterialTransparency: true,
+                    title: const Text('From your loved one or not hehe'),
+                  ),
+                  backgroundColor: deJsonifyColor(
+                    json.decode(backgroundColor!),
+                  ),
+                  body: TheColumnWidget(
+                    message: callMessage!,
+                    fromTerminated: true,
+                  ),
+                );
+              },
+            ),
+          );
+  }
+}
+
+class TheColumnWidget extends StatelessWidget {
+  const TheColumnWidget({
+    super.key,
+    required this.message,
+    this.fromTerminated = false,
+  });
+
+  final String message;
+  final bool fromTerminated;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: Center(
+            child: AnimatedTextKit(
+              animatedTexts: [
+                TyperAnimatedText(
+                  message,
+                  textAlign: TextAlign.center,
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 40,
+                    color: Colors.white,
+                  ),
+                  speed: const Duration(milliseconds: 100),
+                ),
+              ],
+              displayFullTextOnTap: true,
+              repeatForever: false,
+              totalRepeatCount: 1,
+            ),
+          ),
         ),
-      ),
+        if (fromTerminated)
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => const PhonePageScreen(),
+            )),
+            child: const Icon(Icons.home),
+          ),
+      ],
     );
   }
 }

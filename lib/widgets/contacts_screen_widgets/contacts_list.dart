@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:grouped_list/grouped_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/utils.dart';
@@ -108,6 +111,17 @@ class _ContactsListState extends ConsumerState<ContactsList> {
             const SizedBox(width: 10),
             IconButton(
               onPressed: () async {
+                print('......');
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('callMessage', 'callMessage');
+                await prefs.setString('callerPhoneNumber', 'callerPhoneNumber');
+                await prefs.setString('callerName', 'callerPhoneNumber');
+                await prefs.setString(
+                  'backgroundColor',
+                  json.encode(
+                      {'alpha': 200, 'red': 100, 'blue': 90, 'green': 20}),
+                );
+                print('sett');
                 createAwesomeNotification(title: 'Bolexyro');
               },
               icon: const Icon(Icons.search),

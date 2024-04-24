@@ -2,10 +2,10 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:text_call/main.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
@@ -37,10 +37,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         );
 
     final db = FirebaseFirestore.instance;
+    final fcm = FirebaseMessaging.instance;
 
+    final fcmToken = await fcm.getToken();
     // Add a new document with a specified ID
     db.collection("users").doc(_enteredPhoneNumber).set(
-      {'fcmToken': kToken},
+      {'fcmToken': fcmToken},
     );
 
     Navigator.of(context).pushReplacement(

@@ -24,48 +24,16 @@ class RecentsList extends ConsumerStatefulWidget {
 }
 
 class _RecentsListState extends ConsumerState<RecentsList> {
-  final List<bool> _listExpandedBools = [];
+  final Map<Recent, bool> _expandedBoolsMap = {};
   CallFilters _selectedFilter = CallFilters.allCalls;
-  //  final recentsList = [
-  //   Recent(
-  //     contact: const Contact(
-  //       name: 'Bolexyro',
-  //       phoneNumber: '09027929326',
-  //     ),
-  //     category: RecentCategory.incomingAccepted,
-  //   ),
-  //   Recent(
-  //     contact: const Contact(
-  //       name: 'Bolexyronn',
-  //       phoneNumber: '09027929326',
-  //     ),
-  //     category: RecentCategory.incomingRejected,
-  //     callTime: DateTime(2024, 4, 13, 2),
-  //   ),
-  //   Recent(
-  //     contact: const Contact(
-  //       name: 'Bolexyrorrr',
-  //       phoneNumber: '09027929326',
-  //     ),
-  //     category: RecentCategory.outgoingMissed,
-  //     callTime: DateTime(2000, 0, 0, 0, 9),
-  //   ),
-  //   Recent(
-  //     contact: const Contact(
-  //       name: 'Giannis',
-  //       phoneNumber: 'phoneNumber',
-  //     ),
-  //     category: RecentCategory.incomingAccepted,
-  //     callTime: DateTime(2024, 4, 12),
-  //   ),
-  // ];
 
-  void _changeTileExpandedStatus(index) {
+
+  void _changeTileExpandedStatus(Recent recent) {
     setState(() {
-      _listExpandedBools[index] = !_listExpandedBools[index];
-      for (int i = 0; i < _listExpandedBools.length; i++) {
-        if (i != index && _listExpandedBools[i] == true) {
-          _listExpandedBools[i] = false;
+      _expandedBoolsMap[recent] = !_expandedBoolsMap[recent]!;
+      for (final loopRecent in _expandedBoolsMap.keys) {
+        if (loopRecent != recent && _expandedBoolsMap[loopRecent] == true) {
+          _expandedBoolsMap[loopRecent] = false;
         }
       }
     });
@@ -153,10 +121,6 @@ class _RecentsListState extends ConsumerState<RecentsList> {
   Widget build(BuildContext context) {
     final recentsList = _applyFilter(ref.watch(recentsProvider));
 
-    for (int i = 0; i < recentsList.length; i++) {
-      _listExpandedBools.add(false);
-    }
-
     return Column(
       children: [
         const SizedBox(
@@ -187,7 +151,6 @@ class _RecentsListState extends ConsumerState<RecentsList> {
           Expanded(
             child: GroupedListView(
               useStickyGroupSeparators: true,
-              // floatingHeader: true,
               stickyHeaderBackgroundColor:
                   Theme.of(context).colorScheme.primaryContainer,
               elements: recentsList,
@@ -201,9 +164,10 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                 ),
               ),
               order: GroupedListOrder.DESC,
+              itemComparator: (element1, element2) => element1.callTime.compareTo(element2.callTime),
               itemBuilder: (context, recentN) {
-                int index = recentsList.indexOf(recentN);
-                _listExpandedBools.add(false);
+                _expandedBoolsMap[recentN] = _expandedBoolsMap.containsKey(recentN) ? _expandedBoolsMap[recentN]! : false;
+              
                 return Slidable(
                   startActionPane: ActionPane(
                     motion: const BehindMotion(),
@@ -225,15 +189,15 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                   child: widget.screen == Screen.phone
                       ? ExpandableListTile(
                           tileOnTapped: () {
-                            _changeTileExpandedStatus(index);
+                            _changeTileExpandedStatus(recentN);
                           },
-                          isExpanded: _listExpandedBools[index],
+                          isExpanded: _expandedBoolsMap[recentN]!,
                           leading: recentCategoryIconMap[
-                              recentsList[index].category]!,
+                              recentN.category]!,
                           trailing: Text(
                             DateFormat.Hm().format(recentN.callTime),
                           ),
-                          title: Text(recentsList[index].contact.name),
+                          title: Text(recentN.contact.name),
                           expandedContent: Column(
                             children: [
                               const SizedBox(
@@ -278,11 +242,11 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                           children: [
                             ListTile(
                               leading: recentCategoryIconMap[
-                                  recentsList[index].category]!,
+                                  recentN.category]!,
                               trailing: Text(
                                 DateFormat.Hm().format(recentN.callTime),
                               ),
-                              title: Text(recentsList[index].contact.name),
+                              title: Text(recentN.contact.name),
                               onTap: () => widget.onRecentSelected(recentN),
                             ),
                             const Divider(

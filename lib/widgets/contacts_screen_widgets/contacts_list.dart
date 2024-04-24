@@ -27,7 +27,7 @@ class ContactsList extends ConsumerStatefulWidget {
 }
 
 class _ContactsListState extends ConsumerState<ContactsList> {
-  final List<bool> _listExpandedBools = [];
+  final Map<Contact, bool> _expandedBoolsMap = {};
 
   void _showAddContactDialog(context) async {
     showAdaptiveDialog(
@@ -38,12 +38,12 @@ class _ContactsListState extends ConsumerState<ContactsList> {
     );
   }
 
-  void _changeTileExpandedStatus(index) {
+  void _changeTileExpandedStatus(Contact contact) {
     setState(() {
-      _listExpandedBools[index] = !_listExpandedBools[index];
-      for (int i = 0; i < _listExpandedBools.length; i++) {
-        if (i != index && _listExpandedBools[i] == true) {
-          _listExpandedBools[i] = false;
+      _expandedBoolsMap[contact] = !_expandedBoolsMap[contact]!;
+      for (final Contact loopContact in _expandedBoolsMap.keys) {
+        if (loopContact != contact && _expandedBoolsMap[loopContact] == true) {
+          _expandedBoolsMap[loopContact] = false;
         }
       }
     });
@@ -65,22 +65,6 @@ class _ContactsListState extends ConsumerState<ContactsList> {
   @override
   Widget build(BuildContext context) {
     final List<Contact> contactsList = ref.watch(contactsProvider);
-    // final contactsList = [
-    //   const Contact(name: 'Bolexyro', phoneNumber: '09027929326'),
-    //   const Contact(name: 'Mom', phoneNumber: '07034744820'),
-    //   const Contact(name: 'Mosh', phoneNumber: '07034744820'),
-    //   const Contact(name: 'Giannis', phoneNumber: '07034744820'),
-    //   const Contact(name: 'Banjo', phoneNumber: '07034744820'),
-    //   const Contact(name: 'LeBron', phoneNumber: '07034744820'),
-    //   const Contact(name: 'Samuel', phoneNumber: '07034744820'),
-    //   const Contact(name: 'Wisdom', phoneNumber: '07034744820'),
-    //   const Contact(name: 'Oba', phoneNumber: '07034744820'),
-    //   const Contact(name: 'Someone', phoneNumber: '07034744820'),
-    // ];
-
-    contactsList.sort(
-      (a, b) => a.name.compareTo(b.name),
-    );
 
     return Column(
       children: [
@@ -111,7 +95,6 @@ class _ContactsListState extends ConsumerState<ContactsList> {
             const SizedBox(width: 10),
             IconButton(
               onPressed: () async {
-                print('......');
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setString('callMessage', 'callMessage');
                 await prefs.setString('callerPhoneNumber', 'callerPhoneNumber');
@@ -121,7 +104,6 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                   json.encode(
                       {'alpha': 200, 'red': 100, 'blue': 90, 'green': 20}),
                 );
-                print('sett');
                 createAwesomeNotification(title: 'Bolexyro');
               },
               icon: const Icon(Icons.search),
@@ -149,9 +131,13 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
+              itemComparator: (element1, element2) =>
+                  element1.name.compareTo(element2.name),
               itemBuilder: (context, contactN) {
-                int index = contactsList.indexOf(contactN);
-                _listExpandedBools.add(false);
+                _expandedBoolsMap[contactN] =
+                    _expandedBoolsMap.containsKey(contactN)
+                        ? _expandedBoolsMap[contactN]!
+                        : false;
                 return Slidable(
                   startActionPane: ActionPane(
                     motion: const BehindMotion(),
@@ -186,7 +172,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                   ),
                   child: widget.screen == Screen.phone
                       ? ExpandableListTile(
-                          isExpanded: _listExpandedBools[index],
+                          isExpanded: _expandedBoolsMap[contactN]!,
                           title: Text(contactN.name),
                           leading: CircleAvatar(
                             child: Container(
@@ -212,7 +198,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                             ),
                           ),
                           tileOnTapped: () {
-                            _changeTileExpandedStatus(index);
+                            _changeTileExpandedStatus(contactN);
                           },
                           expandedContent: Column(
                             children: [

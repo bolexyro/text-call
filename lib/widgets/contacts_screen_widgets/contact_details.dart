@@ -58,7 +58,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
 
   void _changeTileExpandedStatus(Recent recent) {
     setState(() {
-      _expandedBoolsMap[recent] = true;
+      _expandedBoolsMap[recent] = !_expandedBoolsMap[recent]!;
       for (final Recent loopRecent in _expandedBoolsMap.keys) {
         if (loopRecent != recent && _expandedBoolsMap[loopRecent] == true) {
           _expandedBoolsMap[loopRecent] = false;
@@ -145,8 +145,8 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
+              itemComparator: (element1, element2) => element1.callTime.compareTo(element2.callTime),
               itemBuilder: (context, recentN) {
-                // int index = recentsForAContact.indexOf(recentN);
                 _expandedBoolsMap[recentN] = _expandedBoolsMap.containsKey(recentN) ? _expandedBoolsMap[recentN]! : false;
                 return Column(
                   children: [

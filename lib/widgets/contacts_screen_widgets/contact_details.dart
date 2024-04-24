@@ -30,6 +30,8 @@ class ContactDetails extends ConsumerStatefulWidget {
 }
 
 class _ContactDetailsState extends ConsumerState<ContactDetails> {
+  final Map<Recent, bool> _expandedBoolsMap = {};
+
   void _goToSentMessageScreen(Message message) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -54,13 +56,12 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
     return DateFormat('d MMMM').format(headerDateTime);
   }
 
-  final List<bool> _listExpandedBools = [];
-  void _changeTileExpandedStatus(index) {
+  void _changeTileExpandedStatus(Recent recent) {
     setState(() {
-      _listExpandedBools[index] = !_listExpandedBools[index];
-      for (int i = 0; i < _listExpandedBools.length; i++) {
-        if (i != index && _listExpandedBools[i] == true) {
-          _listExpandedBools[i] = false;
+      _expandedBoolsMap[recent] = !_expandedBoolsMap[recent]!;
+      for (final Recent loopRecent in _expandedBoolsMap.keys) {
+        if (loopRecent != recent && _expandedBoolsMap[loopRecent] == true) {
+          _expandedBoolsMap[loopRecent] = false;
         }
       }
     });
@@ -102,9 +103,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
     final allRecents = ref.watch(recentsProvider);
     final recentsForAContact =
         getRecentsForAContact(allRecents, widget.contact!.phoneNumber);
-    recentsForAContact.sort(
-      (a, b) => b.callTime.compareTo(a.callTime),
-    );
+
     return Column(
       children: [
         ContactCardWProfilePicStack(
@@ -131,6 +130,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
         if (recentsForAContact.isNotEmpty)
           Expanded(
             child: GroupedListView(
+              order: GroupedListOrder.DESC,
               shrinkWrap: true,
               useStickyGroupSeparators: true,
               stickyHeaderBackgroundColor:
@@ -146,8 +146,8 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
                 ),
               ),
               itemBuilder: (context, recentN) {
-                int index = recentsForAContact.indexOf(recentN);
-                _listExpandedBools.add(false);
+                // int index = recentsForAContact.indexOf(recentN);
+                _expandedBoolsMap[recentN] = false;
                 return Column(
                   children: [
                     ExpandableListTile(
@@ -171,8 +171,8 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
                         ),
                         child: const Text('Show Message'),
                       ),
-                      isExpanded: _listExpandedBools[index],
-                      tileOnTapped: () => _changeTileExpandedStatus(index),
+                      isExpanded: _expandedBoolsMap[recentN]!,
+                      tileOnTapped: () => _changeTileExpandedStatus(recentN),
                     ),
                   ],
                 );

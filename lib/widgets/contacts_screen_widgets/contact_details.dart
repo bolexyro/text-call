@@ -66,6 +66,20 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
     });
   }
 
+  String _getFormattedCallTime(DateTime callTime) {
+    final today = DateTime.now();
+
+    final differenceInDays = today.difference(callTime).inDays;
+
+    if (differenceInDays == 0) {
+      return 'Today @${DateFormat.Hm().format(callTime)}';
+    } else if (differenceInDays == 1) {
+      return 'Yesterday @${DateFormat.Hm().format(callTime)}';
+    } else {
+      return '${DateFormat('dd-MM-yyyy').format(callTime)} @${DateFormat.Hm().format(callTime)}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final purpose =
@@ -82,7 +96,14 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
             transparentAndNonTransparentWidth: widget.stackContainerWidths,
           ),
           const SizedBox(
-            height: 20,
+            height: 10,
+          ),
+          Text(
+            _getFormattedCallTime(widget.recent!.callTime),
+            style: const TextStyle(fontSize: 20),
+          ),
+          const SizedBox(
+            height: 7,
           ),
           ElevatedButton(
             onPressed: () {

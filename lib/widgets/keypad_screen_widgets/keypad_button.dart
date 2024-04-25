@@ -15,7 +15,7 @@ class KeypadButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Center(
       child: Container(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+        decoration: const BoxDecoration(shape: BoxShape.circle),
         child: TextButton(
           onPressed: () {
             onButtonPressed(buttonText);

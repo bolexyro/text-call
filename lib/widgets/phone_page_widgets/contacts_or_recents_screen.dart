@@ -117,7 +117,6 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
                 contact: _currentContact!,
                 stackContainerWidths: MediaQuery.sizeOf(context).width * .425,
               );
-
         return Row(
           children: [
             Expanded(
@@ -132,12 +131,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
                 padding: const EdgeInsets.only(top: 40),
                 decoration: BoxDecoration(
                   color: isDarkMode
-                      ? Theme.of(context)
-                          .colorScheme
-                          .primaryContainer
-                          .withRed(11)
-                          .withGreen(18)
-                          .withBlue(25)
+                      ? makeColorLighter(Theme.of(context).primaryColor, 15)
                       : Colors.grey[200],
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -187,12 +181,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
               padding: const EdgeInsets.only(top: 40),
               decoration: BoxDecoration(
                 color: isDarkMode
-                    ? Theme.of(context)
-                        .colorScheme
-                        .primaryContainer
-                        .withRed(11)
-                        .withGreen(18)
-                        .withBlue(25)
+                    ? makeColorLighter(Theme.of(context).primaryColor, 15)
                     : Colors.grey[200],
                 borderRadius: BorderRadius.circular(15),
               ),
@@ -206,8 +195,8 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
       onRecentSelected: (Recent selectedRecent) {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => SentMessageScreen(
-                message: selectedRecent.message),
+            builder: (context) =>
+                SentMessageScreen(message: selectedRecent.message),
           ),
         );
       },

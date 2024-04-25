@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -271,6 +272,8 @@ class NotificationController {
 
       final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
       if (isUserLoggedIn == false) {
+        showFlushBar(Colors.blue, 'You have to login to see the message.',
+            FlushbarPosition.TOP, TextCall.navigatorKey.currentContext!);
         return;
       }
       Navigator.of(TextCall.navigatorKey.currentContext!).push(

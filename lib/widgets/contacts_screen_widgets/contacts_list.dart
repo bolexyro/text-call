@@ -102,7 +102,13 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                 await prefs.setString(
                   'backgroundColor',
                   json.encode(
-                      {'alpha': 200, 'red': 100, 'blue': 90, 'green': 20}),
+                    {
+                      'alpha': 200,
+                      'red': 90,
+                      'green': 90,
+                      'blue': 20,
+                    },
+                  ),
                 );
                 createAwesomeNotification(title: 'Bolexyro');
               },

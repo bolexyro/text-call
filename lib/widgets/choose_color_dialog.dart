@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:text_call/utils/utils.dart';
 
 class ChooseColorDialog extends StatefulWidget {
   const ChooseColorDialog({
@@ -47,12 +48,9 @@ class _ChooseColorDialogState extends State<ChooseColorDialog> {
 
     return AlertDialog(
       backgroundColor: Theme.of(context).brightness == Brightness.dark
-          ? Theme.of(context)
-              .colorScheme
-              .primaryContainer
-              .withRed(11)
-              .withGreen(18)
-              .withBlue(25)
+          ?makeColorLighter(Theme.of(context)
+              .colorScheme.inversePrimary, -135) 
+              
           : null,
       title: const Text('Pick a color!'),
       content: Column(
@@ -65,7 +63,7 @@ class _ChooseColorDialogState extends State<ChooseColorDialog> {
           const SizedBox(
             height: 10,
           ),
-          Row(
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               ElevatedButton(
                 onPressed: () {

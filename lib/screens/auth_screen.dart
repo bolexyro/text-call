@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
+import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/otp_modal_bottom_sheet.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
@@ -52,35 +53,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     );
   }
 
-  void _showFlushBar(Color color, String message, FlushbarPosition position) {
-    Flushbar().dismiss();
-
-    Flushbar(
-      backgroundColor: color,
-      margin: position == FlushbarPosition.TOP
-          ? const EdgeInsets.only(top: 20, left: 10, right: 10)
-          : const EdgeInsets.only(left: 10, right: 10, bottom: 20),
-      messageText: Text(
-        message,
-        style: const TextStyle(fontSize: 16, color: Colors.white),
-      ),
-      duration: const Duration(seconds: 4),
-      flushbarPosition: position,
-      borderRadius: BorderRadius.circular(20),
-      icon: const Icon(Icons.notifications),
-      flushbarStyle: FlushbarStyle.FLOATING,
-    ).show(context);
-  }
-
   void _validateForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       _enteredPhoneNumber = '+234$_enteredPhoneNumber';
       FocusManager.instance.primaryFocus?.unfocus();
-      _showFlushBar(
+      showFlushBar(
           const Color.fromARGB(255, 0, 63, 114),
           'You might be redirected to your browsser. But don\'t panick. It is to verify you are not a bot...IKR',
-          FlushbarPosition.TOP);
+          FlushbarPosition.TOP,
+          context);
 
       _phoneAuthentication();
     }
@@ -103,10 +85,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       },
       verificationFailed: (FirebaseAuthException e) {
         // if (e.code == 'invalid-phone-number') {}
-        _showFlushBar(
-            Colors.red,
-            e.message ?? 'An Error occurred. Please Try again',
-            FlushbarPosition.BOTTOM);
+        showFlushBar(
+          Colors.red,
+          e.message ?? 'An Error occurred. Please Try again',
+          FlushbarPosition.BOTTOM,
+          context,
+        );
 
         setState(() {
           _isAuthenticating = false;

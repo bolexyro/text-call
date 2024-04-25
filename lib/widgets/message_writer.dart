@@ -38,7 +38,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   late Future _animationDelay;
   Color _selectedColor = const Color.fromARGB(255, 13, 214, 214);
 
-  late WebSocketChannel _channel;
+  WebSocketChannel? _channel;
 
   bool _callSending = false;
   final _colorizeColors = [
@@ -50,7 +50,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
   @override
   void dispose() {
-    _channel.sink.close();
+    _channel?.sink.close();
+
     _confettiController.dispose();
     _messageController.dispose();
     super.dispose();
@@ -71,7 +72,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       const Duration(seconds: 40),
     );
 
-    _channel.sink.add(
+    _channel!.sink.add(
       json.encode(
         {
           'caller_phone_number': callerPhoneNumber,
@@ -139,14 +140,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 3,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                      color: Theme.of(context).primaryColor,
                     ),
                     child: Material(
                       borderRadius: BorderRadius.circular(8),
@@ -205,7 +199,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
     if (_callSending) {
       messageWriterContent = StreamBuilder(
-        stream: _channel.stream,
+        stream: _channel!.stream,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final snapshotData = json.decode(snapshot.data);
@@ -324,7 +318,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
-            ? Theme.of(context).colorScheme.primary
+            ? makeColorLighter(Theme.of(context).primaryColor, 15)
             : const Color.fromARGB(255, 207, 222, 234),
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(25),

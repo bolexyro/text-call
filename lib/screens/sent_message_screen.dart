@@ -22,6 +22,14 @@ class SentMessageScreen extends ConsumerWidget {
   final bool fromTerminated;
   final Message? message;
 
+  Widget scaffoldTitle(Color color) {
+    return Text(
+      'From your loved one or not hehe.',
+      style: TextStyle(
+          color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prefs = SharedPreferences.getInstance();
@@ -56,7 +64,6 @@ class SentMessageScreen extends ConsumerWidget {
                       'call/accepted/$callerPhoneNumber');
                   http.get(url);
                 }
-
                 final newRecent = Recent(
                   message: Message(
                     message: callMessage!,
@@ -69,28 +76,65 @@ class SentMessageScreen extends ConsumerWidget {
                 );
 
                 ref.read(recentsProvider.notifier).addRecent(newRecent);
-
+                final backgroundActualColor =
+                    deJsonifyColor(json.decode(backgroundColor));
                 return Scaffold(
                   appBar: AppBar(
+                    iconTheme: IconThemeData(
+                      color: backgroundActualColor.computeLuminance() > 0.5
+                          ? Colors.black
+                          : Colors.white,
+                    ),
                     forceMaterialTransparency: true,
-                    title: const Text('From your loved one or not hehe'),
+                    title: scaffoldTitle(backgroundActualColor),
                   ),
-                  backgroundColor: deJsonifyColor(
-                    json.decode(backgroundColor),
-                  ),
+                  floatingActionButton: fromTerminated
+                      ? FloatingActionButton(
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const PhonePageScreen(),
+                            ),
+                          ),
+                          shape: const CircleBorder(),
+                          backgroundColor:
+                              makeColorLighter(backgroundActualColor, 5),
+                          child: Icon(
+                            Icons.home,
+                            color:
+                                backgroundActualColor.computeLuminance() > 0.5
+                                    ? Colors.black
+                                    : Colors.white,
+                          ),
+                        )
+                      : null,
+                  backgroundColor: backgroundActualColor,
                   body: TheColumnWidget(
-                    message: callMessage,
+                    message: Message(
+                      message: callMessage,
+                      backgroundColor: backgroundActualColor,
+                    ),
                     fromTerminated: fromTerminated,
                   ),
                 );
               },
             )
           : Scaffold(
-              appBar: AppBar(),
-              backgroundColor: message!.backgroundColor,
-              body: TheColumnWidget(
-                message: message!.message,
+              appBar: AppBar(
+                iconTheme: IconThemeData(
+                  color: message!.backgroundColor.computeLuminance() > 0.5
+                      ? Colors.black
+                      : Colors.white,
+                ),
+                forceMaterialTransparency: true,
+                title: scaffoldTitle(message!.backgroundColor),
               ),
+              body: TheColumnWidget(
+                message: Message(
+                  message: message!.message,
+                  backgroundColor: message!.backgroundColor,
+                ),
+              ),
+              backgroundColor: message!.backgroundColor,
             ),
     );
   }
@@ -103,7 +147,7 @@ class TheColumnWidget extends StatelessWidget {
     this.fromTerminated = false,
   });
 
-  final String message;
+  final Message message;
   final bool fromTerminated;
 
   @override
@@ -115,12 +159,14 @@ class TheColumnWidget extends StatelessWidget {
             child: AnimatedTextKit(
               animatedTexts: [
                 TyperAnimatedText(
-                  message,
+                  message.message,
                   textAlign: TextAlign.center,
-                  textStyle: const TextStyle(
+                  textStyle: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 40,
-                    color: Colors.white,
+                    color: message.backgroundColor.computeLuminance() > 0.5
+                        ? Colors.black
+                        : Colors.white,
                   ),
                   speed: const Duration(milliseconds: 100),
                 ),
@@ -131,13 +177,6 @@ class TheColumnWidget extends StatelessWidget {
             ),
           ),
         ),
-        if (fromTerminated)
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => const PhonePageScreen(),
-            )),
-            child: const Icon(Icons.home),
-          ),
       ],
     );
   }

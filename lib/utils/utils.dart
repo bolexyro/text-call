@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ void createAwesomeNotification({String? title, String? body}) {
       fullScreenIntent: true,
       autoDismissible: false,
       wakeUpScreen: true,
-      backgroundColor: Colors.orange,
+      backgroundColor: Colors.green,
       locked: true,
       chronometer: Duration.zero, // Chronometer starts to count at 0 seconds
       timeoutAfter: const Duration(seconds: 20),
@@ -164,4 +165,33 @@ List<Recent> getRecentsForAContact(
       )
       .toList();
   return recentsForThatContact;
+}
+
+void showFlushBar(Color color, String message, FlushbarPosition position,
+    BuildContext context) {
+  Flushbar().dismiss();
+
+  Flushbar(
+    backgroundColor: color,
+    margin: position == FlushbarPosition.TOP
+        ? const EdgeInsets.only(top: 20, left: 10, right: 10)
+        : const EdgeInsets.only(left: 10, right: 10, bottom: 20),
+    messageText: Text(
+      message,
+      style: const TextStyle(fontSize: 16, color: Colors.white),
+    ),
+    duration: const Duration(seconds: 4),
+    flushbarPosition: position,
+    borderRadius: BorderRadius.circular(20),
+    icon: const Icon(Icons.notifications),
+    flushbarStyle: FlushbarStyle.FLOATING,
+  ).show(context);
+}
+
+Color makeColorLighter(Color color, int amount) {
+  final red = (color.red + amount).clamp(0, 255);
+  final green = (color.green + amount).clamp(0, 255);
+  final blue = (color.blue + amount).clamp(0, 255);
+
+  return Color.fromARGB(255, red, green, blue);
 }

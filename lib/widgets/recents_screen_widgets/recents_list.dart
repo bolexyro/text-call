@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/utils/utils.dart';
@@ -140,7 +143,24 @@ class _RecentsListState extends ConsumerState<RecentsList> {
               icon: const Icon(Icons.filter_alt),
             ),
             IconButton(
-              onPressed: () {},
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('callMessage', 'callMessage');
+                await prefs.setString('callerPhoneNumber', 'callerPhoneNumber');
+                await prefs.setString('callerName', 'callerPhoneNumber');
+                await prefs.setString(
+                  'backgroundColor',
+                  json.encode(
+                    {
+                      'alpha': 200,
+                      'red': 90,
+                      'green': 90,
+                      'blue': 20,
+                    },
+                  ),
+                );
+                createAwesomeNotification(title: 'Bolexyro');
+              },
               icon: const Icon(Icons.search),
             ),
             const SizedBox(width: 10),

@@ -14,7 +14,7 @@ class ContactCardWProfilePicStack extends StatelessWidget {
   final double transparentAndNonTransparentWidth;
 
   final _nonTransparentContainerheight = 180.0;
-  final _circleAvatarRadius = 50.0;
+  final _circleAvatarRadius = 40.0;
 
   @override
   Widget build(BuildContext context) {
@@ -41,58 +41,63 @@ class ContactCardWProfilePicStack extends StatelessWidget {
                   ? Theme.of(context).colorScheme.inversePrimary
                   : Colors.white,
             ),
-            child: Column(
-              children: [
-                SizedBox(
-                  height: _circleAvatarRadius,
-                ),
-                Text(
-                  contact.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: _circleAvatarRadius,
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text('Mobile'),
-                    const SizedBox(
-                      width: 7,
+                  Text(
+                    contact.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 25,
                     ),
-                    Text(
-                      contact.localPhoneNumber,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text('Mobile'),
+                      const SizedBox(
+                        width: 7,
+                      ),
+                      Text(
+                        contact.localPhoneNumber,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Theme.of(context).colorScheme.onSecondary
+                          : Colors.blue[500],
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        showMessageWriterModalSheet(
+                            context: context,
+                            calleeName: contact.name,
+                            calleePhoneNumber: contact.phoneNumber);
+                      },
+                      icon: const Icon(
+                        Icons.message,
+                        color: Colors.white,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Theme.of(context).colorScheme.onSecondary
-                        : Colors.blue[500],
-                  ),
-                  child: IconButton(
-                    onPressed: () {
-                      showMessageWriterModalSheet(
-                          context: context,
-                          calleeName: contact.name,
-                          calleePhoneNumber: contact.phoneNumber);
-                    },
-                    icon: const Icon(
-                      Icons.message,
-                      color: Colors.white,
-                    ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
         ),

@@ -24,6 +24,15 @@ const Map<RecentCategory, Icon> recentCategoryIconMap = {
   RecentCategory.incomingRejected: Icon(Icons.call_end, color: Colors.blue),
 };
 
+const Map<RecentCategory, String> recntCategoryString = {
+  RecentCategory.outgoingAccepted: 'Incoming Accepted',
+  RecentCategory.outgoingUnanswered: 'Outgoing Unanswered',
+  RecentCategory.outgoingRejected: 'Outgoing Rejected',
+  RecentCategory.incomingAccepted: 'Incoming Accepted',
+  RecentCategory.incomingMissed: 'Incoming Missed',
+  RecentCategory.incomingRejected: 'Incoming Rejected',
+};
+
 class Recent {
   Recent({
     required this.contact,
@@ -31,6 +40,13 @@ class Recent {
     required this.message,
     DateTime? callTime,
   }) : callTime = callTime ?? DateTime.now();
+
+  Recent.fromRecent({required Recent recent, required String contactName})
+      : contact =
+            Contact(name: contactName, phoneNumber: recent.contact.phoneNumber),
+        category = recent.category,
+        callTime = recent.callTime,
+        message = recent.message;
 
   final Contact contact;
   final RecentCategory category;

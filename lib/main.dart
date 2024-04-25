@@ -122,8 +122,8 @@ void main() async {
   runApp(
     ProviderScope(
       child: receivedAction == null
-          ? const TextCall(fromTerminated: false)
-          : const TextCall(fromTerminated: true),
+          ? const TextCall(appOpenedFromPickedCall: false)
+          : const TextCall(appOpenedFromPickedCall: true),
     ),
   );
 }
@@ -131,9 +131,9 @@ void main() async {
 class TextCall extends StatefulWidget {
   const TextCall({
     super.key,
-    required this.fromTerminated,
+    required this.appOpenedFromPickedCall,
   });
-  final bool fromTerminated;
+  final bool appOpenedFromPickedCall;
 
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
@@ -146,18 +146,23 @@ class TextCall extends StatefulWidget {
 }
 
 class _TextCallState extends State<TextCall> {
-  late Future<bool> _isUserLoggedIn;
+  late Future<Map<String, dynamic>> _userInfo;
 
-  Future<bool> isUserLoggedIn() async {
+  Future<Map<String, dynamic>> userInfo() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
     final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
+    final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
 
-    return isUserLoggedIn ?? false;
+    return {
+      'isUserLoggedIn': isUserLoggedIn,
+      'callerPhoneNumber': callerPhoneNumber,
+    };
   }
 
   @override
   void initState() {
-    _isUserLoggedIn = isUserLoggedIn();
+    _userInfo = userInfo();
     super.initState();
   }
 
@@ -174,7 +179,7 @@ class _TextCallState extends State<TextCall> {
       navigatorKey: TextCall.navigatorKey,
       debugShowCheckedModeBanner: false,
       home: FutureBuilder(
-        future: _isUserLoggedIn,
+        future: _userInfo,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
@@ -186,15 +191,28 @@ class _TextCallState extends State<TextCall> {
           if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           }
-          if (snapshot.data!) {
-            if (widget.fromTerminated) {
+          if (snapshot.hasData) {
+            final userInfo = snapshot.data!;
+            if (widget.appOpenedFromPickedCall) {
+              final url = Uri.https('text-call-backend.onrender.com',
+                  'call/accepted/${userInfo['callerPhoneNumber']}');
+              http.get(url);
+
+              if (userInfo['isUserLoggedIn'] != true) {
+                return const AuthScreen(
+                  appOpenedFromPickedCall: true,
+                );
+              }
               return const SentMessageScreen(
                 fromTerminated: true,
               );
             }
+
+            if (userInfo['isUserLoggedIn'] != true) {
+              return const AuthScreen();
+            }
             return const PhonePageScreen();
           }
-
           return const AuthScreen();
         },
       ),
@@ -271,7 +289,7 @@ class NotificationController {
       http.get(url);
 
       final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
-      if (isUserLoggedIn == false) {
+      if (isUserLoggedIn != true) {
         showFlushBar(Colors.blue, 'You have to login to see the message.',
             FlushbarPosition.TOP, TextCall.navigatorKey.currentContext!);
         return;

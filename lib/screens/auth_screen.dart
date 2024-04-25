@@ -13,7 +13,12 @@ import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/otp_modal_bottom_sheet.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
-  const AuthScreen({super.key});
+  const AuthScreen({
+    super.key,
+    this.appOpenedFromPickedCall = false,
+  });
+
+  final bool appOpenedFromPickedCall;
 
   @override
   ConsumerState<AuthScreen> createState() => _AuthScreenState();
@@ -22,6 +27,7 @@ class AuthScreen extends ConsumerStatefulWidget {
 class _AuthScreenState extends ConsumerState<AuthScreen> {
   late String _enteredPhoneNumber;
   bool _isAuthenticating = false;
+  bool _flushbarShown = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -115,6 +121,18 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.appOpenedFromPickedCall && !_flushbarShown) {
+        showFlushBar(Colors.blue, 'You have to login to see the message.',
+            FlushbarPosition.TOP, context);
+        _flushbarShown = true; // Set flag after showing flushbar
+      }
+    });
   }
 
   @override

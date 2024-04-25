@@ -17,6 +17,15 @@ RecentCategory? _getCategoryEnumFromText({required String recentCategoryText}) {
   return null;
 }
 
+Future<Contact> getContactName({required String phoneNumber}) async {
+  final db = await getDatabase();
+  final data = await db
+      .query('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
+  return Contact(
+      name: data.isEmpty ? 'Unknown' : data[0]['name'] as String,
+      phoneNumber: phoneNumber);
+}
+
 class RecentsNotifier extends StateNotifier<List<Recent>> {
   RecentsNotifier() : super([]);
 
@@ -25,7 +34,7 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
     final data = await db.query('recents');
     final recentsList = data
         .map(
-          (row) => Recent(
+          (row) async => Recent(
             message: Message(
               message: row['message'] as String,
               backgroundColor: Color.fromARGB(
@@ -35,9 +44,8 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
                 row['backgroundColorBlue'] as int,
               ),
             ),
-            contact: Contact(
-                name: row['name'] as String,
-                phoneNumber: row['phoneNumber'] as String),
+            contact:
+                await getContactName(phoneNumber: row['phoneNumber'] as String),
             category: _getCategoryEnumFromText(
               recentCategoryText: row['categoryName'] as String,
             )!,
@@ -45,7 +53,8 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
           ),
         )
         .toList();
-    state = recentsList;
+    final resolvedRecents = await Future.wait(recentsList);
+    state = resolvedRecents;
   }
 
   void addRecent(Recent newRecent) async {
@@ -60,10 +69,15 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
         'message': newRecent.message.message,
         'callTime': newRecent.callTime.toString(),
         'phoneNumber': newRecent.contact.phoneNumber,
-        'name': newRecent.contact.name,
         'categoryName': newRecent.category.name,
       },
     );
+
+    if ((await getContactName(phoneNumber: newRecent.contact.phoneNumber))
+            .name ==
+        'Unknown') {
+      newRecent = Recent.fromRecent(recent: newRecent, contactName: 'Unkown');
+    }
     state = [...state, newRecent];
   }
 }

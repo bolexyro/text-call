@@ -230,7 +230,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold),
                               ),
-                              Text(recentN.category.name),
+                              Text(recntCategoryString[recentN.category]!),
                               const SizedBox(
                                 height: 10,
                               ),

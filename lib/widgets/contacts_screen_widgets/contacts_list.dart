@@ -97,7 +97,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
               onPressed: () async {
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setString('callMessage', 'callMessage');
-                await prefs.setString('callerPhoneNumber', 'callerPhoneNumber');
+                await prefs.setString('callerPhoneNumber', 'emptyPhoneNumber');
                 await prefs.setString('callerName', 'callerPhoneNumber');
                 await prefs.setString(
                   'backgroundColor',

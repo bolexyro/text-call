@@ -37,7 +37,7 @@ class _AddContactState extends ConsumerState<AddContact> {
 
       ref.read(contactsProvider.notifier).addContact(
             Contact(
-              name: _enteredName!,
+              name: _enteredName!.trim(),
               phoneNumber: _enteredPhoneNumber!,
             ),
           );

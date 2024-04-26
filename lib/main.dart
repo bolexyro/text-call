@@ -13,6 +13,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/screens/splash_screen.dart';
 import 'package:text_call/utils/utils.dart';
 import 'firebase_options.dart';
 import 'package:http/http.dart' as http;
@@ -182,11 +183,7 @@ class _TextCallState extends State<TextCall> {
         future: _userInfo,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
+            return const SplashScreen();
           }
           if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');

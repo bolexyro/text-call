@@ -16,7 +16,7 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
     super.initState();
     for (int i = 0; i < 6; i++) {
       focusNodes.add(FocusNode());
-      textControllers.add(TextEditingController());
+      textControllers.add(TextEditingController(text: '\u200B'));
     }
   }
 
@@ -29,6 +29,15 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
       controller.dispose();
     }
     super.dispose();
+  }
+
+  String removeEmptyCharacters(String otpWEmptyCh) {
+    return otpWEmptyCh[1] +
+        otpWEmptyCh[3] +
+        otpWEmptyCh[5] +
+        otpWEmptyCh[7] +
+        otpWEmptyCh[9] +
+        otpWEmptyCh[11];
   }
 
   String getOTP() {
@@ -72,36 +81,73 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
               ),
               const SizedBox(height: 20.0),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   for (int index = 0; index < 6; index++)
-                    SizedBox(
-                      width: 50,
-                      child: TextFormField(
-                        autofocus: index == 0 ? true : false,
-                        controller: textControllers[index],
-                        focusNode: focusNodes[index],
-                        keyboardType: TextInputType.number,
-                        textAlign: TextAlign.center,
-                        onChanged: (value) {
-                          if (value.length == 1 && index < 5) {
-                            FocusScope.of(context)
-                                .nextFocus();
-                          }
-                          if (value.isEmpty && index > 0) {
-                            FocusScope.of(context)
-                                .requestFocus(focusNodes[index - 1]);
-                          }
-                          if (value.length == 1 && index == 5) {
-                            Navigator.of(context).pop(getOTP());
-                          }
-                        },
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          counterText: '',
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 43,
+                          child: TextFormField(
+                            autofocus: index == 0 ? true : false,
+                            controller: textControllers[index],
+                            focusNode: focusNodes[index],
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            onChanged: (value) {
+                              // print(
+                              //     'value is $value value length is ${value.length}');
+
+                              if (value.length >= 2 && index < 5) {
+                                textControllers[index].text = value.length == 2?
+                                    '${value[0]}${value[1]}' : '${value[0]}${value[2]}' ;
+                                // print(
+                                //     'text controlle text is ${textControllers[index].text.length}');
+                                if (textControllers[index + 1].text.isEmpty) {
+                                  textControllers[index + 1].text = '\u200B';
+                                }
+                                FocusScope.of(context).nextFocus();
+                              }
+
+                              if (value.isEmpty && index > 0) {
+                                FocusScope.of(context)
+                                    .requestFocus(focusNodes[index - 1]);
+                              }
+
+                              if (value.length == 1 &&
+                                  index == 0 &&
+                                  value != '\u200B') {
+                                textControllers[index + 1].text = '\u200B';
+                                textControllers[index].text = '\u2008$value';
+
+                                FocusScope.of(context).nextFocus();
+                              }
+                              if (getOTP().length == 12) {
+                                Navigator.of(context).pop(removeEmptyCharacters(getOTP()));
+                              }
+                            },
+
+                            decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide:
+                                    const BorderSide(color: Colors.white),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide:
+                                    const BorderSide(color: Colors.blue),
+                              ),
+                              counterText: '',
+                            ),
+                            // maxLength: 2,
+                          ),
                         ),
-                        maxLength: 1,
-                      ),
+                        if (index != 5)
+                          const SizedBox(
+                            width: 10,
+                          )
+                      ],
                     )
                 ],
               ),

@@ -60,6 +60,7 @@ dependencies:
       ref: master  # or 786d04363f587b818ce585d25b9c2bb62de95aba
   another_flushbar: ^1.12.30
   liquid_pull_to_refresh: ^3.0.1
+  flutter_svg: ^2.0.10+1
 
 dev_dependencies:
   flutter_test:
@@ -85,7 +86,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/
+    - assets/animations/
+    - assets/icons/
     # - images/a_dot_ham.jpeg/
 
   # An image asset can refer to one or more resolution-specific "variants", see

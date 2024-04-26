@@ -97,7 +97,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
   Widget build(BuildContext context) {
     final double availableWidth = MediaQuery.sizeOf(context).width;
 
-    const double tabletWidth = 300;
+    const double tabletWidth = 520;
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     if (widget.whichScreen == WhichScreen.contact) {

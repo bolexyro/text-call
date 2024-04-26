@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/message.dart';
 
@@ -11,20 +12,38 @@ enum RecentCategory {
   incomingMissed,
 }
 
-const Map<RecentCategory, Icon> recentCategoryIconMap = {
-  RecentCategory.outgoingAccepted: Icon(
-    Icons.call,
-    color: Colors.green,
+Map<RecentCategory, Widget> recentCategoryIconMap = {
+  RecentCategory.outgoingAccepted: SvgPicture.asset(
+    'assets/icons/outgoing-call.svg',
+    height: 24,
+    colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
   ),
-  RecentCategory.outgoingUnanswered:
-      Icon(Icons.call_missed, color: Colors.green),
-  RecentCategory.outgoingRejected: Icon(Icons.call_end, color: Colors.green),
-  RecentCategory.incomingAccepted: Icon(Icons.call, color: Colors.blue),
-  RecentCategory.incomingMissed: Icon(Icons.call_missed, color: Colors.blue),
-  RecentCategory.incomingRejected: Icon(Icons.call_end, color: Colors.blue),
+  RecentCategory.outgoingUnanswered: SvgPicture.asset(
+    'assets/icons/outgoing-call.svg',
+    height: 24,
+    colorFilter: const ColorFilter.mode(
+        Color.fromARGB(255, 185, 112, 2), BlendMode.srcIn),
+  ),
+  RecentCategory.outgoingRejected: SvgPicture.asset(
+    'assets/icons/outgoing-call.svg',
+    height: 24,
+    colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn),
+  ),
+  RecentCategory.incomingAccepted: SvgPicture.asset(
+    'assets/icons/incoming-call.svg',
+    height: 24,
+    colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
+  ),
+  RecentCategory.incomingMissed:
+      const Icon(Icons.phone_missed, color: Colors.blue),
+  RecentCategory.incomingRejected: SvgPicture.asset(
+    'assets/icons/incoming-call.svg',
+    height: 24,
+    colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn),
+  ),
 };
 
-const Map<RecentCategory, String> recntCategoryString = {
+const Map<RecentCategory, String> recntCategoryStringMap = {
   RecentCategory.outgoingAccepted: 'Incoming Accepted',
   RecentCategory.outgoingUnanswered: 'Outgoing Unanswered',
   RecentCategory.outgoingRejected: 'Outgoing Rejected',

@@ -99,8 +99,9 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
                               //     'value is $value value length is ${value.length}');
 
                               if (value.length >= 2 && index < 5) {
-                                textControllers[index].text = value.length == 2?
-                                    '${value[0]}${value[1]}' : '${value[0]}${value[2]}' ;
+                                textControllers[index].text = value.length == 2
+                                    ? '${value[0]}${value[1]}'
+                                    : '${value[0]}${value[2]}';
                                 // print(
                                 //     'text controlle text is ${textControllers[index].text.length}');
                                 if (textControllers[index + 1].text.isEmpty) {
@@ -123,7 +124,8 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
                                 FocusScope.of(context).nextFocus();
                               }
                               if (getOTP().length == 12) {
-                                Navigator.of(context).pop(removeEmptyCharacters(getOTP()));
+                                Navigator.of(context)
+                                    .pop(removeEmptyCharacters(getOTP()));
                               }
                             },
 

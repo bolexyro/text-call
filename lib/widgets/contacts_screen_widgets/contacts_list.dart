@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -129,7 +130,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
               backgroundColor: Colors.white,
               showChildOpacityTransition: false,
               onRefresh: () => Future.delayed(const Duration(seconds: 0)),
-              height: 80,
+              height: MediaQuery.sizeOf(context).width < 520 ? 120 : 80,
               animSpeedFactor: 2.3,
               springAnimationDurationInMilliseconds: 600,
               child: GroupedListView(
@@ -159,7 +160,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                     startActionPane: ActionPane(
                       motion: const BehindMotion(),
                       children: [
-                        SlidableAction(
+                        CustomSlidableAction(
                           onPressed: (context) {
                             showMessageWriterModalSheet(
                                 context: context,
@@ -168,22 +169,28 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                           },
                           backgroundColor: const Color(0xFF21B7CA),
                           foregroundColor: Colors.white,
-                          icon: Icons.message,
-                          label: 'Call',
+                          child: SvgPicture.asset(
+                            'assets/icons/message-ring.svg',
+                            height: 30,
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.srcIn),
+                          ),
                         ),
                       ],
                     ),
                     endActionPane: ActionPane(
                       motion: const BehindMotion(),
                       children: [
-                        SlidableAction(
+                        CustomSlidableAction(
                           onPressed: (context) {
                             _showDeleteDialog(context, contactN);
                           },
                           backgroundColor: const Color(0xFFFE4A49),
                           foregroundColor: Colors.white,
-                          icon: Icons.delete,
-                          label: 'Delete',
+                          child: const Icon(
+                            Icons.delete,
+                            size: 30,
+                          ),
                         ),
                       ],
                     ),
@@ -243,13 +250,21 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                                           context: context,
                                         );
                                       },
-                                      icon: const Icon(Icons.message),
+                                      icon: SvgPicture.asset(
+                                        'assets/icons/message-ring.svg',
+                                        height: 24,
+                                        colorFilter: const ColorFilter.mode(
+                                            Colors.white, BlendMode.srcIn),
+                                      ),
                                     ),
                                     IconButton(
                                       onPressed: () {
                                         widget.onContactSelected(contactN);
                                       },
-                                      icon: const Icon(Icons.info_outlined),
+                                      icon: const Icon(
+                                        Icons.info_outlined,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ],
                                 ),

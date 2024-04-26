@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/recent.dart';
@@ -178,7 +179,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
               backgroundColor: Colors.white,
               showChildOpacityTransition: false,
               onRefresh: _refreshRecents,
-              height: 80,
+              height: MediaQuery.sizeOf(context).width < 520 ? 120 : 80,
               animSpeedFactor: 2.3,
               springAnimationDurationInMilliseconds: 600,
               child: GroupedListView(
@@ -210,7 +211,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                     startActionPane: ActionPane(
                       motion: const BehindMotion(),
                       children: [
-                        SlidableAction(
+                        CustomSlidableAction(
                           onPressed: (context) {
                             showMessageWriterModalSheet(
                                 context: context,
@@ -219,8 +220,12 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                           },
                           backgroundColor: const Color(0xFF21B7CA),
                           foregroundColor: Colors.white,
-                          icon: Icons.message,
-                          label: 'Call',
+                          child: SvgPicture.asset(
+                            'assets/icons/message-ring.svg',
+                            height: 30,
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.srcIn),
+                          ),
                         ),
                       ],
                     ),
@@ -245,7 +250,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold),
                                 ),
-                                Text(recntCategoryString[recentN.category]!),
+                                Text(recntCategoryStringMap[recentN.category]!),
                                 const SizedBox(
                                   height: 10,
                                 ),
@@ -262,13 +267,21 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                           context: context,
                                         );
                                       },
-                                      icon: const Icon(Icons.message),
+                                      icon: SvgPicture.asset(
+                                        'assets/icons/message-ring.svg',
+                                        height: 24,
+                                        colorFilter: const ColorFilter.mode(
+                                            Colors.white, BlendMode.srcIn),
+                                      ),
                                     ),
                                     IconButton(
                                       onPressed: () {
                                         widget.onRecentSelected(recentN);
                                       },
-                                      icon: const Icon(Icons.info_outlined),
+                                      icon: const Icon(
+                                        Icons.info_outlined,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ],
                                 ),

@@ -105,6 +105,10 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
           const SizedBox(
             height: 7,
           ),
+          Text(recntCategoryStringMap[widget.recent!.category]!),
+          const SizedBox(
+            height: 7,
+          ),
           ElevatedButton(
             onPressed: () {
               _goToSentMessageScreen(widget.recent!.message);
@@ -181,7 +185,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(DateFormat.Hm().format(recentN.callTime)),
-                          Text(recentN.category.name),
+                          Text(recntCategoryStringMap[recentN.category]!),
                         ],
                       ),
                       expandedContent: ElevatedButton(

@@ -259,7 +259,7 @@ class NotificationController {
           backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
         ),
         contact: Contact(name: callerName!, phoneNumber: callerPhoneNumber!),
-        category: RecentCategory.incomingAccepted,
+        category: RecentCategory.incomingRejected,
       );
 
       db.insert(

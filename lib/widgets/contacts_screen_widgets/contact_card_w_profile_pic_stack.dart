@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
@@ -91,9 +92,11 @@ class ContactCardWProfilePicStack extends StatelessWidget {
                             calleeName: contact.name,
                             calleePhoneNumber: contact.phoneNumber);
                       },
-                      icon: const Icon(
-                        Icons.message,
-                        color: Colors.white,
+                      icon: SvgPicture.asset(
+                        'assets/icons/message-ring.svg',
+                        height: 30,
+                        colorFilter: const ColorFilter.mode(
+                            Colors.white, BlendMode.srcIn),
                       ),
                     ),
                   )

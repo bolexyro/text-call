@@ -234,7 +234,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       repeatForever: false,
                       totalRepeatCount: 1,
                     ),
-                    Lottie.asset('assets/call_rejected.json', height: 300),
+                    Lottie.asset('assets/animations/call_rejected.json', height: 300),
                   ],
                 ),
               );
@@ -271,7 +271,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               future: _animationDelay,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Lottie.asset('assets/telephone_ringing_3d.json');
+                  return Lottie.asset('assets/animations/telephone_ringing_3d.json');
                 }
                 final recent = Recent(
                   message: Message(
@@ -303,7 +303,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                         repeatForever: false,
                         totalRepeatCount: 1,
                       ),
-                      Lottie.asset('assets/call_missed.json'),
+                      Lottie.asset('assets/animations/call_missed.json'),
                     ],
                   ),
                 );

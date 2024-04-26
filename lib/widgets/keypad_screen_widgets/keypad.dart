@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/utils.dart';
@@ -108,14 +109,16 @@ class Keypad extends ConsumerWidget {
         Container(),
         Center(
           child: IconButton(
-            onPressed: ()  {
+            onPressed: () {
               phoneNumberVerification(context, ref);
             },
-            icon: const Padding(
-              padding: EdgeInsets.all(5),
-              child: Icon(
-                Icons.message,
-                size: 25,
+            icon: Padding(
+              padding: const EdgeInsets.all(5),
+              child: SvgPicture.asset(
+                'assets/icons/message-ring.svg',
+                height: 30,
+                colorFilter:
+                    const ColorFilter.mode(Colors.white, BlendMode.srcIn),
               ),
             ),
             style: IconButton.styleFrom(

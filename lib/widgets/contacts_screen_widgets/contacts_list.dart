@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:grouped_list/grouped_list.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
@@ -123,165 +124,177 @@ class _ContactsListState extends ConsumerState<ContactsList> {
           ),
         if (contactsList.isNotEmpty)
           Expanded(
-            child: GroupedListView(
-              useStickyGroupSeparators: true,
-              floatingHeader: true,
-              stickyHeaderBackgroundColor:
-                  Theme.of(context).colorScheme.secondary,
-              elements: contactsList,
-              groupBy: (contactN) => contactN.name[0],
-              groupSeparatorBuilder: (String groupHeader) => Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  groupHeader,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+            child: LiquidPullToRefresh(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              backgroundColor: Colors.white,
+              showChildOpacityTransition: false,
+              onRefresh: () => Future.delayed(const Duration(seconds: 0)),
+              height: 80,
+              animSpeedFactor: 2.3,
+              springAnimationDurationInMilliseconds: 600,
+              child: GroupedListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+
+                useStickyGroupSeparators: true,
+                floatingHeader: true,
+                stickyHeaderBackgroundColor:
+                    Theme.of(context).colorScheme.secondary,
+                elements: contactsList,
+                groupBy: (contactN) => contactN.name[0],
+                groupSeparatorBuilder: (String groupHeader) => Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    groupHeader,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
-              itemComparator: (element1, element2) =>
-                  element1.name.compareTo(element2.name),
-              itemBuilder: (context, contactN) {
-                _expandedBoolsMap[contactN] =
-                    _expandedBoolsMap.containsKey(contactN)
-                        ? _expandedBoolsMap[contactN]!
-                        : false;
-                return Slidable(
-                  startActionPane: ActionPane(
-                    motion: const BehindMotion(),
-                    children: [
-                      SlidableAction(
-                        onPressed: (context) {
-                          showMessageWriterModalSheet(
-                              context: context,
-                              calleePhoneNumber: contactN.phoneNumber,
-                              calleeName: contactN.name);
-                        },
-                        backgroundColor: const Color(0xFF21B7CA),
-                        foregroundColor: Colors.white,
-                        icon: Icons.message,
-                        label: 'Call',
-                      ),
-                    ],
-                  ),
-                  endActionPane: ActionPane(
-                    motion: const BehindMotion(),
-                    children: [
-                      SlidableAction(
-                        onPressed: (context) {
-                          _showDeleteDialog(context, contactN);
-                        },
-                        backgroundColor: const Color(0xFFFE4A49),
-                        foregroundColor: Colors.white,
-                        icon: Icons.delete,
-                        label: 'Delete',
-                      ),
-                    ],
-                  ),
-                  child: widget.screen == Screen.phone
-                      ? ExpandableListTile(
-                          isExpanded: _expandedBoolsMap[contactN]!,
-                          title: Text(contactN.name),
-                          leading: CircleAvatar(
-                            child: Container(
-                              width: double.infinity,
-                              height: double.infinity,
-                              alignment: Alignment.center,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Colors.deepPurple,
-                                    Colors.blue,
-                                  ],
+                itemComparator: (element1, element2) =>
+                    element1.name.compareTo(element2.name),
+                itemBuilder: (context, contactN) {
+                  _expandedBoolsMap[contactN] =
+                      _expandedBoolsMap.containsKey(contactN)
+                          ? _expandedBoolsMap[contactN]!
+                          : false;
+                  return Slidable(
+                    startActionPane: ActionPane(
+                      motion: const BehindMotion(),
+                      children: [
+                        SlidableAction(
+                          onPressed: (context) {
+                            showMessageWriterModalSheet(
+                                context: context,
+                                calleePhoneNumber: contactN.phoneNumber,
+                                calleeName: contactN.name);
+                          },
+                          backgroundColor: const Color(0xFF21B7CA),
+                          foregroundColor: Colors.white,
+                          icon: Icons.message,
+                          label: 'Call',
+                        ),
+                      ],
+                    ),
+                    endActionPane: ActionPane(
+                      motion: const BehindMotion(),
+                      children: [
+                        SlidableAction(
+                          onPressed: (context) {
+                            _showDeleteDialog(context, contactN);
+                          },
+                          backgroundColor: const Color(0xFFFE4A49),
+                          foregroundColor: Colors.white,
+                          icon: Icons.delete,
+                          label: 'Delete',
+                        ),
+                      ],
+                    ),
+                    child: widget.screen == Screen.phone
+                        ? ExpandableListTile(
+                            isExpanded: _expandedBoolsMap[contactN]!,
+                            title: Text(contactN.name),
+                            leading: CircleAvatar(
+                              child: Container(
+                                width: double.infinity,
+                                height: double.infinity,
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Colors.deepPurple,
+                                      Colors.blue,
+                                    ],
+                                  ),
+                                ),
+                                child: Text(
+                                  contactN.name[0],
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 25),
                                 ),
                               ),
-                              child: Text(
-                                contactN.name[0],
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 25),
-                              ),
                             ),
-                          ),
-                          tileOnTapped: () {
-                            _changeTileExpandedStatus(contactN);
-                          },
-                          expandedContent: Column(
+                            tileOnTapped: () {
+                              _changeTileExpandedStatus(contactN);
+                            },
+                            expandedContent: Column(
+                              children: [
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                Text(
+                                  'Mobile ${contactN.localPhoneNumber}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        showMessageWriterModalSheet(
+                                          calleeName: contactN.name,
+                                          calleePhoneNumber:
+                                              contactN.phoneNumber,
+                                          context: context,
+                                        );
+                                      },
+                                      icon: const Icon(Icons.message),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        widget.onContactSelected(contactN);
+                                      },
+                                      icon: const Icon(Icons.info_outlined),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        : Column(
                             children: [
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                'Mobile ${contactN.localPhoneNumber}',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      showMessageWriterModalSheet(
-                                        calleeName: contactN.name,
-                                        calleePhoneNumber: contactN.phoneNumber,
-                                        context: context,
-                                      );
-                                    },
-                                    icon: const Icon(Icons.message),
+                              ListTile(
+                                title: Text(contactN.name),
+                                leading: CircleAvatar(
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    alignment: Alignment.center,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          Colors.deepPurple,
+                                          Colors.blue,
+                                        ],
+                                      ),
+                                    ),
+                                    child: Text(
+                                      contactN.name[0],
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 25),
+                                    ),
                                   ),
-                                  IconButton(
-                                    onPressed: () {
-                                      widget.onContactSelected(contactN);
-                                    },
-                                    icon: const Icon(Icons.info_outlined),
-                                  ),
-                                ],
+                                ),
+                                onTap: () => widget.onContactSelected(contactN),
+                              ),
+                              const Divider(
+                                indent: 45,
+                                endIndent: 15,
                               ),
                             ],
                           ),
-                        )
-                      : Column(
-                          children: [
-                            ListTile(
-                              title: Text(contactN.name),
-                              leading: CircleAvatar(
-                                child: Container(
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  alignment: Alignment.center,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Colors.deepPurple,
-                                        Colors.blue,
-                                      ],
-                                    ),
-                                  ),
-                                  child: Text(
-                                    contactN.name[0],
-                                    style: const TextStyle(
-                                        color: Colors.white, fontSize: 25),
-                                  ),
-                                ),
-                              ),
-                              onTap: () => widget.onContactSelected(contactN),
-                            ),
-                            const Divider(
-                              indent: 45,
-                              endIndent: 15,
-                            ),
-                          ],
-                        ),
-                );
-              },
-              // itemCount: contactsList.length,
+                  );
+                },
+                // itemCount: contactsList.length,
+              ),
             ),
           ),
       ],

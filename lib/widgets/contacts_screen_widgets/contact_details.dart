@@ -100,7 +100,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
           ),
           Text(
             _getFormattedCallTime(widget.recent!.callTime),
-            style: const TextStyle(fontSize: 20),
+            style: const TextStyle(fontSize: 18),
           ),
           const SizedBox(
             height: 7,

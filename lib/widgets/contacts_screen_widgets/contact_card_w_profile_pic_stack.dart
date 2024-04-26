@@ -66,6 +66,7 @@ class ContactCardWProfilePicStack extends StatelessWidget {
                         width: 7,
                       ),
                       Text(
+                        overflow: TextOverflow.ellipsis,
                         contact.localPhoneNumber,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,

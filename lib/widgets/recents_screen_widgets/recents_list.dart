@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
@@ -119,6 +120,10 @@ class _RecentsListState extends ConsumerState<RecentsList> {
         .toList();
   }
 
+  Future<void> _refreshRecents() async {
+    await ref.read(recentsProvider.notifier).loadRecents();
+  }
+
   @override
   Widget build(BuildContext context) {
     final recentsList = _applyFilter(ref.watch(recentsProvider));
@@ -168,116 +173,128 @@ class _RecentsListState extends ConsumerState<RecentsList> {
         ),
         if (recentsList.isNotEmpty)
           Expanded(
-            child: GroupedListView(
-              useStickyGroupSeparators: true,
-              stickyHeaderBackgroundColor:
-                  Theme.of(context).colorScheme.primaryContainer,
-              elements: recentsList,
-              groupBy: (recentN) => DateTime(recentN.callTime.year,
-                  recentN.callTime.month, recentN.callTime.day),
-              groupSeparatorBuilder: (DateTime groupHeaderDateTime) => Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  _groupHeaderText(groupHeaderDateTime),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              order: GroupedListOrder.DESC,
-              itemComparator: (element1, element2) =>
-                  element1.callTime.compareTo(element2.callTime),
-              itemBuilder: (context, recentN) {
-                _expandedBoolsMap[recentN] =
-                    _expandedBoolsMap.containsKey(recentN)
-                        ? _expandedBoolsMap[recentN]!
-                        : false;
-
-                return Slidable(
-                  startActionPane: ActionPane(
-                    motion: const BehindMotion(),
-                    children: [
-                      SlidableAction(
-                        onPressed: (context) {
-                          showMessageWriterModalSheet(
-                              context: context,
-                              calleePhoneNumber: recentN.contact.phoneNumber,
-                              calleeName: recentN.contact.name);
-                        },
-                        backgroundColor: const Color(0xFF21B7CA),
-                        foregroundColor: Colors.white,
-                        icon: Icons.message,
-                        label: 'Call',
-                      ),
-                    ],
+            child: LiquidPullToRefresh(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              backgroundColor: Colors.white,
+              showChildOpacityTransition: false,
+              onRefresh: _refreshRecents,
+              height: 80,
+              animSpeedFactor: 2.3,
+              springAnimationDurationInMilliseconds: 600,
+              child: GroupedListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                useStickyGroupSeparators: true,
+                stickyHeaderBackgroundColor:
+                    Theme.of(context).colorScheme.primaryContainer,
+                elements: recentsList,
+                groupBy: (recentN) => DateTime(recentN.callTime.year,
+                    recentN.callTime.month, recentN.callTime.day),
+                groupSeparatorBuilder: (DateTime groupHeaderDateTime) =>
+                    Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    _groupHeaderText(groupHeaderDateTime),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  child: widget.screen == Screen.phone
-                      ? ExpandableListTile(
-                          tileOnTapped: () {
-                            _changeTileExpandedStatus(recentN);
+                ),
+                order: GroupedListOrder.DESC,
+                itemComparator: (element1, element2) =>
+                    element1.callTime.compareTo(element2.callTime),
+                itemBuilder: (context, recentN) {
+                  _expandedBoolsMap[recentN] =
+                      _expandedBoolsMap.containsKey(recentN)
+                          ? _expandedBoolsMap[recentN]!
+                          : false;
+
+                  return Slidable(
+                    startActionPane: ActionPane(
+                      motion: const BehindMotion(),
+                      children: [
+                        SlidableAction(
+                          onPressed: (context) {
+                            showMessageWriterModalSheet(
+                                context: context,
+                                calleePhoneNumber: recentN.contact.phoneNumber,
+                                calleeName: recentN.contact.name);
                           },
-                          isExpanded: _expandedBoolsMap[recentN]!,
-                          leading: recentCategoryIconMap[recentN.category]!,
-                          trailing: Text(
-                            DateFormat.Hm().format(recentN.callTime),
-                          ),
-                          title: Text(recentN.contact.name),
-                          expandedContent: Column(
+                          backgroundColor: const Color(0xFF21B7CA),
+                          foregroundColor: Colors.white,
+                          icon: Icons.message,
+                          label: 'Call',
+                        ),
+                      ],
+                    ),
+                    child: widget.screen == Screen.phone
+                        ? ExpandableListTile(
+                            tileOnTapped: () {
+                              _changeTileExpandedStatus(recentN);
+                            },
+                            isExpanded: _expandedBoolsMap[recentN]!,
+                            leading: recentCategoryIconMap[recentN.category]!,
+                            trailing: Text(
+                              DateFormat.Hm().format(recentN.callTime),
+                            ),
+                            title: Text(recentN.contact.name),
+                            expandedContent: Column(
+                              children: [
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                Text(
+                                  'Mobile ${recentN.contact.localPhoneNumber}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(recntCategoryString[recentN.category]!),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        showMessageWriterModalSheet(
+                                          calleeName: recentN.contact.name,
+                                          calleePhoneNumber:
+                                              recentN.contact.phoneNumber,
+                                          context: context,
+                                        );
+                                      },
+                                      icon: const Icon(Icons.message),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        widget.onRecentSelected(recentN);
+                                      },
+                                      icon: const Icon(Icons.info_outlined),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        : Column(
                             children: [
-                              const SizedBox(
-                                height: 10,
+                              ListTile(
+                                leading:
+                                    recentCategoryIconMap[recentN.category]!,
+                                trailing: Text(
+                                  DateFormat.Hm().format(recentN.callTime),
+                                ),
+                                title: Text(recentN.contact.name),
+                                onTap: () => widget.onRecentSelected(recentN),
                               ),
-                              Text(
-                                'Mobile ${recentN.contact.localPhoneNumber}',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              Text(recntCategoryString[recentN.category]!),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      showMessageWriterModalSheet(
-                                        calleeName: recentN.contact.name,
-                                        calleePhoneNumber:
-                                            recentN.contact.phoneNumber,
-                                        context: context,
-                                      );
-                                    },
-                                    icon: const Icon(Icons.message),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      widget.onRecentSelected(recentN);
-                                    },
-                                    icon: const Icon(Icons.info_outlined),
-                                  ),
-                                ],
+                              const Divider(
+                                indent: 45,
+                                endIndent: 15,
                               ),
                             ],
                           ),
-                        )
-                      : Column(
-                          children: [
-                            ListTile(
-                              leading: recentCategoryIconMap[recentN.category]!,
-                              trailing: Text(
-                                DateFormat.Hm().format(recentN.callTime),
-                              ),
-                              title: Text(recentN.contact.name),
-                              onTap: () => widget.onRecentSelected(recentN),
-                            ),
-                            const Divider(
-                              indent: 45,
-                              endIndent: 15,
-                            ),
-                          ],
-                        ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         if (recentsList.isEmpty)

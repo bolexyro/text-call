@@ -172,7 +172,7 @@ void showFlushBar(Color color, String message, FlushbarPosition position,
   Flushbar().dismiss();
 
   Flushbar(
-    animationDuration: const Duration(milliseconds: 750),
+    animationDuration: const Duration(milliseconds: 800),
     backgroundColor: color,
     margin: position == FlushbarPosition.TOP
         ? const EdgeInsets.only(top: 20, left: 10, right: 10)

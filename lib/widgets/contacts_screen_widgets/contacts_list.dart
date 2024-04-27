@@ -253,17 +253,20 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                                       icon: SvgPicture.asset(
                                         'assets/icons/message-ring.svg',
                                         height: 24,
-                                        colorFilter: const ColorFilter.mode(
-                                            Colors.white, BlendMode.srcIn),
+                                        colorFilter: ColorFilter.mode(
+                                          Theme.of(context).iconTheme.color!,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     ),
                                     IconButton(
                                       onPressed: () {
                                         widget.onContactSelected(contactN);
                                       },
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.info_outlined,
-                                        color: Colors.white,
+                                        color:
+                                            Theme.of(context).iconTheme.color!,
                                       ),
                                     ),
                                   ],

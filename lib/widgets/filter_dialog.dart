@@ -5,7 +5,8 @@ enum CallFilters {
   missedCalls,
   rejectedCalls,
   outgoingCalls,
-  incomingCalls
+  incomingCalls,
+  unansweredCalls,
 }
 
 class FilterDialog extends StatefulWidget {
@@ -23,7 +24,6 @@ class _FilterDialogState extends State<FilterDialog> {
   late CallFilters _selectedFilter;
   @override
   void initState() {
-    // TODO: implement initState
     _selectedFilter = widget.currentFilter;
     super.initState();
   }
@@ -89,6 +89,16 @@ class _FilterDialogState extends State<FilterDialog> {
           RadioListTile(
             title: const Text('Incoming calls'),
             value: CallFilters.incomingCalls,
+            groupValue: _selectedFilter,
+            onChanged: (CallFilters? value) {
+              setState(() {
+                _selectedFilter = value!;
+                Navigator.of(context).pop(_selectedFilter);
+              });
+            },
+          ),RadioListTile(
+            title: const Text('Unanswered calls'),
+            value: CallFilters.unansweredCalls,
             groupValue: _selectedFilter,
             onChanged: (CallFilters? value) {
               setState(() {

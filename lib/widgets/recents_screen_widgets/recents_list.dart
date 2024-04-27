@@ -87,6 +87,15 @@ class _RecentsListState extends ConsumerState<RecentsList> {
           )
           .toList();
     }
+    if (_selectedFilter == CallFilters.unansweredCalls) {
+      return allRecents
+          .where(
+            (element) => [
+              RecentCategory.outgoingUnanswered,
+            ].contains(element.category),
+          )
+          .toList();
+    }
 
     if (_selectedFilter == CallFilters.outgoingCalls) {
       return allRecents
@@ -270,17 +279,20 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                       icon: SvgPicture.asset(
                                         'assets/icons/message-ring.svg',
                                         height: 24,
-                                        colorFilter: const ColorFilter.mode(
-                                            Colors.white, BlendMode.srcIn),
+                                        colorFilter: ColorFilter.mode(
+                                          Theme.of(context).iconTheme.color!,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     ),
                                     IconButton(
                                       onPressed: () {
                                         widget.onRecentSelected(recentN);
                                       },
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.info_outlined,
-                                        color: Colors.white,
+                                        color:
+                                            Theme.of(context).iconTheme.color!,
                                       ),
                                     ),
                                   ],

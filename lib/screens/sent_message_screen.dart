@@ -90,7 +90,7 @@ class SentMessageScreen extends ConsumerWidget {
                   ),
                   floatingActionButton: fromTerminated
                       ? FloatingActionButton(
-                          onPressed: () => Navigator.of(context).push(
+                          onPressed: () => Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
                               builder: (context) => const PhonePageScreen(),
                             ),

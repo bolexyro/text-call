@@ -13,22 +13,21 @@ class KeypadButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Center(
-      child: Container(
-        decoration: const BoxDecoration(shape: BoxShape.circle),
-        child: TextButton(
-          onPressed: () {
-            onButtonPressed(buttonText);
-          },
-          child: Text(
-            buttonText,
-            style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? const Color.fromARGB(255, 255, 251, 251)
-                    : Colors.black),
-          ),
+    return InkWell(
+      customBorder: const CircleBorder(),
+      splashColor: Colors.grey,
+      onTap: () {
+        onButtonPressed(buttonText);
+      },
+      child: Center(
+        child: Text(
+          buttonText,
+          style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color.fromARGB(255, 255, 251, 251)
+                  : Colors.black),
         ),
       ),
     );

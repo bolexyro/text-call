@@ -139,9 +139,6 @@ class TextCall extends StatefulWidget {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
-  static const String name = 'Awesome Notifications - Example App';
-  static const Color mainColor = Colors.deepPurple;
-
   @override
   State<TextCall> createState() => _TextCallState();
 }

@@ -128,7 +128,6 @@ class Keypad extends ConsumerWidget {
           ),
         ),
         InkWell(
-          borderRadius: BorderRadius.circular(20),
           customBorder: const CircleBorder(),
           splashColor: Colors.grey,
           onTap: () {

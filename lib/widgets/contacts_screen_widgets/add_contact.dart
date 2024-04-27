@@ -144,12 +144,18 @@ class _AddContactState extends ConsumerState<AddContact> {
               TextButton(
                 onPressed: _isAddingContact == true
                     ? null
-                    : () {
+                    : () async {
+                        if (!await checkForInternetConnection(context)) {
+                          showErrorDialog(
+                              'Connect to the internet and try again.',
+                              context);
+                          return;
+                        }
                         _addContact(context);
                       },
                 child: _isAddingContact == false
                     ? const Text('Save')
-                    : const CircularProgressIndicator(),
+                    : const CircularProgressIndicator.adaptive(),
               )
             ],
           )

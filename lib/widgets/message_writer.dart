@@ -176,7 +176,14 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 height: 20,
               ),
               IconButton(
-                onPressed: () => _callSomeone(context),
+                onPressed: () async {
+                  if (!await checkForInternetConnection(context)) {
+                    showErrorDialog(
+                        'Connect to the internet and try again.', context);
+                    return;
+                  }
+                  _callSomeone(context);
+                },
                 icon: const Padding(
                   padding: EdgeInsets.all(5),
                   child: Icon(
@@ -207,9 +214,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 message: Message(
                     message: _messageController.text,
                     backgroundColor: _selectedColor),
-                contact: Contact(
-                    name: '',
-                    phoneNumber: widget.calleePhoneNumber),
+                contact:
+                    Contact(name: '', phoneNumber: widget.calleePhoneNumber),
                 category: RecentCategory.outgoingRejected,
               );
               ref.read(recentsProvider.notifier).addRecent(recent);
@@ -232,7 +238,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       repeatForever: false,
                       totalRepeatCount: 1,
                     ),
-                    Lottie.asset('assets/animations/call_rejected.json', height: 300),
+                    Lottie.asset('assets/animations/call_rejected.json',
+                        height: 300),
                   ],
                 ),
               );
@@ -241,9 +248,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               message: Message(
                   message: _messageController.text,
                   backgroundColor: _selectedColor),
-              contact: Contact(
-                  name: '',
-                  phoneNumber: widget.calleePhoneNumber),
+              contact: Contact(name: '', phoneNumber: widget.calleePhoneNumber),
               category: RecentCategory.outgoingAccepted,
             );
             ref.read(recentsProvider.notifier).addRecent(recent);
@@ -269,7 +274,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               future: _animationDelay,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Lottie.asset('assets/animations/telephone_ringing_3d.json');
+                  return Lottie.asset(
+                      'assets/animations/telephone_ringing_3d.json');
                 }
                 final recent = Recent(
                   message: Message(

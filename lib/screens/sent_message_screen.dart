@@ -41,7 +41,7 @@ class SentMessageScreen extends ConsumerWidget {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator.adaptive(),
                   );
                 }
                 if (snapshot.hasError) {

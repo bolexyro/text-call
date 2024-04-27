@@ -188,7 +188,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
                           Text(recntCategoryStringMap[recentN.category]!),
                         ],
                       ),
-                      expandedContent: ElevatedButton(
+                      expandedContent: recentN.category != RecentCategory.incomingRejected? ElevatedButton(
                         onPressed: () {
                           _goToSentMessageScreen(recentN.message);
                         },
@@ -198,7 +198,17 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
                           ),
                         ),
                         child: const Text('Show Message'),
-                      ),
+                      ) :  ElevatedButton(
+                        onPressed: () {
+                          _goToSentMessageScreen(recentN.message);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child:  Text('Send ${recentN.callTime}'),
+                      ) ,
                       isExpanded: _expandedBoolsMap[recentN]!,
                       tileOnTapped: () => _changeTileExpandedStatus(recentN),
                     ),

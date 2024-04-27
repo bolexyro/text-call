@@ -2,6 +2,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/add_contact.dart';
 import 'package:text_call/widgets/message_writer.dart';
@@ -51,10 +52,18 @@ String changeLocalToIntl({required String localPhoneNumber}) =>
 String changeIntlToLocal({required String intlPhoneNumber}) =>
     '0${intlPhoneNumber.substring(4)}';
 
-void showMessageWriterModalSheet(
+Future<bool> checkForInternetConnection(BuildContext context) async {
+  return await InternetConnection().hasInternetAccess;
+}
+
+Future<void> showMessageWriterModalSheet(
     {required BuildContext context,
     required String calleeName,
-    required String calleePhoneNumber}) {
+    required String calleePhoneNumber}) async {
+  if (!await checkForInternetConnection(context)) {
+    showErrorDialog('Connect to the internet and try again.', context);
+    return;
+  }
   showModalBottomSheet(
     isDismissible: true,
     isScrollControlled: true,
@@ -137,7 +146,7 @@ void showErrorDialog(String text, BuildContext context) {
 }
 
 bool isPhoneNumberValid(String phoneNumber) {
-  if (phoneNumber.length == 14) {
+  if (phoneNumber.length == 11) {
     return true;
   }
   return false;

@@ -86,8 +86,8 @@ class ContactCardWProfilePicStack extends StatelessWidget {
                           : Colors.blue[500],
                     ),
                     child: IconButton(
-                      onPressed: () {
-                        showMessageWriterModalSheet(
+                      onPressed: () async{
+                       await showMessageWriterModalSheet(
                             context: context,
                             calleeName: contact.name,
                             calleePhoneNumber: contact.phoneNumber);
@@ -96,7 +96,9 @@ class ContactCardWProfilePicStack extends StatelessWidget {
                         'assets/icons/message-ring.svg',
                         height: 30,
                         colorFilter: const ColorFilter.mode(
-                            Colors.white, BlendMode.srcIn),
+                          Colors.white,
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
                   )

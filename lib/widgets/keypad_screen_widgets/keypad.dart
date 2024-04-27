@@ -6,7 +6,7 @@ import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/keypad_screen_widgets/keypad_button.dart';
 
-class Keypad extends ConsumerWidget {
+class Keypad extends ConsumerStatefulWidget {
   const Keypad({
     super.key,
     required this.onBackButtonPressed,
@@ -18,41 +18,63 @@ class Keypad extends ConsumerWidget {
   final void Function({bool? longPress}) onBackButtonPressed;
   final String typedInPhoneNumber;
 
+  @override
+  ConsumerState<Keypad> createState() => _KeypadState();
+}
+
+class _KeypadState extends ConsumerState<Keypad> {
+  bool _isCheckingIfNumberExists = false;
+
   void phoneNumberVerification(BuildContext context, WidgetRef ref) async {
-    String phoneNumber =
-        changeLocalToIntl(localPhoneNumber: typedInPhoneNumber);
-    final bool phoneNumberIsValid = isPhoneNumberValid(phoneNumber);
+    setState(() {
+      _isCheckingIfNumberExists = true;
+    });
+    final bool phoneNumberIsValid =
+        isPhoneNumberValid(widget.typedInPhoneNumber);
     if (phoneNumberIsValid == false) {
       showErrorDialog('Enter a valid phone number', context);
+      setState(() {
+        _isCheckingIfNumberExists == true;
+      });
       return;
     }
+    String phoneNumber =
+        changeLocalToIntl(localPhoneNumber: widget.typedInPhoneNumber);
     final bool numberExists = await checkIfNumberExists(
       phoneNumber,
     );
     if (numberExists == false) {
       showErrorDialog('Number doesn\'t exist', context);
+      setState(() {
+        _isCheckingIfNumberExists = false;
+      });
       return;
     }
-    final Contact callee =
-        await ref.read(contactsProvider.notifier).readAContact(
-                  changeLocalToIntl(localPhoneNumber: typedInPhoneNumber),
-                ) ??
-            Contact(
-              name: 'Unknown',
-              phoneNumber:
-                  changeLocalToIntl(localPhoneNumber: typedInPhoneNumber),
-            );
+    final Contact callee = await ref
+            .read(contactsProvider.notifier)
+            .readAContact(
+              changeLocalToIntl(localPhoneNumber: widget.typedInPhoneNumber),
+            ) ??
+        Contact(
+          name: '',
+          phoneNumber:
+              changeLocalToIntl(localPhoneNumber: widget.typedInPhoneNumber),
+        );
 
-    showMessageWriterModalSheet(
+    setState(() {
+      _isCheckingIfNumberExists = false;
+    });
+
+    await showMessageWriterModalSheet(
       context: context,
       calleeName: callee.name,
       calleePhoneNumber:
-          changeLocalToIntl(localPhoneNumber: typedInPhoneNumber),
+          changeLocalToIntl(localPhoneNumber: widget.typedInPhoneNumber),
     );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return GridView.count(
       childAspectRatio: 1.3,
       crossAxisCount: 3,
@@ -60,66 +82,70 @@ class Keypad extends ConsumerWidget {
       children: [
         KeypadButton(
           buttonText: '1',
-          onButtonPressed: onKeyPressed,
+          onButtonPressed: widget.onKeyPressed,
         ),
         KeypadButton(
           buttonText: '2',
-          onButtonPressed: onKeyPressed,
+          onButtonPressed: widget.onKeyPressed,
         ),
         KeypadButton(
           buttonText: '3',
-          onButtonPressed: onKeyPressed,
+          onButtonPressed: widget.onKeyPressed,
         ),
         KeypadButton(
           buttonText: '4',
-          onButtonPressed: onKeyPressed,
+          onButtonPressed: widget.onKeyPressed,
         ),
         KeypadButton(
           buttonText: '5',
-          onButtonPressed: onKeyPressed,
+          onButtonPressed: widget.onKeyPressed,
         ),
         KeypadButton(
           buttonText: '6',
-          onButtonPressed: onKeyPressed,
+          onButtonPressed: widget.onKeyPressed,
         ),
         KeypadButton(
           buttonText: '7',
-          onButtonPressed: onKeyPressed,
+          onButtonPressed: widget.onKeyPressed,
         ),
         KeypadButton(
           buttonText: '8',
-          onButtonPressed: onKeyPressed,
+          onButtonPressed: widget.onKeyPressed,
         ),
         KeypadButton(
           buttonText: '9',
-          onButtonPressed: onKeyPressed,
+          onButtonPressed: widget.onKeyPressed,
         ),
         KeypadButton(
           buttonText: '*',
-          onButtonPressed: onKeyPressed,
+          onButtonPressed: widget.onKeyPressed,
         ),
         KeypadButton(
           buttonText: '0',
-          onButtonPressed: onKeyPressed,
+          onButtonPressed: widget.onKeyPressed,
         ),
         KeypadButton(
           buttonText: '#',
-          onButtonPressed: onKeyPressed,
+          onButtonPressed: widget.onKeyPressed,
         ),
         Container(),
         Center(
           child: IconButton(
-            onPressed: () {
-              phoneNumberVerification(context, ref);
-            },
+            onPressed: _isCheckingIfNumberExists
+                ? null
+                : () {
+                    phoneNumberVerification(context, ref);
+                  },
             icon: Padding(
               padding: const EdgeInsets.all(5),
-              child: SvgPicture.asset(
-                'assets/icons/message-ring.svg',
-                height: 30,
-                colorFilter:
-                    const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-              ),
+              child: _isCheckingIfNumberExists
+                  ? const CircularProgressIndicator.adaptive()
+                  : SvgPicture.asset(
+                      'assets/icons/message-ring.svg',
+                      height: 30,
+                      colorFilter:
+                          const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                    ),
             ),
             style: IconButton.styleFrom(
               backgroundColor: Colors.blue,
@@ -131,9 +157,9 @@ class Keypad extends ConsumerWidget {
           customBorder: const CircleBorder(),
           splashColor: Colors.grey,
           onTap: () {
-            onBackButtonPressed();
+            widget.onBackButtonPressed();
           },
-          onLongPress: () => onBackButtonPressed(longPress: true),
+          onLongPress: () => widget.onBackButtonPressed(longPress: true),
           child: const Icon(Icons.backspace),
         ),
       ],

@@ -49,7 +49,7 @@ Future<void> _messageHandler(RemoteMessage message) async {
   createAwesomeNotification(
     title: '$callerName is calling',
     body: 'Might be urgent. Schrödinger\'s message',
-  );
+  ); 
 }
 
 Future<void> _fcmSetup() async {

@@ -221,8 +221,8 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                       motion: const BehindMotion(),
                       children: [
                         CustomSlidableAction(
-                          onPressed: (context) {
-                            showMessageWriterModalSheet(
+                          onPressed: (context) async{
+                           await showMessageWriterModalSheet(
                                 context: context,
                                 calleePhoneNumber: recentN.contact.phoneNumber,
                                 calleeName: recentN.contact.name);
@@ -275,8 +275,8 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                         },
                                         icon: const Icon(Icons.person_add)),
                                     IconButton(
-                                      onPressed: () {
-                                        showMessageWriterModalSheet(
+                                      onPressed: () async{
+                                        await showMessageWriterModalSheet(
                                           calleeName: recentN.contact.name,
                                           calleePhoneNumber:
                                               recentN.contact.phoneNumber,

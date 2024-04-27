@@ -30,8 +30,6 @@ class ContactsList extends ConsumerStatefulWidget {
 class _ContactsListState extends ConsumerState<ContactsList> {
   final Map<Contact, bool> _expandedBoolsMap = {};
 
- 
-
   void _changeTileExpandedStatus(Contact contact) {
     setState(() {
       _expandedBoolsMap[contact] = !_expandedBoolsMap[contact]!;
@@ -153,8 +151,8 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                       motion: const BehindMotion(),
                       children: [
                         CustomSlidableAction(
-                          onPressed: (context) {
-                            showMessageWriterModalSheet(
+                          onPressed: (context) async {
+                            await showMessageWriterModalSheet(
                                 context: context,
                                 calleePhoneNumber: contactN.phoneNumber,
                                 calleeName: contactN.name);
@@ -234,8 +232,8 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
                                     IconButton(
-                                      onPressed: () {
-                                        showMessageWriterModalSheet(
+                                      onPressed: () async {
+                                        await showMessageWriterModalSheet(
                                           calleeName: contactN.name,
                                           calleePhoneNumber:
                                               contactN.phoneNumber,

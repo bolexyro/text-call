@@ -86,14 +86,12 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
       },
     );
 
-    if (await contactExists(phoneNumber: newRecent.contact.phoneNumber)) {
       newRecent = Recent.fromRecent(
           recent: newRecent,
           recentIsAContact: true,
           contactName:
               (await getContactName(phoneNumber: newRecent.contact.phoneNumber))
                   .name);
-    }
     state = [...state, newRecent];
   }
 }

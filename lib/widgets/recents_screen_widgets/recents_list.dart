@@ -161,7 +161,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
               onPressed: () async {
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setString('callMessage', 'callMessage');
-                await prefs.setString('callerPhoneNumber', 'callerPhoneNumber');
+                await prefs.setString('callerPhoneNumber', '+2349098875567');
                 await prefs.setString('callerName', 'callerPhoneNumber');
                 await prefs.setString(
                   'backgroundColor',
@@ -254,11 +254,12 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                 const SizedBox(
                                   height: 10,
                                 ),
-                                Text(
-                                  'Mobile ${recentN.contact.localPhoneNumber}',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                ),
+                                if (recentN.recentIsAContact)
+                                  Text(
+                                    'Mobile ${recentN.contact.localPhoneNumber}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
                                 Text(recntCategoryStringMap[recentN.category]!),
                                 const SizedBox(
                                   height: 10,
@@ -267,6 +268,12 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
+                                    if(!recentN.recentIsAContact)
+                                    IconButton(
+                                        onPressed: () {
+                                          showAddContactDialog(context, phoneNumber: recentN.contact.phoneNumber);
+                                        },
+                                        icon: const Icon(Icons.person_add)),
                                     IconButton(
                                       onPressed: () {
                                         showMessageWriterModalSheet(

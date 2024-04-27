@@ -17,13 +17,24 @@ RecentCategory? _getCategoryEnumFromText({required String recentCategoryText}) {
   return null;
 }
 
+Future<bool> contactExists({required String phoneNumber}) async {
+  final db = await getDatabase();
+  final data = await db
+      .query('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
+
+  return data.isNotEmpty;
+}
+
 Future<Contact> getContactName({required String phoneNumber}) async {
   final db = await getDatabase();
   final data = await db
       .query('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
   return Contact(
-      name: data.isEmpty ? 'Unknown' : data[0]['name'] as String,
-      phoneNumber: phoneNumber);
+    name: data.isEmpty
+        ? '0${phoneNumber.substring(4)}'
+        : data[0]['name'] as String,
+    phoneNumber: phoneNumber,
+  );
 }
 
 class RecentsNotifier extends StateNotifier<List<Recent>> {
@@ -49,6 +60,8 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
             category: _getCategoryEnumFromText(
               recentCategoryText: row['categoryName'] as String,
             )!,
+            recentIsAContact:
+                await contactExists(phoneNumber: row['phoneNumber'] as String),
             callTime: DateTime.parse(row['callTime'] as String),
           ),
         )
@@ -73,10 +86,13 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
       },
     );
 
-    if ((await getContactName(phoneNumber: newRecent.contact.phoneNumber))
-            .name ==
-        'Unknown') {
-      newRecent = Recent.fromRecent(recent: newRecent, contactName: 'Unkown');
+    if (await contactExists(phoneNumber: newRecent.contact.phoneNumber)) {
+      newRecent = Recent.fromRecent(
+          recent: newRecent,
+          recentIsAContact: true,
+          contactName:
+              (await getContactName(phoneNumber: newRecent.contact.phoneNumber))
+                  .name);
     }
     state = [...state, newRecent];
   }

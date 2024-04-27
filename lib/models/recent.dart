@@ -58,11 +58,11 @@ class Recent {
     required this.category,
     required this.message,
     DateTime? callTime,
+    this.recentIsAContact = false,
   }) : callTime = callTime ?? DateTime.now();
 
-  Recent.fromRecent({required Recent recent, required String contactName})
-      : contact =
-            Contact(name: contactName, phoneNumber: recent.contact.phoneNumber),
+  Recent.fromRecent({required Recent recent, required this.recentIsAContact, required String contactName})
+      : contact = Contact(name: contactName, phoneNumber: recent.contact.phoneNumber,),
         category = recent.category,
         callTime = recent.callTime,
         message = recent.message;
@@ -71,4 +71,5 @@ class Recent {
   final RecentCategory category;
   final DateTime callTime;
   final Message message;
+  final bool recentIsAContact;
 }

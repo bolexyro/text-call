@@ -3,6 +3,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:text_call/models/recent.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/add_contact.dart';
 import 'package:text_call/widgets/message_writer.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
@@ -47,6 +48,9 @@ void createAwesomeNotification({String? title, String? body}) {
 String changeLocalToIntl({required String localPhoneNumber}) =>
     '+234${localPhoneNumber.substring(1)}';
 
+String changeIntlToLocal({required String intlPhoneNumber}) =>
+    '0${intlPhoneNumber.substring(4)}';
+
 void showMessageWriterModalSheet(
     {required BuildContext context,
     required String calleeName,
@@ -57,7 +61,6 @@ void showMessageWriterModalSheet(
     backgroundColor: Colors.transparent,
     context: context,
     builder: (ctx) => MessageWriter(
-      calleeName: calleeName,
       calleePhoneNumber: calleePhoneNumber,
     ),
   );
@@ -77,6 +80,15 @@ Future<sql.Database> getDatabase() async {
     },
   );
   return db;
+}
+
+void showAddContactDialog(context, {String? phoneNumber}) async {
+  showAdaptiveDialog(
+    context: context,
+    builder: (context) {
+      return AddContact(phoneNumber: phoneNumber);
+    },
+  );
 }
 
 void showErrorDialog(String text, BuildContext context) {

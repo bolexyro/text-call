@@ -7,7 +7,12 @@ import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.
 
 //ignore: must_be_immutable
 class AddContact extends ConsumerStatefulWidget {
-  const AddContact({super.key});
+  const AddContact({
+    super.key,
+    this.phoneNumber,
+  });
+
+  final String? phoneNumber;
 
   @override
   ConsumerState<AddContact> createState() => _AddContactState();
@@ -26,6 +31,10 @@ class _AddContactState extends ConsumerState<AddContact> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      _enteredPhoneNumber = widget.phoneNumber == null
+          ? _enteredPhoneNumber
+          : widget.phoneNumber!;
+
       final bool numberExists = await checkIfNumberExists(_enteredPhoneNumber!);
       if (numberExists == false) {
         showErrorDialog('Number doesn\'t exist', context);
@@ -37,9 +46,7 @@ class _AddContactState extends ConsumerState<AddContact> {
 
       ref.read(contactsProvider.notifier).addContact(
             Contact(
-              name: _enteredName!.trim(),
-              phoneNumber: _enteredPhoneNumber!,
-            ),
+                name: _enteredName!.trim(), phoneNumber: _enteredPhoneNumber!),
           );
       Navigator.of(context).pop();
     }
@@ -50,6 +57,7 @@ class _AddContactState extends ConsumerState<AddContact> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.phoneNumber);
     return AlertDialog.adaptive(
       scrollable: true,
       shape: RoundedRectangleBorder(
@@ -92,28 +100,29 @@ class _AddContactState extends ConsumerState<AddContact> {
                   const SizedBox(
                     height: 14,
                   ),
-                  TextFormField(
-                    validator: (value) {
-                      if (value == null ||
-                          value.trim().length != 11 ||
-                          int.tryParse(value) == null) {
-                        return 'Phone number is invalid';
-                      }
-                      return null;
-                    },
-                    onSaved: (newValue) {
-                      _enteredPhoneNumber =
-                          changeLocalToIntl(localPhoneNumber: newValue!);
-                    },
-                    maxLength: 11,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      hintText: 'Phone',
-                      prefixIcon: Icon(
-                        Icons.phone_outlined,
+                  if (widget.phoneNumber == null)
+                    TextFormField(
+                      validator: (value) {
+                        if (value == null ||
+                            value.trim().length != 11 ||
+                            int.tryParse(value) == null) {
+                          return 'Phone number is invalid';
+                        }
+                        return null;
+                      },
+                      onSaved: (newValue) {
+                        _enteredPhoneNumber =
+                            changeLocalToIntl(localPhoneNumber: newValue!);
+                      },
+                      maxLength: 11,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        hintText: 'Phone',
+                        prefixIcon: Icon(
+                          Icons.phone_outlined,
+                        ),
                       ),
                     ),
-                  ),
                   const SizedBox(
                     height: 14,
                   ),

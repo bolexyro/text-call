@@ -32,9 +32,8 @@ Future<void> _messageHandler(RemoteMessage message) async {
   final db = await getDatabase();
   final data = await db.query('contacts',
       where: 'phoneNumber = ?', whereArgs: [callerPhoneNumber]);
-
   if (data.isEmpty) {
-    callerName = 'Unknown';
+    callerName = changeIntlToLocal(intlPhoneNumber: callerPhoneNumber);
   } else {
     callerName = data[0]['name'] as String;
   }
@@ -42,15 +41,13 @@ Future<void> _messageHandler(RemoteMessage message) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString('callMessage', callMessage);
   await prefs.setString('callerPhoneNumber', callerPhoneNumber);
-  await prefs.setString('callerName', callerPhoneNumber);
+  await prefs.setString('callerName', callerName);
   await prefs.setString(
     'backgroundColor',
     json.encode(backgroundColorMap),
   );
   createAwesomeNotification(
-    title: callerName != 'Unknown'
-        ? '$callerName is calling '
-        : '$callerPhoneNumber is calling',
+    title: '$callerName is calling',
     body: 'Might be urgent. Schrödinger\'s message',
   );
 }

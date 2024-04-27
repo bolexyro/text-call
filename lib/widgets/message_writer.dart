@@ -19,11 +19,9 @@ class MessageWriter extends ConsumerStatefulWidget {
   const MessageWriter({
     super.key,
     required this.calleePhoneNumber,
-    required this.calleeName,
   });
 
   final String calleePhoneNumber;
-  final String calleeName;
 
   @override
   ConsumerState<MessageWriter> createState() => _MessageWriterState();
@@ -210,7 +208,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     message: _messageController.text,
                     backgroundColor: _selectedColor),
                 contact: Contact(
-                    name: widget.calleeName,
+                    name: '',
                     phoneNumber: widget.calleePhoneNumber),
                 category: RecentCategory.outgoingRejected,
               );
@@ -244,7 +242,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   message: _messageController.text,
                   backgroundColor: _selectedColor),
               contact: Contact(
-                  name: widget.calleeName,
+                  name: '',
                   phoneNumber: widget.calleePhoneNumber),
               category: RecentCategory.outgoingAccepted,
             );
@@ -278,7 +276,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       message: _messageController.text,
                       backgroundColor: _selectedColor),
                   contact: Contact(
-                    name: widget.calleeName,
+                    name: '',
                     phoneNumber: widget.calleePhoneNumber,
                   ),
                   category: RecentCategory.outgoingUnanswered,

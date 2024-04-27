@@ -11,7 +11,6 @@ import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/confirm_delete_dialog.dart';
-import 'package:text_call/widgets/contacts_screen_widgets/add_contact.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';
 
 class ContactsList extends ConsumerStatefulWidget {
@@ -31,14 +30,7 @@ class ContactsList extends ConsumerStatefulWidget {
 class _ContactsListState extends ConsumerState<ContactsList> {
   final Map<Contact, bool> _expandedBoolsMap = {};
 
-  void _showAddContactDialog(context) async {
-    showAdaptiveDialog(
-      context: context,
-      builder: (context) {
-        return const AddContact();
-      },
-    );
-  }
+ 
 
   void _changeTileExpandedStatus(Contact contact) {
     setState(() {
@@ -90,7 +82,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
             const SizedBox(width: 10),
             IconButton(
               onPressed: () {
-                _showAddContactDialog(context);
+                showAddContactDialog(context);
               },
               icon: const Icon(Icons.person_add),
             ),
@@ -99,7 +91,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
               onPressed: () async {
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setString('callMessage', 'callMessage');
-                await prefs.setString('callerPhoneNumber', 'emptyPhoneNumber');
+                await prefs.setString('callerPhoneNumber', '+2349098875567');
                 await prefs.setString('callerName', 'callerPhoneNumber');
                 await prefs.setString(
                   'backgroundColor',

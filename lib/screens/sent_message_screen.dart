@@ -17,10 +17,12 @@ class SentMessageScreen extends ConsumerWidget {
     super.key,
     this.fromTerminated = false,
     this.message,
+    this.forRequestAccess = false,
   });
 
   final bool fromTerminated;
   final Message? message;
+  final bool forRequestAccess;
 
   Widget scaffoldTitle(Color color) {
     return Text(
@@ -58,6 +60,7 @@ class SentMessageScreen extends ConsumerWidget {
                 final String? callerName = prefs.getString('callerName');
                 final String? callerPhoneNumber =
                     prefs.getString('callerPhoneNumber');
+                final String? recentId = prefs.getString('recentId');
 
                 if (fromTerminated) {
                   final url = Uri.https('text-call-backend.onrender.com',
@@ -65,6 +68,7 @@ class SentMessageScreen extends ConsumerWidget {
                   http.get(url);
                 }
                 final newRecent = Recent(
+                  id: recentId!,
                   message: Message(
                     message: callMessage!,
                     backgroundColor:
@@ -90,7 +94,8 @@ class SentMessageScreen extends ConsumerWidget {
                   ),
                   floatingActionButton: fromTerminated
                       ? FloatingActionButton(
-                          onPressed: () => Navigator.of(context).pushReplacement(
+                          onPressed: () =>
+                              Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
                               builder: (context) => const PhonePageScreen(),
                             ),
@@ -108,13 +113,18 @@ class SentMessageScreen extends ConsumerWidget {
                         )
                       : null,
                   backgroundColor: backgroundActualColor,
-                  body: TheColumnWidget(
-                    message: Message(
-                      message: callMessage,
-                      backgroundColor: backgroundActualColor,
-                    ),
-                    fromTerminated: fromTerminated,
-                  ),
+                  body: forRequestAccess
+                      ? TheStackWidget(
+                          message: Message(
+                              message: message!.message,
+                              backgroundColor: message!.backgroundColor),
+                        )
+                      : TheColumnWidget(
+                          message: Message(
+                            message: callMessage,
+                            backgroundColor: backgroundActualColor,
+                          ),
+                        ),
                 );
               },
             )
@@ -128,12 +138,18 @@ class SentMessageScreen extends ConsumerWidget {
                 forceMaterialTransparency: true,
                 title: scaffoldTitle(message!.backgroundColor),
               ),
-              body: TheColumnWidget(
-                message: Message(
-                  message: message!.message,
-                  backgroundColor: message!.backgroundColor,
-                ),
-              ),
+              body: forRequestAccess
+                  ? TheStackWidget(
+                      message: Message(
+                          message: message!.message,
+                          backgroundColor: message!.backgroundColor),
+                    )
+                  : TheColumnWidget(
+                      message: Message(
+                        message: message!.message,
+                        backgroundColor: message!.backgroundColor,
+                      ),
+                    ),
               backgroundColor: message!.backgroundColor,
             ),
     );
@@ -144,39 +160,91 @@ class TheColumnWidget extends StatelessWidget {
   const TheColumnWidget({
     super.key,
     required this.message,
-    this.fromTerminated = false,
   });
 
   final Message message;
-  final bool fromTerminated;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Center(
+      child: AnimatedTextKit(
+        animatedTexts: [
+          TyperAnimatedText(
+            message.message,
+            textAlign: TextAlign.center,
+            textStyle: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 40,
+              color: message.backgroundColor.computeLuminance() > 0.5
+                  ? Colors.black
+                  : Colors.white,
+            ),
+            speed: const Duration(milliseconds: 100),
+          ),
+        ],
+        displayFullTextOnTap: true,
+        repeatForever: false,
+        totalRepeatCount: 1,
+      ),
+    );
+  }
+}
+
+class TheStackWidget extends StatelessWidget {
+  const TheStackWidget({
+    super.key,
+    required this.message,
+  });
+
+  final Message message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
       children: [
-        Expanded(
-          child: Center(
-            child: AnimatedTextKit(
-              animatedTexts: [
-                TyperAnimatedText(
-                  message.message,
-                  textAlign: TextAlign.center,
-                  textStyle: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 40,
-                    color: message.backgroundColor.computeLuminance() > 0.5
-                        ? Colors.black
-                        : Colors.white,
+        TheColumnWidget(message: message),
+        Positioned(
+            width: MediaQuery.sizeOf(context).width,
+            bottom: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    sendAccessRequestStatus(AccessRequestStatus.granted);
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.all(20),
+                    backgroundColor:
+                        makeColorLighter(message.backgroundColor, -10),
+                    shape: const CircleBorder(),
                   ),
-                  speed: const Duration(milliseconds: 100),
+                  child: const Icon(
+                    Icons.check,
+                    color: Colors.green,
+                    size: 30,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    sendAccessRequestStatus(AccessRequestStatus.denied);
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.all(20),
+                    backgroundColor:
+                        makeColorLighter(message.backgroundColor, -10),
+                    shape: const CircleBorder(),
+                  ),
+                  child: const Icon(
+                    Icons.close,
+                    size: 30,
+                    color: Colors.red,
+                  ),
                 ),
               ],
-              displayFullTextOnTap: true,
-              repeatForever: false,
-              totalRepeatCount: 1,
-            ),
-          ),
-        ),
+            ))
       ],
     );
   }

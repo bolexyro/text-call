@@ -57,7 +57,6 @@ class _AddContactState extends ConsumerState<AddContact> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.phoneNumber);
     return AlertDialog.adaptive(
       scrollable: true,
       shape: RoundedRectangleBorder(
@@ -145,7 +144,7 @@ class _AddContactState extends ConsumerState<AddContact> {
                 onPressed: _isAddingContact == true
                     ? null
                     : () async {
-                        if (!await checkForInternetConnection(context)) {
+                        if (!await checkForInternetConnection()) {
                           showErrorDialog(
                               'Connect to the internet and try again.',
                               context);

@@ -102,7 +102,11 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                     },
                   ),
                 );
-                createAwesomeNotification(title: 'Bolexyro');
+                prefs.setString('recentId', '2024-04-28 22:10:11.836578');
+                createAwesomeNotification(
+                    title: 'Bolexyro is asking permission to see a message.',
+                    notificationPurpose: NotificationPurpose.forAccessRequest,
+                    body: 'Which message? Click to find out.');
               },
               icon: const Icon(Icons.search),
             ),
@@ -110,8 +114,24 @@ class _ContactsListState extends ConsumerState<ContactsList> {
           ],
         ),
         if (contactsList.isEmpty)
-          const Center(
-            child: Text("You have no contacts"),
+          Expanded(
+            child: LiquidPullToRefresh(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              backgroundColor: Colors.white,
+              showChildOpacityTransition: false,
+              onRefresh: () => Future.delayed(const Duration(seconds: 0)),
+              height: MediaQuery.sizeOf(context).width < 520 ? 120 : 80,
+              animSpeedFactor: 2.3,
+              springAnimationDurationInMilliseconds: 600,
+              child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Center(child: Text("You have no contacts")),
+                  ]),
+            ),
           ),
         if (contactsList.isNotEmpty)
           Expanded(

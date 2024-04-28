@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
@@ -10,6 +11,7 @@ import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_card_w_profile_pic_stack.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';
+import 'package:http/http.dart' as http;
 
 enum Purpose { forContact, forRecent }
 
@@ -80,6 +82,14 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
     }
   }
 
+  void _sendAccessRequest(Recent recent) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? requesterPhoneNumber = prefs.getString('phoneNumber');
+    final url = Uri.https('text-call-backend.onrender.com',
+        'send-access-request/$requesterPhoneNumber/${recent.contact.phoneNumber}  ');
+    http.get(url);
+  }
+
   @override
   Widget build(BuildContext context) {
     final purpose =
@@ -109,17 +119,27 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
           const SizedBox(
             height: 7,
           ),
-          ElevatedButton(
-            onPressed: () {
-              _goToSentMessageScreen(widget.recent!.message);
-            },
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: const Text('Show Message'),
-          ),
+          widget.recent!.category != RecentCategory.incomingRejected
+              ? ElevatedButton(
+                  onPressed: () {
+                    _goToSentMessageScreen(widget.recent!.message);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Show message'),
+                )
+              : ElevatedButton(
+                  onPressed: () => _sendAccessRequest(widget.recent!),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Request access'),
+                ),
         ],
       );
     }
@@ -188,7 +208,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
                           Text(recntCategoryStringMap[recentN.category]!),
                         ],
                       ),
-                      expandedContent: recentN.category != RecentCategory.incomingRejected? ElevatedButton(
+                      expandedContent: ElevatedButton(
                         onPressed: () {
                           _goToSentMessageScreen(recentN.message);
                         },
@@ -198,17 +218,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
                           ),
                         ),
                         child: const Text('Show Message'),
-                      ) :  ElevatedButton(
-                        onPressed: () {
-                          _goToSentMessageScreen(recentN.message);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child:  Text('Send ${recentN.callTime}'),
-                      ) ,
+                      ),
                       isExpanded: _expandedBoolsMap[recentN]!,
                       tileOnTapped: () => _changeTileExpandedStatus(recentN),
                     ),

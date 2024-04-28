@@ -46,6 +46,7 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
     final recentsList = data
         .map(
           (row) async => Recent(
+            id: row['id'] as String,
             message: Message(
               message: row['message'] as String,
               backgroundColor: Color.fromARGB(
@@ -75,6 +76,7 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
     db.insert(
       'recents',
       {
+        'id': newRecent.id,
         'backgroundColorAlpha': newRecent.message.backgroundColor.alpha,
         'backgroundColorRed': newRecent.message.backgroundColor.red,
         'backgroundColorGreen': newRecent.message.backgroundColor.green,

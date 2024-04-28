@@ -34,7 +34,7 @@ class _KeypadState extends ConsumerState<Keypad> {
     if (phoneNumberIsValid == false) {
       showErrorDialog('Enter a valid phone number', context);
       setState(() {
-        _isCheckingIfNumberExists == true;
+        _isCheckingIfNumberExists = false;
       });
       return;
     }
@@ -132,20 +132,18 @@ class _KeypadState extends ConsumerState<Keypad> {
         Center(
           child: IconButton(
             onPressed: _isCheckingIfNumberExists
-                ? null
+                ? (){}
                 : () {
                     phoneNumberVerification(context, ref);
                   },
             icon: Padding(
               padding: const EdgeInsets.all(5),
-              child: _isCheckingIfNumberExists
-                  ? const CircularProgressIndicator.adaptive()
-                  : SvgPicture.asset(
-                      'assets/icons/message-ring.svg',
-                      height: 30,
-                      colorFilter:
-                          const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                    ),
+              child: SvgPicture.asset(
+                'assets/icons/message-ring.svg',
+                height: 30,
+                colorFilter:
+                    const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              ),
             ),
             style: IconButton.styleFrom(
               backgroundColor: Colors.blue,

@@ -59,17 +59,28 @@ class Recent {
     required this.message,
     DateTime? callTime,
     this.recentIsAContact = false,
+    required this.id,
   }) : callTime = callTime ?? DateTime.now();
 
-  Recent.fromRecent({required Recent recent, required this.recentIsAContact, required String contactName})
-      : contact = Contact(name: contactName, phoneNumber: recent.contact.phoneNumber,),
+  Recent.fromRecent(
+      {required Recent recent,
+      required this.recentIsAContact,
+      required String contactName})
+      : contact = Contact(
+          name: contactName,
+          phoneNumber: recent.contact.phoneNumber,
+        ),
         category = recent.category,
         callTime = recent.callTime,
-        message = recent.message;
+        message = recent.message,
+        id = recent.id;
 
   final Contact contact;
   final RecentCategory category;
   final DateTime callTime;
   final Message message;
   final bool recentIsAContact;
+  // this id would be the same on the caller and callee's phones. It is used to identify the recent message
+  // we are requesting access for
+  final String id;
 }

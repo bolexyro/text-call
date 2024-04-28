@@ -3,46 +3,81 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/add_contact.dart';
 import 'package:text_call/widgets/message_writer.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
 
 enum Screen { phone, tablet }
 
-void createAwesomeNotification({String? title, String? body}) {
+enum NotificationPurpose { forCall, forAccessRequest }
+
+void createAwesomeNotification(
+    {String? title,
+    String? body,
+    required NotificationPurpose notificationPurpose}) {
+  final DateTime currentDate = DateTime.now();
+
   AwesomeNotifications().createNotification(
     content: NotificationContent(
-      id: 123,
-      channelKey: 'basic_channel',
+      // the id is used to identify each notification. So if you have a static id like 123, when a new notification comes in, the old one goes out.
+      id: int.parse(
+          '11${currentDate.day}${currentDate.hour}${currentDate.minute}${currentDate.second}'),
+      channelKey: notificationPurpose == NotificationPurpose.forCall
+          ? 'calls_channel'
+          : 'access_requests_channel',
       color: Colors.black,
       title: title,
       body: body,
+      autoDismissible:
+          notificationPurpose == NotificationPurpose.forCall ? false : true,
       category: NotificationCategory.Call,
       fullScreenIntent: true,
-      autoDismissible: false,
       wakeUpScreen: true,
       backgroundColor: Colors.green,
-      locked: true,
-      chronometer: Duration.zero, // Chronometer starts to count at 0 seconds
-      timeoutAfter: const Duration(seconds: 20),
+      locked: notificationPurpose == NotificationPurpose.forCall ? true : false,
+      chronometer: notificationPurpose == NotificationPurpose.forCall
+          ? Duration.zero
+          : null, // Chronometer starts to count at 0 seconds
+      timeoutAfter: notificationPurpose == NotificationPurpose.forCall
+          ? const Duration(seconds: 20)
+          : null,
     ),
-    actionButtons: [
-      NotificationActionButton(
-        key: 'ACCEPT',
-        label: 'Accept Call',
-        color: Colors.green,
-        autoDismissible: true,
-      ),
-      NotificationActionButton(
-        key: 'REJECT',
-        label: 'Reject Call',
-        color: Colors.red,
-        autoDismissible: true,
-        actionType: ActionType.SilentAction,
-      ),
-    ],
+    actionButtons: notificationPurpose == NotificationPurpose.forCall
+        ? [
+            NotificationActionButton(
+              key: 'ACCEPT_CALL',
+              label: 'Accept Call',
+              color: Colors.green,
+              autoDismissible: true,
+            ),
+            NotificationActionButton(
+              key: 'REJECT_CALL',
+              label: 'Reject Call',
+              color: Colors.red,
+              autoDismissible: true,
+              actionType: ActionType.SilentAction,
+            ),
+          ]
+        : [
+            NotificationActionButton(
+              key: 'GRANT_ACCESS',
+              label: 'Grant Access',
+              color: Colors.green,
+              autoDismissible: true,
+              actionType: ActionType.SilentAction,
+            ),
+            NotificationActionButton(
+              key: 'DENY_ACCESS',
+              label: 'Deny Access',
+              color: Colors.red,
+              autoDismissible: true,
+              actionType: ActionType.SilentAction,
+            ),
+          ],
   );
 }
 
@@ -52,7 +87,7 @@ String changeLocalToIntl({required String localPhoneNumber}) =>
 String changeIntlToLocal({required String intlPhoneNumber}) =>
     '0${intlPhoneNumber.substring(4)}';
 
-Future<bool> checkForInternetConnection(BuildContext context) async {
+Future<bool> checkForInternetConnection() async {
   return await InternetConnection().hasInternetAccess;
 }
 
@@ -60,7 +95,7 @@ Future<void> showMessageWriterModalSheet(
     {required BuildContext context,
     required String calleeName,
     required String calleePhoneNumber}) async {
-  if (!await checkForInternetConnection(context)) {
+  if (!await checkForInternetConnection()) {
     showErrorDialog('Connect to the internet and try again.', context);
     return;
   }
@@ -85,7 +120,7 @@ Future<sql.Database> getDatabase() async {
       await db.execute(
           'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT)');
       await db.execute(
-          'CREATE TABLE recents (callTime TEXT PRIMARY KEY, phoneNumber TEXT, name TEXT, categoryName TEXT, message TEXT, backgroundColorRed INTEGER, backgroundColorGreen INTEGER, backgroundColorBlue INTEGER, backgroundColorAlpha INTEGER)');
+          'CREATE TABLE recents ( id TEXT PRIMARY KEY, callTime TEXT, phoneNumber TEXT, name TEXT, categoryName TEXT, message TEXT, backgroundColorRed INTEGER, backgroundColorGreen INTEGER, backgroundColorBlue INTEGER, backgroundColorAlpha INTEGER)');
     },
   );
   return db;
@@ -100,7 +135,7 @@ void showAddContactDialog(context, {String? phoneNumber}) async {
   );
 }
 
-void showErrorDialog(String text, BuildContext context) {
+void showErrorDialog(String text, BuildContext context) async {
   final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
   showAdaptiveDialog(
@@ -216,4 +251,28 @@ Color makeColorLighter(Color color, int amount) {
   final blue = (color.blue + amount).clamp(0, 255);
 
   return Color.fromARGB(255, red, green, blue);
+}
+
+enum AccessRequestStatus {
+  granted,
+  denied,
+}
+
+Future<void> sendAccessRequestStatus(
+    AccessRequestStatus accessRequestStatus) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.reload();
+  final recentId = prefs.getString('recentId');
+  final requesterPhoneNumber = prefs.getString('requesterPhoneNumber');
+  final requesteePhoneNumber = prefs.getString('phoneNumber');
+
+  if (accessRequestStatus == AccessRequestStatus.granted) {
+    final url = Uri.https('text-call-backend.onrender.com',
+        'request_status/granted/$requesterPhoneNumber/$requesteePhoneNumber/$recentId');
+    http.get(url);
+    return;
+  }
+  final url = Uri.https('text-call-backend.onrender.com',
+      'request_status/denied/$requesterPhoneNumber/$requesteePhoneNumber/$recentId');
+  http.get(url);
 }

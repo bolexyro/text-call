@@ -33,6 +33,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     duration: const Duration(milliseconds: 800),
   );
 
+  late String recentId;
+
   late Future _animationDelay;
   Color _selectedColor = const Color.fromARGB(255, 13, 214, 214);
 
@@ -70,9 +72,12 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       const Duration(seconds: 40),
     );
 
+    recentId = DateTime.now().toString();
+    print(recentId);
     _channel!.sink.add(
       json.encode(
         {
+          'message_id': recentId,
           'caller_phone_number': callerPhoneNumber,
           'callee_phone_number': widget.calleePhoneNumber,
           'message': _messageController.text,
@@ -177,7 +182,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               ),
               IconButton(
                 onPressed: () async {
-                  if (!await checkForInternetConnection(context)) {
+                  if (!await checkForInternetConnection()) {
                     showErrorDialog(
                         'Connect to the internet and try again.', context);
                     return;
@@ -211,6 +216,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             if (snapshotData['call_status'] == 'rejected') {
               // create a recent in your table
               final recent = Recent(
+                id: recentId,
                 message: Message(
                     message: _messageController.text,
                     backgroundColor: _selectedColor),
@@ -245,6 +251,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               );
             }
             final recent = Recent(
+              id: recentId,
               message: Message(
                   message: _messageController.text,
                   backgroundColor: _selectedColor),
@@ -278,6 +285,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       'assets/animations/telephone_ringing_3d.json');
                 }
                 final recent = Recent(
+                  id: recentId,
                   message: Message(
                       message: _messageController.text,
                       backgroundColor: _selectedColor),

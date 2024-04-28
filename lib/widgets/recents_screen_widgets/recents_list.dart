@@ -174,7 +174,9 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                     },
                   ),
                 );
-                createAwesomeNotification(title: 'Bolexyro');
+                createAwesomeNotification(
+                    title: 'Bolexyro',
+                    notificationPurpose: NotificationPurpose.forCall);
               },
               icon: const Icon(Icons.search),
             ),
@@ -238,6 +240,20 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                         ),
                       ],
                     ),
+                    endActionPane: ActionPane(
+                      motion: const BehindMotion(),
+                      children: [
+                        CustomSlidableAction(
+                          onPressed: (context) {
+                            showAddContactDialog(context,
+                                phoneNumber: recentN.contact.phoneNumber);
+                          },
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                          child: const Icon(Icons.person_add),
+                        ),
+                      ],
+                    ),
                     child: widget.screen == Screen.phone
                         ? ExpandableListTile(
                             tileOnTapped: () {
@@ -268,14 +284,17 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    if(!recentN.recentIsAContact)
-                                    IconButton(
+                                    if (!recentN.recentIsAContact)
+                                      IconButton(
                                         onPressed: () {
-                                          showAddContactDialog(context, phoneNumber: recentN.contact.phoneNumber);
+                                          showAddContactDialog(context,
+                                              phoneNumber:
+                                                  recentN.contact.phoneNumber);
                                         },
-                                        icon: const Icon(Icons.person_add)),
+                                        icon: const Icon(Icons.person_add),
+                                      ),
                                     IconButton(
-                                      onPressed: () async{
+                                      onPressed: () async {
                                         await showMessageWriterModalSheet(
                                           calleeName: recentN.contact.name,
                                           calleePhoneNumber:
@@ -330,25 +349,37 @@ class _RecentsListState extends ConsumerState<RecentsList> {
             ),
           ),
         if (recentsList.isEmpty)
-          const Expanded(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Start calling to see your history.',
-                    textAlign: TextAlign.center,
-                  ),
-                  Icon(
-                    Icons.history,
-                    size: 110,
-                    color: Colors.grey,
-                  ),
-                  SizedBox(
-                    height: 100,
-                  ),
-                ],
-              ),
+          Expanded(
+            child: LiquidPullToRefresh(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              backgroundColor: Colors.white,
+              showChildOpacityTransition: false,
+              onRefresh: _refreshRecents,
+              height: MediaQuery.sizeOf(context).width < 520 ? 120 : 80,
+              animSpeedFactor: 2.3,
+              springAnimationDurationInMilliseconds: 600,
+              child: ListView(children: const [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 60,
+                    ),
+                    Text(
+                      'Start calling to see your history.',
+                      textAlign: TextAlign.center,
+                    ),
+                    Icon(
+                      Icons.history,
+                      size: 110,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(
+                      height: 100,
+                    ),
+                  ],
+                ),
+              ]),
             ),
           ),
       ],

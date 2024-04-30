@@ -12,147 +12,28 @@ import 'package:text_call/models/message.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:http/http.dart' as http;
 
+enum HowAppIsOPened {
+  fromTerminatedForRequestAccess,
+  fromTerminatedForPickedCall,
+  notfromTerminatedForRequestAccess,
+  notFromTerminatedForPickedCall,
+}
+
 class SentMessageScreen extends ConsumerWidget {
   const SentMessageScreen({
     super.key,
-    this.fromTerminated = false,
     this.message,
-    this.forRequestAccess = false,
+    required this.howAppIsOpened,
   });
 
-  final bool fromTerminated;
   final Message? message;
-  final bool forRequestAccess;
-
-  Widget scaffoldTitle(Color color) {
-    return Text(
-      'From your loved one or not hehe.',
-      style: TextStyle(
-          color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white),
-    );
-  }
+  final HowAppIsOPened howAppIsOpened;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final prefs = SharedPreferences.getInstance();
-
     return SafeArea(
-      child: message == null
-          ? FutureBuilder(
-              future: prefs,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator.adaptive(),
-                  );
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error ${snapshot.error}'),
-                  );
-                }
-                final prefs = snapshot.data;
-                prefs!.reload();
-
-                final String? callMessage = prefs.getString('callMessage');
-                final String? backgroundColor =
-                    prefs.getString('backgroundColor');
-                final String? callerName = prefs.getString('callerName');
-                final String? callerPhoneNumber =
-                    prefs.getString('callerPhoneNumber');
-                final String? recentId = prefs.getString('recentId');
-
-                if (fromTerminated) {
-                  final url = Uri.https('text-call-backend.onrender.com',
-                      'call/accepted/$callerPhoneNumber');
-                  http.get(url);
-                }
-                final newRecent = Recent(
-                  id: recentId!,
-                  message: Message(
-                    message: callMessage!,
-                    backgroundColor:
-                        deJsonifyColor(json.decode(backgroundColor!)),
-                  ),
-                  contact: Contact(
-                      name: callerName!, phoneNumber: callerPhoneNumber!),
-                  category: RecentCategory.incomingAccepted,
-                );
-
-                ref.read(recentsProvider.notifier).addRecent(newRecent);
-                final backgroundActualColor =
-                    deJsonifyColor(json.decode(backgroundColor));
-                return Scaffold(
-                  appBar: AppBar(
-                    iconTheme: IconThemeData(
-                      color: backgroundActualColor.computeLuminance() > 0.5
-                          ? Colors.black
-                          : Colors.white,
-                    ),
-                    forceMaterialTransparency: true,
-                    title: scaffoldTitle(backgroundActualColor),
-                  ),
-                  floatingActionButton: fromTerminated
-                      ? FloatingActionButton(
-                          onPressed: () =>
-                              Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const PhonePageScreen(),
-                            ),
-                          ),
-                          shape: const CircleBorder(),
-                          backgroundColor:
-                              makeColorLighter(backgroundActualColor, 5),
-                          child: Icon(
-                            Icons.home,
-                            color:
-                                backgroundActualColor.computeLuminance() > 0.5
-                                    ? Colors.black
-                                    : Colors.white,
-                          ),
-                        )
-                      : null,
-                  backgroundColor: backgroundActualColor,
-                  body: forRequestAccess
-                      ? TheStackWidget(
-                          message: Message(
-                              message: message!.message,
-                              backgroundColor: message!.backgroundColor),
-                        )
-                      : TheColumnWidget(
-                          message: Message(
-                            message: callMessage,
-                            backgroundColor: backgroundActualColor,
-                          ),
-                        ),
-                );
-              },
-            )
-          : Scaffold(
-              appBar: AppBar(
-                iconTheme: IconThemeData(
-                  color: message!.backgroundColor.computeLuminance() > 0.5
-                      ? Colors.black
-                      : Colors.white,
-                ),
-                forceMaterialTransparency: true,
-                title: scaffoldTitle(message!.backgroundColor),
-              ),
-              body: forRequestAccess
-                  ? TheStackWidget(
-                      message: Message(
-                          message: message!.message,
-                          backgroundColor: message!.backgroundColor),
-                    )
-                  : TheColumnWidget(
-                      message: Message(
-                        message: message!.message,
-                        backgroundColor: message!.backgroundColor,
-                      ),
-                    ),
-              backgroundColor: message!.backgroundColor,
-            ),
-    );
+        child: widgetToRenderBasedOnHowAppIsOpened(
+            howAppIsOpened: howAppIsOpened, ref: ref));
   }
 }
 
@@ -194,16 +75,25 @@ class TheStackWidget extends StatelessWidget {
   const TheStackWidget({
     super.key,
     required this.message,
+    required this.howAppIsOpened,
   });
 
   final Message message;
+  final HowAppIsOPened howAppIsOpened;
+  final Color backgroundActualColor = Colors.red;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         TheColumnWidget(message: message),
-        Positioned(
+        if (howAppIsOpened == HowAppIsOPened.fromTerminatedForRequestAccess ||
+            howAppIsOpened ==
+                HowAppIsOPened.fromTerminatedForPickedCall ||
+            howAppIsOpened == HowAppIsOPened.notfromTerminatedForRequestAccess)
+
+        if (howAppIsOpened == HowAppIsOPened.fromTerminatedForRequestAccess || howAppIsOpened == HowAppIsOPened.notfromTerminatedForRequestAccess)
+          Positioned(
             width: MediaQuery.sizeOf(context).width,
             bottom: 20,
             child: Row(
@@ -243,9 +133,140 @@ class TheStackWidget extends StatelessWidget {
                     color: Colors.red,
                   ),
                 ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const PhonePageScreen(),
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    backgroundColor: makeColorLighter(backgroundActualColor, 5),
+                  ),
+                  child: Icon(
+                    Icons.home,
+                    color: backgroundActualColor.computeLuminance() > 0.5
+                        ? Colors.black
+                        : Colors.white,
+                  ),
+                )
               ],
-            ))
+            ),
+          )
       ],
     );
   }
+}
+
+Widget widgetToRenderBasedOnHowAppIsOpened(
+    {required HowAppIsOPened howAppIsOpened,
+    Message? message,
+    required WidgetRef ref}) {
+  if (howAppIsOpened == HowAppIsOPened.notFromTerminatedForPickedCall ||
+      howAppIsOpened == HowAppIsOPened.notfromTerminatedForRequestAccess) {
+    return Scaffold(
+      appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: message!.backgroundColor.computeLuminance() > 0.5
+              ? Colors.black
+              : Colors.white,
+        ),
+        forceMaterialTransparency: true,
+        title: scaffoldTitle(message.backgroundColor),
+      ),
+      body: TheStackWidget(
+        howAppIsOpened: howAppIsOpened,
+        message: Message(
+            message: message.message, backgroundColor: message.backgroundColor),
+      ),
+      backgroundColor: message.backgroundColor,
+    );
+  } else {
+    final prefs = SharedPreferences.getInstance();
+
+    return FutureBuilder(
+      future: prefs,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator.adaptive(),
+          );
+        }
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Error ${snapshot.error}'),
+          );
+        }
+        final prefs = snapshot.data;
+        prefs!.reload();
+
+        final String? callMessage = prefs.getString('callMessage');
+        final String? backgroundColor = prefs.getString('backgroundColor');
+        final String? callerName = prefs.getString('callerName');
+        final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
+        final String? recentId = prefs.getString('recentId');
+
+        final url = Uri.https('text-call-backend.onrender.com',
+            'call/accepted/$callerPhoneNumber');
+        http.get(url);
+
+        final newRecent = Recent(
+          id: recentId!,
+          message: Message(
+            message: callMessage!,
+            backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
+          ),
+          contact: Contact(name: callerName!, phoneNumber: callerPhoneNumber!),
+          category: RecentCategory.incomingAccepted,
+        );
+
+        ref.read(recentsProvider.notifier).addRecent(newRecent);
+        final backgroundActualColor =
+            deJsonifyColor(json.decode(backgroundColor));
+        return Scaffold(
+            appBar: AppBar(
+              iconTheme: IconThemeData(
+                color: backgroundActualColor.computeLuminance() > 0.5
+                    ? Colors.black
+                    : Colors.white,
+              ),
+              forceMaterialTransparency: true,
+              title: scaffoldTitle(backgroundActualColor),
+            ),
+            floatingActionButton: howAppIsOpened ==
+                    HowAppIsOPened.fromTerminatedForPickedCall
+                ? FloatingActionButton(
+                    onPressed: () => Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const PhonePageScreen(),
+                      ),
+                    ),
+                    shape: const CircleBorder(),
+                    backgroundColor: makeColorLighter(backgroundActualColor, 5),
+                    child: Icon(
+                      Icons.home,
+                      color: backgroundActualColor.computeLuminance() > 0.5
+                          ? Colors.black
+                          : Colors.white,
+                    ),
+                  )
+                : null,
+            backgroundColor: backgroundActualColor,
+            body: TheStackWidget(
+              howAppIsOpened: howAppIsOpened,
+              message: Message(
+                  message: message!.message,
+                  backgroundColor: message.backgroundColor),
+            ));
+      },
+    );
+  }
+}
+
+Widget scaffoldTitle(Color color) {
+  return Text(
+    'From your loved one or not hehe.',
+    style: TextStyle(
+        color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white),
+  );
 }

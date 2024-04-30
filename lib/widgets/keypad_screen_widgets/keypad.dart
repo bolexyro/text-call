@@ -32,7 +32,12 @@ class _KeypadState extends ConsumerState<Keypad> {
     final bool phoneNumberIsValid =
         isPhoneNumberValid(widget.typedInPhoneNumber);
     if (phoneNumberIsValid == false) {
-      showErrorDialog('Enter a valid phone number', context);
+      showADialog(
+          header: 'Error!!',
+          body: 'Enter a valid phone number',
+          context: context,
+          buttonText: 'ok',
+          onPressed: () => Navigator.of(context).pop());
       setState(() {
         _isCheckingIfNumberExists = false;
       });
@@ -44,7 +49,12 @@ class _KeypadState extends ConsumerState<Keypad> {
       phoneNumber,
     );
     if (numberExists == false) {
-      showErrorDialog('Number doesn\'t exist', context);
+      showADialog(
+          header: 'Error!!',
+          body: 'Number doesn\'t exist',
+          context: context,
+          buttonText: 'ok',
+          onPressed: () => Navigator.of(context).pop());
       setState(() {
         _isCheckingIfNumberExists = false;
       });
@@ -65,7 +75,7 @@ class _KeypadState extends ConsumerState<Keypad> {
       _isCheckingIfNumberExists = false;
     });
 
-    await showMessageWriterModalSheet(
+    showMessageWriterModalSheet(
       context: context,
       calleeName: callee.name,
       calleePhoneNumber:
@@ -132,7 +142,7 @@ class _KeypadState extends ConsumerState<Keypad> {
         Center(
           child: IconButton(
             onPressed: _isCheckingIfNumberExists
-                ? (){}
+                ? () {}
                 : () {
                     phoneNumberVerification(context, ref);
                   },

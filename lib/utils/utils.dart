@@ -2,7 +2,6 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/add_contact.dart';
@@ -25,7 +24,7 @@ void createAwesomeNotification(
     content: NotificationContent(
       // the id is used to identify each notification. So if you have a static id like 123, when a new notification comes in, the old one goes out.
       id: int.parse(
-          '11${currentDate.day}${currentDate.hour}${currentDate.minute}${currentDate.second}'),
+          '10${currentDate.day}${currentDate.hour}${currentDate.minute}${currentDate.second}'),
       channelKey: notificationPurpose == NotificationPurpose.forCall
           ? 'calls_channel'
           : 'access_requests_channel',
@@ -87,18 +86,24 @@ String changeLocalToIntl({required String localPhoneNumber}) =>
 String changeIntlToLocal({required String intlPhoneNumber}) =>
     '0${intlPhoneNumber.substring(4)}';
 
-Future<bool> checkForInternetConnection() async {
-  return await InternetConnection().hasInternetAccess;
-}
+// Future<bool> checkForInternetConnection(BuildContext context) async {
+//   if(await InternetConnection().hasInternetAccess){
+//     return true;
+//   }
+//    showADialog(
+//         header: 'Error!!',
+//         body: 'Connect to the internet and try again.',
+//         context: context,
+//         buttonText: 'ok',
+//         onPressed: () => Navigator.of(context).pop());
+//     return false;
+// }
 
 Future<void> showMessageWriterModalSheet(
     {required BuildContext context,
     required String calleeName,
     required String calleePhoneNumber}) async {
-  if (!await checkForInternetConnection()) {
-    showErrorDialog('Connect to the internet and try again.', context);
-    return;
-  }
+  // if (!await checkForInternetConnection(context)) {
   showModalBottomSheet(
     isDismissible: true,
     isScrollControlled: true,
@@ -108,6 +113,8 @@ Future<void> showMessageWriterModalSheet(
       calleePhoneNumber: calleePhoneNumber,
     ),
   );
+
+  // }
 }
 
 Future<sql.Database> getDatabase() async {
@@ -120,7 +127,7 @@ Future<sql.Database> getDatabase() async {
       await db.execute(
           'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT)');
       await db.execute(
-          'CREATE TABLE recents ( id TEXT PRIMARY KEY, callTime TEXT, phoneNumber TEXT, name TEXT, categoryName TEXT, message TEXT, backgroundColorRed INTEGER, backgroundColorGreen INTEGER, backgroundColorBlue INTEGER, backgroundColorAlpha INTEGER)');
+          'CREATE TABLE recents ( id TEXT , callTime TEXT PRIMARY KEY , phoneNumber TEXT, name TEXT, categoryName TEXT, message TEXT, backgroundColorRed INTEGER, backgroundColorGreen INTEGER, backgroundColorBlue INTEGER, backgroundColorAlpha INTEGER)');
     },
   );
   return db;
@@ -135,7 +142,13 @@ void showAddContactDialog(context, {String? phoneNumber}) async {
   );
 }
 
-void showErrorDialog(String text, BuildContext context) async {
+void showADialog({
+  required String header,
+  required String body,
+  required BuildContext context,
+  required String buttonText,
+  required void Function() onPressed,
+}) async {
   final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
   showAdaptiveDialog(
@@ -144,34 +157,32 @@ void showErrorDialog(String text, BuildContext context) async {
       backgroundColor: isDarkMode
           ? Theme.of(context).colorScheme.errorContainer
           : Theme.of(context).colorScheme.error,
-      // i am pretty much using this row to center the text
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text(
-            'Error!!',
-            style: TextStyle(
+          Text(
+            header,
+            style: const TextStyle(
               fontSize: 25,
               fontWeight: FontWeight.bold,
             ),
           ),
           Text(
-            text,
+            body,
+            textAlign: TextAlign.center,
             style: const TextStyle(
                 fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
           ),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: onPressed,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('OK'),
+              child: Text(buttonText.toUpperCase()),
             ),
           ),
         ],
@@ -274,5 +285,13 @@ Future<void> sendAccessRequestStatus(
   }
   final url = Uri.https('text-call-backend.onrender.com',
       'request_status/denied/$requesterPhoneNumber/$requesteePhoneNumber/$recentId');
+  http.get(url);
+}
+
+void sendAccessRequest(Recent recent) async {
+  final prefs = await SharedPreferences.getInstance();
+  final String? requesterPhoneNumber = prefs.getString('phoneNumber');
+  final url = Uri.https('text-call-backend.onrender.com',
+      'send-access-request/$requesterPhoneNumber/${recent.contact.phoneNumber}/${recent.id}');
   http.get(url);
 }

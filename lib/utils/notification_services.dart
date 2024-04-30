@@ -6,11 +6,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:text_call/main.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/text_call.dart';
 import 'package:text_call/utils/utils.dart';
 
 Future<String> _getCallerName(String phoneNumber) async {
@@ -56,10 +56,11 @@ Future<void> messageHandler(RemoteMessage message) async {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
 
       await prefs.setString('recentId', recentId);
+      print(recentId);
       AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: int.parse(
-              '11${currentDate.day}${currentDate.hour}${currentDate.minute}${currentDate.second}'),
+              '12${currentDate.day}${currentDate.hour}${currentDate.minute}${currentDate.second}'),
           channelKey: 'access_requests_channel',
           color: Colors.black,
           title: 'Access Request Update',
@@ -79,7 +80,7 @@ Future<void> messageHandler(RemoteMessage message) async {
       AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: int.parse(
-              '22${currentDate.day}${currentDate.hour}${currentDate.minute}${currentDate.second}'),
+              '11${currentDate.day}${currentDate.hour}${currentDate.minute}${currentDate.second}'),
           channelKey: 'access_requests_channel',
           color: Colors.black,
           title: 'Access Request Update',
@@ -224,7 +225,9 @@ class NotificationController {
       }
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
-          builder: (context) => const SentMessageScreen(),
+          builder: (context) => const SentMessageScreen(
+            
+          ),
         ),
       );
     } else if (receivedAction.buttonKeyPressed == 'GRANT_ACCESS') {
@@ -234,13 +237,16 @@ class NotificationController {
     }
 
     // for when the notification is tapped and not any buttons
-    // notification ids beginning with 11, when we tap on them, we should be shown a message screen
-    // notification ids beginning with 22, when we tap on them, nothing should happen. It would just open the app sha
+    // notification ids beginning with 11, when we tap on them, nothing should happen. It would just open the app sha. This should be used for when sending denied message
+    // notification ids beginning with 10, when we tap on them, we should be shown a message screen. this one shoudld be used when we are sending do you want to grant or deny access request.
+    // notification ids beginning with 12, when we tap on them, we should be shown a message screen. but this one should be used when an access request has been granted.
+    // so that you don't end up seeing the grant and deny buttons on the message screen.
     else {
       if (receivedAction.channelKey == 'access_requests_channel') {
-        if (receivedAction.id!.toString().startsWith('22')) {
+        if (receivedAction.id!.toString().startsWith('11')) {
           return;
         }
+
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         final String? recentId = prefs.getString('recentId');
 
@@ -254,9 +260,10 @@ class NotificationController {
         Navigator.of(TextCall.navigatorKey.currentContext!).push(
           MaterialPageRoute(
             builder: (context) => SentMessageScreen(
-              forRequestAccess: true,
+              forRequestAccess:
+                  receivedAction.id!.toString().startsWith('10') ? true : false,
               message: Message(
-                message: data[0]['id'] as String,
+                message: data[0]['message'] as String,
                 backgroundColor: Color.fromARGB(
                   data[0]['backgroundColorAlpha'] as int,
                   data[0]['backgroundColorRed'] as int,

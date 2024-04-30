@@ -37,7 +37,13 @@ class _AddContactState extends ConsumerState<AddContact> {
 
       final bool numberExists = await checkIfNumberExists(_enteredPhoneNumber!);
       if (numberExists == false) {
-        showErrorDialog('Number doesn\'t exist', context);
+        showADialog(
+          header: 'Error!!',
+          body: 'Number doesn\'t exist',
+          context: context,
+          buttonText: 'ok',
+          onPressed: () => Navigator.of(context).pop(),
+        );
         setState(() {
           _isAddingContact = false;
         });
@@ -64,7 +70,7 @@ class _AddContactState extends ConsumerState<AddContact> {
       ),
       content: Column(
         children: [
-          const ContactAvatarCircle(avatarRadius: 20),
+          const ContactAvatarCircle(avatarRadius: 40),
           const SizedBox(
             height: 20,
           ),
@@ -144,13 +150,9 @@ class _AddContactState extends ConsumerState<AddContact> {
                 onPressed: _isAddingContact == true
                     ? null
                     : () async {
-                        if (!await checkForInternetConnection()) {
-                          showErrorDialog(
-                              'Connect to the internet and try again.',
-                              context);
-                          return;
-                        }
-                        _addContact(context);
+                        // if (await checkForInternetConnection(context)) {
+                          _addContact(context);
+                        // }
                       },
                 child: _isAddingContact == false
                     ? const Text('Save')

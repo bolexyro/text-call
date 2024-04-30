@@ -182,12 +182,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               ),
               IconButton(
                 onPressed: () async {
-                  if (!await checkForInternetConnection()) {
-                    showErrorDialog(
-                        'Connect to the internet and try again.', context);
-                    return;
-                  }
-                  _callSomeone(context);
+                  // if (await checkForInternetConnection(context)) {
+                    _callSomeone(context);
+                  // }
                 },
                 icon: const Padding(
                   padding: EdgeInsets.all(5),

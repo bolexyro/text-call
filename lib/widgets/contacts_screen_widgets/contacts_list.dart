@@ -171,8 +171,8 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                       motion: const BehindMotion(),
                       children: [
                         CustomSlidableAction(
-                          onPressed: (context) async {
-                            await showMessageWriterModalSheet(
+                          onPressed: (context) {
+                            showMessageWriterModalSheet(
                                 context: context,
                                 calleePhoneNumber: contactN.phoneNumber,
                                 calleeName: contactN.name);
@@ -252,8 +252,8 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
                                     IconButton(
-                                      onPressed: () async {
-                                        await showMessageWriterModalSheet(
+                                      onPressed: () {
+                                        showMessageWriterModalSheet(
                                           calleeName: contactN.name,
                                           calleePhoneNumber:
                                               contactN.phoneNumber,

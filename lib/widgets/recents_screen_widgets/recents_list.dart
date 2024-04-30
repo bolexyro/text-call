@@ -161,8 +161,9 @@ class _RecentsListState extends ConsumerState<RecentsList> {
               onPressed: () async {
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setString('callMessage', 'callMessage');
-                await prefs.setString('callerPhoneNumber', '+2349098875567');
+                await prefs.setString('callerPhoneNumber', '+2349027929326');
                 await prefs.setString('callerName', 'callerPhoneNumber');
+                await prefs.setString('recentId', DateTime.now().toString());
                 await prefs.setString(
                   'backgroundColor',
                   json.encode(
@@ -223,8 +224,8 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                       motion: const BehindMotion(),
                       children: [
                         CustomSlidableAction(
-                          onPressed: (context) async{
-                           await showMessageWriterModalSheet(
+                          onPressed: (context) {
+                            showMessageWriterModalSheet(
                                 context: context,
                                 calleePhoneNumber: recentN.contact.phoneNumber,
                                 calleeName: recentN.contact.name);
@@ -294,8 +295,8 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                         icon: const Icon(Icons.person_add),
                                       ),
                                     IconButton(
-                                      onPressed: () async {
-                                        await showMessageWriterModalSheet(
+                                      onPressed: () {
+                                        showMessageWriterModalSheet(
                                           calleeName: recentN.contact.name,
                                           calleePhoneNumber:
                                               recentN.contact.phoneNumber,
@@ -313,7 +314,22 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                     ),
                                     IconButton(
                                       onPressed: () {
-                                        widget.onRecentSelected(recentN);
+                                        if (recentN.category !=
+                                            RecentCategory.incomingRejected) {
+                                          widget.onRecentSelected(recentN);
+                                          return;
+                                        }
+                                        showADialog(
+                                          header: 'Alert!!',
+                                          body:
+                                              "you have to ask ${recentN.contact.name} for permission to see this message since you rejected the call.",
+                                          context: context,
+                                          buttonText: 'Send  access request',
+                                          onPressed: () {
+                                            sendAccessRequest(recentN);
+                                            Navigator.of(context).pop();
+                                          },
+                                        );
                                       },
                                       icon: Icon(
                                         Icons.info_outlined,

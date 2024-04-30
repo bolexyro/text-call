@@ -86,8 +86,8 @@ class ContactCardWProfilePicStack extends StatelessWidget {
                           : Colors.blue[500],
                     ),
                     child: IconButton(
-                      onPressed: () async{
-                       await showMessageWriterModalSheet(
+                      onPressed: () {
+                        showMessageWriterModalSheet(
                             context: context,
                             calleeName: contact.name,
                             calleePhoneNumber: contact.phoneNumber);

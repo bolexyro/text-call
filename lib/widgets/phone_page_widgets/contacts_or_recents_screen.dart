@@ -195,8 +195,9 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
       onRecentSelected: (Recent selectedRecent) {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) =>
-                SentMessageScreen(message: selectedRecent.message),
+            builder: (context) => SentMessageScreen(
+                howAppIsOpened: HowAppIsOPened.notFromTerminatedForCallMessages,
+                message: selectedRecent.message),
           ),
         );
       },

@@ -64,7 +64,8 @@ class _TextCallState extends State<TextCall> {
           }
           if (snapshot.hasData) {
             final userInfo = snapshot.data!;
-            if (widget.howAppIsOPened == HowAppIsOPened.fromTerminatedForPickedCall) {
+            if (widget.howAppIsOPened ==
+                HowAppIsOPened.fromTerminatedForCallMessages) {
               final url = Uri.https('text-call-backend.onrender.com',
                   'call/accepted/${userInfo['callerPhoneNumber']}');
               http.get(url);
@@ -74,9 +75,20 @@ class _TextCallState extends State<TextCall> {
                   appOpenedFromPickedCall: true,
                 );
               }
-              return SentMessageScreen(
-                fromTerminated: true,
-                forRequestAccess: widget.appOpenedForAccessRequest,
+              return const SentMessageScreen(
+                howAppIsOpened: HowAppIsOPened.fromTerminatedForCallMessages,
+              );
+            }
+
+            if (widget.howAppIsOPened ==
+                HowAppIsOPened.fromTerminatedForRequestAccess) {
+              if (userInfo['isUserLoggedIn'] != true) {
+                return const AuthScreen(
+                  appOpenedFromPickedCall: true,
+                );
+              }
+              return const SentMessageScreen(
+                howAppIsOpened: HowAppIsOPened.fromTerminatedForRequestAccess,
               );
             }
 

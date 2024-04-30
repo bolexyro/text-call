@@ -63,30 +63,24 @@ void main() async {
         NotificationController.onDismissActionReceivedMethod,
   );
   runApp(
-    ProviderScope(
-      child: whichTextCall(receivedAction)
-    ),
+    ProviderScope(child: whichTextCall(receivedAction)),
   );
 }
 
 Widget whichTextCall(ReceivedAction? receivedAction) {
   if (receivedAction?.buttonKeyPressed == 'ACCEPT_CALL') {
-        return const TextCall(howAppIsOPened: HowAppIsOPened.fromTerminatedNotForPickedCall);
-
-  //   return const TextCall(
-  //       appOpenedForAccessRequest: false,
-  //       appOpenedFromPickedCallOrTappedNotification: true);
-  // }
-
-  // if the notification is tapped
+    return const TextCall(
+        howAppIsOPened: HowAppIsOPened.fromTerminatedForCallMessages);
+  }
+  // if the request access notification is tapped
   if (receivedAction?.channelKey == 'access_requests_channel') {
     return const TextCall(
-      appOpenedForAccessRequest: true,
-      appOpenedFromPickedCallOrTappedNotification: true,
+      howAppIsOPened: HowAppIsOPened.fromTerminatedForRequestAccess,
     );
   }
 
+  // if the call notification is tapped
   return const TextCall(
-      appOpenedForAccessRequest: false,
-      appOpenedFromPickedCallOrTappedNotification: false);
+    howAppIsOPened: HowAppIsOPened.appOpenedRegularly,
+  );
 }

@@ -226,7 +226,7 @@ class NotificationController {
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
           builder: (context) => const SentMessageScreen(
-            
+            howAppIsOpened: HowAppIsOPened.notFromTerminatedForCallMessages,
           ),
         ),
       );
@@ -237,7 +237,7 @@ class NotificationController {
     }
 
     // for when the notification is tapped and not any buttons
-    // notification ids beginning with 11, when we tap on them, nothing should happen. It would just open the app sha. This should be used for when sending denied message
+    // notification ids beginning with 11, when we tap on them, nothing should happen. It would just open the app sha. This should be used for when notificatino shown is to tell you access request denied
     // notification ids beginning with 10, when we tap on them, we should be shown a message screen. this one shoudld be used when we are sending do you want to grant or deny access request.
     // notification ids beginning with 12, when we tap on them, we should be shown a message screen. but this one should be used when an access request has been granted.
     // so that you don't end up seeing the grant and deny buttons on the message screen.
@@ -260,8 +260,9 @@ class NotificationController {
         Navigator.of(TextCall.navigatorKey.currentContext!).push(
           MaterialPageRoute(
             builder: (context) => SentMessageScreen(
-              forRequestAccess:
-                  receivedAction.id!.toString().startsWith('10') ? true : false,
+              howAppIsOpened: receivedAction.id!.toString().startsWith('10')
+                  ? HowAppIsOPened.notfromTerminatedForRequestAccess
+                  : HowAppIsOPened.notFromTerminatedForCallMessages,
               message: Message(
                 message: data[0]['message'] as String,
                 backgroundColor: Color.fromARGB(

@@ -14,9 +14,10 @@ import 'package:http/http.dart' as http;
 
 enum HowAppIsOPened {
   fromTerminatedForRequestAccess,
-  fromTerminatedForPickedCall,
+  fromTerminatedForCallMessages,
   notfromTerminatedForRequestAccess,
-  notFromTerminatedForPickedCall,
+  notFromTerminatedForCallMessages,
+  appOpenedRegularly,
 }
 
 class SentMessageScreen extends ConsumerWidget {
@@ -88,11 +89,7 @@ class TheStackWidget extends StatelessWidget {
       children: [
         TheColumnWidget(message: message),
         if (howAppIsOpened == HowAppIsOPened.fromTerminatedForRequestAccess ||
-            howAppIsOpened ==
-                HowAppIsOPened.fromTerminatedForPickedCall ||
             howAppIsOpened == HowAppIsOPened.notfromTerminatedForRequestAccess)
-
-        if (howAppIsOpened == HowAppIsOPened.fromTerminatedForRequestAccess || howAppIsOpened == HowAppIsOPened.notfromTerminatedForRequestAccess)
           Positioned(
             width: MediaQuery.sizeOf(context).width,
             bottom: 20,
@@ -133,23 +130,26 @@ class TheStackWidget extends StatelessWidget {
                     color: Colors.red,
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () => Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => const PhonePageScreen(),
+                if (howAppIsOpened ==
+                    HowAppIsOPened.fromTerminatedForRequestAccess)
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const PhonePageScreen(),
+                      ),
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    backgroundColor: makeColorLighter(backgroundActualColor, 5),
-                  ),
-                  child: Icon(
-                    Icons.home,
-                    color: backgroundActualColor.computeLuminance() > 0.5
-                        ? Colors.black
-                        : Colors.white,
-                  ),
-                )
+                    style: ElevatedButton.styleFrom(
+                      shape: const CircleBorder(),
+                      backgroundColor:
+                          makeColorLighter(backgroundActualColor, 5),
+                    ),
+                    child: Icon(
+                      Icons.home,
+                      color: backgroundActualColor.computeLuminance() > 0.5
+                          ? Colors.black
+                          : Colors.white,
+                    ),
+                  )
               ],
             ),
           )
@@ -162,7 +162,7 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
     {required HowAppIsOPened howAppIsOpened,
     Message? message,
     required WidgetRef ref}) {
-  if (howAppIsOpened == HowAppIsOPened.notFromTerminatedForPickedCall ||
+  if (howAppIsOpened == HowAppIsOPened.notFromTerminatedForCallMessages ||
       howAppIsOpened == HowAppIsOPened.notfromTerminatedForRequestAccess) {
     return Scaffold(
       appBar: AppBar(
@@ -234,7 +234,7 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
               title: scaffoldTitle(backgroundActualColor),
             ),
             floatingActionButton: howAppIsOpened ==
-                    HowAppIsOPened.fromTerminatedForPickedCall
+                    HowAppIsOPened.fromTerminatedForCallMessages
                 ? FloatingActionButton(
                     onPressed: () => Navigator.of(context).pushReplacement(
                       MaterialPageRoute(

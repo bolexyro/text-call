@@ -51,7 +51,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   @override
   void dispose() {
     _channel?.sink.close();
-
     _confettiController.dispose();
     _messageController.dispose();
     super.dispose();
@@ -73,7 +72,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     );
 
     recentId = DateTime.now().toString();
-    print(recentId);
+    // make sure to remove this line oo. it is only important for debugging purposes
+    prefs.setString('recentId', recentId);
     _channel!.sink.add(
       json.encode(
         {

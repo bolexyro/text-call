@@ -12,29 +12,32 @@ import 'package:text_call/models/message.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:http/http.dart' as http;
 
-enum HowAppIsOPened {
+// sms = sent message screen
+enum HowSmsIsOpened {
   fromTerminatedForRequestAccess,
-  fromTerminatedForCallMessages,
+  fromTerminatedForPickedCall,
   notfromTerminatedForRequestAccess,
-  notFromTerminatedForCallMessages,
-  appOpenedRegularly,
+  notFromTerminatedForPickedCall,
+  notFromTerminatedToShowMessage,
 }
 
 class SentMessageScreen extends ConsumerWidget {
   const SentMessageScreen({
     super.key,
-    this.message,
-    required this.howAppIsOpened,
+    required this.message,
+    required this.howSmsIsOpened,
   });
 
+  // this message should not be null if howsmsisopened == notfromterminatedtoshow message
   final Message? message;
-  final HowAppIsOPened howAppIsOpened;
+  final HowSmsIsOpened howSmsIsOpened;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
-        child: widgetToRenderBasedOnHowAppIsOpened(
-            howAppIsOpened: howAppIsOpened, ref: ref));
+      child: widgetToRenderBasedOnHowAppIsOpened(
+          message: message, howSmsIsOpened: howSmsIsOpened, ref: ref),
+    );
   }
 }
 
@@ -76,11 +79,11 @@ class TheStackWidget extends StatelessWidget {
   const TheStackWidget({
     super.key,
     required this.message,
-    required this.howAppIsOpened,
+    required this.howSmsIsOpened,
   });
 
   final Message message;
-  final HowAppIsOPened howAppIsOpened;
+  final HowSmsIsOpened howSmsIsOpened;
   final Color backgroundActualColor = Colors.red;
 
   @override
@@ -88,8 +91,8 @@ class TheStackWidget extends StatelessWidget {
     return Stack(
       children: [
         TheColumnWidget(message: message),
-        if (howAppIsOpened == HowAppIsOPened.fromTerminatedForRequestAccess ||
-            howAppIsOpened == HowAppIsOPened.notfromTerminatedForRequestAccess)
+        if (howSmsIsOpened == HowSmsIsOpened.fromTerminatedForRequestAccess ||
+            howSmsIsOpened == HowSmsIsOpened.notfromTerminatedForRequestAccess)
           Positioned(
             width: MediaQuery.sizeOf(context).width,
             bottom: 20,
@@ -130,8 +133,8 @@ class TheStackWidget extends StatelessWidget {
                     color: Colors.red,
                   ),
                 ),
-                if (howAppIsOpened ==
-                    HowAppIsOPened.fromTerminatedForRequestAccess)
+                if (howSmsIsOpened ==
+                    HowSmsIsOpened.fromTerminatedForRequestAccess)
                   ElevatedButton(
                     onPressed: () => Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
@@ -159,11 +162,11 @@ class TheStackWidget extends StatelessWidget {
 }
 
 Widget widgetToRenderBasedOnHowAppIsOpened(
-    {required HowAppIsOPened howAppIsOpened,
-    Message? message,
+    {required HowSmsIsOpened howSmsIsOpened,
+    required Message? message,
     required WidgetRef ref}) {
-  if (howAppIsOpened == HowAppIsOPened.notFromTerminatedForCallMessages ||
-      howAppIsOpened == HowAppIsOPened.notfromTerminatedForRequestAccess) {
+  if (howSmsIsOpened == HowSmsIsOpened.notFromTerminatedToShowMessage  ||
+      howSmsIsOpened == HowSmsIsOpened.notfromTerminatedForRequestAccess) {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
@@ -175,11 +178,50 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
         title: scaffoldTitle(message.backgroundColor),
       ),
       body: TheStackWidget(
-        howAppIsOpened: howAppIsOpened,
-        message: Message(
-            message: message.message, backgroundColor: message.backgroundColor),
+        howSmsIsOpened: howSmsIsOpened,
+        message: message,
       ),
       backgroundColor: message.backgroundColor,
+    );
+  }
+
+  if (howSmsIsOpened == HowSmsIsOpened.notFromTerminatedForPickedCall) {
+    final prefs = SharedPreferences.getInstance();
+
+    return FutureBuilder(
+      future: prefs,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Text('waiting');
+        }
+
+        if (snapshot.hasError) {
+          return const Text('error');
+        }
+        final prefs = snapshot.data;
+        final String? callMessage = prefs!.getString('callMessage');
+        final String? backgroundColor = prefs.getString('backgroundColor');
+        final Message message = Message(
+          message: callMessage!,
+          backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
+        );
+        return Scaffold(
+          appBar: AppBar(
+            iconTheme: IconThemeData(
+              color: message.backgroundColor.computeLuminance() > 0.5
+                  ? Colors.black
+                  : Colors.white,
+            ),
+            forceMaterialTransparency: true,
+            title: scaffoldTitle(message.backgroundColor),
+          ),
+          body: TheStackWidget(
+            howSmsIsOpened: howSmsIsOpened,
+            message: message,
+          ),
+          backgroundColor: message.backgroundColor,
+        );
+      },
     );
   } else {
     final prefs = SharedPreferences.getInstance();
@@ -224,40 +266,41 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
         final backgroundActualColor =
             deJsonifyColor(json.decode(backgroundColor));
         return Scaffold(
-            appBar: AppBar(
-              iconTheme: IconThemeData(
-                color: backgroundActualColor.computeLuminance() > 0.5
-                    ? Colors.black
-                    : Colors.white,
-              ),
-              forceMaterialTransparency: true,
-              title: scaffoldTitle(backgroundActualColor),
+          appBar: AppBar(
+            iconTheme: IconThemeData(
+              color: backgroundActualColor.computeLuminance() > 0.5
+                  ? Colors.black
+                  : Colors.white,
             ),
-            floatingActionButton: howAppIsOpened ==
-                    HowAppIsOPened.fromTerminatedForCallMessages
-                ? FloatingActionButton(
-                    onPressed: () => Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => const PhonePageScreen(),
-                      ),
+            forceMaterialTransparency: true,
+            title: scaffoldTitle(backgroundActualColor),
+          ),
+          floatingActionButton: howSmsIsOpened ==
+                  HowSmsIsOpened.fromTerminatedForPickedCall
+              ? FloatingActionButton(
+                  onPressed: () => Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const PhonePageScreen(),
                     ),
-                    shape: const CircleBorder(),
-                    backgroundColor: makeColorLighter(backgroundActualColor, 5),
-                    child: Icon(
-                      Icons.home,
-                      color: backgroundActualColor.computeLuminance() > 0.5
-                          ? Colors.black
-                          : Colors.white,
-                    ),
-                  )
-                : null,
-            backgroundColor: backgroundActualColor,
-            body: TheStackWidget(
-              howAppIsOpened: howAppIsOpened,
-              message: Message(
-                  message: message!.message,
-                  backgroundColor: message.backgroundColor),
-            ));
+                  ),
+                  shape: const CircleBorder(),
+                  backgroundColor: makeColorLighter(backgroundActualColor, 5),
+                  child: Icon(
+                    Icons.home,
+                    color: backgroundActualColor.computeLuminance() > 0.5
+                        ? Colors.black
+                        : Colors.white,
+                  ),
+                )
+              : null,
+          backgroundColor: backgroundActualColor,
+          body: TheStackWidget(
+            howSmsIsOpened: howSmsIsOpened,
+            message: Message(
+                message: newRecent.message.message,
+                backgroundColor: newRecent.message.backgroundColor),
+          ),
+        );
       },
     );
   }

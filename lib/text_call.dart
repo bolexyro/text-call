@@ -6,6 +6,14 @@ import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/screens/splash_screen.dart';
 
+enum HowAppIsOPened {
+  fromTerminatedForRequestAccess,
+  fromTerminatedForPickedCall,
+  notfromTerminatedForRequestAccess,
+  notFromTerminatedForPickedCall,
+  appOpenedRegularly,
+}
+
 class TextCall extends StatefulWidget {
   const TextCall({
     super.key,
@@ -65,7 +73,7 @@ class _TextCallState extends State<TextCall> {
           if (snapshot.hasData) {
             final userInfo = snapshot.data!;
             if (widget.howAppIsOPened ==
-                HowAppIsOPened.fromTerminatedForCallMessages) {
+                HowAppIsOPened.fromTerminatedForPickedCall) {
               final url = Uri.https('text-call-backend.onrender.com',
                   'call/accepted/${userInfo['callerPhoneNumber']}');
               http.get(url);
@@ -76,7 +84,8 @@ class _TextCallState extends State<TextCall> {
                 );
               }
               return const SentMessageScreen(
-                howAppIsOpened: HowAppIsOPened.fromTerminatedForCallMessages,
+                message: null,
+                howSmsIsOpened: HowSmsIsOpened.fromTerminatedForPickedCall,
               );
             }
 
@@ -88,7 +97,8 @@ class _TextCallState extends State<TextCall> {
                 );
               }
               return const SentMessageScreen(
-                howAppIsOpened: HowAppIsOPened.fromTerminatedForRequestAccess,
+                message: null,
+                howSmsIsOpened: HowSmsIsOpened.fromTerminatedForRequestAccess,
               );
             }
 

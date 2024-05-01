@@ -35,7 +35,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
   void _goToSentMessageScreen(Message message) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => SentMessageScreen(
-        howAppIsOpened: HowAppIsOPened.notFromTerminatedForCallMessages,
+        howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
         message: message,
       ),
     ));

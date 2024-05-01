@@ -163,7 +163,6 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                 await prefs.setString('callMessage', 'callMessage');
                 await prefs.setString('callerPhoneNumber', '+2349027929326');
                 await prefs.setString('callerName', 'callerPhoneNumber');
-                await prefs.setString('recentId', DateTime.now().toString());
                 await prefs.setString(
                   'backgroundColor',
                   json.encode(

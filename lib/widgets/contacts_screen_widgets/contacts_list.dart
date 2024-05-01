@@ -102,7 +102,6 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                     },
                   ),
                 );
-                prefs.setString('recentId', '2024-04-28 22:10:11.836578');
                 createAwesomeNotification(
                     title: 'Bolexyro is asking permission to see a message.',
                     notificationPurpose: NotificationPurpose.forAccessRequest,

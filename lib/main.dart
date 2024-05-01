@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/text_call.dart';
 import 'package:text_call/utils/notification_services.dart';
 import 'firebase_options.dart';
@@ -70,7 +69,7 @@ void main() async {
 Widget whichTextCall(ReceivedAction? receivedAction) {
   if (receivedAction?.buttonKeyPressed == 'ACCEPT_CALL') {
     return const TextCall(
-        howAppIsOPened: HowAppIsOPened.fromTerminatedForCallMessages);
+        howAppIsOPened: HowAppIsOPened.fromTerminatedForPickedCall);
   }
   // if the request access notification is tapped
   if (receivedAction?.channelKey == 'access_requests_channel') {

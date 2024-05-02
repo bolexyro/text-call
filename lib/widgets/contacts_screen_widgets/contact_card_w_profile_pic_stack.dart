@@ -21,98 +21,97 @@ class ContactCardWProfilePicStack extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isDarkTheme =
         Theme.of(context).brightness == Brightness.dark ? true : false;
-    final transparentContainerHeight =
-        _circleAvatarRadius + _nonTransparentContainerheight;
-
-    return Stack(
+    return Column(
       children: [
-        Container(
-          height: transparentContainerHeight,
-          width: transparentAndNonTransparentWidth,
-          color: Colors.transparent,
+        SizedBox(
+          height: _circleAvatarRadius,
         ),
-        Positioned(
-          bottom: 0,
-          child: Container(
-            height: _nonTransparentContainerheight,
-            width: transparentAndNonTransparentWidth,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: isDarkTheme
-                  ? Theme.of(context).colorScheme.inversePrimary
-                  : Colors.white,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: _circleAvatarRadius,
-                  ),
-                  Text(
-                    contact.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25,
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              height: _nonTransparentContainerheight,
+              width: transparentAndNonTransparentWidth,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: isDarkTheme
+                    ? Theme.of(context).colorScheme.inversePrimary
+                    : Colors.white,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: _circleAvatarRadius,
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Text('Mobile'),
-                      const SizedBox(
-                        width: 7,
+                    Text(
+                      contact.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25,
                       ),
-                      Text(
-                        overflow: TextOverflow.ellipsis,
-                        contact.localPhoneNumber,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text('Mobile'),
+                        const SizedBox(
+                          width: 7,
+                        ),
+                        Text(
+                          overflow: TextOverflow.ellipsis,
+                          contact.localPhoneNumber,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Theme.of(context).colorScheme.onSecondary
+                            : Colors.blue[500],
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          showMessageWriterModalSheet(
+                              context: context,
+                              calleeName: contact.name,
+                              calleePhoneNumber: contact.phoneNumber);
+                        },
+                        icon: SvgPicture.asset(
+                          'assets/icons/message-ring.svg',
+                          height: 30,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Theme.of(context).colorScheme.onSecondary
-                          : Colors.blue[500],
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        showMessageWriterModalSheet(
-                            context: context,
-                            calleeName: contact.name,
-                            calleePhoneNumber: contact.phoneNumber);
-                      },
-                      icon: SvgPicture.asset(
-                        'assets/icons/message-ring.svg',
-                        height: 30,
-                        colorFilter: const ColorFilter.mode(
-                          Colors.white,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                  )
-                ],
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
+            Positioned(
+              top: -_circleAvatarRadius,
+              left:
+                  (transparentAndNonTransparentWidth / 2) - _circleAvatarRadius,
+              child: ContactAvatarCircle(
+                avatarRadius: _circleAvatarRadius,
+              ),
+            )
+          ],
         ),
-        Positioned(
-          left: (transparentAndNonTransparentWidth / 2) - _circleAvatarRadius,
-          child: ContactAvatarCircle(
-            avatarRadius: _circleAvatarRadius,
-          ),
-        )
       ],
     );
   }

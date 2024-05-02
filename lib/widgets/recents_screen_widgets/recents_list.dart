@@ -240,7 +240,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                         ),
                       ],
                     ),
-                    endActionPane: ActionPane(
+                    endActionPane:  recentN.recentIsAContact? null : ActionPane(
                       motion: const BehindMotion(),
                       children: [
                         CustomSlidableAction(
@@ -253,7 +253,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                           child: const Icon(Icons.person_add),
                         ),
                       ],
-                    ),
+                    ) ,
                     child: widget.screen == Screen.phone
                         ? ExpandableListTile(
                             tileOnTapped: () {

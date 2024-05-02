@@ -27,6 +27,7 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         bottomNavigationBar: NavigationBar(
           selectedIndex: _currentPageIndex,
           indicatorColor: Colors.blue,

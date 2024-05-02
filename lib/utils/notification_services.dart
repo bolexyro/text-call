@@ -56,7 +56,6 @@ Future<void> messageHandler(RemoteMessage message) async {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
 
       await prefs.setString('recentId', recentId);
-      print(recentId);
       AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: int.parse(
@@ -224,11 +223,16 @@ class NotificationController {
             FlushbarPosition.TOP, TextCall.navigatorKey.currentContext!);
         return;
       }
-      print('giannis');
+      final String? callMessage = prefs.getString('callMessage');
+      final String? backgroundColor = prefs.getString('backgroundColor');
+      final Message message = Message(
+        message: callMessage!,
+        backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
+      );
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
-          builder: (context) => const SentMessageScreen(
-            message: null,
+          builder: (context) => SentMessageScreen(
+            message: message,
             howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
           ),
         ),

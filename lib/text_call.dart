@@ -12,6 +12,8 @@ enum HowAppIsOPened {
   notfromTerminatedForRequestAccess,
   notFromTerminatedForPickedCall,
   appOpenedRegularly,
+  // this one would be used when access has been granted and we only want to show
+  fromTerminatedToShowMessage,
 }
 
 class TextCall extends StatefulWidget {
@@ -100,6 +102,13 @@ class _TextCallState extends State<TextCall> {
                 message: null,
                 howSmsIsOpened: HowSmsIsOpened.fromTerminatedForRequestAccess,
               );
+            }
+
+            if (widget.howAppIsOPened ==
+                HowAppIsOPened.fromTerminatedToShowMessage) {
+              return const SentMessageScreen(
+                  message: null,
+                  howSmsIsOpened: HowSmsIsOpened.fromTerminatedToShowMessage);
             }
 
             if (userInfo['isUserLoggedIn'] != true) {

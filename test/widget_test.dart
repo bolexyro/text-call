@@ -7,7 +7,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/text_call.dart';
 
 void main() {

@@ -67,18 +67,27 @@ void main() async {
 }
 
 Widget whichTextCall(ReceivedAction? receivedAction) {
-  if (receivedAction?.buttonKeyPressed == 'ACCEPT_CALL') {
+  if (receivedAction == null) {
+    return const TextCall(
+      howAppIsOPened: HowAppIsOPened.appOpenedRegularly,
+    );
+  }
+  if (receivedAction.buttonKeyPressed == 'ACCEPT_CALL') {
     return const TextCall(
         howAppIsOPened: HowAppIsOPened.fromTerminatedForPickedCall);
   }
   // if the request access notification is tapped
-  if (receivedAction?.channelKey == 'access_requests_channel') {
+  if (receivedAction.channelKey == 'access_requests_channel') {
+    if (receivedAction.id.toString().startsWith('12')) {
+      return const TextCall(
+        howAppIsOPened: HowAppIsOPened.fromTerminatedToShowMessage,
+      );
+    }
     return const TextCall(
       howAppIsOPened: HowAppIsOPened.fromTerminatedForRequestAccess,
     );
   }
 
-  // if the call notification is tapped
   return const TextCall(
     howAppIsOPened: HowAppIsOPened.appOpenedRegularly,
   );

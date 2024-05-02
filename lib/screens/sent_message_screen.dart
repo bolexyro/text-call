@@ -19,6 +19,7 @@ enum HowSmsIsOpened {
   notfromTerminatedForRequestAccess,
   notFromTerminatedForPickedCall,
   notFromTerminatedToShowMessage,
+  fromTerminatedToShowMessage,
 }
 
 class SentMessageScreen extends ConsumerWidget {
@@ -84,13 +85,25 @@ class TheStackWidget extends StatelessWidget {
 
   final Message message;
   final HowSmsIsOpened howSmsIsOpened;
-  final Color backgroundActualColor = Colors.red;
+
+  // void buttonPressed(){
+  //   if (howSmsIsOpened == HowSmsIsOpened.fromTerminatedForPickedCall || howSmsIsOpened == HowSms)
+  // }
 
   @override
   Widget build(BuildContext context) {
+    final backgroundActualColor = message.backgroundColor;
+
     return Stack(
       children: [
-        TheColumnWidget(message: message),
+        SizedBox(
+          height: double.infinity,
+          child: Center(
+            child: SingleChildScrollView(
+              child: TheColumnWidget(message: message),
+            ),
+          ),
+        ),
         if (howSmsIsOpened == HowSmsIsOpened.fromTerminatedForRequestAccess ||
             howSmsIsOpened == HowSmsIsOpened.notfromTerminatedForRequestAccess)
           Positioned(
@@ -102,7 +115,17 @@ class TheStackWidget extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     sendAccessRequestStatus(AccessRequestStatus.granted);
-                    Navigator.of(context).pop();
+                    if (howSmsIsOpened ==
+                        HowSmsIsOpened.notfromTerminatedForRequestAccess) {
+                      Navigator.of(context).pop();
+                      return;
+                    }
+
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const PhonePageScreen(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(20),
@@ -119,7 +142,16 @@ class TheStackWidget extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     sendAccessRequestStatus(AccessRequestStatus.denied);
-                    Navigator.of(context).pop();
+                    if (howSmsIsOpened ==
+                        HowSmsIsOpened.notfromTerminatedForRequestAccess) {
+                      Navigator.of(context).pop();
+                      return;
+                    }
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const PhonePageScreen(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(20),
@@ -142,6 +174,7 @@ class TheStackWidget extends StatelessWidget {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.all(20),
                       shape: const CircleBorder(),
                       backgroundColor:
                           makeColorLighter(backgroundActualColor, 5),
@@ -161,12 +194,19 @@ class TheStackWidget extends StatelessWidget {
   }
 }
 
+//  fromTerminatedForRequestAccess,
+//   fromTerminatedForPickedCall,
+//   notfromTerminatedForRequestAccess, /
+//   notFromTerminatedForPickedCall, /
+//   notFromTerminatedToShowMessage, /
+// fromTerminatedToShowMessage /
 Widget widgetToRenderBasedOnHowAppIsOpened(
     {required HowSmsIsOpened howSmsIsOpened,
     required Message? message,
     required WidgetRef ref}) {
-  if (howSmsIsOpened == HowSmsIsOpened.notFromTerminatedToShowMessage  ||
-      howSmsIsOpened == HowSmsIsOpened.notfromTerminatedForRequestAccess) {
+  if (howSmsIsOpened == HowSmsIsOpened.notFromTerminatedToShowMessage ||
+      howSmsIsOpened == HowSmsIsOpened.notfromTerminatedForRequestAccess ||
+      howSmsIsOpened == HowSmsIsOpened.notFromTerminatedForPickedCall) {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
@@ -185,41 +225,99 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
     );
   }
 
-  if (howSmsIsOpened == HowSmsIsOpened.notFromTerminatedForPickedCall) {
+  // for when request access has been approved.
+  if (howSmsIsOpened == HowSmsIsOpened.fromTerminatedToShowMessage) {
     final prefs = SharedPreferences.getInstance();
 
     return FutureBuilder(
       future: prefs,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text('waiting');
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         }
 
         if (snapshot.hasError) {
           return const Text('error');
         }
         final prefs = snapshot.data;
-        final String? callMessage = prefs!.getString('callMessage');
-        final String? backgroundColor = prefs.getString('backgroundColor');
-        final Message message = Message(
-          message: callMessage!,
-          backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
-        );
-        return Scaffold(
-          appBar: AppBar(
-            iconTheme: IconThemeData(
-              color: message.backgroundColor.computeLuminance() > 0.5
-                  ? Colors.black
-                  : Colors.white,
-            ),
-            forceMaterialTransparency: true,
-            title: scaffoldTitle(message.backgroundColor),
-          ),
-          body: TheStackWidget(
-            howSmsIsOpened: howSmsIsOpened,
-            message: message,
-          ),
-          backgroundColor: message.backgroundColor,
+
+        final String? recentId = prefs!.getString('recentId');
+
+        final db = getDatabase();
+        return FutureBuilder(
+          future: db,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (snapshot.hasError) {
+              return const Text('Error bro');
+            }
+
+            final data = snapshot.data!
+                .query('recents', where: 'id = ?', whereArgs: [recentId]);
+            return FutureBuilder(
+                future: data,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text('There was an error'),
+                    );
+                  }
+                  final data = snapshot.data!;
+                  final Message message = Message(
+                    message: data[0]['message'] as String,
+                    backgroundColor: Color.fromARGB(
+                      data[0]['backgroundColorAlpha'] as int,
+                      data[0]['backgroundColorRed'] as int,
+                      data[0]['backgroundColorGreen'] as int,
+                      data[0]['backgroundColorBlue'] as int,
+                    ),
+                  );
+                  return Scaffold(
+                    appBar: AppBar(
+                      iconTheme: IconThemeData(
+                        color: message.backgroundColor.computeLuminance() > 0.5
+                            ? Colors.black
+                            : Colors.white,
+                      ),
+                      forceMaterialTransparency: true,
+                      title: scaffoldTitle(message.backgroundColor),
+                    ),
+                    floatingActionButton: FloatingActionButton(
+                      onPressed: () => Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const PhonePageScreen(),
+                        ),
+                      ),
+                      shape: const CircleBorder(),
+                      backgroundColor:
+                          makeColorLighter(message.backgroundColor, 5),
+                      child: Icon(
+                        Icons.home,
+                        color: message.backgroundColor.computeLuminance() > 0.5
+                            ? Colors.black
+                            : Colors.white,
+                      ),
+                    ),
+                    body: TheStackWidget(
+                      howSmsIsOpened: howSmsIsOpened,
+                      message: message,
+                    ),
+                    backgroundColor: message.backgroundColor,
+                  );
+                });
+          },
         );
       },
     );
@@ -276,7 +374,8 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
             title: scaffoldTitle(backgroundActualColor),
           ),
           floatingActionButton: howSmsIsOpened ==
-                  HowSmsIsOpened.fromTerminatedForPickedCall
+                      HowSmsIsOpened.fromTerminatedForPickedCall ||
+                  howSmsIsOpened == HowSmsIsOpened.fromTerminatedToShowMessage
               ? FloatingActionButton(
                   onPressed: () => Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
@@ -297,8 +396,9 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
           body: TheStackWidget(
             howSmsIsOpened: howSmsIsOpened,
             message: Message(
-                message: newRecent.message.message,
-                backgroundColor: newRecent.message.backgroundColor),
+              message: newRecent.message.message,
+              backgroundColor: newRecent.message.backgroundColor,
+            ),
           ),
         );
       },

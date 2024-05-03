@@ -115,6 +115,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
                 ),
               )
             : ContactDetails(
+                key: ValueKey(_currentContact!.phoneNumber),
                 contact: _currentContact!,
                 stackContainerWidths: MediaQuery.sizeOf(context).width * .425,
               );
@@ -163,6 +164,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
               ),
             )
           : ContactDetails(
+              key: ObjectKey(_currentRecent!),
               recent: _currentRecent,
               stackContainerWidths: MediaQuery.sizeOf(context).width * .425,
             );

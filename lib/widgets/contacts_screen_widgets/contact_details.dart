@@ -94,6 +94,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
           ),
           ContactCardWProfilePicStack(
             contact: widget.recent!.contact,
+            recent: widget.recent,
             transparentAndNonTransparentWidth: widget.stackContainerWidths,
           ),
           const SizedBox(
@@ -139,6 +140,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
     final recentsForAContact =
         getRecentsForAContact(allRecents, widget.contact!.phoneNumber);
 
+  print('giannis is  ${widget.contact!.name}');
     return Column(
       children: [
         ContactCardWProfilePicStack(

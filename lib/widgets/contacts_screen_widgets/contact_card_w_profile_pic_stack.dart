@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/models/recent.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 
@@ -8,10 +9,12 @@ class ContactCardWProfilePicStack extends StatefulWidget {
   const ContactCardWProfilePicStack({
     super.key,
     required this.contact,
+    this.recent,
     required this.transparentAndNonTransparentWidth,
   });
 
   final Contact contact;
+  final Recent? recent;
   final double transparentAndNonTransparentWidth;
 
   @override
@@ -37,11 +40,51 @@ class _ContactCardWProfilePicStackState
   }
 
   void _updateContactDetails({required Contact newContact}) {
-    // if (newContact.name != contactName || newContact.phoneNumber != contactPhoneNumber) {
-    setState(() {
-      _updatedContact = newContact;
-    });
-    // }
+    if (newContact.name != _updatedContact.name ||
+        newContact.phoneNumber != _updatedContact.phoneNumber) {
+      setState(() {
+        _updatedContact = newContact;
+      });
+    }
+  }
+
+  whichIconButton() {
+    if (widget.recent != null) {
+      return widget.recent!.recentIsAContact
+          ? null
+          : IconButton(
+              onPressed: () async {
+                if (widget.recent == null) {
+                  final contact = await showAddContactDialog(context,
+                      contact: _updatedContact);
+                  if (contact == null) {
+                    return;
+                  }
+                  _updateContactDetails(newContact: contact);
+                } else {
+                  showAddContactDialog(context,
+                      phoneNumber: widget.recent!.contact.phoneNumber);
+                }
+              },
+              icon: const Icon(Icons.person_add),
+            );
+    } else {
+      return IconButton(
+          onPressed: () async {
+            if (widget.recent == null) {
+              final contact =
+                  await showAddContactDialog(context, contact: _updatedContact);
+              if (contact == null) {
+                return;
+              }
+              _updateContactDetails(newContact: contact);
+            } else {
+              showAddContactDialog(context,
+                  phoneNumber: widget.recent!.contact.phoneNumber);
+            }
+          },
+          icon: const Icon(Icons.edit));
+    }
   }
 
   @override
@@ -145,17 +188,7 @@ class _ContactCardWProfilePicStackState
               right: 0,
               child: Padding(
                 padding: const EdgeInsets.all(5),
-                child: IconButton(
-                  onPressed: () async {
-                    final contact = await showAddContactDialog(context,
-                        contact: _updatedContact);
-                    if (contact == null) {
-                      return;
-                    }
-                    _updateContactDetails(newContact: contact);
-                  },
-                  icon: const Icon(Icons.edit),
-                ),
+                child: whichIconButton(),
               ),
             )
           ],

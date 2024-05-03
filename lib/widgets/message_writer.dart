@@ -279,7 +279,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   return Lottie.asset(
                       'assets/animations/telephone_ringing_3d.json');
                 }
-
                 final recent = Recent.withoutContactObject(
                     category: RecentCategory.outgoingUnanswered,
                     message: Message(

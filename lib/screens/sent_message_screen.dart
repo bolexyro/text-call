@@ -9,7 +9,6 @@ import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/models/message.dart';
-import 'package:text_call/models/contact.dart';
 import 'package:http/http.dart' as http;
 
 // sms = sent message screen
@@ -100,6 +99,7 @@ class TheStackWidget extends StatelessWidget {
           height: double.infinity,
           child: Center(
             child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
               child: TheColumnWidget(message: message),
             ),
           ),
@@ -342,7 +342,6 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
 
         final String? callMessage = prefs.getString('callMessage');
         final String? backgroundColor = prefs.getString('backgroundColor');
-        final String? callerName = prefs.getString('callerName');
         final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
         final String? recentId = prefs.getString('recentId');
 
@@ -350,15 +349,11 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
             'call/accepted/$callerPhoneNumber');
         http.get(url);
 
-        final newRecent = Recent(
-          id: recentId!,
-          message: Message(
+      final newRecent = Recent.withoutContactObject(category: RecentCategory.incomingAccepted, message:  Message(
             message: callMessage!,
             backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
-          ),
-          contact: Contact(name: callerName!, phoneNumber: callerPhoneNumber!),
-          category: RecentCategory.incomingAccepted,
-        );
+          ), id: recentId!, phoneNumber: callerPhoneNumber!);
+        
 
         ref.read(recentsProvider.notifier).addRecent(newRecent);
         final backgroundActualColor =

@@ -40,6 +40,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           Contact(
             name: "Me",
             phoneNumber: _enteredPhoneNumber,
+            imagePath: null,
           ),
         );
 

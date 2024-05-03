@@ -6,7 +6,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 
@@ -110,7 +109,6 @@ Future<void> messageHandler(RemoteMessage message) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString('callMessage', callMessage);
   await prefs.setString('callerPhoneNumber', callerPhoneNumber);
-  await prefs.setString('callerName', callerName);
   await prefs.setString('recentId', recentId);
   await prefs.setString(
     'backgroundColor',
@@ -172,7 +170,6 @@ class NotificationController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.reload();
       final String? callMessage = prefs.getString('callMessage');
-      final String? callerName = prefs.getString('callerName');
       final String? backgroundColor = prefs.getString('backgroundColor');
       final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
       final String? recentId = prefs.getString('recentId');
@@ -182,15 +179,14 @@ class NotificationController {
       http.get(url);
 
       final db = await getDatabase();
-      final newRecent = Recent(
-        id: recentId!,
-        message: Message(
-          message: callMessage!,
-          backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
-        ),
-        contact: Contact(name: callerName!, phoneNumber: callerPhoneNumber!),
-        category: RecentCategory.incomingRejected,
-      );
+      final newRecent = Recent.withoutContactObject(
+          category: RecentCategory.incomingRejected,
+          message: Message(
+            message: callMessage!,
+            backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
+          ),
+          id: recentId!,
+          phoneNumber: callerPhoneNumber!);
 
       db.insert(
         'recents',
@@ -203,7 +199,6 @@ class NotificationController {
           'message': newRecent.message.message,
           'callTime': newRecent.callTime.toString(),
           'phoneNumber': newRecent.contact.phoneNumber,
-          'name': newRecent.contact.name,
           'categoryName': newRecent.category.name,
         },
       );

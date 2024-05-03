@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart' as syspaths;
+import 'package:path/path.dart' as path;
 
-//ignore: must_be_immutable
 class AddContact extends ConsumerStatefulWidget {
   const AddContact({
     super.key,
@@ -24,12 +28,31 @@ class _AddContactState extends ConsumerState<AddContact> {
   String? _enteredPhoneNumber;
   bool _isAddingContact = false;
 
+  File? _imageFile;
+  String? _imagePath;
+
+  void _selectImage() async {
+    print('tapped');
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage == null) {
+      return;
+    }
+    _imageFile = File(pickedImage.path);
+    setState(() {
+      _imagePath = pickedImage.path;
+    });
+  }
+
   void _addContact(context) async {
     setState(() {
       _isAddingContact = true;
     });
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+
+      final appDir = syspaths.getApplicationDocumentsDirectory();
 
       _enteredPhoneNumber = widget.phoneNumber == null
           ? _enteredPhoneNumber
@@ -52,7 +75,9 @@ class _AddContactState extends ConsumerState<AddContact> {
 
       ref.read(contactsProvider.notifier).addContact(
             Contact(
-                name: _enteredName!.trim(), phoneNumber: _enteredPhoneNumber!),
+                name: _enteredName!.trim(),
+                phoneNumber: _enteredPhoneNumber!,
+                imagePath: _imagePath),
           );
       Navigator.of(context).pop();
     }
@@ -70,7 +95,11 @@ class _AddContactState extends ConsumerState<AddContact> {
       ),
       content: Column(
         children: [
-          const ContactAvatarCircle(avatarRadius: 40),
+          ContactAvatarCircle(
+            avatarRadius: 40,
+            purpose: Purpose.selectingImage,
+            imagePath: _imagePath,
+          ),
           const SizedBox(
             height: 20,
           ),
@@ -151,7 +180,7 @@ class _AddContactState extends ConsumerState<AddContact> {
                     ? null
                     : () async {
                         // if (await checkForInternetConnection(context)) {
-                          _addContact(context);
+                        _addContact(context);
                         // }
                       },
                 child: _isAddingContact == false

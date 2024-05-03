@@ -15,7 +15,6 @@ class KeypadButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return InkWell(
       customBorder: const CircleBorder(),
-      splashColor: Colors.grey,
       onTap: () {
         onButtonPressed(buttonText);
       },

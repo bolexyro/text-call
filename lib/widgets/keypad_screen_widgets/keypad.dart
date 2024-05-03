@@ -60,17 +60,35 @@ class _KeypadState extends ConsumerState<Keypad> {
       });
       return;
     }
-    final Contact callee = await ref
-            .read(contactsProvider.notifier)
-            .readAContact(
-              changeLocalToIntl(localPhoneNumber: widget.typedInPhoneNumber),
-            ) ??
-        Contact(
-          name: '',
-          phoneNumber:
-              changeLocalToIntl(localPhoneNumber: widget.typedInPhoneNumber),
-        );
 
+    final Contact callee = ref
+            .read(contactsProvider)
+            .where(
+              (contact) =>
+                  contact.phoneNumber ==
+                  changeLocalToIntl(
+                    localPhoneNumber: widget.typedInPhoneNumber,
+                  ),
+            )
+            .toList()
+            .isNotEmpty
+        ? ref
+            .read(contactsProvider)
+            .where(
+              (contact) =>
+                  contact.phoneNumber ==
+                  changeLocalToIntl(
+                    localPhoneNumber: widget.typedInPhoneNumber,
+                  ),
+            )
+            .toList()[0]
+        : Contact(
+            name: '',
+            phoneNumber:
+                changeLocalToIntl(localPhoneNumber: widget.typedInPhoneNumber),
+            imagePath: null,
+          );
+          
     setState(() {
       _isCheckingIfNumberExists = false;
     });

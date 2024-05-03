@@ -10,29 +10,26 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
     final db = await getDatabase();
     final data = await db.query('contacts');
     final contactsList = data
-        .map((row) => Contact(
+        .map(
+          (row) => Contact(
             name: row['name'] as String,
-            phoneNumber: row['phoneNumber'] as String))
+            phoneNumber: row['phoneNumber'] as String,
+            imagePath: row['imagePath'] as String?,
+          ),
+        )
         .toList();
     state = contactsList;
-  }
-
-  Future<Contact?> readAContact(String phoneNumber) async {
-    final db = await getDatabase();
-    final data = await db
-        .query('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
-
-    if (data.isEmpty) {
-      return null;
-    }
-    return Contact(name: data[0]['name'] as String, phoneNumber: phoneNumber);
   }
 
   void addContact(Contact newContact) async {
     final db = await getDatabase();
     db.insert(
       'contacts',
-      {'phoneNumber': newContact.phoneNumber, 'name': newContact.name},
+      {
+        'phoneNumber': newContact.phoneNumber,
+        'name': newContact.name,
+        'imagePath': newContact.imagePath,
+      },
     );
     state = [...state, newContact];
   }

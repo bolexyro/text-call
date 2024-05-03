@@ -1,27 +1,60 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+
+enum Purpose { selectingImage, displayingImage }
 
 class ContactAvatarCircle extends StatelessWidget {
   const ContactAvatarCircle({
     super.key,
     required this.avatarRadius,
+    required this.purpose,
+    required this.imagePath,
   });
 
   final double avatarRadius;
+  final Purpose purpose;
+  final String? imagePath;
+
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: avatarRadius,
-      backgroundColor: Colors.blue,
-      foregroundColor: Colors.white,
-      child: IconButton(
-        icon: const Icon(Icons.camera_alt),
-        onPressed: () async {
-          final ImagePicker picker = ImagePicker();
-          // final XFile? image =
-final XFile? file = await picker.pickImage(source: ImageSource.gallery);
-        },
-      ),
-    );
+    late final Widget activeContent;
+    if (purpose == Purpose.selectingImage) {
+      activeContent = InkWell(
+        radius: avatarRadius,
+        onTap: () {},
+        child: CircleAvatar(
+          radius: avatarRadius,
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+          child: const Icon(Icons.camera_alt),
+        ),
+      );
+    }
+
+    if (purpose == Purpose.displayingImage) {
+      if (imagePath == null) {
+        activeContent = InkWell(
+          radius: avatarRadius,
+          onTap: () {},
+          child: CircleAvatar(
+            radius: avatarRadius,
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+            child: const Icon(Icons.camera_alt),
+          ),
+        );
+      } else {
+        activeContent = CircleAvatar(
+          radius: avatarRadius,
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+          child: Image.file(
+            File(imagePath!),
+          ),
+        );
+      }
+    }
+    return activeContent;
   }
 }

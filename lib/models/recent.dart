@@ -62,18 +62,33 @@ class Recent {
     required this.id,
   }) : callTime = callTime ?? DateTime.now();
 
-  Recent.fromRecent(
-      {required Recent recent,
-      required this.recentIsAContact,
-      required String contactName})
-      : contact = Contact(
-          name: contactName,
-          phoneNumber: recent.contact.phoneNumber,
-        ),
+  Recent.fromRecent({
+    required Recent recent,
+    required this.recentIsAContact,
+    required String contactName,
+    required String? contactImagePath,
+  })  : contact = Contact(
+            name: contactName,
+            phoneNumber: recent.contact.phoneNumber,
+            imagePath: null),
         category = recent.category,
         callTime = recent.callTime,
         message = recent.message,
         id = recent.id;
+
+  Recent.withoutContactObject({
+    required this.category,
+    required this.message,
+    required this.id,
+    DateTime? callTime,
+    required String phoneNumber,
+    this.recentIsAContact = false,
+  })  : callTime = callTime ?? DateTime.now(),
+        contact = Contact(
+          name: 'name',
+          phoneNumber: phoneNumber,
+          imagePath: null,
+        );
 
   final Contact contact;
   final RecentCategory category;

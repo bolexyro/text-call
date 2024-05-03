@@ -125,9 +125,9 @@ Future<sql.Database> getDatabase() async {
     version: 1,
     onCreate: (db, version) async {
       await db.execute(
-          'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT)');
+          'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT, imagePath TEXT)');
       await db.execute(
-          'CREATE TABLE recents ( id TEXT , callTime TEXT PRIMARY KEY , phoneNumber TEXT, name TEXT, categoryName TEXT, message TEXT, backgroundColorRed INTEGER, backgroundColorGreen INTEGER, backgroundColorBlue INTEGER, backgroundColorAlpha INTEGER)');
+          'CREATE TABLE recents ( id TEXT , callTime TEXT PRIMARY KEY , phoneNumber TEXT, categoryName TEXT, message TEXT, backgroundColorRed INTEGER, backgroundColorGreen INTEGER, backgroundColorBlue INTEGER, backgroundColorAlpha INTEGER)');
     },
   );
   return db;

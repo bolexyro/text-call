@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
-import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
@@ -183,7 +182,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               IconButton(
                 onPressed: () async {
                   // if (await checkForInternetConnection(context)) {
-                    _callSomeone(context);
+                  _callSomeone(context);
                   // }
                 },
                 icon: const Padding(
@@ -212,15 +211,14 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             final snapshotData = json.decode(snapshot.data);
             if (snapshotData['call_status'] == 'rejected') {
               // create a recent in your table
-              final recent = Recent(
-                id: recentId,
-                message: Message(
-                    message: _messageController.text,
-                    backgroundColor: _selectedColor),
-                contact:
-                    Contact(name: '', phoneNumber: widget.calleePhoneNumber),
-                category: RecentCategory.outgoingRejected,
-              );
+              final recent = Recent.withoutContactObject(
+                  category: RecentCategory.outgoingRejected,
+                  message: Message(
+                      message: _messageController.text,
+                      backgroundColor: _selectedColor),
+                  id: recentId,
+                  phoneNumber: widget.calleePhoneNumber);
+
               ref.read(recentsProvider.notifier).addRecent(recent);
               return Padding(
                 padding: const EdgeInsets.only(top: 10.0),
@@ -247,13 +245,13 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 ),
               );
             }
-            final recent = Recent(
-              id: recentId,
+            final recent = Recent.withoutContactObject(
+              category: RecentCategory.outgoingAccepted,
               message: Message(
                   message: _messageController.text,
                   backgroundColor: _selectedColor),
-              contact: Contact(name: '', phoneNumber: widget.calleePhoneNumber),
-              category: RecentCategory.outgoingAccepted,
+              id: recentId,
+              phoneNumber: widget.calleePhoneNumber,
             );
             ref.read(recentsProvider.notifier).addRecent(recent);
             _confettiController.play();
@@ -281,17 +279,15 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   return Lottie.asset(
                       'assets/animations/telephone_ringing_3d.json');
                 }
-                final recent = Recent(
-                  id: recentId,
-                  message: Message(
-                      message: _messageController.text,
-                      backgroundColor: _selectedColor),
-                  contact: Contact(
-                    name: '',
-                    phoneNumber: widget.calleePhoneNumber,
-                  ),
-                  category: RecentCategory.outgoingUnanswered,
-                );
+
+                final recent = Recent.withoutContactObject(
+                    category: RecentCategory.outgoingUnanswered,
+                    message: Message(
+                        message: _messageController.text,
+                        backgroundColor: _selectedColor),
+                    id: recentId,
+                    phoneNumber: widget.calleePhoneNumber);
+
                 ref.read(recentsProvider.notifier).addRecent(recent);
                 return Padding(
                   padding: const EdgeInsets.only(top: 10.0),

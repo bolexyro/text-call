@@ -10,11 +10,13 @@ class ContactAvatarCircle extends StatelessWidget {
     required this.avatarRadius,
     required this.purpose,
     required this.imagePath,
+    this.onCirclePressed,
   });
 
   final double avatarRadius;
   final Purpose purpose;
   final String? imagePath;
+  final void Function()? onCirclePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -22,39 +24,25 @@ class ContactAvatarCircle extends StatelessWidget {
     if (purpose == Purpose.selectingImage) {
       activeContent = InkWell(
         radius: avatarRadius,
-        onTap: () {},
+        onTap: onCirclePressed,
         child: CircleAvatar(
           radius: avatarRadius,
-          backgroundColor: Colors.blue,
+          backgroundColor: imagePath == null ? Colors.blue : null,
           foregroundColor: Colors.white,
-          child: const Icon(Icons.camera_alt),
+          backgroundImage:
+              imagePath == null ? null : FileImage(File(imagePath!)),
+          child: imagePath != null ? null : const Icon(Icons.camera_alt),
         ),
       );
     }
 
     if (purpose == Purpose.displayingImage) {
-      if (imagePath == null) {
-        activeContent = InkWell(
-          radius: avatarRadius,
-          onTap: () {},
-          child: CircleAvatar(
-            radius: avatarRadius,
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
-            child: const Icon(Icons.camera_alt),
-          ),
-        );
-      } else {
-        activeContent = CircleAvatar(
-          radius: avatarRadius,
-          backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
-          child: Image.file(
-            File(imagePath!),
-          ),
-        );
-      }
+      activeContent = CircleAvatar(
+        radius: avatarRadius,
+        backgroundImage: FileImage(File(imagePath!)),
+      );
     }
+
     return activeContent;
   }
 }

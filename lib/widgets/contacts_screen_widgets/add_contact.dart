@@ -29,7 +29,6 @@ class _AddContactState extends ConsumerState<AddContact> {
   bool _isAddingContact = false;
 
   File? _imageFile;
-  String? _imagePath;
 
   void _selectImage() async {
     print('tapped');
@@ -39,10 +38,19 @@ class _AddContactState extends ConsumerState<AddContact> {
     if (pickedImage == null) {
       return;
     }
-    _imageFile = File(pickedImage.path);
+
     setState(() {
-      _imagePath = pickedImage.path;
+      _imageFile = File(pickedImage.path);
     });
+  }
+
+  Future<void> saveImage(File? imageFile) async {
+    if (imageFile == null) {
+      return;
+    }
+    final appDir = await syspaths.getApplicationDocumentsDirectory();
+    final filename = path.basename(imageFile.path);
+    await imageFile.copy('${appDir.path}/$filename');
   }
 
   void _addContact(context) async {
@@ -51,8 +59,6 @@ class _AddContactState extends ConsumerState<AddContact> {
     });
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-
-      final appDir = syspaths.getApplicationDocumentsDirectory();
 
       _enteredPhoneNumber = widget.phoneNumber == null
           ? _enteredPhoneNumber
@@ -73,11 +79,13 @@ class _AddContactState extends ConsumerState<AddContact> {
         return;
       }
 
-      ref.read(contactsProvider.notifier).addContact(
+      await saveImage(_imageFile);
+      await ref.read(contactsProvider.notifier).addContact(
             Contact(
-                name: _enteredName!.trim(),
-                phoneNumber: _enteredPhoneNumber!,
-                imagePath: _imagePath),
+              name: _enteredName!.trim(),
+              phoneNumber: _enteredPhoneNumber!,
+              imagePath: _imageFile?.path,
+            ),
           );
       Navigator.of(context).pop();
     }
@@ -96,9 +104,10 @@ class _AddContactState extends ConsumerState<AddContact> {
       content: Column(
         children: [
           ContactAvatarCircle(
+            onCirclePressed: _selectImage,
             avatarRadius: 40,
             purpose: Purpose.selectingImage,
-            imagePath: _imagePath,
+            imagePath: _imageFile?.path,
           ),
           const SizedBox(
             height: 20,

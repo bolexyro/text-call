@@ -21,7 +21,7 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
     state = contactsList;
   }
 
-  void addContact(Contact newContact) async {
+  Future<void> addContact(Contact newContact) async {
     final db = await getDatabase();
     db.insert(
       'contacts',

@@ -11,6 +11,7 @@ import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/confirm_delete_dialog.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';
 
 class ContactsList extends ConsumerStatefulWidget {
@@ -207,29 +208,36 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                         ? ExpandableListTile(
                             isExpanded: _expandedBoolsMap[contactN]!,
                             title: Text(contactN.name),
-                            leading: CircleAvatar(
-                              child: Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                alignment: Alignment.center,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Colors.deepPurple,
-                                      Colors.blue,
-                                    ],
+                            leading: contactN.imagePath != null
+                                ? ContactAvatarCircle(
+                                    avatarRadius: 20,
+                                    purpose: Purpose.displayingImage,
+                                    imagePath: contactN.imagePath,
+                                  )
+                                : CircleAvatar(
+                                    radius: 20,
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      alignment: Alignment.center,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            Colors.deepPurple,
+                                            Colors.blue,
+                                          ],
+                                        ),
+                                      ),
+                                      child: Text(
+                                        contactN.name[0],
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 25),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                child: Text(
-                                  contactN.name[0],
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 25),
-                                ),
-                              ),
-                            ),
                             tileOnTapped: () {
                               _changeTileExpandedStatus(contactN);
                             },
@@ -287,29 +295,37 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                             children: [
                               ListTile(
                                 title: Text(contactN.name),
-                                leading: CircleAvatar(
-                                  child: Container(
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    alignment: Alignment.center,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          Colors.deepPurple,
-                                          Colors.blue,
-                                        ],
+                                leading: contactN.imagePath != null
+                                    ? ContactAvatarCircle(
+                                        avatarRadius: 20,
+                                        purpose: Purpose.displayingImage,
+                                        imagePath: contactN.imagePath,
+                                      )
+                                    : CircleAvatar(
+                                        radius: 20,
+                                        child: Container(
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          alignment: Alignment.center,
+                                          decoration: const BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                              colors: [
+                                                Colors.deepPurple,
+                                                Colors.blue,
+                                              ],
+                                            ),
+                                          ),
+                                          child: Text(
+                                            contactN.name[0],
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 25),
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                    child: Text(
-                                      contactN.name[0],
-                                      style: const TextStyle(
-                                          color: Colors.white, fontSize: 25),
-                                    ),
-                                  ),
-                                ),
                                 onTap: () => widget.onContactSelected(contactN),
                               ),
                               const Divider(

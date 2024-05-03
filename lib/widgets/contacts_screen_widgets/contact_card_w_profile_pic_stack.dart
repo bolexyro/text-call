@@ -106,8 +106,12 @@ class ContactCardWProfilePicStack extends StatelessWidget {
               top: -_circleAvatarRadius,
               left:
                   (transparentAndNonTransparentWidth / 2) - _circleAvatarRadius,
-              child: ContactAvatarCircle(purpose: Purpose.displayingImage,
-                avatarRadius: _circleAvatarRadius, imagePath: contact.imagePath,
+              child: ContactAvatarCircle(
+                purpose: contact.imagePath == null
+                    ? Purpose.selectingImage
+                    : Purpose.displayingImage,
+                avatarRadius: _circleAvatarRadius,
+                imagePath: contact.imagePath,
               ),
             )
           ],

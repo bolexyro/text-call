@@ -1,11 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
+import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart' as syspaths;
 
-class ContactCardWProfilePicStack extends StatefulWidget {
+class ContactCardWProfilePicStack extends ConsumerStatefulWidget {
   const ContactCardWProfilePicStack({
     super.key,
     required this.contact,
@@ -18,12 +24,12 @@ class ContactCardWProfilePicStack extends StatefulWidget {
   final double transparentAndNonTransparentWidth;
 
   @override
-  State<ContactCardWProfilePicStack> createState() =>
+  ConsumerState<ContactCardWProfilePicStack> createState() =>
       _ContactCardWProfilePicStackState();
 }
 
 class _ContactCardWProfilePicStackState
-    extends State<ContactCardWProfilePicStack> {
+    extends ConsumerState<ContactCardWProfilePicStack> {
   final _nonTransparentContainerheight = 180.0;
 
   final _circleAvatarRadius = 40.0;
@@ -33,9 +39,10 @@ class _ContactCardWProfilePicStackState
   @override
   void initState() {
     _updatedContact = Contact(
-        name: widget.contact.name,
-        phoneNumber: widget.contact.phoneNumber,
-        imagePath: widget.contact.imagePath);
+      name: widget.contact.name,
+      phoneNumber: widget.contact.phoneNumber,
+      imagePath: widget.contact.imagePath,
+    );
     super.initState();
   }
 
@@ -176,13 +183,39 @@ class _ContactCardWProfilePicStackState
               top: -_circleAvatarRadius,
               left: (widget.transparentAndNonTransparentWidth / 2) -
                   _circleAvatarRadius,
-              child: ContactAvatarCircle(
-                purpose: widget.contact.imagePath == null
-                    ? Purpose.selectingImage
-                    : Purpose.displayingImage,
-                avatarRadius: _circleAvatarRadius,
-                imagePath: widget.contact.imagePath,
-              ),
+              child: widget.recent != null
+                  ? ContactAvatarCircle(
+                      avatarRadius: _circleAvatarRadius,
+                      imagePath: _updatedContact.imagePath,
+                    )
+                  : ContactAvatarCircle(
+                      onCirclePressed: widget.contact.imagePath == null
+                          ? () async {
+                              final File? imageFile =
+                                  await selectImage(context);
+                              if (imageFile == null) {
+                                return;
+                              }
+                              final appDir = await syspaths
+                                  .getApplicationDocumentsDirectory();
+                              final filename = path.basename(imageFile.path);
+                              await imageFile.copy('${appDir.path}/$filename');
+
+                              setState(() {
+                                _updatedContact = Contact(
+                                  name: _updatedContact.name,
+                                  phoneNumber: _updatedContact.phoneNumber,
+                                  imagePath: imageFile.path,
+                                );
+                              });
+                              ref.read(contactsProvider.notifier).updateContact(
+                                  oldContact: _updatedContact,
+                                  newContact: _updatedContact);
+                            }
+                          : null,
+                      avatarRadius: _circleAvatarRadius,
+                      imagePath: _updatedContact.imagePath,
+                    ),
             ),
             Positioned(
               right: 0,

@@ -36,7 +36,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
     });
   }
 
-  void _setCurrentRecent(Recent selectedRecent) {
+  void _setCurrentRecent(Recent? selectedRecent) {
     setState(() {
       _currentRecent = selectedRecent;
     });
@@ -115,7 +115,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
                 ),
               )
             : ContactDetails(
-                key: ValueKey(_currentContact!.phoneNumber),
+                key: ObjectKey(_currentContact),
                 contact: _currentContact!,
                 stackContainerWidths: MediaQuery.sizeOf(context).width * .425,
               );
@@ -195,12 +195,12 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
       );
     }
     return RecentsList(
-      onRecentSelected: (Recent selectedRecent) {
+      onRecentSelected: (Recent? selectedRecent) {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => SentMessageScreen(
                 howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
-                message: selectedRecent.message),
+                message: selectedRecent!.message),
           ),
         );
       },

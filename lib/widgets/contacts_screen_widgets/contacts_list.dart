@@ -211,7 +211,6 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                             leading: contactN.imagePath != null
                                 ? ContactAvatarCircle(
                                     avatarRadius: 20,
-                                    purpose: Purpose.displayingImage,
                                     imagePath: contactN.imagePath,
                                   )
                                 : CircleAvatar(
@@ -298,7 +297,6 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                                 leading: contactN.imagePath != null
                                     ? ContactAvatarCircle(
                                         avatarRadius: 20,
-                                        purpose: Purpose.displayingImage,
                                         imagePath: contactN.imagePath,
                                       )
                                     : CircleAvatar(

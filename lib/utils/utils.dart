@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:another_flushbar/flushbar.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
@@ -10,6 +13,7 @@ import 'package:text_call/widgets/message_writer.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
+
 
 enum Screen { phone, tablet }
 
@@ -142,7 +146,6 @@ Future<Contact?> showAddContactDialog(context, {String? phoneNumber, Contact? co
       return AddContactDialog(phoneNumber: phoneNumber, contact: contact,);
     },
   );
-  print(returnedContact?.name);
   return returnedContact;
 }
 
@@ -299,3 +302,65 @@ void sendAccessRequest(Recent recent) async {
       'send-access-request/$requesterPhoneNumber/${recent.contact.phoneNumber}/${recent.id}');
   http.get(url);
 }
+
+
+ Future<File?> selectImage(BuildContext context) async {
+    ImageSource? source;
+    FocusManager.instance.primaryFocus?.unfocus();
+    await showModalBottomSheet(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
+      ),
+      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            height: 20,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                  onPressed: () {
+                    source = ImageSource.camera;
+                    Navigator.of(context).pop();
+                  },
+                  iconSize: 40,
+                  icon: const Icon(
+                    Icons.camera_alt_rounded,
+                  )),
+              IconButton(
+                  iconSize: 40,
+                  onPressed: () {
+                    source = ImageSource.gallery;
+                    Navigator.of(context).pop();
+                  },
+                  icon: const Icon(
+                    Icons.photo_library_rounded,
+                  )),
+            ],
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+        ],
+      ),
+    );
+
+    if (source == null) {
+      return null;
+    }
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedImage = await picker.pickImage(source: source!);
+    if (pickedImage == null) {
+      return null;
+    }
+
+    return File(pickedImage.path);
+  
+  }
+

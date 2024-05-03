@@ -139,8 +139,6 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
     final allRecents = ref.watch(recentsProvider);
     final recentsForAContact =
         getRecentsForAContact(allRecents, widget.contact!.phoneNumber);
-
-  print('giannis is  ${widget.contact!.name}');
     return Column(
       children: [
         ContactCardWProfilePicStack(

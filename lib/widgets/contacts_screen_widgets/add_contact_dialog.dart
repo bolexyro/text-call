@@ -5,9 +5,8 @@ import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart' as syspaths;
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart' as syspaths;
 
 class AddContactDialog extends ConsumerStatefulWidget {
   const AddContactDialog({
@@ -29,7 +28,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
   String? _enteredPhoneNumber;
   bool _isAddingContact = false;
   File? _imageFile;
-  ImageSource? _source;
+  // ImageSource? _source;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
@@ -53,68 +52,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
     super.dispose();
   }
 
-  void _selectImage() async {
-    FocusManager.instance.primaryFocus?.unfocus();
-    await showModalBottomSheet(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
-      ),
-      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
-      context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(
-            height: 20,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              IconButton(
-                  onPressed: () {
-                    _source = ImageSource.camera;
-                    Navigator.of(context).pop();
-                  },
-                  iconSize: 40,
-                  icon: const Icon(
-                    Icons.camera_alt_rounded,
-                  )),
-              IconButton(
-                  iconSize: 40,
-                  onPressed: () {
-                    _source = ImageSource.gallery;
-                    Navigator.of(context).pop();
-                  },
-                  icon: const Icon(
-                    Icons.photo_library_rounded,
-                  )),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-        ],
-      ),
-    );
-
-    if (_source == null) {
-      return;
-    }
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage = await picker.pickImage(source: _source!);
-    _source = null;
-    if (pickedImage == null) {
-      return;
-    }
-
-    setState(() {
-      _imageFile = File(pickedImage.path);
-    });
-  }
-
-  Future<void> saveImage(File? imageFile) async {
+    Future<void> _saveImage(File? imageFile) async {
     if (imageFile == null) {
       return;
     }
@@ -149,7 +87,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
         return;
       }
 
-      await saveImage(_imageFile);
+      await _saveImage(_imageFile);
 
       if (widget.contact != null) {
         final Contact oldContact = widget.contact!;
@@ -190,9 +128,11 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
       content: Column(
         children: [
           ContactAvatarCircle(
-            onCirclePressed: _selectImage,
+            onCirclePressed: () async {
+              _imageFile = await selectImage(context);
+              setState(() {});
+            },
             avatarRadius: 40,
-            purpose: Purpose.selectingImage,
             imagePath: _imageFile?.path,
           ),
           const SizedBox(

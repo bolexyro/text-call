@@ -21,7 +21,7 @@ class RecentsList extends ConsumerStatefulWidget {
     required this.screen,
   });
 
-  final void Function(Recent selectedRecent) onRecentSelected;
+  final void Function(Recent? selectedRecent) onRecentSelected;
   final Screen screen;
 
   @override
@@ -131,6 +131,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
   }
 
   Future<void> _refreshRecents() async {
+    widget.onRecentSelected(null);
     await ref.read(recentsProvider.notifier).loadRecents();
   }
 

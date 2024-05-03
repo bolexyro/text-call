@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
@@ -29,12 +28,62 @@ class _AddContactState extends ConsumerState<AddContact> {
   bool _isAddingContact = false;
 
   File? _imageFile;
+  ImageSource? _source;
+
+  // void _show
 
   void _selectImage() async {
-    print('tapped');
+    FocusManager.instance.primaryFocus?.unfocus();
+    await showModalBottomSheet(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
+      ),
+      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            height: 20,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                  onPressed: () {
+                    _source = ImageSource.camera;
+                    Navigator.of(context).pop();
+                  },
+                  iconSize: 40,
+                  icon: const Icon(
+                    Icons.camera_alt_rounded,
+                  )),
+              IconButton(
+                  iconSize: 40,
+                  onPressed: () {
+                    _source = ImageSource.gallery;
+                    Navigator.of(context).pop();
+                  },
+                  icon: const Icon(
+                    Icons.photo_library_rounded,
+                  )),
+            ],
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+        ],
+      ),
+    );
+
+    if (_source == null) {
+      return;
+    }
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage =
-        await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage = await picker.pickImage(source: _source!);
+    _source = null;
     if (pickedImage == null) {
       return;
     }

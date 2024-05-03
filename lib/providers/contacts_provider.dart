@@ -34,6 +34,26 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
     state = [...state, newContact];
   }
 
+  Future<void> updateContact(
+      {required Contact oldContact, required Contact newContact}) async {
+    final db = await getDatabase();
+    db.update(
+      'contacts',
+      {
+        'phoneNumber': newContact.phoneNumber,
+        'name': newContact.name,
+        'imagePath': newContact.imagePath
+      },
+      where: 'phoneNumber = ?',
+      whereArgs: [oldContact.phoneNumber],
+    );
+
+    final List<Contact> newState = List.from(state)
+      ..removeWhere((contact) => contact.phoneNumber == oldContact.phoneNumber);
+    newState.add(newContact);
+    state = newState;
+  }
+
   void deleteContact(String phoneNumber) async {
     final db = await getDatabase();
     await db

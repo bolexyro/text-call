@@ -48,6 +48,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
       MaterialPageRoute(
         builder: (context) => SafeArea(
           child: Scaffold(
+            resizeToAvoidBottomInset: false,
             body: Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).brightness == Brightness.dark
@@ -97,7 +98,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
   Widget build(BuildContext context) {
     final double availableWidth = MediaQuery.sizeOf(context).width;
 
-    const double tabletWidth = 520;
+    const double tabletWidth = 300;
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     if (widget.whichScreen == WhichScreen.contact) {

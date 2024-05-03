@@ -3,8 +3,9 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
-import 'package:text_call/widgets/contacts_screen_widgets/add_contact.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/add_contact_dialog.dart';
 import 'package:text_call/widgets/message_writer.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
@@ -133,13 +134,16 @@ Future<sql.Database> getDatabase() async {
   return db;
 }
 
-void showAddContactDialog(context, {String? phoneNumber}) async {
-  showAdaptiveDialog(
+Future<Contact?> showAddContactDialog(context, {String? phoneNumber, Contact? contact}) async {
+  // name and phonenumber would be returned when we are updating contact for it to reflect in the contact card stack
+  final Contact? returnedContact = await showAdaptiveDialog(
     context: context,
     builder: (context) {
-      return AddContact(phoneNumber: phoneNumber);
+      return AddContactDialog(phoneNumber: phoneNumber, contact: contact,);
     },
   );
+  print(returnedContact?.name);
+  return returnedContact;
 }
 
 void showADialog({

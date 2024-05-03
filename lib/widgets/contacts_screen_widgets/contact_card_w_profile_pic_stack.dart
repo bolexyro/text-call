@@ -4,7 +4,7 @@ import 'package:text_call/models/contact.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 
-class ContactCardWProfilePicStack extends StatelessWidget {
+class ContactCardWProfilePicStack extends StatefulWidget {
   const ContactCardWProfilePicStack({
     super.key,
     required this.contact,
@@ -14,8 +14,35 @@ class ContactCardWProfilePicStack extends StatelessWidget {
   final Contact contact;
   final double transparentAndNonTransparentWidth;
 
+  @override
+  State<ContactCardWProfilePicStack> createState() =>
+      _ContactCardWProfilePicStackState();
+}
+
+class _ContactCardWProfilePicStackState
+    extends State<ContactCardWProfilePicStack> {
   final _nonTransparentContainerheight = 180.0;
+
   final _circleAvatarRadius = 40.0;
+
+  late Contact _updatedContact;
+
+  @override
+  void initState() {
+    _updatedContact = Contact(
+        name: widget.contact.name,
+        phoneNumber: widget.contact.phoneNumber,
+        imagePath: widget.contact.imagePath);
+    super.initState();
+  }
+
+  void _updateContactDetails({required Contact newContact}) {
+    // if (newContact.name != contactName || newContact.phoneNumber != contactPhoneNumber) {
+    setState(() {
+      _updatedContact = newContact;
+    });
+    // }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +58,7 @@ class ContactCardWProfilePicStack extends StatelessWidget {
           children: [
             Container(
               height: _nonTransparentContainerheight,
-              width: transparentAndNonTransparentWidth,
+              width: widget.transparentAndNonTransparentWidth,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 color: isDarkTheme
@@ -46,7 +73,7 @@ class ContactCardWProfilePicStack extends StatelessWidget {
                       height: _circleAvatarRadius,
                     ),
                     Text(
-                      contact.name,
+                      _updatedContact.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -63,8 +90,8 @@ class ContactCardWProfilePicStack extends StatelessWidget {
                           width: 7,
                         ),
                         Text(
+                          _updatedContact.localPhoneNumber,
                           overflow: TextOverflow.ellipsis,
-                          contact.localPhoneNumber,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
@@ -85,8 +112,8 @@ class ContactCardWProfilePicStack extends StatelessWidget {
                         onPressed: () {
                           showMessageWriterModalSheet(
                               context: context,
-                              calleeName: contact.name,
-                              calleePhoneNumber: contact.phoneNumber);
+                              calleeName: widget.contact.name,
+                              calleePhoneNumber: widget.contact.phoneNumber);
                         },
                         icon: SvgPicture.asset(
                           'assets/icons/message-ring.svg',
@@ -104,14 +131,31 @@ class ContactCardWProfilePicStack extends StatelessWidget {
             ),
             Positioned(
               top: -_circleAvatarRadius,
-              left:
-                  (transparentAndNonTransparentWidth / 2) - _circleAvatarRadius,
+              left: (widget.transparentAndNonTransparentWidth / 2) -
+                  _circleAvatarRadius,
               child: ContactAvatarCircle(
-                purpose: contact.imagePath == null
+                purpose: widget.contact.imagePath == null
                     ? Purpose.selectingImage
                     : Purpose.displayingImage,
                 avatarRadius: _circleAvatarRadius,
-                imagePath: contact.imagePath,
+                imagePath: widget.contact.imagePath,
+              ),
+            ),
+            Positioned(
+              right: 0,
+              child: Padding(
+                padding: const EdgeInsets.all(5),
+                child: IconButton(
+                  onPressed: () async {
+                    final contact = await showAddContactDialog(context,
+                        contact: _updatedContact);
+                    if (contact == null) {
+                      return;
+                    }
+                    _updateContactDetails(newContact: contact);
+                  },
+                  icon: const Icon(Icons.edit),
+                ),
               ),
             )
           ],

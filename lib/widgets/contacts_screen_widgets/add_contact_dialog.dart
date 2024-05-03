@@ -9,28 +9,49 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart' as syspaths;
 import 'package:path/path.dart' as path;
 
-class AddContact extends ConsumerStatefulWidget {
-  const AddContact({
+class AddContactDialog extends ConsumerStatefulWidget {
+  const AddContactDialog({
     super.key,
     this.phoneNumber,
+    this.contact,
   });
 
   final String? phoneNumber;
+  final Contact? contact;
 
   @override
-  ConsumerState<AddContact> createState() => _AddContactState();
+  ConsumerState<AddContactDialog> createState() => _AddContactState();
 }
 
-class _AddContactState extends ConsumerState<AddContact> {
+class _AddContactState extends ConsumerState<AddContactDialog> {
   final _formKey = GlobalKey<FormState>();
   String? _enteredName;
   String? _enteredPhoneNumber;
   bool _isAddingContact = false;
-
   File? _imageFile;
   ImageSource? _source;
 
-  // void _show
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+
+  @override
+  void initState() {
+    if (widget.contact != null) {
+      _nameController.text = widget.contact!.name;
+      _phoneNumberController.text = widget.contact!.localPhoneNumber;
+      _imageFile = widget.contact!.imagePath == null
+          ? null
+          : File(widget.contact!.imagePath!);
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneNumberController.dispose();
+    super.dispose();
+  }
 
   void _selectImage() async {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -129,14 +150,30 @@ class _AddContactState extends ConsumerState<AddContact> {
       }
 
       await saveImage(_imageFile);
-      await ref.read(contactsProvider.notifier).addContact(
-            Contact(
-              name: _enteredName!.trim(),
-              phoneNumber: _enteredPhoneNumber!,
-              imagePath: _imageFile?.path,
-            ),
-          );
-      Navigator.of(context).pop();
+
+      if (widget.contact != null) {
+        final Contact oldContact = widget.contact!;
+        final newContact = Contact(
+            name: _nameController.text,
+            phoneNumber: changeLocalToIntl(
+                localPhoneNumber: _phoneNumberController.text),
+            imagePath: _imageFile?.path);
+
+        await ref.read(contactsProvider.notifier).updateContact(
+              oldContact: oldContact,
+              newContact: newContact,
+            );
+        Navigator.of(context).pop(newContact);
+      } else {
+        await ref.read(contactsProvider.notifier).addContact(
+              Contact(
+                name: _enteredName!.trim(),
+                phoneNumber: _enteredPhoneNumber!,
+                imagePath: _imageFile?.path,
+              ),
+            );
+        Navigator.of(context).pop();
+      }
     }
     setState(() {
       _isAddingContact = false;
@@ -168,6 +205,7 @@ class _AddContactState extends ConsumerState<AddContact> {
               child: Column(
                 children: [
                   TextFormField(
+                    controller: _nameController,
                     validator: (value) {
                       if (value == null ||
                           value.trim().isEmpty ||
@@ -194,6 +232,7 @@ class _AddContactState extends ConsumerState<AddContact> {
                   ),
                   if (widget.phoneNumber == null)
                     TextFormField(
+                      controller: _phoneNumberController,
                       validator: (value) {
                         if (value == null ||
                             value.trim().length != 11 ||

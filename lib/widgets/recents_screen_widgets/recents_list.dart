@@ -176,8 +176,9 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                   ),
                 );
                 createAwesomeNotification(
-                    title: 'Bolexyro',
-                    notificationPurpose: NotificationPurpose.forCall);
+                  title: 'Bolexyro',
+                  notificationPurpose: NotificationPurpose.forCall,
+                );
               },
               icon: const Icon(Icons.search),
             ),
@@ -241,20 +242,22 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                         ),
                       ],
                     ),
-                    endActionPane:  recentN.recentIsAContact? null : ActionPane(
-                      motion: const BehindMotion(),
-                      children: [
-                        CustomSlidableAction(
-                          onPressed: (context) {
-                            showAddContactDialog(context,
-                                phoneNumber: recentN.contact.phoneNumber);
-                          },
-                          backgroundColor: Colors.orange,
-                          foregroundColor: Colors.white,
-                          child: const Icon(Icons.person_add),
-                        ),
-                      ],
-                    ) ,
+                    endActionPane: recentN.recentIsAContact
+                        ? null
+                        : ActionPane(
+                            motion: const BehindMotion(),
+                            children: [
+                              CustomSlidableAction(
+                                onPressed: (context) {
+                                  showAddContactDialog(context,
+                                      phoneNumber: recentN.contact.phoneNumber);
+                                },
+                                backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white,
+                                child: const Icon(Icons.person_add),
+                              ),
+                            ],
+                          ),
                     child: widget.screen == Screen.phone
                         ? ExpandableListTile(
                             tileOnTapped: () {

@@ -111,7 +111,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
             name: _nameController.text,
             phoneNumber: changeLocalToIntl(
                 localPhoneNumber: _phoneNumberController.text),
-            imagePath: _imageFile?.path);
+            imagePath: _imageFile?.path,);
 
         await ref.read(contactsProvider.notifier).updateContact(
               oldContact: oldContact,
@@ -145,7 +145,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
         children: [
           ContactAvatarCircle(
             onCirclePressed: () async {
-              _imageFile = await selectImage(context);
+              _imageFile = (await selectImage(context)) ?? _imageFile;
               setState(() {});
             },
             avatarRadius: 40,

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:another_flushbar/flushbar.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -13,7 +14,6 @@ import 'package:text_call/widgets/message_writer.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
-
 
 enum Screen { phone, tablet }
 
@@ -138,12 +138,16 @@ Future<sql.Database> getDatabase() async {
   return db;
 }
 
-Future<Contact?> showAddContactDialog(context, {String? phoneNumber, Contact? contact}) async {
+Future<Contact?> showAddContactDialog(context,
+    {String? phoneNumber, Contact? contact}) async {
   // name and phonenumber would be returned when we are updating contact for it to reflect in the contact card stack
   final Contact? returnedContact = await showAdaptiveDialog(
     context: context,
     builder: (context) {
-      return AddContactDialog(phoneNumber: phoneNumber, contact: contact,);
+      return AddContactDialog(
+        phoneNumber: phoneNumber,
+        contact: contact,
+      );
     },
   );
   return returnedContact;
@@ -303,63 +307,73 @@ void sendAccessRequest(Recent recent) async {
   http.get(url);
 }
 
-
- Future<File?> selectImage(BuildContext context) async {
-    ImageSource? source;
-    FocusManager.instance.primaryFocus?.unfocus();
-    await showModalBottomSheet(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(20),
+Future<File?> selectImage(BuildContext context) async {
+  ImageSource? source;
+  FocusManager.instance.primaryFocus?.unfocus();
+  await showModalBottomSheet(
+    // backgroundColor: Colors.transparent,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(20),
+      ),
+    ),
+    context: context,
+    builder: (context) => Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(
+          height: 10,
         ),
-      ),
-      context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(
-            height: 20,
+        Container(
+          width: 50,
+          height: 5,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(2),
+            color: Colors.grey,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              IconButton(
-                  onPressed: () {
-                    source = ImageSource.camera;
-                    Navigator.of(context).pop();
-                  },
-                  iconSize: 40,
-                  icon: const Icon(
-                    Icons.camera_alt_rounded,
-                  )),
-              IconButton(
-                  iconSize: 40,
-                  onPressed: () {
-                    source = ImageSource.gallery;
-                    Navigator.of(context).pop();
-                  },
-                  icon: const Icon(
-                    Icons.photo_library_rounded,
-                  )),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-        ],
-      ),
-    );
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(
+                onPressed: () {
+                  source = ImageSource.camera;
+                  Navigator.of(context).pop();
+                },
+                iconSize: 40,
+                icon: const Icon(
+                  Icons.camera_alt_rounded,
+                )),
+            IconButton(
+                iconSize: 40,
+                onPressed: () {
+                  source = ImageSource.gallery;
+                  Navigator.of(context).pop();
+                },
+                icon: const Icon(
+                  Icons.photo_library_rounded,
+                )),
+          ],
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+      ],
+    ),
+  );
 
-    if (source == null) {
-      return null;
-    }
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage = await picker.pickImage(source: source!);
-    if (pickedImage == null) {
-      return null;
-    }
-
-    return File(pickedImage.path);
-  
+  if (source == null) {
+    return null;
+  }
+  final ImagePicker picker = ImagePicker();
+  final XFile? pickedImage = await picker.pickImage(source: source!);
+  if (pickedImage == null) {
+    return null;
   }
 
+  return File(pickedImage.path);
+}

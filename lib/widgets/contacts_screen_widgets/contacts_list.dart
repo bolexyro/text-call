@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,9 +5,9 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
+import 'package:text_call/screens/search_screen.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/confirm_delete_dialog.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
@@ -88,25 +87,30 @@ class _ContactsListState extends ConsumerState<ContactsList> {
             const SizedBox(width: 10),
             IconButton(
               onPressed: () async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setString('callMessage', 'callMessage');
-                await prefs.setString('callerPhoneNumber', '+2349098875567');
-                await prefs.setString('callerName', 'callerPhoneNumber');
-                await prefs.setString(
-                  'backgroundColor',
-                  json.encode(
-                    {
-                      'alpha': 200,
-                      'red': 90,
-                      'green': 90,
-                      'blue': 20,
-                    },
+                // final prefs = await SharedPreferences.getInstance();
+                // await prefs.setString('callMessage', 'callMessage');
+                // await prefs.setString('callerPhoneNumber', '+2349098875567');
+                // await prefs.setString('callerName', 'callerPhoneNumber');
+                // await prefs.setString(
+                //   'backgroundColor',
+                //   json.encode(
+                //     {
+                //       'alpha': 200,
+                //       'red': 90,
+                //       'green': 90,
+                //       'blue': 20,
+                //     },
+                //   ),
+                // );
+                // createAwesomeNotification(
+                //     title: 'Bolexyro is asking permission to see a message.',
+                //     notificationPurpose: NotificationPurpose.forAccessRequest,
+                //     body: 'Which message? Click to find out.');
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const SearchScreen(),
                   ),
                 );
-                createAwesomeNotification(
-                    title: 'Bolexyro is asking permission to see a message.',
-                    notificationPurpose: NotificationPurpose.forAccessRequest,
-                    body: 'Which message? Click to find out.');
               },
               icon: const Icon(Icons.search),
             ),

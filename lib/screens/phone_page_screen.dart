@@ -28,31 +28,33 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _currentPageIndex,
-          indicatorColor: Colors.blue,
-          onDestinationSelected: (int index) {
-            setState(() {
-              _currentPageIndex = index;
-            });
-          },
-          height: 60,
-          destinations: const <Widget>[
-            NavigationDestination(
-              icon: Icon(Icons.drag_indicator_sharp),
-              label: 'keypad',
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.recent_actors,
+        bottomNavigationBar: SizedBox(
+          child: NavigationBar(
+            selectedIndex: _currentPageIndex,
+            indicatorColor: Colors.blue,
+            onDestinationSelected: (int index) {
+              setState(() {
+                _currentPageIndex = index;
+              });
+            },
+            height: 60,
+            destinations: const <Widget>[
+              NavigationDestination(
+                icon: Icon(Icons.drag_indicator_sharp),
+                label: 'keypad',
               ),
-              label: 'Recents',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.contacts),
-              label: 'Contacts',
-            ),
-          ],
+              NavigationDestination(
+                icon: Icon(
+                  Icons.recent_actors,
+                ),
+                label: 'Recents',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.contacts),
+                label: 'Contacts',
+              ),
+            ],
+          ),
         ),
         body: [
           const KeypadScreen(),

@@ -18,15 +18,18 @@ class KeypadButton extends ConsumerWidget {
       onTap: () {
         onButtonPressed(buttonText);
       },
-      child: Center(
-        child: Text(
-          buttonText,
-          style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? const Color.fromARGB(255, 255, 251, 251)
-                  : Colors.black),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Center(
+          child: Text(
+            buttonText,
+            style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color.fromARGB(255, 255, 251, 251)
+                    : Colors.black),
+          ),
         ),
       ),
     );

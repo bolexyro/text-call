@@ -19,7 +19,7 @@ class ContactAvatarCircle extends StatelessWidget {
     late final Widget activeContent;
     if (onCirclePressed != null) {
       activeContent = InkWell(
-        radius: avatarRadius,
+        customBorder: const CircleBorder(), // radius: avatarRadius,
         onTap: onCirclePressed,
         child: CircleAvatar(
           radius: avatarRadius,

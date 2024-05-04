@@ -97,16 +97,23 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
+        const Row(
           children: [
-            const Spacer(),
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.search),
-            ),
-            const LogOutMenuAnchor(),
+            Spacer(),
+            LogOutMenuAnchor(),
           ],
         ),
+        // SizedBox(
+        //   height: 40,
+        //   child: ListView(
+        //     children: [
+        //       Text('faf'),
+        //       Text('faf'),
+        //       Text('faf'),
+        //       Text('faf'),
+        //     ],
+        //   ),
+        // ),
         const Spacer(),
         TextField(
           onChanged: (value) {},
@@ -118,12 +125,14 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
           decoration: const InputDecoration(border: InputBorder.none),
           style: const TextStyle(fontSize: 43, fontWeight: FontWeight.bold),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 50.0),
-          child: Keypad(
-            typedInPhoneNumber: _inputedDigitsTextController.text,
-            onBackButtonPressed: _backspace,
-            onKeyPressed: _addDigit,
+        SizedBox(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 50.0),
+            child: Keypad(
+              typedInPhoneNumber: _inputedDigitsTextController.text,
+              onBackButtonPressed: _backspace,
+              onKeyPressed: _addDigit,
+            ),
           ),
         ),
         const SizedBox(

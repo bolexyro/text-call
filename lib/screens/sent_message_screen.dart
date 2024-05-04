@@ -9,7 +9,6 @@ import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/models/message.dart';
-import 'package:http/http.dart' as http;
 
 // sms = sent message screen
 enum HowSmsIsOpened {
@@ -194,12 +193,6 @@ class TheStackWidget extends StatelessWidget {
   }
 }
 
-//  fromTerminatedForRequestAccess,
-//   fromTerminatedForPickedCall,
-//   notfromTerminatedForRequestAccess, /
-//   notFromTerminatedForPickedCall, /
-//   notFromTerminatedToShowMessage, /
-// fromTerminatedToShowMessage /
 Widget widgetToRenderBasedOnHowAppIsOpened(
     {required HowSmsIsOpened howSmsIsOpened,
     required Message? message,
@@ -207,6 +200,28 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
   if (howSmsIsOpened == HowSmsIsOpened.notFromTerminatedToShowMessage ||
       howSmsIsOpened == HowSmsIsOpened.notfromTerminatedForRequestAccess ||
       howSmsIsOpened == HowSmsIsOpened.notFromTerminatedForPickedCall) {
+    if (howSmsIsOpened == HowSmsIsOpened.notFromTerminatedForPickedCall) {
+      final futurePrefs = SharedPreferences.getInstance();
+      futurePrefs.then((prefs) {
+        prefs.reload();
+
+        final String? callMessage = prefs.getString('callMessage');
+        final String? backgroundColor = prefs.getString('backgroundColor');
+        final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
+        final String? recentId = prefs.getString('recentId');
+
+        final newRecent = Recent.withoutContactObject(
+            category: RecentCategory.incomingAccepted,
+            message: Message(
+              message: callMessage!,
+              backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
+            ),
+            id: recentId!,
+            phoneNumber: callerPhoneNumber!);
+
+        ref.read(recentsProvider.notifier).addRecent(newRecent);
+      });
+    }
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
@@ -345,15 +360,14 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
         final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
         final String? recentId = prefs.getString('recentId');
 
-        final url = Uri.https('text-call-backend.onrender.com',
-            'call/accepted/$callerPhoneNumber');
-        http.get(url);
-
-      final newRecent = Recent.withoutContactObject(category: RecentCategory.incomingAccepted, message:  Message(
-            message: callMessage!,
-            backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
-          ), id: recentId!, phoneNumber: callerPhoneNumber!);
-        
+        final newRecent = Recent.withoutContactObject(
+            category: RecentCategory.incomingAccepted,
+            message: Message(
+              message: callMessage!,
+              backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
+            ),
+            id: recentId!,
+            phoneNumber: callerPhoneNumber!);
 
         ref.read(recentsProvider.notifier).addRecent(newRecent);
         final backgroundActualColor =

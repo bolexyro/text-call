@@ -313,7 +313,6 @@ void sendAccessRequest(Recent recent) async {
           top: Radius.circular(20),
         ),
       ),
-      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
       context: context,
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,

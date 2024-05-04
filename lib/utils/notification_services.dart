@@ -213,7 +213,6 @@ class NotificationController {
       http.get(url);
 
       final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
-      print('isUserLoggedIn $isUserLoggedIn');
       if (isUserLoggedIn != true) {
         showFlushBar(Colors.blue, 'You have to login to see the message.',
             FlushbarPosition.TOP, TextCall.navigatorKey.currentContext!);

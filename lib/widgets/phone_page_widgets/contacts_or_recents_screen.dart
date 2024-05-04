@@ -98,7 +98,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
   Widget build(BuildContext context) {
     final double availableWidth = MediaQuery.sizeOf(context).width;
 
-    const double tabletWidth = 300;
+    const double tabletWidth = 520;
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     if (widget.whichScreen == WhichScreen.contact) {
@@ -196,11 +196,14 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
     }
     return RecentsList(
       onRecentSelected: (Recent? selectedRecent) {
+        if (selectedRecent == null) {
+          return;
+        }
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => SentMessageScreen(
                 howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
-                message: selectedRecent!.message),
+                message: selectedRecent.message),
           ),
         );
       },

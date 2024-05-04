@@ -52,7 +52,17 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
     super.dispose();
   }
 
-    Future<void> _saveImage(File? imageFile) async {
+  bool _checkIfContactIsAlreadyInContactList(String newContactPhoneNumber) {
+    final allContacts = ref.read(contactsProvider);
+    for (final eachContact in allContacts) {
+      if (newContactPhoneNumber == eachContact.phoneNumber) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<void> _saveImage(File? imageFile) async {
     if (imageFile == null) {
       return;
     }
@@ -73,10 +83,16 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
           : widget.phoneNumber!;
 
       final bool numberExists = await checkIfNumberExists(_enteredPhoneNumber!);
-      if (numberExists == false) {
+
+      final bool numberIsAlreadyAContact =
+          _checkIfContactIsAlreadyInContactList(_enteredPhoneNumber!);
+      if (numberExists == false || numberIsAlreadyAContact == true && widget.contact == null) {
+        String errorMessage = numberExists == false
+            ? 'Number doesn\'t exist'
+            : 'Number is already a contact';
         showADialog(
           header: 'Error!!',
-          body: 'Number doesn\'t exist',
+          body: errorMessage,
           context: context,
           buttonText: 'ok',
           onPressed: () => Navigator.of(context).pop(),

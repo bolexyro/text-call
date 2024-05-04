@@ -34,8 +34,10 @@ Map<RecentCategory, Widget> recentCategoryIconMap = {
     height: 24,
     colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
   ),
+
   RecentCategory.incomingMissed:
       const Icon(Icons.phone_missed, color: Colors.blue),
+
   RecentCategory.incomingRejected: SvgPicture.asset(
     'assets/icons/incoming-call.svg',
     height: 24,
@@ -44,7 +46,7 @@ Map<RecentCategory, Widget> recentCategoryIconMap = {
 };
 
 const Map<RecentCategory, String> recntCategoryStringMap = {
-  RecentCategory.outgoingAccepted: 'Incoming Accepted',
+  RecentCategory.outgoingAccepted: 'Outgoing Accepted',
   RecentCategory.outgoingUnanswered: 'Outgoing Unanswered',
   RecentCategory.outgoingRejected: 'Outgoing Rejected',
   RecentCategory.incomingAccepted: 'Incoming Accepted',

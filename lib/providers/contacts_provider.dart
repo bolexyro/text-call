@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/utils/utils.dart';
 
+
+const String contactsTableName = 'contacts';
 class ContactsNotifier extends StateNotifier<List<Contact>> {
   ContactsNotifier() : super([]);
 
   Future<void> loadContacts() async {
     final db = await getDatabase();
-    final data = await db.query('contacts');
+    final data = await db.query(contactsTableName);
     final contactsList = data
         .map(
           (row) => Contact(
@@ -24,7 +26,7 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
   Future<void> addContact(Contact newContact) async {
     final db = await getDatabase();
     db.insert(
-      'contacts',
+      contactsTableName,
       {
         'phoneNumber': newContact.phoneNumber,
         'name': newContact.name,
@@ -38,7 +40,7 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
       {required Contact oldContact, required Contact newContact}) async {
     final db = await getDatabase();
     db.update(
-      'contacts',
+      contactsTableName,
       {
         'phoneNumber': newContact.phoneNumber,
         'name': newContact.name,
@@ -57,7 +59,7 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
   void deleteContact(String phoneNumber) async {
     final db = await getDatabase();
     await db
-        .delete('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
+        .delete(contactsTableName, where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
     state = List.from(state)
       ..removeWhere((contact) => contact.phoneNumber == phoneNumber);
   }

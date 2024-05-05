@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:another_flushbar/flushbar.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';

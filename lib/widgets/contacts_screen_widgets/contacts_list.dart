@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -212,35 +211,42 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                         ? ExpandableListTile(
                             isExpanded: _expandedBoolsMap[contactN]!,
                             title: Text(contactN.name),
-                            leading: contactN.imagePath != null
-                                ? ContactAvatarCircle(
-                                    avatarRadius: 20,
-                                    imagePath: contactN.imagePath,
-                                  )
-                                : CircleAvatar(
-                                    radius: 20,
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                      alignment: Alignment.center,
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [
-                                            Colors.deepPurple,
-                                            Colors.blue,
-                                          ],
+                            leading: GestureDetector(
+                              onTap: () => widget.onContactSelected(contactN),
+                              child: contactN.imagePath != null
+                                  ? Hero(
+                                      tag: contactN.phoneNumber,
+                                      child: ContactAvatarCircle(
+                                        avatarRadius: 20,
+                                        imagePath: contactN.imagePath,
+                                      ))
+                                  : CircleAvatar(
+                                      radius: 20,
+                                      child: Container(
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        alignment: Alignment.center,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              Colors.deepPurple,
+                                              Colors.blue,
+                                            ],
+                                          ),
+                                        ),
+                                        child: Text(
+                                          contactN.name[0],
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 25,
+                                          ),
                                         ),
                                       ),
-                                      child: Text(
-                                        contactN.name[0],
-                                        style: const TextStyle(
-                                            color: Colors.white, fontSize: 25),
-                                      ),
                                     ),
-                                  ),
+                            ),
                             tileOnTapped: () {
                               _changeTileExpandedStatus(contactN);
                             },
@@ -300,9 +306,9 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                                 title: Text(contactN.name),
                                 leading: contactN.imagePath != null
                                     ? ContactAvatarCircle(
-                                        avatarRadius: 20,
-                                        imagePath: contactN.imagePath,
-                                      )
+                                      avatarRadius: 20,
+                                      imagePath: contactN.imagePath,
+                                    )
                                     : CircleAvatar(
                                         radius: 20,
                                         child: Container(

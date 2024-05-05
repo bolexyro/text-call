@@ -188,34 +188,37 @@ class _ContactCardWProfilePicStackState
                       avatarRadius: _circleAvatarRadius,
                       imagePath: _updatedContact.imagePath,
                     )
-                  : ContactAvatarCircle(
-                      onCirclePressed: widget.contact.imagePath == null
-                          ? () async {
-                              final File? imageFile =
-                                  await selectImage(context);
-                              if (imageFile == null) {
-                                return;
+                  : Hero(
+                    tag: widget.contact.phoneNumber,
+                    child: ContactAvatarCircle(
+                        onCirclePressed: widget.contact.imagePath == null
+                            ? () async {
+                                final File? imageFile =
+                                    await selectImage(context);
+                                if (imageFile == null) {
+                                  return;
+                                }
+                                final appDir = await syspaths
+                                    .getApplicationDocumentsDirectory();
+                                final filename = path.basename(imageFile.path);
+                                await imageFile.copy('${appDir.path}/$filename');
+                    
+                                setState(() {
+                                  _updatedContact = Contact(
+                                    name: _updatedContact.name,
+                                    phoneNumber: _updatedContact.phoneNumber,
+                                    imagePath: imageFile.path,
+                                  );
+                                });
+                                ref.read(contactsProvider.notifier).updateContact(
+                                    oldContact: _updatedContact,
+                                    newContact: _updatedContact);
                               }
-                              final appDir = await syspaths
-                                  .getApplicationDocumentsDirectory();
-                              final filename = path.basename(imageFile.path);
-                              await imageFile.copy('${appDir.path}/$filename');
-
-                              setState(() {
-                                _updatedContact = Contact(
-                                  name: _updatedContact.name,
-                                  phoneNumber: _updatedContact.phoneNumber,
-                                  imagePath: imageFile.path,
-                                );
-                              });
-                              ref.read(contactsProvider.notifier).updateContact(
-                                  oldContact: _updatedContact,
-                                  newContact: _updatedContact);
-                            }
-                          : null,
-                      avatarRadius: _circleAvatarRadius,
-                      imagePath: _updatedContact.imagePath,
-                    ),
+                            : null,
+                        avatarRadius: _circleAvatarRadius,
+                        imagePath: _updatedContact.imagePath,
+                      ),
+                  ),
             ),
             Positioned(
               right: 0,

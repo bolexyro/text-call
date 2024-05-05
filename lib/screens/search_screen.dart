@@ -169,94 +169,97 @@ class _MainSearchWidgetState extends ConsumerState<MainSearchWidget> {
       },
     );
   }
+@override
+Widget build(BuildContext context) {
+  bool isPhone = MediaQuery.sizeOf(context).width < tabletWidth;
 
-  @override
-  Widget build(BuildContext context) {
-    bool isPhone = MediaQuery.sizeOf(context).width < tabletWidth;
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SearchAnchor(
-            builder: (BuildContext context, SearchController controller) {
-              return SearchBar(
-                controller: controller,
-                padding: const WidgetStatePropertyAll<EdgeInsets>(
-                  EdgeInsets.symmetric(horizontal: 16.0),
-                ),
+  return Column(
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SearchAnchor(
+          builder: (BuildContext context, SearchController controller) {
+            return SearchBar(
+              controller: controller,
+              padding: const WidgetStatePropertyAll<EdgeInsets>(
+                EdgeInsets.symmetric(horizontal: 16.0),
+              ),
+              onTap: () {
+                setState(() {
+                  resultsBarIsShown = true;
+                });
+                // controller.openView();
+              },
+              onChanged: (_) {
+                currentSeachText = _.toLowerCase();
+                if (currentSeachText == '') {
+                  setState(() {
+                    contacts = [];
+                  });
+                  return;
+                }
+                updateContacts();
+                // controller.openView();
+              },
+              leading: const Icon(Icons.search),
+              trailing: <Widget>[
+                Tooltip(
+                  message: 'Cancel',
+                  child: IconButton(
+                    onPressed: () {
+                      controller.text = '';
+                    },
+                    icon: const Icon(Icons.close),
+                  ),
+                )
+              ],
+            );
+          },
+          suggestionsBuilder:
+              (BuildContext context, SearchController controller) {
+            return List<ListTile>.generate(5, (int index) {
+              final String item = 'item $index';
+              return ListTile(
+                title: Text(item),
                 onTap: () {
                   setState(() {
-                    resultsBarIsShown = true;
+                    controller.closeView(item);
                   });
-                  // controller.openView();
                 },
-                onChanged: (_) {
-                  currentSeachText = _.toLowerCase();
-                  if (currentSeachText == '') {
-                    setState(() {
-                      contacts = [];
-                    });
-                    return;
-                  }
-                  updateContacts();
-                  // controller.openView();
-                },
-                leading: const Icon(Icons.search),
-                trailing: <Widget>[
-                  Tooltip(
-                    message: 'Cancel',
-                    child: IconButton(
-                      onPressed: () {
-                        controller.text = '';
-                      },
-                      icon: const Icon(Icons.close),
-                    ),
-                  )
-                ],
               );
-            },
-            suggestionsBuilder:
-                (BuildContext context, SearchController controller) {
-              return List<ListTile>.generate(5, (int index) {
-                final String item = 'item $index';
-                return ListTile(
-                  title: Text(item),
-                  onTap: () {
-                    setState(() {
-                      controller.closeView(item);
-                    });
-                  },
-                );
-              });
-            },
-          ),
+            });
+          },
         ),
-        if (resultsBarIsShown)
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(
-                top: 12,
-                right: 12,
-                left: 12,
-                bottom: MediaQuery.viewInsetsOf(context).vertical == 0
-                    ? 300
-                    : MediaQuery.viewInsetsOf(context).vertical + 12,
-              ),
+      ),
+      // SizedBox(height: 100,),
+      if (resultsBarIsShown)
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: 12,
+              right: 12,
+              left: 12,
+              bottom: MediaQuery.viewInsetsOf(context).vertical == 0
+                  ? 12
+                  : MediaQuery.viewInsetsOf(context).vertical + 12,
+            ),
+            child: SingleChildScrollView(
               child: Container(
                 padding: const EdgeInsets.only(top: 12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   color: Theme.of(context).brightness == Brightness.dark
-                      ? makeColorLighter(Theme.of(context).primaryColor, 15)
+                      ? makeColorLighter(
+                          Theme.of(context).primaryColor, 15)
                       : Colors.grey[200],
                 ),
-                child: ListView.builder(
-                  itemCount: contacts.length,
-                  itemBuilder: (context, index) {
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(contacts.length, (index) {
                     final contactN = contacts[index];
-                    final specialChStartIndex =
-                        contactN.name.toLowerCase().indexOf(currentSeachText);
+                    final specialChStartIndex = contactN.name
+                        .toLowerCase()
+                        .indexOf(currentSeachText);
 
                     final specialChEndIndex =
                         specialChStartIndex + currentSeachText.length;
@@ -355,12 +358,12 @@ class _MainSearchWidgetState extends ConsumerState<MainSearchWidget> {
                         ],
                       ),
                     );
-                  },
+                  }),
                 ),
               ),
             ),
           ),
-      ],
-    );
-  }
-}
+        ),
+    ],
+  );
+}}

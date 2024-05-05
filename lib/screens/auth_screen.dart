@@ -119,6 +119,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           await auth.signInWithCredential(credential);
           await _setPreferences();
         }
+
+        else {
+          setState(() {
+            _isAuthenticating = false;
+          });
+        }
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
     );

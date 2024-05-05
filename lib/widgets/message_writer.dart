@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 // import 'package:fleather/fleather.dart';
@@ -318,30 +319,55 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         },
       );
     }
-    return Container(
-      height: MediaQuery.sizeOf(context).height * .6,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? makeColorLighter(Theme.of(context).primaryColor, 15)
-            : const Color.fromARGB(255, 207, 222, 234),
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(25),
-        ),
-      ),
-      child: Stack(
-        alignment: Alignment.topCenter,
-        children: [
-          SingleChildScrollView(child: messageWriterContent),
-          ConfettiWidget(
-            confettiController: _confettiController,
-            shouldLoop: true,
-            blastDirectionality: BlastDirectionality.explosive,
-            numberOfParticles: 30,
-            emissionFrequency: 0.1,
+    return Stack(
+      children: [
+        GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: Container(
+            color: Colors.black54,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+              child: Container(
+                decoration: BoxDecoration(color: Colors.white.withOpacity(0.0)),
+              ),
+            ),
           ),
-        ],
-      ),
+        ),
+        Positioned(
+          bottom: 0,
+          child: Container(
+            // height: MediaQuery.sizeOf(context).height * .6,
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? makeColorLighter(Theme.of(context).primaryColor, 15)
+                  : const Color.fromARGB(255, 207, 222, 234),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(25),
+              ),
+            ),
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                        0, 0, 0, MediaQuery.viewInsetsOf(context).vertical),
+                    child: SingleChildScrollView(child: messageWriterContent),
+                  ),
+                ),
+                ConfettiWidget(
+                  confettiController: _confettiController,
+                  shouldLoop: true,
+                  blastDirectionality: BlastDirectionality.explosive,
+                  numberOfParticles: 30,
+                  emissionFrequency: 0.1,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

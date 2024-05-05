@@ -260,6 +260,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                           ),
                     child: widget.screen == Screen.phone
                         ? ExpandableListTile(
+                          justARegularListTile: false,
                             tileOnTapped: () {
                               _changeTileExpandedStatus(recentN);
                             },

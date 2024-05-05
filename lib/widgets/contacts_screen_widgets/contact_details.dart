@@ -190,6 +190,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
                 return Column(
                   children: [
                     ExpandableListTile(
+                      justARegularListTile: false,
                       leading: recentCategoryIconMap[recentN.category]!,
                       title: Column(
                         mainAxisSize: MainAxisSize.min,

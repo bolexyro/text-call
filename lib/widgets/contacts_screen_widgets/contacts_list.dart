@@ -10,6 +10,7 @@ import 'package:text_call/screens/search_screen.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/confirm_delete_dialog.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/contact_letter_avatar.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';
 
 class ContactsList extends ConsumerStatefulWidget {
@@ -51,6 +52,21 @@ class _ContactsListState extends ConsumerState<ContactsList> {
       return;
     }
     ref.read(contactsProvider.notifier).deleteContact(contact.phoneNumber);
+  }
+
+  Widget withOrWithoutHero(contact) {
+    return widget.screen == Screen.phone
+        ? Hero(
+            tag: contact.phoneNumber,
+            child: ContactAvatarCircle(
+              avatarRadius: 20,
+              imagePath: contact.imagePath,
+            ),
+          )
+        : ContactAvatarCircle(
+            avatarRadius: 20,
+            imagePath: contact.imagePath,
+          );
   }
 
   @override
@@ -207,141 +223,70 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                         ),
                       ],
                     ),
-                    child: widget.screen == Screen.phone
-                        ? ExpandableListTile(
-                            isExpanded: _expandedBoolsMap[contactN]!,
-                            title: Text(contactN.name),
-                            leading: GestureDetector(
-                              onTap: () => widget.onContactSelected(contactN),
-                              child: contactN.imagePath != null
-                                  ? Hero(
-                                      tag: contactN.phoneNumber,
-                                      child: ContactAvatarCircle(
-                                        avatarRadius: 20,
-                                        imagePath: contactN.imagePath,
-                                      ))
-                                  : CircleAvatar(
-                                      radius: 20,
-                                      child: Container(
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                        alignment: Alignment.center,
-                                        decoration: const BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              Colors.deepPurple,
-                                              Colors.blue,
-                                            ],
-                                          ),
-                                        ),
-                                        child: Text(
-                                          contactN.name[0],
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 25,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                            ),
-                            tileOnTapped: () {
-                              _changeTileExpandedStatus(contactN);
-                            },
-                            expandedContent: Column(
-                              children: [
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                Text(
-                                  'Mobile ${contactN.localPhoneNumber}',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    IconButton(
-                                      onPressed: () {
-                                        showMessageWriterModalSheet(
-                                          calleeName: contactN.name,
-                                          calleePhoneNumber:
-                                              contactN.phoneNumber,
-                                          context: context,
-                                        );
-                                      },
-                                      icon: SvgPicture.asset(
-                                        'assets/icons/message-ring.svg',
-                                        height: 24,
-                                        colorFilter: ColorFilter.mode(
-                                          Theme.of(context).iconTheme.color!,
-                                          BlendMode.srcIn,
-                                        ),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: () {
-                                        widget.onContactSelected(contactN);
-                                      },
-                                      icon: Icon(
-                                        Icons.info_outlined,
-                                        color:
-                                            Theme.of(context).iconTheme.color!,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          )
-                        : Column(
+                    child: ExpandableListTile(
+                      justARegularListTile:
+                          widget.screen == Screen.phone ? false : true,
+                      isExpanded: _expandedBoolsMap[contactN]!,
+                      title: Text(contactN.name),
+                      leading: GestureDetector(
+                        onTap: () => widget.onContactSelected(contactN),
+                        child: contactN.imagePath != null
+                            ? withOrWithoutHero(contactN)
+                            : ContactLetterAvatar(contactName: contactN.name),
+                      ),
+                      tileOnTapped: () {
+                        if (widget.screen == Screen.phone) {
+                          _changeTileExpandedStatus(contactN);
+                          return;
+                        }
+                        widget.onContactSelected(contactN);
+                      },
+                      expandedContent: Column(
+                        children: [
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            'Mobile ${contactN.localPhoneNumber}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              ListTile(
-                                title: Text(contactN.name),
-                                leading: contactN.imagePath != null
-                                    ? ContactAvatarCircle(
-                                      avatarRadius: 20,
-                                      imagePath: contactN.imagePath,
-                                    )
-                                    : CircleAvatar(
-                                        radius: 20,
-                                        child: Container(
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                          alignment: Alignment.center,
-                                          decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                Colors.deepPurple,
-                                                Colors.blue,
-                                              ],
-                                            ),
-                                          ),
-                                          child: Text(
-                                            contactN.name[0],
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 25),
-                                          ),
-                                        ),
-                                      ),
-                                onTap: () => widget.onContactSelected(contactN),
+                              IconButton(
+                                onPressed: () {
+                                  showMessageWriterModalSheet(
+                                    calleeName: contactN.name,
+                                    calleePhoneNumber: contactN.phoneNumber,
+                                    context: context,
+                                  );
+                                },
+                                icon: SvgPicture.asset(
+                                  'assets/icons/message-ring.svg',
+                                  height: 24,
+                                  colorFilter: ColorFilter.mode(
+                                    Theme.of(context).iconTheme.color!,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
                               ),
-                              const Divider(
-                                indent: 45,
-                                endIndent: 15,
+                              IconButton(
+                                onPressed: () {
+                                  widget.onContactSelected(contactN);
+                                },
+                                icon: Icon(
+                                  Icons.info_outlined,
+                                  color: Theme.of(context).iconTheme.color!,
+                                ),
                               ),
                             ],
                           ),
+                        ],
+                      ),
+                    ),
                   );
                 },
                 // itemCount: contactsList.length,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/text_call.dart';
 import 'package:text_call/utils/notification_services.dart';
 import 'firebase_options.dart';
@@ -62,33 +63,41 @@ void main() async {
         NotificationController.onDismissActionReceivedMethod,
   );
   runApp(
-    ProviderScope(child: whichTextCall(receivedAction)),
+    ProviderScope(child: await whichTextCall(receivedAction)),
   );
 }
 
-Widget whichTextCall(ReceivedAction? receivedAction) {
+Future<Widget> whichTextCall(ReceivedAction? receivedAction) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final isDarkMode = prefs.getBool('isDarkMode');
+
   if (receivedAction == null) {
-    return const TextCall(
+    return TextCall(
+      isDarkMode: isDarkMode ?? true,
       howAppIsOPened: HowAppIsOPened.appOpenedRegularly,
     );
   }
   if (receivedAction.buttonKeyPressed == 'ACCEPT_CALL') {
-    return const TextCall(
+    return TextCall(
+        isDarkMode: isDarkMode ?? true,
         howAppIsOPened: HowAppIsOPened.fromTerminatedForPickedCall);
   }
   // if the request access notification is tapped
   if (receivedAction.channelKey == 'access_requests_channel') {
     if (receivedAction.id.toString().startsWith('12')) {
-      return const TextCall(
+      return TextCall(
+        isDarkMode: isDarkMode ?? true,
         howAppIsOPened: HowAppIsOPened.fromTerminatedToShowMessage,
       );
     }
-    return const TextCall(
+    return TextCall(
+      isDarkMode: isDarkMode ?? true,
       howAppIsOPened: HowAppIsOPened.fromTerminatedForRequestAccess,
     );
   }
 
-  return const TextCall(
+  return TextCall(
+    isDarkMode: isDarkMode ?? true,
     howAppIsOPened: HowAppIsOPened.appOpenedRegularly,
   );
 }

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:text_call/widgets/keypad_screen_widgets/keypad.dart';
-import 'package:text_call/widgets/keypad_screen_widgets/logout_menu_anchor.dart';
 
 class KeypadScreen extends ConsumerStatefulWidget {
-  const KeypadScreen({super.key});
+  const KeypadScreen({
+    super.key,
+    required this.scaffoldKey,
+  });
+
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
   @override
   ConsumerState<KeypadScreen> createState() => _KeypadScreenState();
@@ -97,23 +102,24 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Row(
+        Row(
           children: [
-            Spacer(),
-            LogOutMenuAnchor(),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0, left: 8),
+              child: IconButton(
+                onPressed: () {
+                  widget.scaffoldKey.currentState!.openDrawer();
+                },
+                icon: SvgPicture.asset(
+                  'assets/icons/hamburger-menu.svg',
+                  height: 30,
+                  colorFilter:
+                       ColorFilter.mode(Theme.of(context).iconTheme.color ?? Colors.grey, BlendMode.srcIn),
+                ),
+              ),
+            ),
           ],
         ),
-        // SizedBox(
-        //   height: 40,
-        //   child: ListView(
-        //     children: [
-        //       Text('faf'),
-        //       Text('faf'),
-        //       Text('faf'),
-        //       Text('faf'),
-        //     ],
-        //   ),
-        // ),
         const Spacer(),
         TextField(
           onChanged: (value) {},

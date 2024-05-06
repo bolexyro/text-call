@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/screens/auth_screen.dart';
@@ -20,8 +21,10 @@ class TextCall extends StatefulWidget {
   const TextCall({
     super.key,
     required this.howAppIsOPened,
+    required this.isDarkMode,
   });
   final HowAppIsOPened howAppIsOPened;
+  final bool isDarkMode;
 
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
@@ -53,7 +56,8 @@ class _TextCallState extends State<TextCall> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
+      themeMode: widget.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
@@ -79,7 +83,7 @@ class _TextCallState extends State<TextCall> {
               final url = Uri.https('text-call-backend.onrender.com',
                   'call/accepted/${userInfo['callerPhoneNumber']}');
               http.get(url);
-
+    
               if (userInfo['isUserLoggedIn'] != true) {
                 return const AuthScreen(
                   appOpenedFromPickedCall: true,
@@ -87,10 +91,11 @@ class _TextCallState extends State<TextCall> {
               }
               return const SentMessageScreen(
                 message: null,
-                howSmsIsOpened: HowSmsIsOpened.fromTerminatedForPickedCall,
+                howSmsIsOpened:
+                    HowSmsIsOpened.fromTerminatedForPickedCall,
               );
             }
-
+    
             if (widget.howAppIsOPened ==
                 HowAppIsOPened.fromTerminatedForRequestAccess) {
               if (userInfo['isUserLoggedIn'] != true) {
@@ -100,17 +105,19 @@ class _TextCallState extends State<TextCall> {
               }
               return const SentMessageScreen(
                 message: null,
-                howSmsIsOpened: HowSmsIsOpened.fromTerminatedForRequestAccess,
+                howSmsIsOpened:
+                    HowSmsIsOpened.fromTerminatedForRequestAccess,
               );
             }
-
+    
             if (widget.howAppIsOPened ==
                 HowAppIsOPened.fromTerminatedToShowMessage) {
               return const SentMessageScreen(
                   message: null,
-                  howSmsIsOpened: HowSmsIsOpened.fromTerminatedToShowMessage);
+                  howSmsIsOpened:
+                      HowSmsIsOpened.fromTerminatedToShowMessage);
             }
-
+    
             if (userInfo['isUserLoggedIn'] != true) {
               return const AuthScreen();
             }

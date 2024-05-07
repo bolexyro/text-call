@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/auth_screen.dart';
+import 'package:text_call/screens/settings_screen.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 
 import 'package:text_call/widgets/phone_page_widgets/contacts_or_recents_screen.dart';
@@ -84,7 +85,11 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
               ListTile(
                 leading: const Icon(Icons.settings),
                 title: const Text('Settings'),
-                onTap: () => Navigator.of(context).pop(),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsScreen(),
+                  ),
+                ),
               ),
               ListTile(
                 leading: const Icon(Icons.close),

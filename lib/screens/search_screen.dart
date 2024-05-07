@@ -169,202 +169,207 @@ class _MainSearchWidgetState extends ConsumerState<MainSearchWidget> {
       },
     );
   }
-@override
-Widget build(BuildContext context) {
-  bool isPhone = MediaQuery.sizeOf(context).width < tabletWidth;
 
-  return Column(
-    children: [
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SearchAnchor(
-          builder: (BuildContext context, SearchController controller) {
-            return SearchBar(
-              controller: controller,
-              padding: const WidgetStatePropertyAll<EdgeInsets>(
-                EdgeInsets.symmetric(horizontal: 16.0),
-              ),
-              onTap: () {
-                setState(() {
-                  resultsBarIsShown = true;
-                });
-                // controller.openView();
-              },
-              onChanged: (_) {
-                currentSeachText = _.toLowerCase();
-                if (currentSeachText == '') {
-                  setState(() {
-                    contacts = [];
-                  });
-                  return;
-                }
-                updateContacts();
-                // controller.openView();
-              },
-              leading: const Icon(Icons.search),
-              trailing: <Widget>[
-                Tooltip(
-                  message: 'Cancel',
-                  child: IconButton(
-                    onPressed: () {
-                      controller.text = '';
-                    },
-                    icon: const Icon(Icons.close),
-                  ),
-                )
-              ],
-            );
-          },
-          suggestionsBuilder:
-              (BuildContext context, SearchController controller) {
-            return List<ListTile>.generate(5, (int index) {
-              final String item = 'item $index';
-              return ListTile(
-                title: Text(item),
+  @override
+  Widget build(BuildContext context) {
+    bool isPhone = MediaQuery.sizeOf(context).width < tabletWidth;
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return SearchBar(
+                controller: controller,
+                padding: const WidgetStatePropertyAll<EdgeInsets>(
+                  EdgeInsets.symmetric(horizontal: 16.0),
+                ),
                 onTap: () {
                   setState(() {
-                    controller.closeView(item);
+                    resultsBarIsShown = true;
                   });
+                  // controller.openView();
+                },
+                onChanged: (_) {
+                  currentSeachText = _.toLowerCase();
+                  if (currentSeachText == '') {
+                    setState(() {
+                      contacts = [];
+                    });
+                    return;
+                  }
+                  updateContacts();
+                  // controller.openView();
+                },
+                leading: const Icon(Icons.search),
+                trailing: <Widget>[
+                  Tooltip(
+                    message: 'Cancel',
+                    child: IconButton(
+                      onPressed: () {
+                        controller.text = '';
+                      },
+                      icon: const Icon(Icons.close),
+                    ),
+                  )
+                ],
+              );
+            },
+            suggestionsBuilder:
+                (BuildContext context, SearchController controller) {
+              return List<ListTile>.generate(
+                5,
+                (int index) {
+                  final String item = 'item $index';
+                  return ListTile(
+                    title: Text(item),
+                    onTap: () {
+                      setState(() {
+                        controller.closeView(item);
+                      });
+                    },
+                  );
                 },
               );
-            });
-          },
+            },
+          ),
         ),
-      ),
-      // SizedBox(height: 100,),
-      if (resultsBarIsShown)
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: 12,
-              right: 12,
-              left: 12,
-              bottom: MediaQuery.viewInsetsOf(context).vertical == 0
-                  ? 12
-                  : MediaQuery.viewInsetsOf(context).vertical + 12,
-            ),
-            child: SingleChildScrollView(
-              child: Container(
-                padding: const EdgeInsets.only(top: 12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? makeColorLighter(
-                          Theme.of(context).primaryColor, 15)
-                      : Colors.grey[200],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(contacts.length, (index) {
-                    final contactN = contacts[index];
-                    final specialChStartIndex = contactN.name
-                        .toLowerCase()
-                        .indexOf(currentSeachText);
+        // SizedBox(height: 100,),
+        if (resultsBarIsShown)
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: 12,
+                right: 12,
+                left: 12,
+                bottom: MediaQuery.viewInsetsOf(context).vertical == 0
+                    ? 12
+                    : MediaQuery.viewInsetsOf(context).vertical + 12,
+              ),
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.only(top: 12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? makeColorLighter(Theme.of(context).primaryColor, 15)
+                        : Colors.grey[200],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(contacts.length, (index) {
+                      final contactN = contacts[index];
+                      final specialChStartIndex =
+                          contactN.name.toLowerCase().indexOf(currentSeachText);
 
-                    final specialChEndIndex =
-                        specialChStartIndex + currentSeachText.length;
-                    _expandedBoolsList.add(false);
-                    return ExpandableListTile(
-                      justARegularListTile: !isPhone,
-                      isExpanded: _expandedBoolsList[index],
-                      title: RichText(
-                        text: TextSpan(
-                          text: contactN.name.substring(0, specialChStartIndex),
-                          style: DefaultTextStyle.of(context).style,
-                          children: <TextSpan>[
-                            TextSpan(
-                              text: contactN.name.substring(
-                                  specialChStartIndex, specialChEndIndex),
-                              style: const TextStyle(color: Colors.blue),
-                            ),
-                            TextSpan(
-                              text: contactN.name.substring(specialChEndIndex),
-                            ),
-                          ],
-                        ),
-                      ),
-                      leading: isPhone
-                          ? GestureDetector(
-                              onTap: () {
-                                widget.onContactSelected(contactN);
-                              },
-                              child: contactN.imagePath != null
-                                  ? Hero(
-                                      tag: contactN.phoneNumber,
-                                      child: ContactAvatarCircle(
-                                        avatarRadius: 20,
-                                        imagePath: contactN.imagePath,
-                                      ),
-                                    )
-                                  : ContactLetterAvatar(
-                                      contactName: contactN.name),
-                            )
-                          : contactN.imagePath != null
-                              ? ContactAvatarCircle(
-                                  avatarRadius: 20,
-                                  imagePath: contactN.imagePath,
-                                )
-                              : ContactLetterAvatar(contactName: contactN.name),
-                      tileOnTapped: () {
-                        if (isPhone) {
-                          _changeTileExpandedStatus(index);
-                          return;
-                        }
-                        widget.onContactSelected(contactN);
-                      },
-                      expandedContent: Column(
-                        children: [
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            'Mobile ${contactN.localPhoneNumber}',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  showMessageWriterModalSheet(
-                                    calleeName: contactN.name,
-                                    calleePhoneNumber: contactN.phoneNumber,
-                                    context: context,
-                                  );
-                                },
-                                icon: SvgPicture.asset(
-                                  'assets/icons/message-ring.svg',
-                                  height: 24,
-                                  colorFilter: ColorFilter.mode(
-                                    Theme.of(context).iconTheme.color!,
-                                    BlendMode.srcIn,
-                                  ),
-                                ),
+                      final specialChEndIndex =
+                          specialChStartIndex + currentSeachText.length;
+                      _expandedBoolsList.add(false);
+                      return ExpandableListTile(
+                        justARegularListTile: !isPhone,
+                        isExpanded: _expandedBoolsList[index],
+                        title: RichText(
+                          text: TextSpan(
+                            text:
+                                contactN.name.substring(0, specialChStartIndex),
+                            style: DefaultTextStyle.of(context).style,
+                            children: <TextSpan>[
+                              TextSpan(
+                                text: contactN.name.substring(
+                                    specialChStartIndex, specialChEndIndex),
+                                style: const TextStyle(color: Colors.blue),
                               ),
-                              IconButton(
-                                onPressed: () {
-                                  widget.onContactSelected(contactN);
-                                },
-                                icon: Icon(
-                                  Icons.info_outlined,
-                                  color: Theme.of(context).iconTheme.color!,
-                                ),
+                              TextSpan(
+                                text:
+                                    contactN.name.substring(specialChEndIndex),
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    );
-                  }),
+                        ),
+                        leading: isPhone
+                            ? GestureDetector(
+                                onTap: () {
+                                  widget.onContactSelected(contactN);
+                                },
+                                child: contactN.imagePath != null
+                                    ? Hero(
+                                        tag: contactN.phoneNumber,
+                                        child: ContactAvatarCircle(
+                                          avatarRadius: 20,
+                                          imagePath: contactN.imagePath,
+                                        ),
+                                      )
+                                    : ContactLetterAvatar(
+                                        contactName: contactN.name),
+                              )
+                            : contactN.imagePath != null
+                                ? ContactAvatarCircle(
+                                    avatarRadius: 20,
+                                    imagePath: contactN.imagePath,
+                                  )
+                                : ContactLetterAvatar(
+                                    contactName: contactN.name),
+                        tileOnTapped: () {
+                          if (isPhone) {
+                            _changeTileExpandedStatus(index);
+                            return;
+                          }
+                          widget.onContactSelected(contactN);
+                        },
+                        expandedContent: Column(
+                          children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              'Mobile ${contactN.localPhoneNumber}',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    showMessageWriterModalSheet(
+                                      calleeName: contactN.name,
+                                      calleePhoneNumber: contactN.phoneNumber,
+                                      context: context,
+                                    );
+                                  },
+                                  icon: SvgPicture.asset(
+                                    'assets/icons/message-ring.svg',
+                                    height: 24,
+                                    colorFilter: ColorFilter.mode(
+                                      Theme.of(context).iconTheme.color!,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    widget.onContactSelected(contactN);
+                                  },
+                                  icon: Icon(
+                                    Icons.info_outlined,
+                                    color: Theme.of(context).iconTheme.color!,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-    ],
-  );
-}
+      ],
+    );
+  }
 }

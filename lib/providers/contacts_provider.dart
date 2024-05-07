@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/utils/utils.dart';
 
-
 const String contactsTableName = 'contacts';
+
 class ContactsNotifier extends StateNotifier<List<Contact>> {
   ContactsNotifier() : super([]);
 

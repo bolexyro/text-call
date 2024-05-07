@@ -59,7 +59,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
   void _callSomeone(context) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final callerPhoneNumber = prefs.getString('phoneNumber');
+    final callerPhoneNumber = prefs.getString('myPhoneNumber');
     _channel = WebSocketChannel.connect(
       Uri.parse('wss://text-call-backend.onrender.com/ws/$callerPhoneNumber'),
     );
@@ -214,12 +214,13 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             if (snapshotData['call_status'] == 'rejected') {
               // create a recent in your table
               final recent = Recent.withoutContactObject(
-                  category: RecentCategory.outgoingRejected,
-                  message: Message(
-                      message: _messageController.text,
-                      backgroundColor: _selectedColor),
-                  id: recentId,
-                  phoneNumber: widget.calleePhoneNumber);
+                category: RecentCategory.outgoingRejected,
+                message: Message(
+                    message: _messageController.text,
+                    backgroundColor: _selectedColor),
+                id: recentId,
+                phoneNumber: widget.calleePhoneNumber,
+              );
 
               ref.read(recentsProvider.notifier).addRecent(recent);
               return Padding(
@@ -282,12 +283,13 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       'assets/animations/telephone_ringing_3d.json');
                 }
                 final recent = Recent.withoutContactObject(
-                    category: RecentCategory.outgoingUnanswered,
-                    message: Message(
-                        message: _messageController.text,
-                        backgroundColor: _selectedColor),
-                    id: recentId,
-                    phoneNumber: widget.calleePhoneNumber);
+                  category: RecentCategory.outgoingUnanswered,
+                  message: Message(
+                      message: _messageController.text,
+                      backgroundColor: _selectedColor),
+                  id: recentId,
+                  phoneNumber: widget.calleePhoneNumber,
+                );
 
                 ref.read(recentsProvider.notifier).addRecent(recent);
                 return Padding(

@@ -34,7 +34,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   Future<void> _setPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isUserLoggedIn', true);
-    await prefs.setString('phoneNumber', _enteredPhoneNumber);
+    await prefs.setString('myPhoneNumber', _enteredPhoneNumber);
+
+    await prefs.setString('myName', 'Me');
 
     ref.read(contactsProvider.notifier).addContact(
           Contact(
@@ -118,9 +120,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           // Sign the user in (or link) with the credential
           await auth.signInWithCredential(credential);
           await _setPreferences();
-        }
-
-        else {
+        } else {
           setState(() {
             _isAuthenticating = false;
           });

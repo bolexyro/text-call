@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:local_hero/local_hero.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/search_screen.dart';
@@ -29,6 +31,22 @@ class ContactsList extends ConsumerStatefulWidget {
 
 class _ContactsListState extends ConsumerState<ContactsList> {
   final Map<Contact, bool> _expandedBoolsMap = {};
+  final ScrollController _controller = ScrollController();
+
+  void _scrollListener() {
+    if (_controller.offset >= _controller.position.maxScrollExtent &&
+        !_controller.position.outOfRange) {}
+    if (_controller.offset <= _controller.position.minScrollExtent &&
+        !_controller.position.outOfRange) {}
+  }
+
+  @override
+  void initState() {
+    animatedContainerHeight = bigHeight;
+
+    _controller.addListener(_scrollListener);
+    super.initState();
+  }
 
   void _changeTileExpandedStatus(Contact contact) {
     setState(() {
@@ -69,68 +87,125 @@ class _ContactsListState extends ConsumerState<ContactsList> {
           );
   }
 
+  double bigHeight = 160;
+  double smallHeight = 60;
+  late double animatedContainerHeight;
+
   @override
   Widget build(BuildContext context) {
     final List<Contact> contactsList = ref.watch(contactsProvider);
+    // final List<Contact> contactsList = [
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    // ];
 
+    final animatedContainerContent = animatedContainerHeight == bigHeight
+        // i am using this singlechildScrollView around the column because, if you don't you'd be getting errors.
+        ? SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 45,
+                ),
+                const LocalHero(
+                  tag: 'contact_text',
+                  child: Text(
+                    'Contacts',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Text(
+                    '${contactsList.length} contacts with phone number',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Row(
+                  children: [
+                    const Spacer(),
+                    const SizedBox(width: 10),
+                    IconButton(
+                      onPressed: () {
+                        showAddContactDialog(context);
+                      },
+                      icon: const Icon(Icons.person_add),
+                    ),
+                    const SizedBox(width: 10),
+                    IconButton(
+                      onPressed: () async {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SearchScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.search),
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                ),
+              ],
+            ),
+          )
+        : Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              children: [
+                const LocalHero(
+                  tag: 'contact_text',
+                  child: Text(
+                    'Contacts',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+                  ),
+                ),
+                const Spacer(),
+                const SizedBox(width: 10),
+                IconButton(
+                  onPressed: () {
+                    showAddContactDialog(context);
+                  },
+                  icon: const Icon(Icons.person_add),
+                ),
+                const SizedBox(width: 10),
+                IconButton(
+                  onPressed: () async {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const SearchScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.search),
+                ),
+                const SizedBox(width: 10),
+              ],
+            ),
+          );
     return Column(
       children: [
-        const SizedBox(
-          height: 45,
-        ),
-        const Text(
-          'Contacts',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Text(
-            '${contactsList.length} contacts with phone number',
-            textAlign: TextAlign.center,
-          ),
-        ),
-        Row(
-          children: [
-            const Spacer(),
-            const SizedBox(width: 10),
-            IconButton(
-              onPressed: () {
-                showAddContactDialog(context);
-              },
-              icon: const Icon(Icons.person_add),
-            ),
-            const SizedBox(width: 10),
-            IconButton(
-              onPressed: () async {
-                // final prefs = await SharedPreferences.getInstance();
-                // await prefs.setString('callMessage', 'callMessage');
-                // await prefs.setString('callerPhoneNumber', '+2349098875567');
-                // await prefs.setString('callerName', 'callerPhoneNumber');
-                // await prefs.setString(
-                //   'backgroundColor',
-                //   json.encode(
-                //     {
-                //       'alpha': 200,
-                //       'red': 90,
-                //       'green': 90,
-                //       'blue': 20,
-                //     },
-                //   ),
-                // );
-                // createAwesomeNotification(
-                //     title: 'Bolexyro is asking permission to see a message.',
-                //     notificationPurpose: NotificationPurpose.forAccessRequest,
-                //     body: 'Which message? Click to find out.');
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const SearchScreen(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.search),
-            ),
-            const SizedBox(width: 10),
-          ],
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: animatedContainerHeight,
+          child: animatedContainerContent,
         ),
         if (contactsList.isEmpty)
           Expanded(
@@ -143,13 +218,14 @@ class _ContactsListState extends ConsumerState<ContactsList> {
               animSpeedFactor: 2.3,
               springAnimationDurationInMilliseconds: 600,
               child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [
-                    SizedBox(
-                      height: 30,
-                    ),
-                    Center(child: Text("You have no contacts")),
-                  ]),
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Center(child: Text("You have no contacts")),
+                ],
+              ),
             ),
           ),
         if (contactsList.isNotEmpty)
@@ -162,134 +238,168 @@ class _ContactsListState extends ConsumerState<ContactsList> {
               height: MediaQuery.sizeOf(context).width < 520 ? 120 : 80,
               animSpeedFactor: 2.3,
               springAnimationDurationInMilliseconds: 600,
-              child: GroupedListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-
-                useStickyGroupSeparators: true,
-                floatingHeader: true,
-                stickyHeaderBackgroundColor:
-                    Theme.of(context).colorScheme.secondary,
-                elements: contactsList,
-                groupBy: (contactN) => contactN.name[0],
-                groupSeparatorBuilder: (String groupHeader) => Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    groupHeader,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification notification) {
+                  if (notification is OverscrollNotification) {
+                    if (_controller.offset <=
+                            _controller.position.minScrollExtent &&
+                        !_controller.position.outOfRange) {
+                      setState(() {
+                        animatedContainerHeight = bigHeight;
+                      });
+                    }
+                  }
+                  if (notification is UserScrollNotification) {
+                    if (notification.direction == ScrollDirection.forward) {
+                      if (_controller.offset <=
+                              _controller.position.minScrollExtent &&
+                          !_controller.position.outOfRange) {
+                        setState(() {
+                          animatedContainerHeight = bigHeight;
+                        });
+                      }
+                    } else if (notification.direction ==
+                        ScrollDirection.reverse) {
+                      setState(() {
+                        animatedContainerHeight = smallHeight;
+                      });
+                    }
+                  }
+                  // Returning null (or false) to
+                  // "allow the notification to continue to be dispatched to further ancestors".
+                  return false;
+                },
+                child: GroupedListView(
+                  controller: _controller,
+                  physics: const AlwaysScrollableScrollPhysics(),
+    
+                  useStickyGroupSeparators: true,
+                  floatingHeader: true,
+                  stickyHeaderBackgroundColor:
+                      Theme.of(context).colorScheme.secondary,
+                  elements: contactsList,
+                  groupBy: (contactN) => contactN.name[0],
+                  groupSeparatorBuilder: (String groupHeader) => Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      groupHeader,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
-                itemComparator: (element1, element2) =>
-                    element1.name.compareTo(element2.name),
-                itemBuilder: (context, contactN) {
-                  _expandedBoolsMap[contactN] =
-                      _expandedBoolsMap.containsKey(contactN)
-                          ? _expandedBoolsMap[contactN]!
-                          : false;
-                  return Slidable(
-                    startActionPane: ActionPane(
-                      motion: const BehindMotion(),
-                      children: [
-                        CustomSlidableAction(
-                          onPressed: (context) {
-                            showMessageWriterModalSheet(
-                                context: context,
-                                calleePhoneNumber: contactN.phoneNumber,
-                                calleeName: contactN.name);
-                          },
-                          backgroundColor: const Color(0xFF21B7CA),
-                          foregroundColor: Colors.white,
-                          child: SvgPicture.asset(
-                            'assets/icons/message-ring.svg',
-                            height: 30,
-                            colorFilter: const ColorFilter.mode(
-                                Colors.white, BlendMode.srcIn),
-                          ),
-                        ),
-                      ],
-                    ),
-                    endActionPane: ActionPane(
-                      motion: const BehindMotion(),
-                      children: [
-                        CustomSlidableAction(
-                          onPressed: (context) {
-                            _showDeleteDialog(context, contactN);
-                          },
-                          backgroundColor: const Color(0xFFFE4A49),
-                          foregroundColor: Colors.white,
-                          child: const Icon(
-                            Icons.delete,
-                            size: 30,
-                          ),
-                        ),
-                      ],
-                    ),
-                    child: ExpandableListTile(
-                      justARegularListTile:
-                          widget.screen == Screen.phone ? false : true,
-                      isExpanded: _expandedBoolsMap[contactN]!,
-                      title: Text(contactN.name),
-                      leading: GestureDetector(
-                        onTap: () => widget.onContactSelected(contactN),
-                        child: contactN.imagePath != null
-                            ? withOrWithoutHero(contactN)
-                            : ContactLetterAvatar(contactName: contactN.name),
-                      ),
-                      tileOnTapped: () {
-                        if (widget.screen == Screen.phone) {
-                          _changeTileExpandedStatus(contactN);
-                          return;
-                        }
-                        widget.onContactSelected(contactN);
-                      },
-                      expandedContent: Column(
+                  itemComparator: (element1, element2) =>
+                      element1.name.compareTo(element2.name),
+                  itemBuilder: (context, contactN) {
+                    _expandedBoolsMap[contactN] =
+                        _expandedBoolsMap.containsKey(contactN)
+                            ? _expandedBoolsMap[contactN]!
+                            : false;
+                    return Slidable(
+                      startActionPane: ActionPane(
+                        motion: const BehindMotion(),
                         children: [
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            'Mobile ${contactN.localPhoneNumber}',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  showMessageWriterModalSheet(
-                                    calleeName: contactN.name,
-                                    calleePhoneNumber: contactN.phoneNumber,
-                                    context: context,
-                                  );
-                                },
-                                icon: SvgPicture.asset(
-                                  'assets/icons/message-ring.svg',
-                                  height: 24,
-                                  colorFilter: ColorFilter.mode(
-                                    Theme.of(context).iconTheme.color!,
-                                    BlendMode.srcIn,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () {
-                                  widget.onContactSelected(contactN);
-                                },
-                                icon: Icon(
-                                  Icons.info_outlined,
-                                  color: Theme.of(context).iconTheme.color!,
-                                ),
-                              ),
-                            ],
+                          CustomSlidableAction(
+                            onPressed: (context) {
+                              showMessageWriterModalSheet(
+                                  context: context,
+                                  calleePhoneNumber: contactN.phoneNumber,
+                                  calleeName: contactN.name);
+                            },
+                            backgroundColor: const Color(0xFF21B7CA),
+                            foregroundColor: Colors.white,
+                            child: SvgPicture.asset(
+                              'assets/icons/message-ring.svg',
+                              height: 30,
+                              colorFilter: const ColorFilter.mode(
+                                  Colors.white, BlendMode.srcIn),
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                  );
-                },
-                // itemCount: contactsList.length,
+                      endActionPane: ActionPane(
+                        motion: const BehindMotion(),
+                        children: [
+                          CustomSlidableAction(
+                            onPressed: (context) {
+                              _showDeleteDialog(context, contactN);
+                            },
+                            backgroundColor: const Color(0xFFFE4A49),
+                            foregroundColor: Colors.white,
+                            child: const Icon(
+                              Icons.delete,
+                              size: 30,
+                            ),
+                          ),
+                        ],
+                      ),
+                      child: ExpandableListTile(
+                        justARegularListTile:
+                            widget.screen == Screen.phone ? false : true,
+                        isExpanded: _expandedBoolsMap[contactN]!,
+                        title: Text(contactN.name),
+                        leading: GestureDetector(
+                          onTap: () => widget.onContactSelected(contactN),
+                          child: contactN.imagePath != null
+                              ? withOrWithoutHero(contactN)
+                              : ContactLetterAvatar(contactName: contactN.name),
+                        ),
+                        tileOnTapped: () {
+                          if (widget.screen == Screen.phone) {
+                            _changeTileExpandedStatus(contactN);
+                            return;
+                          }
+                          widget.onContactSelected(contactN);
+                        },
+                        expandedContent: Column(
+                          children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              'Mobile ${contactN.localPhoneNumber}',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    showMessageWriterModalSheet(
+                                      calleeName: contactN.name,
+                                      calleePhoneNumber: contactN.phoneNumber,
+                                      context: context,
+                                    );
+                                  },
+                                  icon: SvgPicture.asset(
+                                    'assets/icons/message-ring.svg',
+                                    height: 24,
+                                    colorFilter: ColorFilter.mode(
+                                      Theme.of(context).iconTheme.color!,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    widget.onContactSelected(contactN);
+                                  },
+                                  icon: Icon(
+                                    Icons.info_outlined,
+                                    color: Theme.of(context).iconTheme.color!,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                  // itemCount: contactsList.length,
+                ),
               ),
             ),
           ),

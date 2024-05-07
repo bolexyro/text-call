@@ -66,6 +66,7 @@ dependencies:
   path_provider: ^2.1.3
   auto_height_grid_view: ^1.0.0
   get: ^4.6.6
+  local_hero: ^0.3.0
   # flutter_quill: ^9.2.3
 
 dev_dependencies:

@@ -104,18 +104,15 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
       children: [
         Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, left: 8),
-              child: IconButton(
-                onPressed: () {
-                  widget.scaffoldKey.currentState!.openDrawer();
-                },
-                icon: SvgPicture.asset(
-                  'assets/icons/hamburger-menu.svg',
-                  height: 30,
-                  colorFilter:
-                       ColorFilter.mode(Theme.of(context).iconTheme.color ?? Colors.grey, BlendMode.srcIn),
-                ),
+            IconButton(
+              onPressed: () {
+                widget.scaffoldKey.currentState!.openDrawer();
+              },
+              icon: SvgPicture.asset(
+                'assets/icons/hamburger-menu.svg',
+                height: 30,
+                colorFilter:
+                     ColorFilter.mode(Theme.of(context).iconTheme.color ?? Colors.grey, BlendMode.srcIn),
               ),
             ),
           ],

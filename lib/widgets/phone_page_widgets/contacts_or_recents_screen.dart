@@ -15,7 +15,11 @@ class ContactsRecentsScreen extends ConsumerStatefulWidget {
   const ContactsRecentsScreen({
     super.key,
     required this.whichScreen,
+    required this.scaffoldKey,
   });
+
+    final GlobalKey<ScaffoldState> scaffoldKey;
+
 
   final WhichScreen whichScreen;
   @override
@@ -123,6 +127,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
           children: [
             Expanded(
               child: ContactsList(
+                scaffoldKey: widget.scaffoldKey,
                 screen: Screen.tablet,
                 onContactSelected: _setCurrentContact,
               ),
@@ -145,6 +150,8 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
       }
 
       return ContactsList(
+                        scaffoldKey: widget.scaffoldKey,
+
         screen: Screen.phone,
         onContactSelected: (Contact selectedContact) =>
             _goToPage(selectedContact: selectedContact),
@@ -173,6 +180,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
         children: [
           Expanded(
             child: RecentsList(
+              scaffoldKey: widget.scaffoldKey,
               screen: Screen.tablet,
               onRecentSelected: _setCurrentRecent,
             ),
@@ -195,6 +203,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
       );
     }
     return RecentsList(
+      scaffoldKey: widget.scaffoldKey,
       onRecentSelected: (Recent? selectedRecent) {
         if (selectedRecent == null) {
           return;

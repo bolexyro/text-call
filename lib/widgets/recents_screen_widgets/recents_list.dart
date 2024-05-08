@@ -23,10 +23,12 @@ class RecentsList extends ConsumerStatefulWidget {
     super.key,
     required this.onRecentSelected,
     required this.screen,
+    required this.scaffoldKey,
   });
 
   final void Function(Recent? selectedRecent) onRecentSelected;
   final Screen screen;
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
   @override
   ConsumerState<RecentsList> createState() => _RecentsListState();
@@ -249,7 +251,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
               name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
           category: RecentCategory.incomingAccepted,
           message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
+              message: 'HeFsinglllo There', backgroundColor: Colors.red.shade50),
           id: '123'),
       Recent(
           contact: const Contact(
@@ -293,9 +295,23 @@ class _RecentsListState extends ConsumerState<RecentsList> {
         ? SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(
-                  height: 45,
+                 Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        widget.scaffoldKey.currentState!.openDrawer();
+                      },
+                      icon: SvgPicture.asset(
+                        'assets/icons/hamburger-menu.svg',
+                        height: 30,
+                        colorFilter: ColorFilter.mode(
+                            Theme.of(context).iconTheme.color ?? Colors.grey,
+                            BlendMode.srcIn),
+                      ),
+                    ),
+                  ],
                 ),
+               
                 LocalHero(
                   tag: 'recents_text',
                   child: Text(
@@ -349,9 +365,21 @@ class _RecentsListState extends ConsumerState<RecentsList> {
             ),
           )
         : Padding(
-            padding: const EdgeInsets.fromLTRB(10.0, 15, 10, 15),
+            padding: const EdgeInsets.fromLTRB(2.0, 15, 5, 15),
             child: Row(
               children: [
+                IconButton(
+                  onPressed: () {
+                    widget.scaffoldKey.currentState!.openDrawer();
+                  },
+                  icon: SvgPicture.asset(
+                    'assets/icons/hamburger-menu.svg',
+                    height: 30,
+                    colorFilter: ColorFilter.mode(
+                        Theme.of(context).iconTheme.color ?? Colors.grey,
+                        BlendMode.srcIn),
+                  ),
+                ),
                 LocalHero(
                   tag: 'recents_text',
                   child: Text(

@@ -27,7 +27,7 @@ class ContactAvatarCircle extends StatelessWidget {
           foregroundColor: Colors.white,
           backgroundImage:
               imagePath == null ? null : FileImage(File(imagePath!)),
-          child: imagePath != null ? null : const Icon(Icons.camera_alt),
+          child: imagePath != null ? null : const Icon(Icons.add_a_photo),
         ),
       );
     } else {
@@ -36,7 +36,7 @@ class ContactAvatarCircle extends StatelessWidget {
         backgroundColor: imagePath == null ? Colors.blue : null,
         foregroundColor: Colors.white,
         backgroundImage: imagePath == null ? null : FileImage(File(imagePath!)),
-        child: imagePath != null ? null : const Icon(Icons.camera_alt),
+        child: imagePath != null ? null : const Icon(Icons.add_a_photo),
       );
     }
 

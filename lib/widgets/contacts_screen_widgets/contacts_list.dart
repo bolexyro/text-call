@@ -20,10 +20,12 @@ class ContactsList extends ConsumerStatefulWidget {
     super.key,
     required this.onContactSelected,
     required this.screen,
+    required this.scaffoldKey,
   });
 
   final void Function(Contact selectedContact) onContactSelected;
   final Screen screen;
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
   @override
   ConsumerState<ContactsList> createState() => _ContactsListState();
@@ -32,7 +34,7 @@ class ContactsList extends ConsumerStatefulWidget {
 class _ContactsListState extends ConsumerState<ContactsList> {
   final Map<Contact, bool> _expandedBoolsMap = {};
   final ScrollController _scrollController = ScrollController();
-  double bigHeight = 175;
+  double bigHeight = 200;
   double smallHeight = 70;
   late double animatedContainerHeight;
 
@@ -118,8 +120,21 @@ class _ContactsListState extends ConsumerState<ContactsList> {
         ? SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(
-                  height: 45,
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        widget.scaffoldKey.currentState!.openDrawer();
+                      },
+                      icon: SvgPicture.asset(
+                        'assets/icons/hamburger-menu.svg',
+                        height: 30,
+                        colorFilter: ColorFilter.mode(
+                            Theme.of(context).iconTheme.color ?? Colors.grey,
+                            BlendMode.srcIn),
+                      ),
+                    ),
+                  ],
                 ),
                 LocalHero(
                   tag: 'contact_text',
@@ -167,9 +182,22 @@ class _ContactsListState extends ConsumerState<ContactsList> {
             ),
           )
         : Padding(
-            padding: const EdgeInsets.fromLTRB(10.0, 15, 10, 15),
+            padding: const EdgeInsets.fromLTRB(2.0, 15, 5, 15),
             child: Row(
               children: [
+                IconButton(
+                  onPressed: () {
+                    widget.scaffoldKey.currentState!.openDrawer();
+                  },
+                  icon: SvgPicture.asset(
+                    'assets/icons/hamburger-menu.svg',
+                    height: 30,
+                    colorFilter: ColorFilter.mode(
+                        Theme.of(context).iconTheme.color ?? Colors.grey,
+                        BlendMode.srcIn),
+                  ),
+                ),
+                //  SizedBox(width: 10),
                 LocalHero(
                   tag: 'contact_text',
                   child: Text(

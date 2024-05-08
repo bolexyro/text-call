@@ -22,7 +22,7 @@ class PhonePageScreen extends ConsumerStatefulWidget {
 
 class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
   int _currentPageIndex = 0;
-  final GlobalKey<ScaffoldState> _key = GlobalKey();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   bool _isDarkMode = Get.isDarkMode;
 
   @override
@@ -46,7 +46,7 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        key: _key,
+        key: _scaffoldKey,
         drawer: Drawer(
           child: ListView(
             children: [
@@ -130,12 +130,16 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
         ),
         body: [
           KeypadScreen(
-            scaffoldKey: _key,
+            scaffoldKey: _scaffoldKey,
           ),
-          const ContactsRecentsScreen(
+           ContactsRecentsScreen(
+                            scaffoldKey:_scaffoldKey,
+
             whichScreen: WhichScreen.recent,
           ),
-          const ContactsRecentsScreen(
+           ContactsRecentsScreen(
+                                        scaffoldKey:_scaffoldKey,
+
             whichScreen: WhichScreen.contact,
           ),
         ][_currentPageIndex],

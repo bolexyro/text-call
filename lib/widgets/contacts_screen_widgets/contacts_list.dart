@@ -31,21 +31,21 @@ class ContactsList extends ConsumerStatefulWidget {
 
 class _ContactsListState extends ConsumerState<ContactsList> {
   final Map<Contact, bool> _expandedBoolsMap = {};
-  final ScrollController _controller = ScrollController();
-
-  void _scrollListener() {
-    if (_controller.offset >= _controller.position.maxScrollExtent &&
-        !_controller.position.outOfRange) {}
-    if (_controller.offset <= _controller.position.minScrollExtent &&
-        !_controller.position.outOfRange) {}
-  }
+  final ScrollController _scrollController = ScrollController();
+  double bigHeight = 175;
+  double smallHeight = 70;
+  late double animatedContainerHeight;
 
   @override
   void initState() {
     animatedContainerHeight = bigHeight;
-
-    _controller.addListener(_scrollListener);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _changeTileExpandedStatus(Contact contact) {
@@ -87,35 +87,31 @@ class _ContactsListState extends ConsumerState<ContactsList> {
           );
   }
 
-  double bigHeight = 160;
-  double smallHeight = 60;
-  late double animatedContainerHeight;
-
   @override
   Widget build(BuildContext context) {
-    final List<Contact> contactsList = ref.watch(contactsProvider);
-    // final List<Contact> contactsList = [
-    //   const Contact(
-    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-    //   const Contact(
-    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-    //   const Contact(
-    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-    //   const Contact(
-    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-    //   const Contact(
-    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-    //   const Contact(
-    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-    //   const Contact(
-    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-    //   const Contact(
-    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-    //   const Contact(
-    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-    //   const Contact(
-    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-    // ];
+    // final List<Contact> contactsList = ref.watch(contactsProvider);
+    final List<Contact> contactsList = [
+      const Contact(
+          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+      const Contact(
+          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+      const Contact(
+          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+      const Contact(
+          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+      const Contact(
+          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+      const Contact(
+          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+      const Contact(
+          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+      const Contact(
+          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+      const Contact(
+          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+      const Contact(
+          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    ];
 
     final animatedContainerContent = animatedContainerHeight == bigHeight
         // i am using this singlechildScrollView around the column because, if you don't you'd be getting errors.
@@ -125,31 +121,35 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                 const SizedBox(
                   height: 45,
                 ),
-                const LocalHero(
+                LocalHero(
                   tag: 'contact_text',
                   child: Text(
                     'Contacts',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineLarge!
+                        .copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Text(
-                    '${contactsList.length} contacts with phone number',
-                    textAlign: TextAlign.center,
+                SizedBox(
+                  height: 50,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Text(
+                      '${contactsList.length} contacts with phone number',
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
                 Row(
                   children: [
                     const Spacer(),
-                    const SizedBox(width: 10),
                     IconButton(
                       onPressed: () {
                         showAddContactDialog(context);
                       },
                       icon: const Icon(Icons.person_add),
                     ),
-                    const SizedBox(width: 10),
                     IconButton(
                       onPressed: () async {
                         Navigator.of(context).push(
@@ -167,25 +167,27 @@ class _ContactsListState extends ConsumerState<ContactsList> {
             ),
           )
         : Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.fromLTRB(10.0, 15, 10, 15),
             child: Row(
               children: [
-                const LocalHero(
+                LocalHero(
                   tag: 'contact_text',
                   child: Text(
                     'Contacts',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+                    // style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineLarge!
+                        .copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 const Spacer(),
-                const SizedBox(width: 10),
                 IconButton(
                   onPressed: () {
                     showAddContactDialog(context);
                   },
                   icon: const Icon(Icons.person_add),
                 ),
-                const SizedBox(width: 10),
                 IconButton(
                   onPressed: () async {
                     Navigator.of(context).push(
@@ -196,7 +198,6 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                   },
                   icon: const Icon(Icons.search),
                 ),
-                const SizedBox(width: 10),
               ],
             ),
           );
@@ -241,9 +242,9 @@ class _ContactsListState extends ConsumerState<ContactsList> {
               child: NotificationListener<ScrollNotification>(
                 onNotification: (ScrollNotification notification) {
                   if (notification is OverscrollNotification) {
-                    if (_controller.offset <=
-                            _controller.position.minScrollExtent &&
-                        !_controller.position.outOfRange) {
+                    if (_scrollController.offset <=
+                            _scrollController.position.minScrollExtent &&
+                        !_scrollController.position.outOfRange) {
                       setState(() {
                         animatedContainerHeight = bigHeight;
                       });
@@ -251,9 +252,9 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                   }
                   if (notification is UserScrollNotification) {
                     if (notification.direction == ScrollDirection.forward) {
-                      if (_controller.offset <=
-                              _controller.position.minScrollExtent &&
-                          !_controller.position.outOfRange) {
+                      if (_scrollController.offset <=
+                              _scrollController.position.minScrollExtent &&
+                          !_scrollController.position.outOfRange) {
                         setState(() {
                           animatedContainerHeight = bigHeight;
                         });
@@ -270,9 +271,9 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                   return false;
                 },
                 child: GroupedListView(
-                  controller: _controller,
+                  controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
-    
+
                   useStickyGroupSeparators: true,
                   floatingHeader: true,
                   stickyHeaderBackgroundColor:

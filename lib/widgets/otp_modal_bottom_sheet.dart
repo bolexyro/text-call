@@ -65,6 +65,7 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
       Positioned(
         bottom: 0,
         child: Container(
+          padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).vertical + 20),
           width: MediaQuery.sizeOf(context).width,
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.primaryContainer,
@@ -72,7 +73,6 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
               top: Radius.circular(30),
             ),
           ),
-          height: MediaQuery.of(context).size.height * 0.8,
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,

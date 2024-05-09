@@ -91,29 +91,29 @@ class _ContactsListState extends ConsumerState<ContactsList> {
 
   @override
   Widget build(BuildContext context) {
-    // final List<Contact> contactsList = ref.watch(contactsProvider);
-    final List<Contact> contactsList = [
-      const Contact(
-          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-      const Contact(
-          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-      const Contact(
-          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-      const Contact(
-          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-      const Contact(
-          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-      const Contact(
-          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-      const Contact(
-          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-      const Contact(
-          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-      const Contact(
-          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-      const Contact(
-          name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
-    ];
+    final List<Contact> contactsList = ref.watch(contactsProvider);
+    // final List<Contact> contactsList = [
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    //   const Contact(
+    //       name: 'Bola', phoneNumber: '+2349027929326', imagePath: null),
+    // ];
 
     final animatedContainerContent = animatedContainerHeight == bigHeight
         // i am using this singlechildScrollView around the column because, if you don't you'd be getting errors.

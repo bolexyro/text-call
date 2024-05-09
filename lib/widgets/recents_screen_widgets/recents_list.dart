@@ -8,8 +8,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:local_hero/local_hero.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:text_call/models/contact.dart';
-import 'package:text_call/models/message.dart';
+// import 'package:text_call/models/contact.dart';
+// import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/utils/utils.dart';
@@ -160,135 +160,135 @@ class _RecentsListState extends ConsumerState<RecentsList> {
 
   @override
   Widget build(BuildContext context) {
-    // final recentsList = _applyFilter(ref.watch(recentsProvider));
-    final recentsList = [
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'HeFsinglllo There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-      Recent(
-          contact: const Contact(
-              name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-              message: 'Hello There', backgroundColor: Colors.red.shade50),
-          id: '123'),
-    ];
+    final recentsList = _applyFilter(ref.watch(recentsProvider));
+    // final recentsList = [
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'HeFsinglllo There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    //   Recent(
+    //       contact: const Contact(
+    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
+    //       category: RecentCategory.incomingAccepted,
+    //       message: Message(
+    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
+    //       id: '123'),
+    // ];
 
     final animatedContainerContent = animatedContainerHeight == bigHeight
         // i am using this singlechildScrollView around the column because, if you don't you'd be getting errors.

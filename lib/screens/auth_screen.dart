@@ -30,8 +30,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   bool _flushbarShown = false;
 
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _textController = TextEditingController();
 
-  Future<void> _setPreferences() async {
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _setPreferencesUpdateLocalAndRemoteDb() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isUserLoggedIn', true);
     await prefs.setString('myPhoneNumber', _enteredPhoneNumber);
@@ -85,19 +92,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     final auth = FirebaseAuth.instance;
     await auth.verifyPhoneNumber(
       phoneNumber: _enteredPhoneNumber,
+      timeout: const Duration(seconds: 60),
       verificationCompleted: (PhoneAuthCredential credential) async {
-        // ANDROID ONLY!
-
-        // Sign the user in (or link) with the auto-generated credential
-        await auth.signInWithCredential(credential);
-        await _setPreferences();
+        await _setPreferencesUpdateLocalAndRemoteDb();
       },
       verificationFailed: (FirebaseAuthException e) {
-        // if (e.code == 'invalid-phone-number') {}
+        if (e.code == 'invalid-phone-number') {}
+
         showFlushBar(
           Colors.red,
           e.message ?? 'An Error occurred. Please Try again',
-          FlushbarPosition.BOTTOM,
+          FlushbarPosition.TOP,
           context,
         );
 
@@ -109,17 +114,40 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         String? smsCode = await showModalBottomSheet(
           backgroundColor: Colors.transparent,
           context: context,
-          builder: (context) => const OTPModalBottomSheet(),
+          builder: (context) => OTPModalBottomSheet(
+            phoneNumber: _enteredPhoneNumber,
+            resendToken: resendToken,
+          ),
           isDismissible: false,
           isScrollControlled: true,
         );
         if (smsCode != null) {
-          // Create a PhoneAuthCredential with the code
-          PhoneAuthCredential credential = PhoneAuthProvider.credential(
-              verificationId: verificationId, smsCode: smsCode);
-          // Sign the user in (or link) with the credential
-          await auth.signInWithCredential(credential);
-          await _setPreferences();
+          try {
+            PhoneAuthCredential credential = PhoneAuthProvider.credential(
+                verificationId: verificationId, smsCode: smsCode);
+            // Sign the user in (or link) with the credential
+            await auth.signInWithCredential(credential);
+            await _setPreferencesUpdateLocalAndRemoteDb();
+          } on FirebaseAuthException catch (e) {
+            if (e.code == 'invalid-verification-code') {
+              showFlushBar(
+                Colors.red,
+                'The verification code from SMS/TOTP is invalid. Please check and enter the correct verification code again.',
+                FlushbarPosition.TOP,
+                context,
+              );
+            } else {
+              showFlushBar(
+                Colors.red,
+                e.message ?? 'An Error occurred. Please Try again',
+                FlushbarPosition.TOP,
+                context,
+              );
+            }
+            setState(() {
+              _isAuthenticating = false;
+            });
+          }
         } else {
           setState(() {
             _isAuthenticating = false;
@@ -183,6 +211,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             Form(
               key: _formKey,
               child: TextFormField(
+                controller: _textController,
                 validator: (value) {
                   if (value == null ||
                       int.tryParse(value) == null ||
@@ -191,10 +220,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   }
                   return null;
                 },
+                onChanged: (value) {
+                  if (value.length == 1 && value == '0') {
+                    _textController.text = '';
+                  }
+                },
                 onSaved: (newValue) => _enteredPhoneNumber = newValue!,
                 keyboardType: TextInputType.phone,
                 maxLength: 10,
                 decoration: InputDecoration(
+                  counterText: '',
                   filled: Theme.of(context).brightness == Brightness.dark
                       ? null
                       : true,
@@ -221,7 +256,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 onPressed: _isAuthenticating == true
                     ? null
                     : () {
-                        _validateForm();
+                        showModalBottomSheet(
+                          backgroundColor: Colors.transparent,
+                          context: context,
+                          builder: (context) => const OTPModalBottomSheet(
+                            phoneNumber: '08125657042',
+                            resendToken: 1,
+                          ),
+                          isDismissible: false,
+                          isScrollControlled: true,
+                        );
                       },
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(

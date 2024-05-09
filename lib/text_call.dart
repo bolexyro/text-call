@@ -59,9 +59,9 @@ class _TextCallState extends State<TextCall> {
   Widget build(BuildContext context) {
     return LocalHeroScope(
       duration: const Duration(milliseconds: 100),
-      // createRectTween: (begin, end) {
-      //   return RectTween(begin: begin, end: end);
-      // },
+      createRectTween: (begin, end) {
+        return RectTween(begin: begin, end: end);
+      },
       curve: Curves.linear,
       child: GetMaterialApp(
         themeMode: widget.isDarkMode ? ThemeMode.dark : ThemeMode.light,

@@ -1,14 +1,8 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:another_flushbar/flushbar.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:text_call/models/contact.dart';
-import 'package:text_call/providers/contacts_provider.dart';
-import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/otp_modal_bottom_sheet.dart';
 
@@ -31,42 +25,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _textController = TextEditingController();
+  final _auth = FirebaseAuth.instance;
 
   @override
   void dispose() {
     _textController.dispose();
     super.dispose();
-  }
-
-  Future<void> _setPreferencesUpdateLocalAndRemoteDb() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isUserLoggedIn', true);
-    await prefs.setString('myPhoneNumber', _enteredPhoneNumber);
-
-    await prefs.setString('myName', 'Me');
-
-    ref.read(contactsProvider.notifier).addContact(
-          Contact(
-            name: "Me",
-            phoneNumber: _enteredPhoneNumber,
-            imagePath: null,
-          ),
-        );
-
-    final db = FirebaseFirestore.instance;
-    final fcm = FirebaseMessaging.instance;
-
-    final fcmToken = await fcm.getToken();
-    // Add a new document with a specified ID
-    db.collection("users").doc(_enteredPhoneNumber).set(
-      {'fcmToken': fcmToken},
-    );
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const PhonePageScreen(),
-      ),
-    );
   }
 
   void _validateForm() {
@@ -75,12 +39,75 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       _enteredPhoneNumber = '+234$_enteredPhoneNumber';
       FocusManager.instance.primaryFocus?.unfocus();
       showFlushBar(
-          const Color.fromARGB(255, 0, 63, 114),
-          'You might be redirected to your browsser. But don\'t panick. It is to verify you are not a bot...IKR',
-          FlushbarPosition.TOP,
-          context);
+        const Color.fromARGB(255, 0, 63, 114),
+        'You might be redirected to your browsser. But don\'t panick. It is to verify you are not a bot...IKR',
+        FlushbarPosition.TOP,
+        context,
+      );
 
       _phoneAuthentication();
+    }
+  }
+
+  void _anotherChance(String verificationId, int? resendToken) async {
+    Map<String, dynamic>? smsCodeAndVerificationIdandResendToken =
+        await showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      context: context,
+      builder: (context) => OTPModalBottomSheet(
+        phoneNumber: _enteredPhoneNumber,
+        resendToken: resendToken,
+        verificationId: verificationId,
+      ),
+      isDismissible: false,
+      isScrollControlled: true,
+    );
+
+    if (smsCodeAndVerificationIdandResendToken != null) {
+      try {
+        final String verificationId =
+            smsCodeAndVerificationIdandResendToken['verificationId']!;
+        final String smsCode =
+            smsCodeAndVerificationIdandResendToken['smsCode']!;
+        // ignore: unused_local_variable
+        final int? resendToken =
+            smsCodeAndVerificationIdandResendToken['resendToken']!;
+
+        PhoneAuthCredential credential = PhoneAuthProvider.credential(
+          verificationId: verificationId,
+          smsCode: smsCode,
+        );
+
+        await _auth.signInWithCredential(credential);
+        await setPreferencesUpdateLocalAndRemoteDb(
+            phoneNumber: _enteredPhoneNumber, ref: ref, context: context);
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'invalid-verification-code') {
+          showFlushBar(
+            Colors.red,
+            'The verification code from SMS/OTP is invalid. Please check and enter the correct verification code again.',
+            FlushbarPosition.TOP,
+            context,
+            mainButtonOnPressed: () {
+              _anotherChance(verificationId, resendToken);
+            },
+          );
+        } else {
+          showFlushBar(
+            Colors.red,
+            e.message ?? 'An Error occurred. Please Try again',
+            FlushbarPosition.TOP,
+            context,
+          );
+        }
+        setState(() {
+          _isAuthenticating = false;
+        });
+      }
+    } else {
+      setState(() {
+        _isAuthenticating = false;
+      });
     }
   }
 
@@ -89,12 +116,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       _isAuthenticating = true;
     });
 
-    final auth = FirebaseAuth.instance;
-    await auth.verifyPhoneNumber(
+    await _auth.verifyPhoneNumber(
       phoneNumber: _enteredPhoneNumber,
       timeout: const Duration(seconds: 60),
       verificationCompleted: (PhoneAuthCredential credential) async {
-        await _setPreferencesUpdateLocalAndRemoteDb();
+        await setPreferencesUpdateLocalAndRemoteDb(
+            phoneNumber: _enteredPhoneNumber, ref: ref, context: context);
       },
       verificationFailed: (FirebaseAuthException e) {
         if (e.code == 'invalid-phone-number') {}
@@ -111,48 +138,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         });
       },
       codeSent: (String verificationId, int? resendToken) async {
-        String? smsCode = await showModalBottomSheet(
-          backgroundColor: Colors.transparent,
-          context: context,
-          builder: (context) => OTPModalBottomSheet(
-            phoneNumber: _enteredPhoneNumber,
-            resendToken: resendToken,
-          ),
-          isDismissible: false,
-          isScrollControlled: true,
-        );
-        if (smsCode != null) {
-          try {
-            PhoneAuthCredential credential = PhoneAuthProvider.credential(
-                verificationId: verificationId, smsCode: smsCode);
-            // Sign the user in (or link) with the credential
-            await auth.signInWithCredential(credential);
-            await _setPreferencesUpdateLocalAndRemoteDb();
-          } on FirebaseAuthException catch (e) {
-            if (e.code == 'invalid-verification-code') {
-              showFlushBar(
-                Colors.red,
-                'The verification code from SMS/TOTP is invalid. Please check and enter the correct verification code again.',
-                FlushbarPosition.TOP,
-                context,
-              );
-            } else {
-              showFlushBar(
-                Colors.red,
-                e.message ?? 'An Error occurred. Please Try again',
-                FlushbarPosition.TOP,
-                context,
-              );
-            }
-            setState(() {
-              _isAuthenticating = false;
-            });
-          }
-        } else {
-          setState(() {
-            _isAuthenticating = false;
-          });
-        }
+        _anotherChance(verificationId, resendToken);
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
@@ -165,7 +151,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       if (widget.appOpenedFromPickedCall && !_flushbarShown) {
         showFlushBar(Colors.blue, 'You have to login to see the message.',
             FlushbarPosition.TOP, context);
-        _flushbarShown = true; // Set flag after showing flushbar
+        _flushbarShown = true;
       }
     });
   }
@@ -256,16 +242,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 onPressed: _isAuthenticating == true
                     ? null
                     : () {
-                        showModalBottomSheet(
-                          backgroundColor: Colors.transparent,
-                          context: context,
-                          builder: (context) => const OTPModalBottomSheet(
-                            phoneNumber: '08125657042',
-                            resendToken: 1,
-                          ),
-                          isDismissible: false,
-                          isScrollControlled: true,
-                        );
+                        _validateForm();
                       },
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(

@@ -1,47 +1,48 @@
 import 'dart:async';
 import 'dart:ui';
-
-import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/utils/utils.dart';
 
-class OTPModalBottomSheet extends StatefulWidget {
+class OTPModalBottomSheet extends ConsumerStatefulWidget {
   const OTPModalBottomSheet({
     super.key,
     required this.phoneNumber,
     required this.resendToken,
+    required this.verificationId,
   });
 
   final String phoneNumber;
   final int? resendToken;
+  final String verificationId;
 
   @override
-  State<OTPModalBottomSheet> createState() => _OTPModalBottomSheetState();
+  ConsumerState<OTPModalBottomSheet> createState() =>
+      _OTPModalBottomSheetState();
 }
 
-class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
-  List<FocusNode> focusNodes = [];
-  List<TextEditingController> textControllers = [];
-  int counter = 40;
-  String counterText = '';
-  bool resendAvailable = false;
+class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
+  final List<FocusNode> _focusNodes = [];
+  final List<TextEditingController> _textControllers = [];
+  int _counter = 5;
+  String _counterText = '';
+  late String _enteredPhoneNumber;
+  bool codeResent = false;
+  late int? _resendToken;
 
   void startCountDownTimer() {
     Timer.periodic(
       const Duration(seconds: 1),
       (Timer timer) {
-        if (counter == 0) {
+        if (_counter == 0) {
           timer.cancel();
-          setState(() {
-            resendAvailable = true;
-          });
         } else {
           setState(() {
-            counter--;
-            counterText = counter.toString().length == 2
-                ? counter.toString()
-                : '0$counter';
+            _counter--;
+            _counterText = _counter.toString().length == 2
+                ? _counter.toString()
+                : '0$_counter';
           });
         }
       },
@@ -51,19 +52,22 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
   @override
   void initState() {
     super.initState();
+    _resendToken = widget.resendToken;
+    _enteredPhoneNumber = widget.phoneNumber;
+
     for (int i = 0; i < 6; i++) {
-      focusNodes.add(FocusNode());
-      textControllers.add(TextEditingController(text: '\u200B'));
+      _focusNodes.add(FocusNode());
+      _textControllers.add(TextEditingController(text: '\u200B'));
     }
     startCountDownTimer();
   }
 
   @override
   void dispose() {
-    for (var node in focusNodes) {
+    for (var node in _focusNodes) {
       node.dispose();
     }
-    for (final controller in textControllers) {
+    for (final controller in _textControllers) {
       controller.dispose();
     }
     super.dispose();
@@ -80,25 +84,41 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
 
   String getOTP() {
     String output = '';
-    for (final controller in textControllers) {
+    for (final controller in _textControllers) {
       output += controller.text;
     }
     return output;
   }
 
-  void resendOtp(int resendToken) async {
+  late Completer<String> completer;
+
+  Future<String> otpOnResend() {
+    completer = Completer<String>();
+    return completer.future;
+  }
+
+  void resendOtp() async {
     final auth = FirebaseAuth.instance;
     await auth.verifyPhoneNumber(
-      codeAutoRetrievalTimeout: (verificationId) {
-        
+      forceResendingToken: _resendToken,
+      phoneNumber: _enteredPhoneNumber,
+      timeout: const Duration(seconds: 60),
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        await setPreferencesUpdateLocalAndRemoteDb(
+            phoneNumber: _enteredPhoneNumber, ref: ref, context: context);
       },
-        forceResendingToken: resendToken,
-        phoneNumber: widget.phoneNumber,
-        codeSent:  (String verificationId, int? resendToken){},
-        verificationCompleted: (PhoneAuthCredential credential) async {},
-        verificationFailed: (FirebaseAuthException e) {
-        
+      verificationFailed: (FirebaseAuthException e) {},
+      codeSent: (String verificationId, int? resendToken) async {
+        _resendToken = resendToken;
+        String smsCode = await otpOnResend();
+        Navigator.of(context).pop({
+          'smsCode': smsCode,
+          'verificationId': verificationId,
+          'resendToken': _resendToken
         });
+      },
+      codeAutoRetrievalTimeout: (verificationId) {},
+    );
   }
 
   @override
@@ -144,7 +164,7 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
                     ),
                   ),
                   Text(
-                    'Enter the 6 digit code sent to you at ${widget.phoneNumber}',
+                    'Enter the 6 digit code sent to you at ${changeIntlToLocal(intlPhoneNumber: _enteredPhoneNumber)}',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
@@ -159,8 +179,8 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
                               width: 43,
                               child: TextFormField(
                                 autofocus: index == 0 ? true : false,
-                                controller: textControllers[index],
-                                focusNode: focusNodes[index],
+                                controller: _textControllers[index],
+                                focusNode: _focusNodes[index],
                                 keyboardType: TextInputType.number,
                                 textAlign: TextAlign.center,
                                 onChanged: (value) {
@@ -168,16 +188,16 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
                                   //     'value is $value value length is ${value.length}');
 
                                   if (value.length >= 2 && index < 5) {
-                                    textControllers[index].text =
+                                    _textControllers[index].text =
                                         value.length == 2
                                             ? '${value[0]}${value[1]}'
                                             : '${value[0]}${value[2]}';
                                     // print(
                                     //     'text controlle text is ${textControllers[index].text.length}');
-                                    if (textControllers[index + 1]
+                                    if (_textControllers[index + 1]
                                         .text
                                         .isEmpty) {
-                                      textControllers[index + 1].text =
+                                      _textControllers[index + 1].text =
                                           '\u200B';
                                     }
                                     FocusScope.of(context).nextFocus();
@@ -185,21 +205,33 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
 
                                   if (value.isEmpty && index > 0) {
                                     FocusScope.of(context)
-                                        .requestFocus(focusNodes[index - 1]);
+                                        .requestFocus(_focusNodes[index - 1]);
                                   }
 
                                   if (value.length == 1 &&
                                       index == 0 &&
                                       value != '\u200B') {
-                                    textControllers[index + 1].text = '\u200B';
-                                    textControllers[index].text =
+                                    _textControllers[index + 1].text = '\u200B';
+                                    _textControllers[index].text =
                                         '\u2008$value';
 
                                     FocusScope.of(context).nextFocus();
                                   }
                                   if (getOTP().length == 12) {
-                                    Navigator.of(context)
-                                        .pop(removeEmptyCharacters(getOTP()));
+                                    // I am doing this just in case firebase sends a different oTP in the new ss
+                                    if (!codeResent) {
+                                      // here we weould be sending the same verificationId and resendToken as the one in widget.<whatever>
+                                      Navigator.of(context).pop({
+                                        'smsCode':
+                                            removeEmptyCharacters(getOTP()),
+                                        'verificationId': widget.verificationId,
+                                        'resendToken': _resendToken,
+                                      });
+                                    } else {
+                                      completer.complete(
+                                        removeEmptyCharacters(getOTP()),
+                                      );
+                                    }
                                   }
                                 },
 
@@ -228,13 +260,19 @@ class _OTPModalBottomSheetState extends State<OTPModalBottomSheet> {
                     ],
                   ),
                   const SizedBox(height: 15),
-                  if (counter == 0)
+                  if (_counter == 0)
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        resendOtp();
+                        setState(() {
+                          _counter = 5;
+                        });
+                        startCountDownTimer();
+                      },
                       child: const Text('Resend Code'),
                     ),
-                  if (counter != 0)
-                    Text('Resend code would be availlbe in $counterText'),
+                  if (_counter != 0)
+                    Text('Resend code would be available in $_counterText'),
                 ],
               ),
             ),

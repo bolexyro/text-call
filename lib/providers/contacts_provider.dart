@@ -11,6 +11,9 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
   Future<void> loadContacts() async {
     final db = await getDatabase();
     final data = await db.query(contactsTableName);
+    if (data.isNotEmpty) {
+      return;
+    }
     final contactsList = data
         .map(
           (row) => Contact(
@@ -25,6 +28,12 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
 
   Future<void> addContact(Contact newContact) async {
     final db = await getDatabase();
+
+    db.query(
+      contactsTableName,
+      where: 'phoneNumber = ?',
+      whereArgs: [newContact.phoneNumber],
+    );
     db.insert(
       contactsTableName,
       {
@@ -58,8 +67,8 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
 
   void deleteContact(String phoneNumber) async {
     final db = await getDatabase();
-    await db
-        .delete(contactsTableName, where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
+    await db.delete(contactsTableName,
+        where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
     state = List.from(state)
       ..removeWhere((contact) => contact.phoneNumber == phoneNumber);
   }

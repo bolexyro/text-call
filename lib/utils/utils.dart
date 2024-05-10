@@ -3,11 +3,16 @@ import 'dart:io';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
+import 'package:text_call/providers/contacts_provider.dart';
+import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/add_contact_dialog.dart';
 import 'package:text_call/widgets/message_writer.dart';
 import 'package:sqflite/sqflite.dart' as sql;
@@ -245,11 +250,26 @@ List<Recent> getRecentsForAContact(
 }
 
 void showFlushBar(Color color, String message, FlushbarPosition position,
-    BuildContext context) {
+    BuildContext context,
+    {void Function()? mainButtonOnPressed}) {
   Flushbar().dismiss();
 
   Flushbar(
+    mainButton: mainButtonOnPressed == null
+        ? null
+        : Column(
+            children: [
+              ElevatedButton(
+                onPressed: mainButtonOnPressed,
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white),
+                child: const Text('Try again'),
+              ),
+            ],
+          ),
     animationDuration: const Duration(milliseconds: 800),
+    dismissDirection: FlushbarDismissDirection.HORIZONTAL,
     backgroundColor: color,
     margin: position == FlushbarPosition.TOP
         ? const EdgeInsets.only(top: 20, left: 10, right: 10)
@@ -258,7 +278,9 @@ void showFlushBar(Color color, String message, FlushbarPosition position,
       message,
       style: const TextStyle(fontSize: 16, color: Colors.white),
     ),
-    duration: const Duration(seconds: 4),
+    duration: mainButtonOnPressed == null
+        ? const Duration(seconds: 4)
+        : const Duration(seconds: 100),
     flushbarPosition: position,
     borderRadius: BorderRadius.circular(20),
     icon: const Icon(Icons.notifications),
@@ -375,4 +397,39 @@ Future<File?> selectImage(BuildContext context) async {
   }
 
   return File(pickedImage.path);
+}
+
+Future<void> setPreferencesUpdateLocalAndRemoteDb({
+  required String phoneNumber,
+  required WidgetRef ref,
+  required BuildContext context,
+}) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('isUserLoggedIn', true);
+  await prefs.setString('myPhoneNumber', phoneNumber);
+
+  await prefs.setString('myName', 'Me');
+
+  ref.read(contactsProvider.notifier).addContact(
+        Contact(
+          name: "Me",
+          phoneNumber: phoneNumber,
+          imagePath: null,
+        ),
+      );
+
+  final db = FirebaseFirestore.instance;
+  final fcm = FirebaseMessaging.instance;
+
+  final fcmToken = await fcm.getToken();
+  // Add a new document with a specified ID
+  db.collection("users").doc(phoneNumber).set(
+    {'fcmToken': fcmToken},
+  );
+
+  Navigator.of(context).pushReplacement(
+    MaterialPageRoute(
+      builder: (context) => const PhonePageScreen(),
+    ),
+  );
 }

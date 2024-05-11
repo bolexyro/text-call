@@ -23,7 +23,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   late String _enteredPhoneNumber;
   bool _isAuthenticating = false;
   bool _flushbarShown = false;
-  late bool _changeOfPhoneNumberVerification;
+  bool _changeOfPhoneNumberVerification = false;
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _textController = TextEditingController();
@@ -100,6 +100,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   void _otpHandler(
       String verificationId, int? resendToken, String phoneNumber) async {
+    print('change in otp is $_changeOfPhoneNumberVerification');
+
     Map<String, dynamic>? smsCodeAndVerificationIdandResendToken =
         await showModalBottomSheet(
       backgroundColor: Colors.transparent,
@@ -132,6 +134,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         if (_changeOfPhoneNumberVerification) {
           _phoneAuthentication(phoneNumber: _enteredPhoneNumber);
           _changeOfPhoneNumberVerification = false;
+          return;
         }
         if (!_changeOfPhoneNumberVerification) {
           await setPreferencesUpdateLocalAndRemoteDb(

@@ -113,8 +113,8 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
       phoneNumber: _enteredPhoneNumber,
       timeout: const Duration(seconds: 60),
       verificationCompleted: (PhoneAuthCredential credential) async {
-        await setPreferencesUpdateLocalAndRemoteDb(
-            phoneNumber: _enteredPhoneNumber, ref: ref, context: context);
+        // await setPreferencesUpdateLocalAndRemoteDb(
+        //     phoneNumber: _enteredPhoneNumber, ref: ref, context: context);
       },
       verificationFailed: (FirebaseAuthException e) {},
       codeSent: (String verificationId, int? resendToken) async {

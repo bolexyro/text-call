@@ -25,11 +25,44 @@ class OTPModalBottomSheet extends ConsumerStatefulWidget {
 class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
   final List<FocusNode> _focusNodes = [];
   final List<TextEditingController> _textControllers = [];
-  int _counter = 5;
+  final int _totalCounterSeconds = 40;
+  late int _counter;
   String _counterText = '';
   late String _enteredPhoneNumber;
   bool codeResent = false;
   late int? _resendToken;
+
+  @override
+  void initState() {
+    super.initState();
+    _counter = _totalCounterSeconds;
+    _resendToken = widget.resendToken;
+    _enteredPhoneNumber = widget.phoneNumber;
+
+    for (int i = 0; i < 6; i++) {
+      _focusNodes.add(FocusNode());
+      _textControllers.add(TextEditingController(text: '\u200B'));
+    }
+    startCountDownTimer();
+  }
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
+    for (final controller in _textControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
 
   void startCountDownTimer() {
     Timer.periodic(
@@ -49,30 +82,6 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _resendToken = widget.resendToken;
-    _enteredPhoneNumber = widget.phoneNumber;
-
-    for (int i = 0; i < 6; i++) {
-      _focusNodes.add(FocusNode());
-      _textControllers.add(TextEditingController(text: '\u200B'));
-    }
-    startCountDownTimer();
-  }
-
-  @override
-  void dispose() {
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
-    for (final controller in _textControllers) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
   String removeEmptyCharacters(String otpWEmptyCh) {
     return otpWEmptyCh[1] +
         otpWEmptyCh[3] +
@@ -90,11 +99,11 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
     return output;
   }
 
-  late Completer<String> completer;
+  late Completer<String> _completer;
 
   Future<String> otpOnResend() {
-    completer = Completer<String>();
-    return completer.future;
+    _completer = Completer<String>();
+    return _completer.future;
   }
 
   void resendOtp() async {
@@ -153,7 +162,18 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(
-                    height: 110,
+                    height: 15,
+                  ),
+                  Container(
+                    width: 50,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(2),
+                      color: Colors.grey[200],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 60,
                   ),
                   const Text(
                     'Enter the Code',
@@ -164,7 +184,7 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
                     ),
                   ),
                   Text(
-                    'Enter the 6 digit code sent to you at ${changeIntlToLocal(intlPhoneNumber: _enteredPhoneNumber)}',
+                    'Enter the 6 digit code sent to you at ${changeIntlToLocal(_enteredPhoneNumber)}',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
@@ -228,7 +248,7 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
                                         'resendToken': _resendToken,
                                       });
                                     } else {
-                                      completer.complete(
+                                      _completer.complete(
                                         removeEmptyCharacters(getOTP()),
                                       );
                                     }
@@ -265,7 +285,7 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
                       onPressed: () {
                         resendOtp();
                         setState(() {
-                          _counter = 5;
+                          _counter = _totalCounterSeconds;
                         });
                         startCountDownTimer();
                       },

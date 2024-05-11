@@ -110,7 +110,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
         final newContact = Contact(
             name: _nameController.text,
             phoneNumber: changeLocalToIntl(
-                localPhoneNumber: _phoneNumberController.text),
+                 _phoneNumberController.text),
             imagePath: _imageFile?.path,);
 
         await ref.read(contactsProvider.notifier).updateContact(
@@ -199,7 +199,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
                       },
                       onSaved: (newValue) {
                         _enteredPhoneNumber =
-                            changeLocalToIntl(localPhoneNumber: newValue!);
+                            changeLocalToIntl(newValue!);
                       },
                       maxLength: 11,
                       keyboardType: TextInputType.phone,

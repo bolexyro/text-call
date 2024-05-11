@@ -19,7 +19,7 @@ Future<String> _getCallerName(String phoneNumber) async {
       .query('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
   await db.close();
   if (data.isEmpty) {
-    return changeIntlToLocal(intlPhoneNumber: phoneNumber);
+    return changeIntlToLocal( phoneNumber);
   } else {
     return data[0]['name'] as String;
   }

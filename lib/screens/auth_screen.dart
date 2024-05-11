@@ -3,6 +3,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/otp_modal_bottom_sheet.dart';
 
@@ -22,10 +23,29 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   late String _enteredPhoneNumber;
   bool _isAuthenticating = false;
   bool _flushbarShown = false;
+  late bool _changeOfPhoneNumberVerification;
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _textController = TextEditingController();
   final _auth = FirebaseAuth.instance;
+
+  late final Future<SharedPreferences> _prefs;
+
+  GlobalKey? _flushBarKey;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.appOpenedFromPickedCall && !_flushbarShown) {
+        showFlushBar(Colors.blue, 'You have to login to see the message.',
+            FlushbarPosition.TOP, context);
+        _flushbarShown = true;
+      }
+    });
+
+    _prefs = SharedPreferences.getInstance();
+  }
 
   @override
   void dispose() {
@@ -33,11 +53,40 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     super.dispose();
   }
 
-  void _validateForm() {
+  void _validateForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       _enteredPhoneNumber = '+234$_enteredPhoneNumber';
       FocusManager.instance.primaryFocus?.unfocus();
+
+      final prefs = await _prefs;
+      final originalPhoneNumber = prefs.getString('myPhoneNumber');
+      if (originalPhoneNumber != null &&
+          originalPhoneNumber != _enteredPhoneNumber) {
+        _changeOfPhoneNumberVerification = true;
+        _flushBarKey = showFlushBar(
+          const Color.fromARGB(255, 0, 63, 114),
+          'Wrong number! To change from ${changeIntlToLocal(originalPhoneNumber)} to ${changeIntlToLocal(_enteredPhoneNumber)}, you have to verify both numbers.',
+          FlushbarPosition.TOP,
+          context,
+          mainButton: ElevatedButton(
+            onPressed: () async {
+              (_flushBarKey!.currentWidget as Flushbar).dismiss();
+              final SharedPreferences prefs =
+                  await SharedPreferences.getInstance();
+              final String myPhoneNumber = prefs.getString('myPhoneNumber')!;
+              _phoneAuthentication(phoneNumber: myPhoneNumber);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+            ),
+            child: const Text('Aight bet'),
+          ),
+        );
+        return;
+      }
       showFlushBar(
         const Color.fromARGB(255, 0, 63, 114),
         'You might be redirected to your browsser. But don\'t panick. It is to verify you are not a bot...IKR',
@@ -45,17 +94,18 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         context,
       );
 
-      _phoneAuthentication();
+      _phoneAuthentication(phoneNumber: _enteredPhoneNumber);
     }
   }
 
-  void _anotherChance(String verificationId, int? resendToken) async {
+  void _otpHandler(
+      String verificationId, int? resendToken, String phoneNumber) async {
     Map<String, dynamic>? smsCodeAndVerificationIdandResendToken =
         await showModalBottomSheet(
       backgroundColor: Colors.transparent,
       context: context,
       builder: (context) => OTPModalBottomSheet(
-        phoneNumber: _enteredPhoneNumber,
+        phoneNumber: phoneNumber,
         resendToken: resendToken,
         verificationId: verificationId,
       ),
@@ -79,22 +129,41 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         );
 
         await _auth.signInWithCredential(credential);
-        await setPreferencesUpdateLocalAndRemoteDb(
-            phoneNumber: _enteredPhoneNumber, ref: ref, context: context);
+        if (_changeOfPhoneNumberVerification) {
+          _phoneAuthentication(phoneNumber: _enteredPhoneNumber);
+          _changeOfPhoneNumberVerification = false;
+        }
+        if (!_changeOfPhoneNumberVerification) {
+          await setPreferencesUpdateLocalAndRemoteDb(
+            phoneNumber: phoneNumber,
+            ref: ref,
+            context: context,
+          );
+        }
       } on FirebaseAuthException catch (e) {
         if (e.code == 'invalid-verification-code') {
-          showFlushBar(
-            Colors.red,
+          _flushBarKey = showFlushBar(
+            Theme.of(context).brightness == Brightness.dark
+                ? Theme.of(context).colorScheme.errorContainer
+                : Theme.of(context).colorScheme.error,
             'The verification code from SMS/OTP is invalid. Please check and enter the correct verification code again.',
             FlushbarPosition.TOP,
             context,
-            mainButtonOnPressed: () {
-              _anotherChance(verificationId, resendToken);
-            },
+            mainButton: ElevatedButton(
+              onPressed: () {
+                (_flushBarKey!.currentWidget as Flushbar).dismiss();
+                _otpHandler(verificationId, resendToken, phoneNumber);
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black, foregroundColor: Colors.white),
+              child: const Text('Try again'),
+            ),
           );
         } else {
           showFlushBar(
-            Colors.red,
+            Theme.of(context).brightness == Brightness.dark
+                ? Theme.of(context).colorScheme.errorContainer
+                : Theme.of(context).colorScheme.error,
             e.message ?? 'An Error occurred. Please Try again',
             FlushbarPosition.TOP,
             context,
@@ -111,23 +180,32 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
   }
 
-  void _phoneAuthentication() async {
+  void _phoneAuthentication({required String phoneNumber}) async {
     setState(() {
       _isAuthenticating = true;
     });
 
+    print('change is $_changeOfPhoneNumberVerification');
+
     await _auth.verifyPhoneNumber(
-      phoneNumber: _enteredPhoneNumber,
+      phoneNumber: phoneNumber,
       timeout: const Duration(seconds: 60),
       verificationCompleted: (PhoneAuthCredential credential) async {
-        await setPreferencesUpdateLocalAndRemoteDb(
-            phoneNumber: _enteredPhoneNumber, ref: ref, context: context);
+        if (!_changeOfPhoneNumberVerification) {
+          await setPreferencesUpdateLocalAndRemoteDb(
+            phoneNumber: _enteredPhoneNumber,
+            ref: ref,
+            context: context,
+          );
+        }
       },
       verificationFailed: (FirebaseAuthException e) {
         if (e.code == 'invalid-phone-number') {}
 
         showFlushBar(
-          Colors.red,
+          Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).colorScheme.errorContainer
+              : Theme.of(context).colorScheme.error,
           e.message ?? 'An Error occurred. Please Try again',
           FlushbarPosition.TOP,
           context,
@@ -138,22 +216,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         });
       },
       codeSent: (String verificationId, int? resendToken) async {
-        _anotherChance(verificationId, resendToken);
+        _otpHandler(verificationId, resendToken, phoneNumber);
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.appOpenedFromPickedCall && !_flushbarShown) {
-        showFlushBar(Colors.blue, 'You have to login to see the message.',
-            FlushbarPosition.TOP, context);
-        _flushbarShown = true;
-      }
-    });
   }
 
   @override

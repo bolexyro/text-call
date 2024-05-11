@@ -45,7 +45,7 @@ class _KeypadState extends ConsumerState<Keypad> {
       return;
     }
     String phoneNumber =
-        changeLocalToIntl(localPhoneNumber: widget.typedInPhoneNumber);
+        changeLocalToIntl(widget.typedInPhoneNumber);
     final bool numberExists = await checkIfNumberExists(
       phoneNumber,
     );
@@ -68,7 +68,7 @@ class _KeypadState extends ConsumerState<Keypad> {
               (contact) =>
                   contact.phoneNumber ==
                   changeLocalToIntl(
-                    localPhoneNumber: widget.typedInPhoneNumber,
+                    widget.typedInPhoneNumber,
                   ),
             )
             .toList()
@@ -79,14 +79,14 @@ class _KeypadState extends ConsumerState<Keypad> {
               (contact) =>
                   contact.phoneNumber ==
                   changeLocalToIntl(
-                    localPhoneNumber: widget.typedInPhoneNumber,
+                    widget.typedInPhoneNumber,
                   ),
             )
             .toList()[0]
         : Contact(
             name: '',
             phoneNumber:
-                changeLocalToIntl(localPhoneNumber: widget.typedInPhoneNumber),
+                changeLocalToIntl(widget.typedInPhoneNumber),
             imagePath: null,
           );
 
@@ -98,7 +98,7 @@ class _KeypadState extends ConsumerState<Keypad> {
       context: context,
       calleeName: callee.name,
       calleePhoneNumber:
-          changeLocalToIntl(localPhoneNumber: widget.typedInPhoneNumber),
+          changeLocalToIntl(widget.typedInPhoneNumber),
     );
   }
 

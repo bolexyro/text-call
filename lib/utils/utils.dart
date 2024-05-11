@@ -89,10 +89,10 @@ void createAwesomeNotification(
   );
 }
 
-String changeLocalToIntl({required String localPhoneNumber}) =>
+String changeLocalToIntl(String localPhoneNumber) =>
     '+234${localPhoneNumber.substring(1)}';
 
-String changeIntlToLocal({required String intlPhoneNumber}) =>
+String changeIntlToLocal(String intlPhoneNumber) =>
     '0${intlPhoneNumber.substring(4)}';
 
 // Future<bool> checkForInternetConnection(BuildContext context) async {
@@ -249,25 +249,13 @@ List<Recent> getRecentsForAContact(
   return recentsForThatContact;
 }
 
-void showFlushBar(Color color, String message, FlushbarPosition position,
+GlobalKey showFlushBar(Color color, String message, FlushbarPosition position,
     BuildContext context,
-    {void Function()? mainButtonOnPressed}) {
-  Flushbar().dismiss();
-
+    {Widget? mainButton}) {
+  final GlobalKey flushBarKey = GlobalKey();
   Flushbar(
-    mainButton: mainButtonOnPressed == null
-        ? null
-        : Column(
-            children: [
-              ElevatedButton(
-                onPressed: mainButtonOnPressed,
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white),
-                child: const Text('Try again'),
-              ),
-            ],
-          ),
+    key: flushBarKey,
+    mainButton: mainButton,
     animationDuration: const Duration(milliseconds: 800),
     dismissDirection: FlushbarDismissDirection.HORIZONTAL,
     backgroundColor: color,
@@ -278,7 +266,7 @@ void showFlushBar(Color color, String message, FlushbarPosition position,
       message,
       style: const TextStyle(fontSize: 16, color: Colors.white),
     ),
-    duration: mainButtonOnPressed == null
+    duration: mainButton == null
         ? const Duration(seconds: 4)
         : const Duration(seconds: 100),
     flushbarPosition: position,
@@ -286,6 +274,7 @@ void showFlushBar(Color color, String message, FlushbarPosition position,
     icon: const Icon(Icons.notifications),
     flushbarStyle: FlushbarStyle.FLOATING,
   ).show(context);
+  return flushBarKey;
 }
 
 Color makeColorLighter(Color color, int amount) {

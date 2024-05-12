@@ -392,6 +392,8 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
   required String phoneNumber,
   required WidgetRef ref,
   required BuildContext context,
+  required bool updateMeContact,
+  String? phoneNumberToBeUpdated,
 }) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.setBool('isUserLoggedIn', true);
@@ -399,13 +401,33 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
 
   await prefs.setString('myName', 'Me');
 
-  ref.read(contactsProvider.notifier).addContact(
-        Contact(
-          name: "Me",
-          phoneNumber: phoneNumber,
-          imagePath: null,
-        ),
-      );
+  if (updateMeContact) {
+    await ref.read(contactsProvider.notifier).loadContacts();
+    ref
+        .read(contactsProvider)
+        .where((contact) => contact.phoneNumber == phoneNumberToBeUpdated)
+        .first;
+    final originalContact = ref
+        .read(contactsProvider)
+        .where((contact) => contact.phoneNumber == phoneNumberToBeUpdated)
+        .first;z
+w    ref.read(contactsProvider.notifier).updateContact(
+          oldContactPhoneNumber: originalContact.phoneNumber,
+          newContact: Contact(
+            name: 'Me',
+            phoneNumber: phoneNumber,
+            imagePath: originalContact.imagePath,
+          ),
+        );
+  } else {
+    ref.read(contactsProvider.notifier).addContact(
+          Contact(
+            name: "Me",
+            phoneNumber: phoneNumber,
+            imagePath: null,
+          ),
+        );
+  }
 
   final db = FirebaseFirestore.instance;
   final fcm = FirebaseMessaging.instance;

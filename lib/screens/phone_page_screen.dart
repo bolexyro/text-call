@@ -132,14 +132,12 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
           KeypadScreen(
             scaffoldKey: _scaffoldKey,
           ),
-           ContactsRecentsScreen(
-                            scaffoldKey:_scaffoldKey,
-
+          ContactsRecentsScreen(
+            scaffoldKey: _scaffoldKey,
             whichScreen: WhichScreen.recent,
           ),
-           ContactsRecentsScreen(
-                                        scaffoldKey:_scaffoldKey,
-
+          ContactsRecentsScreen(
+            scaffoldKey: _scaffoldKey,
             whichScreen: WhichScreen.contact,
           ),
         ][_currentPageIndex],

@@ -189,8 +189,8 @@ class _ContactCardWProfilePicStackState
                       imagePath: _updatedContact.imagePath,
                     )
                   : Hero(
-                    tag: widget.contact.phoneNumber,
-                    child: ContactAvatarCircle(
+                      tag: widget.contact.phoneNumber,
+                      child: ContactAvatarCircle(
                         onCirclePressed: widget.contact.imagePath == null
                             ? () async {
                                 final File? imageFile =
@@ -201,8 +201,9 @@ class _ContactCardWProfilePicStackState
                                 final appDir = await syspaths
                                     .getApplicationDocumentsDirectory();
                                 final filename = path.basename(imageFile.path);
-                                await imageFile.copy('${appDir.path}/$filename');
-                    
+                                await imageFile
+                                    .copy('${appDir.path}/$filename');
+
                                 setState(() {
                                   _updatedContact = Contact(
                                     name: _updatedContact.name,
@@ -210,15 +211,19 @@ class _ContactCardWProfilePicStackState
                                     imagePath: imageFile.path,
                                   );
                                 });
-                                ref.read(contactsProvider.notifier).updateContact(
-                                    oldContact: _updatedContact,
-                                    newContact: _updatedContact);
+                                ref
+                                    .read(contactsProvider.notifier)
+                                    .updateContact(
+                                      oldContactPhoneNumber:
+                                          _updatedContact.phoneNumber,
+                                      newContact: _updatedContact,
+                                    );
                               }
                             : null,
                         avatarRadius: _circleAvatarRadius,
                         imagePath: _updatedContact.imagePath,
                       ),
-                  ),
+                    ),
             ),
             Positioned(
               right: 0,

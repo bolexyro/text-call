@@ -24,10 +24,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   bool _isAuthenticating = false;
   bool _flushbarShown = false;
   bool _changeOfPhoneNumberVerification = false;
+  bool _updateMeContact = false;
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _textController = TextEditingController();
   final _auth = FirebaseAuth.instance;
+  late final _originalPhoneNumber;
 
   late final Future<SharedPreferences> _prefs;
 
@@ -60,22 +62,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       FocusManager.instance.primaryFocus?.unfocus();
 
       final prefs = await _prefs;
-      final originalPhoneNumber = prefs.getString('myPhoneNumber');
-      if (originalPhoneNumber != null &&
-          originalPhoneNumber != _enteredPhoneNumber) {
+      _originalPhoneNumber = prefs.getString('myPhoneNumber');
+      if (_originalPhoneNumber != null &&
+          _originalPhoneNumber != _enteredPhoneNumber) {
         _changeOfPhoneNumberVerification = true;
+        _updateMeContact = true;
         _flushBarKey = showFlushBar(
           const Color.fromARGB(255, 0, 63, 114),
-          'Wrong number! To change from ${changeIntlToLocal(originalPhoneNumber)} to ${changeIntlToLocal(_enteredPhoneNumber)}, you have to verify both numbers.',
+          'Wrong number! To change from ${changeIntlToLocal(_originalPhoneNumber)} to ${changeIntlToLocal(_enteredPhoneNumber)}, you have to verify both numbers.',
           FlushbarPosition.TOP,
           context,
           mainButton: ElevatedButton(
             onPressed: () async {
               (_flushBarKey!.currentWidget as Flushbar).dismiss();
-              final SharedPreferences prefs =
-                  await SharedPreferences.getInstance();
-              final String myPhoneNumber = prefs.getString('myPhoneNumber')!;
-              _phoneAuthentication(phoneNumber: myPhoneNumber);
+
+              _phoneAuthentication(phoneNumber: _originalPhoneNumber);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
@@ -100,8 +101,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   void _otpHandler(
       String verificationId, int? resendToken, String phoneNumber) async {
-    print('change in otp is $_changeOfPhoneNumberVerification');
-
     Map<String, dynamic>? smsCodeAndVerificationIdandResendToken =
         await showModalBottomSheet(
       backgroundColor: Colors.transparent,
@@ -141,6 +140,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             phoneNumber: phoneNumber,
             ref: ref,
             context: context,
+            updateMeContact: _updateMeContact,
+            phoneNumberToBeUpdated: _originalPhoneNumber,
           );
         }
       } on FirebaseAuthException catch (e) {
@@ -188,8 +189,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       _isAuthenticating = true;
     });
 
-    print('change is $_changeOfPhoneNumberVerification');
-
     await _auth.verifyPhoneNumber(
       phoneNumber: phoneNumber,
       timeout: const Duration(seconds: 60),
@@ -199,6 +198,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             phoneNumber: _enteredPhoneNumber,
             ref: ref,
             context: context,
+            updateMeContact: _updateMeContact,
           );
         }
       },

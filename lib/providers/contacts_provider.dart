@@ -11,9 +11,7 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
   Future<void> loadContacts() async {
     final db = await getDatabase();
     final data = await db.query(contactsTableName);
-    if (data.isNotEmpty) {
-      return;
-    }
+    
     final contactsList = data
         .map(
           (row) => Contact(
@@ -29,15 +27,15 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
   Future<void> addContact(Contact newContact) async {
     final db = await getDatabase();
 
-    final data = await db.query(
-      contactsTableName,
-      where: 'phoneNumber = ?',
-      whereArgs: [newContact.phoneNumber],
-    );
-
-    if (data.isNotEmpty) {
-      return;
-    }
+    // final data = await db.query(
+    //   contactsTableName,
+    //   where: 'phoneNumber = ?',
+    //   whereArgs: [newContact.phoneNumber],
+    // );
+    // print('data is $data');
+    // if (data.isNotEmpty) {
+    //   return;
+    // }
 
     db.insert(
       contactsTableName,
@@ -51,7 +49,8 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
   }
 
   Future<void> updateContact(
-      {required Contact oldContact, required Contact newContact}) async {
+      {required String oldContactPhoneNumber,
+      required Contact newContact}) async {
     final db = await getDatabase();
     db.update(
       contactsTableName,
@@ -61,11 +60,11 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
         'imagePath': newContact.imagePath
       },
       where: 'phoneNumber = ?',
-      whereArgs: [oldContact.phoneNumber],
+      whereArgs: [oldContactPhoneNumber],
     );
 
     final List<Contact> newState = List.from(state)
-      ..removeWhere((contact) => contact.phoneNumber == oldContact.phoneNumber);
+      ..removeWhere((contact) => contact.phoneNumber == oldContactPhoneNumber);
     newState.add(newContact);
     state = newState;
   }

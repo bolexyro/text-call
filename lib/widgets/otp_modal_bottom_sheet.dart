@@ -28,8 +28,8 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
   final int _totalCounterSeconds = 40;
   late int _counter;
   String _counterText = '';
-  late String _enteredPhoneNumber;
-  bool codeResent = false;
+  late String _phoneNumber;
+  bool _codeResent = false;
   late int? _resendToken;
 
   @override
@@ -37,7 +37,7 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
     super.initState();
     _counter = _totalCounterSeconds;
     _resendToken = widget.resendToken;
-    _enteredPhoneNumber = widget.phoneNumber;
+    _phoneNumber = widget.phoneNumber;
 
     for (int i = 0; i < 6; i++) {
       _focusNodes.add(FocusNode());
@@ -107,10 +107,11 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
   }
 
   void resendOtp() async {
+    _codeResent = true;
     final auth = FirebaseAuth.instance;
     await auth.verifyPhoneNumber(
       forceResendingToken: _resendToken,
-      phoneNumber: _enteredPhoneNumber,
+      phoneNumber: _phoneNumber,
       timeout: const Duration(seconds: 60),
       verificationCompleted: (PhoneAuthCredential credential) async {
         // await setPreferencesUpdateLocalAndRemoteDb(
@@ -184,7 +185,7 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
                     ),
                   ),
                   Text(
-                    'Enter the 6 digit code sent to you at ${changeIntlToLocal(_enteredPhoneNumber)}',
+                    'Enter the 6 digit code sent to you at ${changeIntlToLocal(_phoneNumber)}',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
@@ -239,7 +240,7 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
                                   }
                                   if (getOTP().length == 12) {
                                     // I am doing this just in case firebase sends a different oTP in the new ss
-                                    if (!codeResent) {
+                                    if (!_codeResent) {
                                       // here we weould be sending the same verificationId and resendToken as the one in widget.<whatever>
                                       Navigator.of(context).pop({
                                         'smsCode':

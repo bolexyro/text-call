@@ -106,7 +106,6 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
       await _saveImage(_imageFile);
 
       if (widget.contact != null) {
-        final Contact oldContact = widget.contact!;
         final newContact = Contact(
             name: _nameController.text,
             phoneNumber: changeLocalToIntl(
@@ -114,7 +113,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
             imagePath: _imageFile?.path,);
 
         await ref.read(contactsProvider.notifier).updateContact(
-              oldContact: oldContact,
+              oldContactPhoneNumber: widget.contact!.phoneNumber,
               newContact: newContact,
             );
         Navigator.of(context).pop(newContact);

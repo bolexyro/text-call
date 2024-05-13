@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/auth_screen.dart';
@@ -25,11 +23,11 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
   int _currentPageIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   bool _isDarkMode = Get.isDarkMode;
-  late Future<Contact> _myContact;
+  late Future<String> _futureToWaitFor;
 
   @override
   void initState() {
-    _myContact = _loadMeContact();
+    _futureToWaitFor = _loadThingsNeeded();
     ref.read(recentsProvider.notifier).loadRecents();
     super.initState();
   }
@@ -44,14 +42,10 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
     );
   }
 
-  Future<Contact> _loadMeContact() async {
+  Future<String> _loadThingsNeeded() async {
     await ref.read(contactsProvider.notifier).loadContacts();
     final prefs = await SharedPreferences.getInstance();
-    final myPhoneNumber = prefs.getString('myPhoneNumber');
-    return ref
-        .read(contactsProvider)
-        .where((contact) => contact.phoneNumber == myPhoneNumber)
-        .first;
+    return prefs.getString('myPhoneNumber')!;
   }
 
   @override
@@ -60,57 +54,47 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
       child: Scaffold(
         key: _scaffoldKey,
         drawer: Drawer(
-          child: ListView(
+          child: Column(
             children: [
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0, left: 10),
-                    child: IconButton(
-                      onPressed: () => setState(() {
-                        _myContact = _loadMeContact();
-                      }),
-                      icon: SvgPicture.asset(
-                        'assets/icons/sync.svg',
-                        height: 24,
-                        colorFilter: ColorFilter.mode(
-                            Theme.of(context).iconTheme.color!,
-                            BlendMode.srcIn),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-              DrawerHeader(
-                padding: const EdgeInsets.all(0),
-                child: FutureBuilder(
-                  future: _myContact,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
+              SizedBox(
+                height: 210,
+                child: DrawerHeader(
+                  padding: const EdgeInsets.only(top: 30),
+                  child: FutureBuilder(
+                    future: _futureToWaitFor,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        return const Center(
+                          child: Text(
+                              'Please close and reopen the drawer. Sorry for the inconvenience'),
+                        );
+                      }
+                      final String myPhoneNumber = snapshot.data!;
+                      final myContact = ref
+                          .watch(contactsProvider)
+                          .where(
+                              (contact) => contact.phoneNumber == myPhoneNumber)
+                          .first;
+                      return Column(
+                        children: [
+                          ContactAvatarCircle(
+                            avatarRadius: 45,
+                            imagePath: myContact.imagePath,
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                              '${myContact.name} @${changeIntlToLocal(myContact.phoneNumber)}'),
+                        ],
                       );
-                    }
-                    if (snapshot.hasError) {
-                      return const Center(
-                        child: Text(
-                            'Please exit and reopen the app. Sorry for the inconvenience'),
-                      );
-                    }
-
-                    final myContact = snapshot.data!;
-                    return Column(
-                      children: [
-                        ContactAvatarCircle(
-                            avatarRadius: 45, imagePath: myContact.imagePath),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                            '${myContact.name} @${changeIntlToLocal(myContact.phoneNumber)}'),
-                      ],
-                    );
-                  },
+                    },
+                  ),
                 ),
               ),
               SwitchListTile.adaptive(
@@ -130,9 +114,9 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
                 title: const Text('Dark Mode'),
               ),
               ListTile(
-                leading: const Icon(Icons.logout),
-                title: const Text('Log Out'),
-                onTap: () => _logout(),
+                leading: const Icon(Icons.close),
+                title: const Text('Cancel'),
+                onTap: () => Navigator.of(context).pop(),
               ),
               ListTile(
                 leading: const Icon(Icons.settings),
@@ -143,11 +127,15 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
                   ),
                 ),
               ),
+              const Spacer(),
               ListTile(
-                leading: const Icon(Icons.close),
-                title: const Text('Cancel'),
-                onTap: () => Navigator.of(context).pop(),
+                leading: const Icon(Icons.logout),
+                title: const Text('Log Out'),
+                onTap: () => _logout(),
               ),
+              const SizedBox(
+                height: 30,
+              )
             ],
           ),
         ),

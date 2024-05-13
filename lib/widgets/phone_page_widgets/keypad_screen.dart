@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:text_call/models/contact.dart';
+import 'package:text_call/providers/contacts_provider.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/contact_details.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/contact_letter_avatar.dart';
+import 'package:text_call/widgets/expandable_list_tile.dart';
 import 'package:text_call/widgets/keypad_screen_widgets/keypad.dart';
 
 class KeypadScreen extends ConsumerStatefulWidget {
@@ -17,6 +23,20 @@ class KeypadScreen extends ConsumerStatefulWidget {
 
 class _KeypadScreenState extends ConsumerState<KeypadScreen> {
   final _inputedDigitsTextController = TextEditingController(text: '');
+
+  List<Contact>? _contacsThatMatchPattern = [];
+
+  List<Contact> _getContactsWithMatch(String pattern) {
+    if (pattern == '') {
+      return [];
+    }
+    return ref
+        .read(contactsProvider)
+        .where((contact) =>
+            contact.localPhoneNumber.contains(pattern) ||
+            contact.phoneNumber.contains(pattern))
+        .toList();
+  }
 
   @override
   void initState() {
@@ -38,6 +58,8 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
       myText,
     );
     final myTextLength = myText.length;
+    _contacsThatMatchPattern = _getContactsWithMatch(newText);
+
     setState(() {
       _inputedDigitsTextController.text = newText;
       _inputedDigitsTextController.selection = textSelection.copyWith(
@@ -49,6 +71,8 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
 
   void _backspace({bool? longPress}) {
     if (longPress == true) {
+      _contacsThatMatchPattern = _getContactsWithMatch('');
+
       setState(() {
         _inputedDigitsTextController.text = '';
       });
@@ -65,6 +89,8 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
         textSelection.end,
         '',
       );
+      _contacsThatMatchPattern = _getContactsWithMatch(newText);
+
       setState(() {
         _inputedDigitsTextController.text = newText;
         _inputedDigitsTextController.selection = textSelection.copyWith(
@@ -89,6 +115,8 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
       newEnd,
       '',
     );
+    _contacsThatMatchPattern = _getContactsWithMatch(newText);
+
     setState(() {
       _inputedDigitsTextController.text = newText;
       _inputedDigitsTextController.selection = textSelection.copyWith(
@@ -111,13 +139,103 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
               icon: SvgPicture.asset(
                 'assets/icons/hamburger-menu.svg',
                 height: 30,
-                colorFilter:
-                     ColorFilter.mode(Theme.of(context).iconTheme.color ?? Colors.grey, BlendMode.srcIn),
+                colorFilter: ColorFilter.mode(
+                    Theme.of(context).iconTheme.color ?? Colors.grey,
+                    BlendMode.srcIn),
               ),
             ),
           ],
         ),
-        const Spacer(),
+        Expanded(
+          child: _contacsThatMatchPattern == null
+              ? const Text('')
+              : Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                  child: ListView(
+                    children: [
+                      for (final contact in _contacsThatMatchPattern!)
+                        ExpandableListTile(
+                          expandedContent: null,
+                          isExpanded: null,
+                          justARegularListTile: true,
+                          leading: GestureDetector(
+                            onTap: () {
+                              const stackPadding =
+                                  EdgeInsets.symmetric(horizontal: 10);
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => SafeArea(
+                                    child: Scaffold(
+                                      resizeToAvoidBottomInset: false,
+                                      body: Container(
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? null
+                                              : Colors.grey[200],
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      10.0),
+                                                  child: IconButton(
+                                                    onPressed: () =>
+                                                        Navigator.of(context)
+                                                            .pop(),
+                                                    icon: const Icon(Icons
+                                                        .arrow_back_ios_new),
+                                                  ),
+                                                ),
+                                                const Spacer(),
+                                              ],
+                                            ),
+                                            Expanded(
+                                              child: ContactDetails(
+                                                contact: contact,
+                                                stackContainerWidths:
+                                                    MediaQuery.sizeOf(context)
+                                                            .width -
+                                                        stackPadding.horizontal,
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            child: contact.imagePath != null
+                                ? Hero(
+                                    tag: contact.phoneNumber,
+                                    child: ContactAvatarCircle(
+                                      avatarRadius: 20,
+                                      imagePath: contact.imagePath,
+                                    ),
+                                  )
+                                : ContactLetterAvatar(
+                                    contactName: contact.name),
+                          ),
+                          title: Text(contact.name),
+                          tileOnTapped: () {
+                            _inputedDigitsTextController.text =
+                                contact.localPhoneNumber;
+                            setState(() {
+                              _contacsThatMatchPattern = _getContactsWithMatch(
+                                  _inputedDigitsTextController.text);
+                            });
+                          },
+                        )
+                    ],
+                  ),
+                ),
+        ),
         TextField(
           onChanged: (value) {},
           autofocus: true,
@@ -128,15 +246,10 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
           decoration: const InputDecoration(border: InputBorder.none),
           style: const TextStyle(fontSize: 43, fontWeight: FontWeight.bold),
         ),
-        SizedBox(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 50.0),
-            child: Keypad(
-              typedInPhoneNumber: _inputedDigitsTextController.text,
-              onBackButtonPressed: _backspace,
-              onKeyPressed: _addDigit,
-            ),
-          ),
+        Keypad(
+          typedInPhoneNumber: _inputedDigitsTextController.text,
+          onBackButtonPressed: _backspace,
+          onKeyPressed: _addDigit,
         ),
         const SizedBox(
           height: 10,

@@ -105,174 +105,179 @@ class _KeypadState extends ConsumerState<Keypad> {
     final keypadHeight = MediaQuery.sizeOf(context).height * .5;
     final buttonWidth = keypadWidth / 3;
     final buttonHeight = keypadHeight / 5;
+
+    print(buttonHeight);
+
     return SizedBox(
       height: keypadHeight,
       width: keypadWidth,
-      child: Container(
-        // color: Colors.red,
-        child: Column(
-          children: [
-            Row(
-              children: [
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: KeypadButton(
-                    buttonText: '1',
-                    onButtonPressed: widget.onKeyPressed,
-                  ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: KeypadButton(
+                  buttonText: '1',
+                  onButtonPressed: widget.onKeyPressed,
                 ),
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: KeypadButton(
-                    buttonText: '2',
-                    onButtonPressed: widget.onKeyPressed,
-                  ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: KeypadButton(
+                  buttonText: '2',
+                  onButtonPressed: widget.onKeyPressed,
                 ),
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: KeypadButton(
-                    buttonText: '3',
-                    onButtonPressed: widget.onKeyPressed,
-                  ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: KeypadButton(
+                  buttonText: '3',
+                  onButtonPressed: widget.onKeyPressed,
                 ),
-              ],
-            ),
-            Row(
-              children: [
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: KeypadButton(
-                    buttonText: '4',
-                    onButtonPressed: widget.onKeyPressed,
-                  ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: KeypadButton(
+                  buttonText: '4',
+                  onButtonPressed: widget.onKeyPressed,
                 ),
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: KeypadButton(
-                    buttonText: '5',
-                    onButtonPressed: widget.onKeyPressed,
-                  ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: KeypadButton(
+                  buttonText: '5',
+                  onButtonPressed: widget.onKeyPressed,
                 ),
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: KeypadButton(
-                    buttonText: '6',
-                    onButtonPressed: widget.onKeyPressed,
-                  ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: KeypadButton(
+                  buttonText: '6',
+                  onButtonPressed: widget.onKeyPressed,
                 ),
-              ],
-            ),
-            Row(
-              children: [
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: KeypadButton(
-                    buttonText: '7',
-                    onButtonPressed: widget.onKeyPressed,
-                  ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: KeypadButton(
+                  buttonText: '7',
+                  onButtonPressed: widget.onKeyPressed,
                 ),
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: KeypadButton(
-                    buttonText: '8',
-                    onButtonPressed: widget.onKeyPressed,
-                  ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: KeypadButton(
+                  buttonText: '8',
+                  onButtonPressed: widget.onKeyPressed,
                 ),
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: KeypadButton(
-                    buttonText: '9',
-                    onButtonPressed: widget.onKeyPressed,
-                  ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: KeypadButton(
+                  buttonText: '9',
+                  onButtonPressed: widget.onKeyPressed,
                 ),
-              ],
-            ),
-            Row(
-              children: [
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: KeypadButton(
-                    buttonText: '*',
-                    onButtonPressed: widget.onKeyPressed,
-                  ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: KeypadButton(
+                  buttonText: '*',
+                  onButtonPressed: widget.onKeyPressed,
                 ),
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: KeypadButton(
-                    buttonText: '0',
-                    onButtonPressed: widget.onKeyPressed,
-                  ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: KeypadButton(
+                  buttonText: '0',
+                  onButtonPressed: widget.onKeyPressed,
                 ),
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: KeypadButton(
-                    buttonText: '#',
-                    onButtonPressed: widget.onKeyPressed,
-                  ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: KeypadButton(
+                  buttonText: '#',
+                  onButtonPressed: widget.onKeyPressed,
                 ),
-              ],
-            ),
-            Row(
-              children: [
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                ),
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: _isCheckingIfNumberExists
-                        ? () {}
-                        : () {
-                            phoneNumberVerification(context, ref);
-                          },
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+              ),
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: _isCheckingIfNumberExists
+                      ? () {}
+                      : () {
+                          phoneNumberVerification(context, ref);
+                        },
+                  child: Padding(
+                    padding: EdgeInsets.all(buttonHeight * .1),
                     child: Container(
                       decoration: const BoxDecoration(
                         color: Colors.blue,
                         shape: BoxShape.circle,
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding:  EdgeInsets.all(buttonHeight * .15),
                         child: SvgPicture.asset(
                           'assets/icons/message-ring.svg',
                           colorFilter: const ColorFilter.mode(
-                              Colors.white, BlendMode.srcIn),
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: () {
-                      widget.onBackButtonPressed();
-                    },
-                    onLongPress: () =>
-                        widget.onBackButtonPressed(longPress: true),
-                    child: const Icon(Icons.backspace),
-                  ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () {
+                    widget.onBackButtonPressed();
+                  },
+                  onLongPress: () =>
+                      widget.onBackButtonPressed(longPress: true),
+                  child: const Icon(Icons.backspace),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

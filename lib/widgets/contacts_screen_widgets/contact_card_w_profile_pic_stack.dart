@@ -42,6 +42,7 @@ class _ContactCardWProfilePicStackState
       name: widget.contact.name,
       phoneNumber: widget.contact.phoneNumber,
       imagePath: widget.contact.imagePath,
+      isMyContact: widget.contact.isMyContact,
     );
     super.initState();
   }
@@ -50,7 +51,12 @@ class _ContactCardWProfilePicStackState
     if (newContact.name != _updatedContact.name ||
         newContact.phoneNumber != _updatedContact.phoneNumber) {
       setState(() {
-        _updatedContact = newContact;
+        _updatedContact = Contact(
+          name: newContact.name,
+          phoneNumber: newContact.phoneNumber,
+          imagePath: newContact.imagePath,
+          isMyContact: _updatedContact.isMyContact,
+        );
       });
     }
   }
@@ -61,36 +67,29 @@ class _ContactCardWProfilePicStackState
           ? null
           : IconButton(
               onPressed: () async {
-                if (widget.recent == null) {
-                  final contact = await showAddContactDialog(context,
-                      contact: _updatedContact);
-                  if (contact == null) {
-                    return;
-                  }
-                  _updateContactDetails(newContact: contact);
-                } else {
-                  showAddContactDialog(context,
-                      phoneNumber: widget.recent!.contact.phoneNumber);
-                }
+                showAddContactDialog(context,
+                    phoneNumber: widget.recent!.contact.phoneNumber);
               },
               icon: const Icon(Icons.person_add),
             );
     } else {
+      late final Contact? contact;
       return IconButton(
-          onPressed: () async {
-            if (widget.recent == null) {
-              final contact =
-                  await showAddContactDialog(context, contact: _updatedContact);
-              if (contact == null) {
-                return;
-              }
-              _updateContactDetails(newContact: contact);
-            } else {
-              showAddContactDialog(context,
-                  phoneNumber: widget.recent!.contact.phoneNumber);
-            }
-          },
-          icon: const Icon(Icons.edit));
+        onPressed: () async {
+          if (_updatedContact.isMyContact) {
+            contact = await showAddContactDialog(context,
+                phoneNumber: _updatedContact.phoneNumber, contact: _updatedContact);
+          } else {
+            contact =
+                await showAddContactDialog(context, contact: _updatedContact);
+          }
+          if (contact == null) {
+            return;
+          }
+          _updateContactDetails(newContact: contact!);
+        },
+        icon: const Icon(Icons.edit),
+      );
     }
   }
 

@@ -13,10 +13,12 @@ class AddContactDialog extends ConsumerStatefulWidget {
     super.key,
     this.phoneNumber,
     this.contact,
+    this.name,
   });
 
   final String? phoneNumber;
   final Contact? contact;
+  final String? name;
 
   @override
   ConsumerState<AddContactDialog> createState() => _AddContactState();
@@ -28,7 +30,6 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
   String? _enteredPhoneNumber;
   bool _isAddingContact = false;
   File? _imageFile;
-  // ImageSource? _source;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
@@ -42,6 +43,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
           ? null
           : File(widget.contact!.imagePath!);
     }
+
     super.initState();
   }
 
@@ -86,7 +88,8 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
 
       final bool numberIsAlreadyAContact =
           _checkIfContactIsAlreadyInContactList(_enteredPhoneNumber!);
-      if (numberExists == false || numberIsAlreadyAContact == true && widget.contact == null) {
+      if (numberExists == false ||
+          numberIsAlreadyAContact == true && widget.contact == null) {
         String errorMessage = numberExists == false
             ? 'Number doesn\'t exist'
             : 'Number is already a contact';
@@ -107,10 +110,10 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
 
       if (widget.contact != null) {
         final newContact = Contact(
-            name: _nameController.text,
-            phoneNumber: changeLocalToIntl(
-                 _phoneNumberController.text),
-            imagePath: _imageFile?.path,);
+          name: _nameController.text,
+          phoneNumber: changeLocalToIntl(_phoneNumberController.text),
+          imagePath: _imageFile?.path,
+        );
 
         await ref.read(contactsProvider.notifier).updateContact(
               oldContactPhoneNumber: widget.contact!.phoneNumber,
@@ -135,6 +138,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
 
   @override
   Widget build(BuildContext context) {
+
     return AlertDialog.adaptive(
       scrollable: true,
       shape: RoundedRectangleBorder(
@@ -185,6 +189,8 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
                   const SizedBox(
                     height: 14,
                   ),
+                  // if widget.phoneNumber is not null, then what we want to do is add a new contact and all we want 
+                  // from the user is the name since we already have the phoneNumber.
                   if (widget.phoneNumber == null)
                     TextFormField(
                       controller: _phoneNumberController,
@@ -197,8 +203,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
                         return null;
                       },
                       onSaved: (newValue) {
-                        _enteredPhoneNumber =
-                            changeLocalToIntl(newValue!);
+                        _enteredPhoneNumber = changeLocalToIntl(newValue!);
                       },
                       maxLength: 11,
                       keyboardType: TextInputType.phone,

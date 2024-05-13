@@ -18,8 +18,7 @@ class ContactsRecentsScreen extends ConsumerStatefulWidget {
     required this.scaffoldKey,
   });
 
-    final GlobalKey<ScaffoldState> scaffoldKey;
-
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
   final WhichScreen whichScreen;
   @override
@@ -150,8 +149,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
       }
 
       return ContactsList(
-                        scaffoldKey: widget.scaffoldKey,
-
+        scaffoldKey: widget.scaffoldKey,
         screen: Screen.phone,
         onContactSelected: (Contact selectedContact) =>
             _goToPage(selectedContact: selectedContact),

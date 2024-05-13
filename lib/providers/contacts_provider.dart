@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/utils/utils.dart';
 
@@ -9,19 +10,22 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
   ContactsNotifier() : super([]);
 
   Future<void> loadContacts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String myPhoneNumber = prefs.getString('myPhoneNumber')!;
     final db = await getDatabase();
     final data = await db.query(contactsTableName);
-    
     final contactsList = data
         .map(
           (row) => Contact(
             name: row['name'] as String,
             phoneNumber: row['phoneNumber'] as String,
             imagePath: row['imagePath'] as String?,
+            isMyContact:
+                row['phoneNumber'] as String == myPhoneNumber ? true : false,
           ),
         )
         .toList();
-    state = contactsList;
+  state = contactsList;
   }
 
   Future<void> addContact(Contact newContact) async {

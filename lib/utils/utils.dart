@@ -5,7 +5,6 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -399,8 +398,6 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
   await prefs.setBool('isUserLoggedIn', true);
   await prefs.setString('myPhoneNumber', phoneNumber);
 
-  await prefs.setString('myName', 'Me');
-
   if (updateMeContact) {
     await ref.read(contactsProvider.notifier).loadContacts();
     ref
@@ -410,8 +407,8 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
     final originalContact = ref
         .read(contactsProvider)
         .where((contact) => contact.phoneNumber == phoneNumberToBeUpdated)
-        .first;z
-w    ref.read(contactsProvider.notifier).updateContact(
+        .first;
+    ref.read(contactsProvider.notifier).updateContact(
           oldContactPhoneNumber: originalContact.phoneNumber,
           newContact: Contact(
             name: 'Me',

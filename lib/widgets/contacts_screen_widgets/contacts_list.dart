@@ -344,29 +344,33 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                           ),
                         ],
                       ),
-                      endActionPane: ActionPane(
-                        motion: const BehindMotion(),
-                        children: [
-                          CustomSlidableAction(
-                            onPressed: (context) {
-                              _showDeleteDialog(context, contactN);
-                            },
-                            backgroundColor: const Color(0xFFFE4A49),
-                            foregroundColor: Colors.white,
-                            child: const Icon(
-                              Icons.delete,
-                              size: 30,
+                      endActionPane: contactN.isMyContact
+                          ? null
+                          : ActionPane(
+                              motion: const BehindMotion(),
+                              children: [
+                                CustomSlidableAction(
+                                  onPressed: (context) {
+                                    _showDeleteDialog(context, contactN);
+                                  },
+                                  backgroundColor: const Color(0xFFFE4A49),
+                                  foregroundColor: Colors.white,
+                                  child: const Icon(
+                                    Icons.delete,
+                                    size: 30,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
                       child: ExpandableListTile(
                         justARegularListTile:
                             widget.screen == Screen.phone ? false : true,
                         isExpanded: _expandedBoolsMap[contactN]!,
                         title: Text(contactN.name),
                         leading: GestureDetector(
-                          onTap: () => widget.onContactSelected(contactN),
+                          onTap: () {
+                            widget.onContactSelected(contactN);
+                          },
                           child: contactN.imagePath != null
                               ? withOrWithoutHero(contactN)
                               : ContactLetterAvatar(contactName: contactN.name),

@@ -1,13 +1,14 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/auth_screen.dart';
 import 'package:text_call/screens/settings_screen.dart';
+import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 
 import 'package:text_call/widgets/phone_page_widgets/contacts_or_recents_screen.dart';
@@ -24,10 +25,11 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
   int _currentPageIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   bool _isDarkMode = Get.isDarkMode;
+  late Future<Contact> _myContact;
 
   @override
   void initState() {
-    ref.read(contactsProvider.notifier).loadContacts();
+    _myContact = _loadMeContact();
     ref.read(recentsProvider.notifier).loadRecents();
     super.initState();
   }
@@ -42,6 +44,16 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
     );
   }
 
+  Future<Contact> _loadMeContact() async {
+    await ref.read(contactsProvider.notifier).loadContacts();
+    final prefs = await SharedPreferences.getInstance();
+    final myPhoneNumber = prefs.getString('myPhoneNumber');
+    return ref
+        .read(contactsProvider)
+        .where((contact) => contact.phoneNumber == myPhoneNumber)
+        .first;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -50,15 +62,55 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
         drawer: Drawer(
           child: ListView(
             children: [
-              const DrawerHeader(
-                child: Column(
-                  children: [
-                    ContactAvatarCircle(avatarRadius: 45, imagePath: null),
-                    SizedBox(
-                      height: 10,
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10.0, left: 10),
+                    child: IconButton(
+                      onPressed: () => setState(() {
+                        _myContact = _loadMeContact();
+                      }),
+                      icon: SvgPicture.asset(
+                        'assets/icons/sync.svg',
+                        height: 24,
+                        colorFilter: ColorFilter.mode(
+                            Theme.of(context).iconTheme.color!,
+                            BlendMode.srcIn),
+                      ),
                     ),
-                    Text('Me @ 09027929326'),
-                  ],
+                  )
+                ],
+              ),
+              DrawerHeader(
+                padding: const EdgeInsets.all(0),
+                child: FutureBuilder(
+                  future: _myContact,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return const Center(
+                        child: Text(
+                            'Please exit and reopen the app. Sorry for the inconvenience'),
+                      );
+                    }
+
+                    final myContact = snapshot.data!;
+                    return Column(
+                      children: [
+                        ContactAvatarCircle(
+                            avatarRadius: 45, imagePath: myContact.imagePath),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                            '${myContact.name} @${changeIntlToLocal(myContact.phoneNumber)}'),
+                      ],
+                    );
+                  },
                 ),
               ),
               SwitchListTile.adaptive(

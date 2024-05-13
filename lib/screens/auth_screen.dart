@@ -29,7 +29,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _textController = TextEditingController();
   final _auth = FirebaseAuth.instance;
-  late final _originalPhoneNumber;
+  late String? _originalPhoneNumber;
 
   late final Future<SharedPreferences> _prefs;
 
@@ -69,14 +69,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         _updateMeContact = true;
         _flushBarKey = showFlushBar(
           const Color.fromARGB(255, 0, 63, 114),
-          'Wrong number! To change from ${changeIntlToLocal(_originalPhoneNumber)} to ${changeIntlToLocal(_enteredPhoneNumber)}, you have to verify both numbers.',
+          'Wrong number! To change from ${changeIntlToLocal(_originalPhoneNumber!)} to ${changeIntlToLocal(_enteredPhoneNumber)}, you have to verify both numbers.',
           FlushbarPosition.TOP,
           context,
           mainButton: ElevatedButton(
             onPressed: () async {
               (_flushBarKey!.currentWidget as Flushbar).dismiss();
 
-              _phoneAuthentication(phoneNumber: _originalPhoneNumber);
+              _phoneAuthentication(phoneNumber: _originalPhoneNumber!);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,

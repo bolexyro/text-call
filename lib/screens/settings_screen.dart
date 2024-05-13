@@ -18,7 +18,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         body: ListView(
           children: [
             ListTile(
-              title: const Text('Backup'),
+              title: const Text('Backup contacts and recents'),
               trailing: const Icon(Icons.backup),
               onTap: () {},
             )

@@ -113,11 +113,7 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
                 },
                 title: const Text('Dark Mode'),
               ),
-              ListTile(
-                leading: const Icon(Icons.close),
-                title: const Text('Cancel'),
-                onTap: () => Navigator.of(context).pop(),
-              ),
+              
               ListTile(
                 leading: const Icon(Icons.settings),
                 title: const Text('Settings'),
@@ -126,6 +122,11 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
                     builder: (context) => const SettingsScreen(),
                   ),
                 ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.close),
+                title: const Text('Cancel'),
+                onTap: () => Navigator.of(context).pop(),
               ),
               const Spacer(),
               ListTile(

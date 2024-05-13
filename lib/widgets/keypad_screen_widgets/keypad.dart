@@ -44,8 +44,7 @@ class _KeypadState extends ConsumerState<Keypad> {
       });
       return;
     }
-    String phoneNumber =
-        changeLocalToIntl(widget.typedInPhoneNumber);
+    String phoneNumber = changeLocalToIntl(widget.typedInPhoneNumber);
     final bool numberExists = await checkIfNumberExists(
       phoneNumber,
     );
@@ -85,8 +84,7 @@ class _KeypadState extends ConsumerState<Keypad> {
             .toList()[0]
         : Contact(
             name: '',
-            phoneNumber:
-                changeLocalToIntl(widget.typedInPhoneNumber),
+            phoneNumber: changeLocalToIntl(widget.typedInPhoneNumber),
             imagePath: null,
           );
 
@@ -97,153 +95,185 @@ class _KeypadState extends ConsumerState<Keypad> {
     showMessageWriterModalSheet(
       context: context,
       calleeName: callee.name,
-      calleePhoneNumber:
-          changeLocalToIntl(widget.typedInPhoneNumber),
+      calleePhoneNumber: changeLocalToIntl(widget.typedInPhoneNumber),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // return AutoHeightGridView(
-    //   itemCount: 12,
-    //   crossAxisCount: 3,
-    //   physics: const BouncingScrollPhysics(),
-    //   padding: const EdgeInsets.all(12),
-    //   shrinkWrap: true,
-    //   builder: (context, index) {
-    //     final buttons = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
-    //     if (index == 9) {
-    //       return Container();
-    //     }
-    //     if (index == 10) {
-    //       return Center(
-    //         child: IconButton(
-    //           onPressed: _isCheckingIfNumberExists
-    //               ? () {}
-    //               : () {
-    //                   phoneNumberVerification(context, ref);
-    //                 },
-    //           icon: Padding(
-    //             padding: const EdgeInsets.all(5),
-    //             child: SvgPicture.asset(
-    //               'assets/icons/message-ring.svg',
-    //               height: 30,
-    //               colorFilter:
-    //                   const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-    //             ),
-    //           ),
-    //           style: IconButton.styleFrom(
-    //             backgroundColor: Colors.blue,
-    //             foregroundColor: Colors.white,
-    //           ),
-    //         ),
-    //       );
-    //     }
-    //     if (index == 11) {
-    //       return InkWell(
-    //         customBorder: const CircleBorder(),
-    //         splashColor: Colors.grey,
-    //         onTap: () {
-    //           widget.onBackButtonPressed();
-    //         },
-    //         onLongPress: () => widget.onBackButtonPressed(longPress: true),
-    //         child: const Center(
-    //           child: Padding(
-    //             padding: EdgeInsets.all(18.0),
-    //             child: Icon(Icons.backspace),
-    //           ),
-    //         ),
-    //       );
-    //     }
-    //     return KeypadButton(
-    //         buttonText: buttons[index], onButtonPressed: widget.onKeyPressed);
-    //   },
-    // );
-    return GridView.count(
-      childAspectRatio: 1.3,
-      crossAxisCount: 3,
-      shrinkWrap: true,
-      children: [
-        KeypadButton(
-          buttonText: '1',
-          onButtonPressed: widget.onKeyPressed,
-        ),
-        KeypadButton(
-          buttonText: '2',
-          onButtonPressed: widget.onKeyPressed,
-        ),
-        KeypadButton(
-          buttonText: '3',
-          onButtonPressed: widget.onKeyPressed,
-        ),
-        KeypadButton(
-          buttonText: '4',
-          onButtonPressed: widget.onKeyPressed,
-        ),
-        KeypadButton(
-          buttonText: '5',
-          onButtonPressed: widget.onKeyPressed,
-        ),
-        KeypadButton(
-          buttonText: '6',
-          onButtonPressed: widget.onKeyPressed,
-        ),
-        KeypadButton(
-          buttonText: '7',
-          onButtonPressed: widget.onKeyPressed,
-        ),
-        KeypadButton(
-          buttonText: '8',
-          onButtonPressed: widget.onKeyPressed,
-        ),
-        KeypadButton(
-          buttonText: '9',
-          onButtonPressed: widget.onKeyPressed,
-        ),
-        KeypadButton(
-          buttonText: '*',
-          onButtonPressed: widget.onKeyPressed,
-        ),
-        KeypadButton(
-          buttonText: '0',
-          onButtonPressed: widget.onKeyPressed,
-        ),
-        KeypadButton(
-          buttonText: '#',
-          onButtonPressed: widget.onKeyPressed,
-        ),
-        Container(),
-        Center(
-          child: IconButton(
-            onPressed: _isCheckingIfNumberExists
-                ? () {}
-                : () {
-                    phoneNumberVerification(context, ref);
-                  },
-            icon: Padding(
-              padding: const EdgeInsets.all(5),
-              child: SvgPicture.asset(
-                'assets/icons/message-ring.svg',
-                height: 30,
-                colorFilter:
-                    const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-              ),
+    final keypadWidth = MediaQuery.sizeOf(context).width * .7;
+    final keypadHeight = MediaQuery.sizeOf(context).height * .5;
+    final buttonWidth = keypadWidth / 3;
+    final buttonHeight = keypadHeight / 5;
+    return SizedBox(
+      height: keypadHeight,
+      width: keypadWidth,
+      child: Container(
+        // color: Colors.red,
+        child: Column(
+          children: [
+            Row(
+              children: [
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: KeypadButton(
+                    buttonText: '1',
+                    onButtonPressed: widget.onKeyPressed,
+                  ),
+                ),
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: KeypadButton(
+                    buttonText: '2',
+                    onButtonPressed: widget.onKeyPressed,
+                  ),
+                ),
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: KeypadButton(
+                    buttonText: '3',
+                    onButtonPressed: widget.onKeyPressed,
+                  ),
+                ),
+              ],
             ),
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
+            Row(
+              children: [
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: KeypadButton(
+                    buttonText: '4',
+                    onButtonPressed: widget.onKeyPressed,
+                  ),
+                ),
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: KeypadButton(
+                    buttonText: '5',
+                    onButtonPressed: widget.onKeyPressed,
+                  ),
+                ),
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: KeypadButton(
+                    buttonText: '6',
+                    onButtonPressed: widget.onKeyPressed,
+                  ),
+                ),
+              ],
             ),
-          ),
+            Row(
+              children: [
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: KeypadButton(
+                    buttonText: '7',
+                    onButtonPressed: widget.onKeyPressed,
+                  ),
+                ),
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: KeypadButton(
+                    buttonText: '8',
+                    onButtonPressed: widget.onKeyPressed,
+                  ),
+                ),
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: KeypadButton(
+                    buttonText: '9',
+                    onButtonPressed: widget.onKeyPressed,
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: KeypadButton(
+                    buttonText: '*',
+                    onButtonPressed: widget.onKeyPressed,
+                  ),
+                ),
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: KeypadButton(
+                    buttonText: '0',
+                    onButtonPressed: widget.onKeyPressed,
+                  ),
+                ),
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: KeypadButton(
+                    buttonText: '#',
+                    onButtonPressed: widget.onKeyPressed,
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                ),
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: _isCheckingIfNumberExists
+                        ? () {}
+                        : () {
+                            phoneNumberVerification(context, ref);
+                          },
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.blue,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: SvgPicture.asset(
+                          'assets/icons/message-ring.svg',
+                          colorFilter: const ColorFilter.mode(
+                              Colors.white, BlendMode.srcIn),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () {
+                      widget.onBackButtonPressed();
+                    },
+                    onLongPress: () =>
+                        widget.onBackButtonPressed(longPress: true),
+                    child: const Icon(Icons.backspace),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-        InkWell(
-          customBorder: const CircleBorder(),
-          onTap: () {
-            widget.onBackButtonPressed();
-          },
-          onLongPress: () => widget.onBackButtonPressed(longPress: true),
-          child: const Icon(Icons.backspace),
-        ),
-      ],
+      ),
     );
   }
 }

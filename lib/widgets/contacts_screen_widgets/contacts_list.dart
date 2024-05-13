@@ -5,7 +5,6 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-import 'package:local_hero/local_hero.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/search_screen.dart';
@@ -136,15 +135,12 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                     ),
                   ],
                 ),
-                LocalHero(
-                  tag: 'contact_text',
-                  child: Text(
-                    'Contacts',
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineLarge!
-                        .copyWith(fontWeight: FontWeight.bold),
-                  ),
+                Text(
+                  'Contacts',
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineLarge!
+                      .copyWith(fontWeight: FontWeight.bold),
                 ),
                 SizedBox(
                   height: 50,
@@ -197,17 +193,12 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                         BlendMode.srcIn),
                   ),
                 ),
-                //  SizedBox(width: 10),
-                LocalHero(
-                  tag: 'contact_text',
-                  child: Text(
-                    'Contacts',
-                    // style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineLarge!
-                        .copyWith(fontWeight: FontWeight.bold),
-                  ),
+                Text(
+                  'Contacts',
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineLarge!
+                      .copyWith(fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 IconButton(

@@ -344,7 +344,13 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                                   onPressed: (context) {
                                     _showDeleteDialog(context, contactN);
                                   },
-                                  backgroundColor: const Color(0xFFFE4A49),
+                                  backgroundColor:
+                                      Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .errorContainer
+                                          : Theme.of(context).colorScheme.error,
                                   foregroundColor: Colors.white,
                                   child: const Icon(
                                     Icons.delete,

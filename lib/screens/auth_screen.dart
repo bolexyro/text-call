@@ -197,6 +197,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         });
       }
     } else {
+      print('giannis');
       setState(() {
         _isAuthenticating = false;
       });
@@ -330,6 +331,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 onPressed: _isAuthenticating == true
                     ? null
                     : () {
+                        print('nope');
                         _validateForm();
                       },
                 style: ElevatedButton.styleFrom(

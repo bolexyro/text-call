@@ -1,3 +1,4 @@
+import 'package:auto_size_text_field/auto_size_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -232,15 +233,18 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
                   ),
                 ),
         ),
-        TextField(
-          onChanged: (value) {},
-          autofocus: true,
-          cursorColor: Colors.green,
-          keyboardType: TextInputType.none,
-          textAlign: TextAlign.center,
-          controller: _inputedDigitsTextController,
-          decoration: const InputDecoration(border: InputBorder.none),
-          style: const TextStyle(fontSize: 43, fontWeight: FontWeight.bold),
+        SizedBox(
+          width: MediaQuery.sizeOf(context).width *.8,
+          child: AutoSizeTextField(
+            controller: _inputedDigitsTextController,
+            onChanged: (value) {},
+            autofocus: true,
+            cursorColor: Colors.green,
+            keyboardType: TextInputType.none,
+            textAlign: TextAlign.center,
+            decoration: const InputDecoration(border: InputBorder.none),
+            style: const TextStyle(fontSize: 43, fontWeight: FontWeight.bold,),
+          ),
         ),
         Keypad(
           typedInPhoneNumber: _inputedDigitsTextController.text,

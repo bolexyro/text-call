@@ -49,14 +49,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
-  auto_height_grid_view:
+  auto_size_text_field:
     dependency: "direct main"
     description:
-      name: auto_height_grid_view
-      sha256: c6b91f673aa3e1ba8630eb8003111b96a7d20669a29d746d8bd8c617eb3e703d
+      name: auto_size_text_field
+      sha256: c4ba8714ba4216ca122acac1573581dac499f3162c9218a28b573dca73721b3f
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "2.2.3"
   awesome_notifications:
     dependency: "direct main"
     description:
@@ -335,6 +335,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  flutter_otp_text_field:
+    dependency: "direct main"
+    description:
+      name: flutter_otp_text_field
+      sha256: c51dc7ce1a6fd9430580decda1104643f14703819e351c4a3074c9fe3d24cdbc
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.3+2"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -882,10 +890,10 @@ packages:
     dependency: transitive
     description:
       name: vm_service
-      sha256: "3923c89304b715fb1eb6423f017651664a03bf5f4b29983627c4da791f74a4ec"
+      sha256: a75f83f14ad81d5fe4b3319710b90dec37da0e22612326b696c9e1b8f34bbf48
       url: "https://pub.dev"
     source: hosted
-    version: "14.2.1"
+    version: "14.2.0"
   web:
     dependency: transitive
     description:

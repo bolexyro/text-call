@@ -1,4 +1,3 @@
-// import 'package:auto_height_grid_view/auto_height_grid_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -26,7 +25,10 @@ class Keypad extends ConsumerStatefulWidget {
 class _KeypadState extends ConsumerState<Keypad> {
   bool _isCheckingIfNumberExists = false;
 
-  void phoneNumberVerification(BuildContext context, WidgetRef ref) async {
+  void _phoneNumberVerification(BuildContext context, WidgetRef ref) async {
+    if (widget.typedInPhoneNumber.isEmpty) {
+      return;
+    }
     setState(() {
       _isCheckingIfNumberExists = true;
     });
@@ -237,7 +239,7 @@ class _KeypadState extends ConsumerState<Keypad> {
                   onTap: _isCheckingIfNumberExists
                       ? () {}
                       : () {
-                          phoneNumberVerification(context, ref);
+                          _phoneNumberVerification(context, ref);
                         },
                   child: Padding(
                     padding: EdgeInsets.all(buttonHeight * .15),

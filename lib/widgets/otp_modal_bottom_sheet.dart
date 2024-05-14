@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/utils/utils.dart';
 
@@ -82,22 +83,22 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
     );
   }
 
-  String removeEmptyCharacters(String otpWEmptyCh) {
-    return otpWEmptyCh[1] +
-        otpWEmptyCh[3] +
-        otpWEmptyCh[5] +
-        otpWEmptyCh[7] +
-        otpWEmptyCh[9] +
-        otpWEmptyCh[11];
-  }
+  // String removeEmptyCharacters(String otpWEmptyCh) {
+  //   return otpWEmptyCh[1] +
+  //       otpWEmptyCh[3] +
+  //       otpWEmptyCh[5] +
+  //       otpWEmptyCh[7] +
+  //       otpWEmptyCh[9] +
+  //       otpWEmptyCh[11];
+  // }
 
-  String getOTP() {
-    String output = '';
-    for (final controller in _textControllers) {
-      output += controller.text;
-    }
-    return output;
-  }
+  // String getOTP() {
+  //   String output = '';
+  //   for (final controller in _textControllers) {
+  //     output += controller.text;
+  //   }
+  //   return output;
+  // }
 
   late Completer<String> _completer;
 
@@ -192,95 +193,121 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 20.0),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (int index = 0; index < 6; index++)
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 43,
-                              child: TextFormField(
-                                autofocus: index == 0 ? true : false,
-                                controller: _textControllers[index],
-                                focusNode: _focusNodes[index],
-                                keyboardType: TextInputType.number,
-                                textAlign: TextAlign.center,
-                                onChanged: (value) {
-                                  // print(
-                                  //     'value is $value value length is ${value.length}');
+                  // Row(
+                  //   mainAxisSize: MainAxisSize.min,
+                  //   children: [
+                  //     for (int index = 0; index < 6; index++)
+                  //       Row(
+                  //         children: [
+                  //           SizedBox(
+                  //             width: 43,
+                  //             child: TextFormField(
+                  //               autofocus: index == 0 ? true : false,
+                  //               controller: _textControllers[index],
+                  //               focusNode: _focusNodes[index],
+                  //               keyboardType: TextInputType.number,
+                  //               textAlign: TextAlign.center,
+                  //               onChanged: (value) {
+                  //                 // print(
+                  //                 //     'value is $value value length is ${value.length}');
 
-                                  if (value.length >= 2 && index < 5) {
-                                    _textControllers[index].text =
-                                        value.length == 2
-                                            ? '${value[0]}${value[1]}'
-                                            : '${value[0]}${value[2]}';
-                                    // print(
-                                    //     'text controlle text is ${textControllers[index].text.length}');
-                                    if (_textControllers[index + 1]
-                                        .text
-                                        .isEmpty) {
-                                      _textControllers[index + 1].text =
-                                          '\u200B';
-                                    }
-                                    FocusScope.of(context).nextFocus();
-                                  }
+                  //                 if (value.length >= 2 && index < 5) {
+                  //                   _textControllers[index].text =
+                  //                       value.length == 2
+                  //                           ? '${value[0]}${value[1]}'
+                  //                           : '${value[0]}${value[2]}';
+                  //                   // print(
+                  //                   //     'text controlle text is ${textControllers[index].text.length}');
+                  //                   if (_textControllers[index + 1]
+                  //                       .text
+                  //                       .isEmpty) {
+                  //                     _textControllers[index + 1].text =
+                  //                         '\u200B';
+                  //                   }
+                  //                   FocusScope.of(context).nextFocus();
+                  //                 }
 
-                                  if (value.isEmpty && index > 0) {
-                                    FocusScope.of(context)
-                                        .requestFocus(_focusNodes[index - 1]);
-                                  }
+                  //                 if (value.isEmpty && index > 0) {
+                  //                   FocusScope.of(context)
+                  //                       .requestFocus(_focusNodes[index - 1]);
+                  //                 }
 
-                                  if (value.length == 1 &&
-                                      index == 0 &&
-                                      value != '\u200B') {
-                                    _textControllers[index + 1].text = '\u200B';
-                                    _textControllers[index].text =
-                                        '\u2008$value';
+                  //                 if (value.length == 1 &&
+                  //                     index == 0 &&
+                  //                     value != '\u200B') {
+                  //                   _textControllers[index + 1].text = '\u200B';
+                  //                   _textControllers[index].text =
+                  //                       '\u2008$value';
 
-                                    FocusScope.of(context).nextFocus();
-                                  }
-                                  if (getOTP().length == 12) {
-                                    // I am doing this just in case firebase sends a different oTP in the new ss
-                                    if (!_codeResent) {
-                                      // here we weould be sending the same verificationId and resendToken as the one in widget.<whatever>
-                                      Navigator.of(context).pop({
-                                        'smsCode':
-                                            removeEmptyCharacters(getOTP()),
-                                        'verificationId': widget.verificationId,
-                                        'resendToken': _resendToken,
-                                      });
-                                    } else {
-                                      _completer.complete(
-                                        removeEmptyCharacters(getOTP()),
-                                      );
-                                    }
-                                  }
-                                },
+                  //                   FocusScope.of(context).nextFocus();
+                  //                 }
+                  //                 if (getOTP().length == 12) {
+                  //                   // I am doing this just in case firebase sends a different oTP in the new ss
+                  //                   if (!_codeResent) {
+                  //                     // here we weould be sending the same verificationId and resendToken as the one in widget.<whatever>
+                  //                     Navigator.of(context).pop({
+                  //                       'smsCode':
+                  //                           removeEmptyCharacters(getOTP()),
+                  //                       'verificationId': widget.verificationId,
+                  //                       'resendToken': _resendToken,
+                  //                     });
+                  //                   } else {
+                  //                     _completer.complete(
+                  //                       removeEmptyCharacters(getOTP()),
+                  //                     );
+                  //                   }
+                  //                 }
+                  //               },
 
-                                decoration: InputDecoration(
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide:
-                                        const BorderSide(color: Colors.white),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide:
-                                        const BorderSide(color: Colors.blue),
-                                  ),
-                                  counterText: '',
-                                ),
-                                // maxLength: 2,
-                              ),
-                            ),
-                            if (index != 5)
-                              const SizedBox(
-                                width: 10,
-                              )
-                          ],
-                        )
-                    ],
+                  //               decoration: InputDecoration(
+                  //                 enabledBorder: OutlineInputBorder(
+                  //                   borderRadius: BorderRadius.circular(8),
+                  //                   borderSide:
+                  //                       const BorderSide(color: Colors.white),
+                  //                 ),
+                  //                 focusedBorder: OutlineInputBorder(
+                  //                   borderRadius: BorderRadius.circular(8),
+                  //                   borderSide:
+                  //                       const BorderSide(color: Colors.blue),
+                  //                 ),
+                  //                 counterText: '',
+                  //               ),
+                  //               // maxLength: 2,
+                  //             ),
+                  //           ),
+                  //           if (index != 5)
+                  //             const SizedBox(
+                  //               width: 10,
+                  //             )
+                  //         ],
+                  //       )
+                  //   ],
+                  // ),
+                  OtpTextField(
+                    autoFocus: true,
+                    numberOfFields: 6,
+                    borderRadius: BorderRadius.circular(8),
+                    borderColor: Colors.white,
+                    margin: const EdgeInsets.only(right: 10.0),
+                    focusedBorderColor: Colors.blue,
+                    showFieldAsBox: false,
+                    keyboardType: TextInputType.number,
+                    onCodeChanged: (String code) {
+                    },
+                    onSubmit: (String verificationCode) {
+                      if (!_codeResent) {
+                        // here we weould be sending the same verificationId and resendToken as the one in widget.<whatever>
+                        Navigator.of(context).pop({
+                          'smsCode': verificationCode,
+                          'verificationId': widget.verificationId,
+                          'resendToken': _resendToken,
+                        });
+                      } else {
+                        _completer.complete(
+                        verificationCode,
+                        );
+                      }
+                    }, // end onSubmit
                   ),
                   const SizedBox(height: 15),
                   if (_counter == 0)

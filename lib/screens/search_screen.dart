@@ -32,6 +32,12 @@ class _SearchScreenState extends State<SearchScreen> {
       MaterialPageRoute(
         builder: (context) => SafeArea(
           child: Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back_ios_new),
+              ),
+            ),
             resizeToAvoidBottomInset: false,
             body: Container(
               decoration: BoxDecoration(
@@ -40,28 +46,10 @@ class _SearchScreenState extends State<SearchScreen> {
                     : Colors.grey[200],
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: IconButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: const Icon(Icons.arrow_back_ios_new),
-                        ),
-                      ),
-                      const Spacer(),
-                    ],
-                  ),
-                  Expanded(
-                    child: ContactDetails(
-                      contact: selectedContact,
-                      stackContainerWidths: MediaQuery.sizeOf(context).width -
-                          stackPadding.horizontal,
-                    ),
-                  )
-                ],
+              child: ContactDetails(
+                contact: selectedContact,
+                stackContainerWidths:
+                    MediaQuery.sizeOf(context).width - stackPadding.horizontal,
               ),
             ),
           ),
@@ -95,6 +83,10 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios_new),
+        ),
         title: const Text('Search'),
       ),
       body: isPhone

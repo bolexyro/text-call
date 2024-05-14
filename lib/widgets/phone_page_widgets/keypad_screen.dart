@@ -3,10 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
+import 'package:text_call/screens/tablet_contact_details_screen.dart';
+import 'package:text_call/utils/constants.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_details.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_letter_avatar.dart';
-import 'package:text_call/widgets/expandable_list_tile.dart';
 import 'package:text_call/widgets/keypad_screen_widgets/keypad.dart';
 
 class KeypadScreen extends ConsumerStatefulWidget {
@@ -126,6 +127,53 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
     });
   }
 
+  void _goToContactDetailsScreen(Contact contact) {
+    const stackPadding = EdgeInsets.symmetric(horizontal: 10);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MediaQuery.sizeOf(context).width > tabletWidth
+            ? TabletContactDetailsScreen(contact: contact)
+            : SafeArea(
+                child: Scaffold(
+                  resizeToAvoidBottomInset: false,
+                  body: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? null
+                          : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: IconButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                icon: const Icon(Icons.arrow_back_ios_new),
+                              ),
+                            ),
+                            const Spacer(),
+                          ],
+                        ),
+                        Expanded(
+                          child: ContactDetails(
+                            contact: contact,
+                            stackContainerWidths:
+                                MediaQuery.sizeOf(context).width -
+                                    stackPadding.horizontal,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -154,62 +202,10 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
                   child: ListView(
                     children: [
                       for (final contact in _contacsThatMatchPattern!)
-                        ExpandableListTile(
-                          expandedContent: null,
-                          isExpanded: null,
-                          justARegularListTile: true,
+                        ListTile(
                           leading: GestureDetector(
                             onTap: () {
-                              const stackPadding =
-                                  EdgeInsets.symmetric(horizontal: 10);
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => SafeArea(
-                                    child: Scaffold(
-                                      resizeToAvoidBottomInset: false,
-                                      body: Container(
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).brightness ==
-                                                  Brightness.dark
-                                              ? null
-                                              : Colors.grey[200],
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.all(
-                                                      10.0),
-                                                  child: IconButton(
-                                                    onPressed: () =>
-                                                        Navigator.of(context)
-                                                            .pop(),
-                                                    icon: const Icon(Icons
-                                                        .arrow_back_ios_new),
-                                                  ),
-                                                ),
-                                                const Spacer(),
-                                              ],
-                                            ),
-                                            Expanded(
-                                              child: ContactDetails(
-                                                contact: contact,
-                                                stackContainerWidths:
-                                                    MediaQuery.sizeOf(context)
-                                                            .width -
-                                                        stackPadding.horizontal,
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
+                              _goToContactDetailsScreen(contact);
                             },
                             child: contact.imagePath != null
                                 ? Hero(
@@ -223,7 +219,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
                                     contactName: contact.name),
                           ),
                           title: Text(contact.name),
-                          tileOnTapped: () {
+                          onTap: () {
                             _inputedDigitsTextController.text =
                                 contact.localPhoneNumber;
                             setState(() {

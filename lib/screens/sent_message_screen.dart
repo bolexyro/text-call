@@ -35,7 +35,11 @@ class SentMessageScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
       child: widgetToRenderBasedOnHowAppIsOpened(
-          message: message, howSmsIsOpened: howSmsIsOpened, ref: ref),
+        message: message,
+        howSmsIsOpened: howSmsIsOpened,
+        ref: ref,
+        context: context,
+      ),
     );
   }
 }
@@ -196,7 +200,8 @@ class TheStackWidget extends StatelessWidget {
 Widget widgetToRenderBasedOnHowAppIsOpened(
     {required HowSmsIsOpened howSmsIsOpened,
     required Message? message,
-    required WidgetRef ref}) {
+    required WidgetRef ref,
+    required BuildContext context}) {
   if (howSmsIsOpened == HowSmsIsOpened.notFromTerminatedToShowMessage ||
       howSmsIsOpened == HowSmsIsOpened.notfromTerminatedForRequestAccess ||
       howSmsIsOpened == HowSmsIsOpened.notFromTerminatedForPickedCall) {
@@ -224,6 +229,10 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
     }
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios_new),
+        ),
         iconTheme: IconThemeData(
           color: message!.backgroundColor.computeLuminance() > 0.5
               ? Colors.black
@@ -301,6 +310,10 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
                   );
                   return Scaffold(
                     appBar: AppBar(
+                      leading: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_back_ios_new),
+                      ),
                       iconTheme: IconThemeData(
                         color: message.backgroundColor.computeLuminance() > 0.5
                             ? Colors.black
@@ -374,6 +387,10 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
             deJsonifyColor(json.decode(backgroundColor));
         return Scaffold(
           appBar: AppBar(
+            leading: IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back_ios_new),
+            ),
             iconTheme: IconThemeData(
               color: backgroundActualColor.computeLuminance() > 0.5
                   ? Colors.black

@@ -95,7 +95,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
           ContactCardWProfilePicStack(
             contact: widget.recent!.contact,
             recent: widget.recent,
-            transparentAndNonTransparentWidth: widget.stackContainerWidths,
+            width: widget.stackContainerWidths,
           ),
           const SizedBox(
             height: 10,
@@ -142,7 +142,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
       children: [
         ContactCardWProfilePicStack(
           contact: widget.contact!,
-          transparentAndNonTransparentWidth: widget.stackContainerWidths,
+          width: widget.stackContainerWidths,
         ),
         const SizedBox(
           height: 20,
@@ -214,7 +214,7 @@ class _ContactDetailsState extends ConsumerState<ContactDetails> {
                                 )
                               : ElevatedButton(
                                   onPressed: () =>
-                                      sendAccessRequest(widget.recent!),
+                                      sendAccessRequest(recentN),
                                   style: ElevatedButton.styleFrom(
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),

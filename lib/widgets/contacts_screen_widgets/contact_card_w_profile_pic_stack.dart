@@ -16,12 +16,12 @@ class ContactCardWProfilePicStack extends ConsumerStatefulWidget {
     super.key,
     required this.contact,
     this.recent,
-    required this.transparentAndNonTransparentWidth,
+    required this.width,
   });
 
   final Contact contact;
   final Recent? recent;
-  final double transparentAndNonTransparentWidth;
+  final double width;
 
   @override
   ConsumerState<ContactCardWProfilePicStack> createState() =>
@@ -78,7 +78,8 @@ class _ContactCardWProfilePicStackState
         onPressed: () async {
           if (_updatedContact.isMyContact) {
             contact = await showAddContactDialog(context,
-                phoneNumber: _updatedContact.phoneNumber, contact: _updatedContact);
+                phoneNumber: _updatedContact.phoneNumber,
+                contact: _updatedContact);
           } else {
             contact =
                 await showAddContactDialog(context, contact: _updatedContact);
@@ -107,7 +108,7 @@ class _ContactCardWProfilePicStackState
           children: [
             Container(
               height: _nonTransparentContainerheight,
-              width: widget.transparentAndNonTransparentWidth,
+              width: widget.width,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 color: isDarkTheme
@@ -180,8 +181,7 @@ class _ContactCardWProfilePicStackState
             ),
             Positioned(
               top: -_circleAvatarRadius,
-              left: (widget.transparentAndNonTransparentWidth / 2) -
-                  _circleAvatarRadius,
+              left: (widget.width / 2) - _circleAvatarRadius,
               child: widget.recent != null
                   ? ContactAvatarCircle(
                       avatarRadius: _circleAvatarRadius,

@@ -106,7 +106,6 @@ class _KeypadState extends ConsumerState<Keypad> {
     final buttonWidth = keypadWidth / 3;
     final buttonHeight = keypadHeight / 5;
 
-
     return SizedBox(
       height: keypadHeight,
       width: keypadWidth,
@@ -241,14 +240,14 @@ class _KeypadState extends ConsumerState<Keypad> {
                           phoneNumberVerification(context, ref);
                         },
                   child: Padding(
-                    padding: EdgeInsets.all(buttonHeight * .1),
+                    padding: EdgeInsets.all(buttonHeight * .15),
                     child: Container(
                       decoration: const BoxDecoration(
                         color: Colors.blue,
                         shape: BoxShape.circle,
                       ),
                       child: Padding(
-                        padding:  EdgeInsets.all(buttonHeight * .15),
+                        padding: EdgeInsets.all(buttonHeight * .12),
                         child: SvgPicture.asset(
                           'assets/icons/message-ring.svg',
                           colorFilter: const ColorFilter.mode(

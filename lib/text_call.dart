@@ -21,10 +21,10 @@ class TextCall extends StatefulWidget {
   const TextCall({
     super.key,
     required this.howAppIsOPened,
-    required this.isDarkMode,
+    required this.themeMode,
   });
   final HowAppIsOPened howAppIsOPened;
-  final bool isDarkMode;
+  final ThemeMode themeMode;
 
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
@@ -57,7 +57,7 @@ class _TextCallState extends State<TextCall> {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      themeMode: widget.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      themeMode:widget.themeMode,
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),

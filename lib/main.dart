@@ -71,33 +71,39 @@ Future<Widget> whichTextCall(ReceivedAction? receivedAction) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   final isDarkMode = prefs.getBool('isDarkMode');
 
+  final ThemeMode themeMode = isDarkMode == null
+      ? ThemeMode.system
+      : isDarkMode == true
+          ? ThemeMode.dark
+          : ThemeMode.light;
+
   if (receivedAction == null) {
     return TextCall(
-      isDarkMode: isDarkMode ?? true,
+      themeMode: themeMode,
       howAppIsOPened: HowAppIsOPened.appOpenedRegularly,
     );
   }
   if (receivedAction.buttonKeyPressed == 'ACCEPT_CALL') {
     return TextCall(
-        isDarkMode: isDarkMode ?? true,
+        themeMode: themeMode,
         howAppIsOPened: HowAppIsOPened.fromTerminatedForPickedCall);
   }
   // if the request access notification is tapped
   if (receivedAction.channelKey == 'access_requests_channel') {
     if (receivedAction.id.toString().startsWith('12')) {
       return TextCall(
-        isDarkMode: isDarkMode ?? true,
+        themeMode: themeMode,
         howAppIsOPened: HowAppIsOPened.fromTerminatedToShowMessage,
       );
     }
     return TextCall(
-      isDarkMode: isDarkMode ?? true,
+      themeMode: themeMode,
       howAppIsOPened: HowAppIsOPened.fromTerminatedForRequestAccess,
     );
   }
 
   return TextCall(
-    isDarkMode: isDarkMode ?? true,
+    themeMode: themeMode,
     howAppIsOPened: HowAppIsOPened.appOpenedRegularly,
   );
 }

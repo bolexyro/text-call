@@ -92,7 +92,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
           numberIsAlreadyAContact == true && widget.contact == null) {
         String errorMessage = numberExists == false
             ? 'Number doesn\'t exist'
-            : 'Number is already a contact';
+            : 'Number already exists';
         showADialog(
           header: 'Error!!',
           body: errorMessage,

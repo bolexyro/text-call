@@ -67,6 +67,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           _originalPhoneNumber != _enteredPhoneNumber) {
         _changeOfPhoneNumberVerification = true;
         _updateMeContact = true;
+
         _flushBarKey = showFlushBar(
           const Color.fromARGB(255, 0, 63, 114),
           'Wrong number! To change from ${changeIntlToLocal(_originalPhoneNumber!)} to ${changeIntlToLocal(_enteredPhoneNumber)}, you have to verify both numbers.',
@@ -75,8 +76,25 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           mainButton: ElevatedButton(
             onPressed: () async {
               (_flushBarKey!.currentWidget as Flushbar).dismiss();
+              _flushBarKey = showFlushBar(
+                const Color.fromARGB(255, 0, 63, 114),
+                'NB: If you change your number, people with your previous number won\'t be able to text call you',
+                FlushbarPosition.TOP,
+                context,
+                mainButton: ElevatedButton(
+                  onPressed: () async {
+                    (_flushBarKey!.currentWidget as Flushbar).dismiss();
 
-              _phoneAuthentication(phoneNumber: _originalPhoneNumber!);
+                    _phoneAuthentication(phoneNumber: _originalPhoneNumber!);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                  ),
+                  child: const Text('Ok'),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
@@ -86,6 +104,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             child: const Text('Aight bet'),
           ),
         );
+
         return;
       }
       showFlushBar(

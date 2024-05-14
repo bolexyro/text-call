@@ -106,7 +106,6 @@ class _KeypadState extends ConsumerState<Keypad> {
     final buttonWidth = keypadWidth / 3;
     final buttonHeight = keypadHeight / 5;
 
-    print(buttonHeight);
 
     return SizedBox(
       height: keypadHeight,

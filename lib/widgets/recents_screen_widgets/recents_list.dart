@@ -36,7 +36,7 @@ class RecentsList extends ConsumerStatefulWidget {
 class _RecentsListState extends ConsumerState<RecentsList> {
   final Map<Recent, bool> _expandedBoolsMap = {};
   CallFilters _selectedFilter = CallFilters.allCalls;
-  double bigHeight = 175;
+  double bigHeight = 185;
   double smallHeight = 70;
   late double animatedContainerHeight;
 

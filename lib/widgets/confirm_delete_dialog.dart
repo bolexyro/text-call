@@ -44,8 +44,12 @@ class _ConfirmDeleteDialogState extends State<ConfirmDeleteDialog> {
               ),
             ),
           ),
+          const SizedBox(
+            height: 10,
+          ),
           Text(
             'Delete Contact - ${widget.contactName}',
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 25,
               color: isDarkMode ? Colors.white : Colors.black,

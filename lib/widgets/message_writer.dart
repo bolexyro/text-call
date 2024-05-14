@@ -211,7 +211,29 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final snapshotData = json.decode(snapshot.data);
-            if (snapshotData['call_status'] == 'rejected') {
+            if (snapshotData['call_status'] == 'error') {
+              return Padding(
+                padding: const EdgeInsets.only(top: 10.0),
+                child: Stack(
+                  children: [
+                    Opacity(
+                      opacity: .5,
+                      child: Lottie.asset(
+                        'assets/animations/404 user not found.json',
+                        height: 300,
+                      ),
+                    ),
+                    Text(
+                      'The number you are trying to call doesn\'t exist. Are you sure you are not trying to call a previos version of your number.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.pacifico(
+                        fontSize: 32,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            } else if (snapshotData['call_status'] == 'rejected') {
               // create a recent in your table
               final recent = Recent.withoutContactObject(
                 category: RecentCategory.outgoingRejected,
@@ -248,32 +270,36 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 ),
               );
             }
-            final recent = Recent.withoutContactObject(
-              category: RecentCategory.outgoingAccepted,
-              message: Message(
-                  message: _messageController.text,
-                  backgroundColor: _selectedColor),
-              id: recentId,
-              phoneNumber: widget.calleePhoneNumber,
-            );
-            ref.read(recentsProvider.notifier).addRecent(recent);
-            _confettiController.play();
-            return AnimatedTextKit(
-              animatedTexts: [
-                ColorizeAnimatedText(
-                  'Thy call hath been answered',
-                  textAlign: TextAlign.center,
-                  textStyle: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 50,
-                    fontFamily: 'Horizon',
-                  ),
-                  colors: _colorizeColors,
-                )
-              ],
-              displayFullTextOnTap: true,
-              repeatForever: true,
-            );
+            if (snapshotData['call_status'] == 'accepted') {
+              final recent = Recent.withoutContactObject(
+                category: RecentCategory.outgoingAccepted,
+                message: Message(
+                    message: _messageController.text,
+                    backgroundColor: _selectedColor),
+                id: recentId,
+                phoneNumber: widget.calleePhoneNumber,
+              );
+              ref.read(recentsProvider.notifier).addRecent(recent);
+              _confettiController.play();
+              return AnimatedTextKit(
+                animatedTexts: [
+                  ColorizeAnimatedText(
+                    'Thy call hath been answered',
+                    textAlign: TextAlign.center,
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 50,
+                      fontFamily: 'Horizon',
+                    ),
+                    colors: _colorizeColors,
+                  )
+                ],
+                displayFullTextOnTap: true,
+                repeatForever: true,
+              );
+            }
+            return const Text(
+                'This shoul be for some case that is not available yet');
           } else {
             return FutureBuilder(
               future: _animationDelay,

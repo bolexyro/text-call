@@ -153,9 +153,11 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
                     : MediaQuery.viewInsetsOf(context).vertical + 30),
             width: MediaQuery.sizeOf(context).width,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.surfaceContainer
+                  : Theme.of(context).colorScheme.secondary,
               borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(30),
+                top: Radius.circular(20),
               ),
             ),
             child: SingleChildScrollView(
@@ -290,7 +292,10 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
                         });
                         startCountDownTimer();
                       },
-                      child: const Text('Resend Code'),
+                      child: Text(
+                        'Resend Code',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ),
                   if (_counter != 0)
                     Text('Resend code would be available in $_counterText'),

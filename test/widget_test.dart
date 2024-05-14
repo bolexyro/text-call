@@ -13,7 +13,7 @@ void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const TextCall(
-      isDarkMode: true,
+      themeMode: ThemeMode.system,
       howAppIsOPened: HowAppIsOPened.appOpenedRegularly,
     ));
 

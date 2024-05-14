@@ -12,6 +12,7 @@ import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
+import 'package:text_call/widgets/camera_or_gallery.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/add_contact_dialog.dart';
 import 'package:text_call/widgets/message_writer.dart';
 import 'package:sqflite/sqflite.dart' as sql;
@@ -317,69 +318,18 @@ void sendAccessRequest(Recent recent) async {
 }
 
 Future<File?> selectImage(BuildContext context) async {
-  ImageSource? source;
   FocusManager.instance.primaryFocus?.unfocus();
-  await showModalBottomSheet(
-    // backgroundColor: Colors.transparent,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(20),
-      ),
-    ),
-    context: context,
-    builder: (context) => Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(
-          height: 10,
-        ),
-        Container(
-          width: 50,
-          height: 5,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(2),
-            color: Colors.grey,
-          ),
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-                onPressed: () {
-                  source = ImageSource.camera;
-                  Navigator.of(context).pop();
-                },
-                iconSize: 40,
-                icon: const Icon(
-                  Icons.camera_alt_rounded,
-                )),
-            IconButton(
-                iconSize: 40,
-                onPressed: () {
-                  source = ImageSource.gallery;
-                  Navigator.of(context).pop();
-                },
-                icon: const Icon(
-                  Icons.photo_library_rounded,
-                )),
-          ],
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-      ],
-    ),
-  );
+  ImageSource? source = await showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      context: context,
+      builder: (context) => const CameraOrGallery());
 
   if (source == null) {
     return null;
   }
   final ImagePicker picker = ImagePicker();
-  final XFile? pickedImage = await picker.pickImage(source: source!);
+  final XFile? pickedImage = await picker.pickImage(source: source);
   if (pickedImage == null) {
     return null;
   }
@@ -398,24 +348,51 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
   await prefs.setBool('isUserLoggedIn', true);
   await prefs.setString('myPhoneNumber', phoneNumber);
 
+  final db = FirebaseFirestore.instance;
+  final fcm = FirebaseMessaging.instance;
+
   if (updateMeContact) {
     await ref.read(contactsProvider.notifier).loadContacts();
-    ref
-        .read(contactsProvider)
-        .where((contact) => contact.phoneNumber == phoneNumberToBeUpdated)
-        .first;
     final originalContact = ref
         .read(contactsProvider)
         .where((contact) => contact.phoneNumber == phoneNumberToBeUpdated)
         .first;
-    ref.read(contactsProvider.notifier).updateContact(
-          oldContactPhoneNumber: originalContact.phoneNumber,
-          newContact: Contact(
-            name: 'Me',
-            phoneNumber: phoneNumber,
-            imagePath: originalContact.imagePath,
-          ),
-        );
+
+    // if the new number is already a contact, update the name to me
+    // and the previos me should be me(previous)
+    final contactAlreadyExistingWithNewPhoneNumber = ref
+        .read(contactsProvider)
+        .where((contact) => contact.phoneNumber == phoneNumber)
+        .toList();
+
+    if (contactAlreadyExistingWithNewPhoneNumber.isNotEmpty) {
+      ref.read(contactsProvider.notifier).updateContact(
+            oldContactPhoneNumber: phoneNumber,
+            newContact: Contact(
+              name: originalContact.name,
+              phoneNumber: phoneNumber,
+              imagePath: originalContact.imagePath,
+            ),
+          );
+      ref.read(contactsProvider.notifier).updateContact(
+            oldContactPhoneNumber: originalContact.phoneNumber,
+            newContact: Contact(
+              name: '${originalContact.name}(previous)',
+              phoneNumber: originalContact.phoneNumber,
+              imagePath: originalContact.imagePath,
+            ),
+          );
+    } else {
+      ref.read(contactsProvider.notifier).updateContact(
+            oldContactPhoneNumber: originalContact.phoneNumber,
+            newContact: Contact(
+              name: originalContact.name,
+              phoneNumber: phoneNumber,
+              imagePath: originalContact.imagePath,
+            ),
+          );
+    }
+    db.collection("users").doc(originalContact.phoneNumber).delete();
   } else {
     ref.read(contactsProvider.notifier).addContact(
           Contact(
@@ -425,9 +402,6 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
           ),
         );
   }
-
-  final db = FirebaseFirestore.instance;
-  final fcm = FirebaseMessaging.instance;
 
   final fcmToken = await fcm.getToken();
   // Add a new document with a specified ID

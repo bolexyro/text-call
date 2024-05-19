@@ -19,7 +19,7 @@ Future<String> _getCallerName(String phoneNumber) async {
       .query('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
   await db.close();
   if (data.isEmpty) {
-    return changeIntlToLocal( phoneNumber);
+    return changeIntlToLocal(phoneNumber);
   } else {
     return data[0]['name'] as String;
   }
@@ -228,7 +228,7 @@ class NotificationController {
         MaterialPageRoute(
           builder: (context) => SentMessageScreen(
             message: message,
-            howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
+            howSmsIsOpened: HowSmsIsOpened.notFromTerminatedToPickCall,
           ),
         ),
       );
@@ -263,8 +263,9 @@ class NotificationController {
           MaterialPageRoute(
             builder: (context) => SentMessageScreen(
               howSmsIsOpened: receivedAction.id!.toString().startsWith('10')
-                  ? HowSmsIsOpened.notfromTerminatedForRequestAccess
-                  : HowSmsIsOpened.notFromTerminatedToShowMessage,
+                  ? HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess
+                  : HowSmsIsOpened
+                      .notFromTerminatedToShowMessageAfterAccessRequestGranted,
               message: Message(
                 message: data[0]['message'] as String,
                 backgroundColor: Color.fromARGB(

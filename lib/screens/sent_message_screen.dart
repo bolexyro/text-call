@@ -12,12 +12,12 @@ import 'package:text_call/models/message.dart';
 
 // sms = sent message screen
 enum HowSmsIsOpened {
-  fromTerminatedForRequestAccess,
-  fromTerminatedForPickedCall,
-  notfromTerminatedForRequestAccess,
-  notFromTerminatedForPickedCall,
-  notFromTerminatedToShowMessage,
-  fromTerminatedToShowMessage,
+  fromTerminatedToGrantOrDeyRequestAccess,
+  fromTerminatedToPickCall,
+  notFromTerminatedToGrantOrDeyRequestAccess,
+  notFromTerminatedToPickCall,
+  notFromTerminatedToShowMessageAfterAccessRequestGranted,
+  fromTerminatedToShowMessageAfterAccessRequestGranted,
 }
 
 class SentMessageScreen extends ConsumerWidget {
@@ -107,8 +107,10 @@ class TheStackWidget extends StatelessWidget {
             ),
           ),
         ),
-        if (howSmsIsOpened == HowSmsIsOpened.fromTerminatedForRequestAccess ||
-            howSmsIsOpened == HowSmsIsOpened.notfromTerminatedForRequestAccess)
+        if (howSmsIsOpened ==
+                HowSmsIsOpened.fromTerminatedToGrantOrDeyRequestAccess ||
+            howSmsIsOpened ==
+                HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess)
           Positioned(
             width: MediaQuery.sizeOf(context).width,
             bottom: 20,
@@ -119,7 +121,8 @@ class TheStackWidget extends StatelessWidget {
                   onPressed: () {
                     sendAccessRequestStatus(AccessRequestStatus.granted);
                     if (howSmsIsOpened ==
-                        HowSmsIsOpened.notfromTerminatedForRequestAccess) {
+                        HowSmsIsOpened
+                            .notFromTerminatedToGrantOrDeyRequestAccess) {
                       Navigator.of(context).pop();
                       return;
                     }
@@ -146,7 +149,8 @@ class TheStackWidget extends StatelessWidget {
                   onPressed: () {
                     sendAccessRequestStatus(AccessRequestStatus.denied);
                     if (howSmsIsOpened ==
-                        HowSmsIsOpened.notfromTerminatedForRequestAccess) {
+                        HowSmsIsOpened
+                            .notFromTerminatedToGrantOrDeyRequestAccess) {
                       Navigator.of(context).pop();
                       return;
                     }
@@ -169,7 +173,7 @@ class TheStackWidget extends StatelessWidget {
                   ),
                 ),
                 if (howSmsIsOpened ==
-                    HowSmsIsOpened.fromTerminatedForRequestAccess)
+                    HowSmsIsOpened.fromTerminatedToGrantOrDeyRequestAccess)
                   ElevatedButton(
                     onPressed: () => Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
@@ -202,10 +206,13 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
     required Message? message,
     required WidgetRef ref,
     required BuildContext context}) {
-  if (howSmsIsOpened == HowSmsIsOpened.notFromTerminatedToShowMessage ||
-      howSmsIsOpened == HowSmsIsOpened.notfromTerminatedForRequestAccess ||
-      howSmsIsOpened == HowSmsIsOpened.notFromTerminatedForPickedCall) {
-    if (howSmsIsOpened == HowSmsIsOpened.notFromTerminatedForPickedCall) {
+  if (howSmsIsOpened ==
+          HowSmsIsOpened
+              .notFromTerminatedToShowMessageAfterAccessRequestGranted ||
+      howSmsIsOpened ==
+          HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess ||
+      howSmsIsOpened == HowSmsIsOpened.notFromTerminatedToPickCall) {
+    if (howSmsIsOpened == HowSmsIsOpened.notFromTerminatedToPickCall) {
       final futurePrefs = SharedPreferences.getInstance();
       futurePrefs.then((prefs) {
         prefs.reload();
@@ -250,7 +257,8 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
   }
 
   // for when request access has been approved.
-  if (howSmsIsOpened == HowSmsIsOpened.fromTerminatedToShowMessage) {
+  if (howSmsIsOpened ==
+      HowSmsIsOpened.fromTerminatedToShowMessageAfterAccessRequestGranted) {
     final prefs = SharedPreferences.getInstance();
 
     return FutureBuilder(
@@ -400,8 +408,10 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
             title: scaffoldTitle(backgroundActualColor),
           ),
           floatingActionButton: howSmsIsOpened ==
-                      HowSmsIsOpened.fromTerminatedForPickedCall ||
-                  howSmsIsOpened == HowSmsIsOpened.fromTerminatedToShowMessage
+                      HowSmsIsOpened.fromTerminatedToPickCall ||
+                  howSmsIsOpened ==
+                      HowSmsIsOpened
+                          .fromTerminatedToShowMessageAfterAccessRequestGranted
               ? FloatingActionButton(
                   onPressed: () => Navigator.of(context).pushReplacement(
                     MaterialPageRoute(

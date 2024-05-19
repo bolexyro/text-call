@@ -463,7 +463,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                     }
                   }
                   // Returning null (or false) to
-                  // "allow the notification to continue to be dispatched to further ancestors".
+                // "allow the notification to continue to be dispatched to further ancestors".
                   return false;
                 },
                 child: GroupedListView(

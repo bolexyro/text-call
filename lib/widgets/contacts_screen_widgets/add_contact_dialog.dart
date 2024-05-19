@@ -138,7 +138,6 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
 
   @override
   Widget build(BuildContext context) {
-
     return AlertDialog.adaptive(
       scrollable: true,
       shape: RoundedRectangleBorder(
@@ -189,7 +188,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
                   const SizedBox(
                     height: 14,
                   ),
-                  // if widget.phoneNumber is not null, then what we want to do is add a new contact and all we want 
+                  // if widget.phoneNumber is not null, then what we want to do is add a new contact and all we want
                   // from the user is the name since we already have the phoneNumber.
                   if (widget.phoneNumber == null)
                     TextFormField(

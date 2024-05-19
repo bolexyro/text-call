@@ -11,6 +11,7 @@ import 'package:confetti/confetti.dart';
 import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
+import 'package:text_call/screens/rich_message_writer.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/choose_color_dialog.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -123,59 +124,69 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 textCapitalization: TextCapitalization.sentences,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
-                    hintText: 'Enter the message you want to call them with',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  hintText: 'Enter the message you want to call them with',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  labelText: 'Message',
+                  labelStyle: const TextStyle(color: Colors.black),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Colors.black,
                     ),
-                    labelText: 'Message',
-                    labelStyle: const TextStyle(color: Colors.black),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Colors.black,
-                      ),
-                    )),
+                  ),
+                ),
               ),
               const SizedBox(
                 height: 30,
               ),
               Row(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    child: Material(
-                      borderRadius: BorderRadius.circular(8),
-                      color: Theme.of(context).primaryColor,
-                      child: InkWell(
-                        onTap: _showColorPicker,
+                  ElevatedButton(
+                    onPressed: _showColorPicker,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      backgroundColor: Theme.of(context).primaryColor,
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 16),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.color_lens,
-                                  color: _selectedColor // Icon color
-                                  ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Selected Color',
-                                style: TextStyle(
-                                  color: _selectedColor, // Text color
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ),
                     ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.color_lens,
+                            color: _selectedColor // Icon color
+                            ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Selected Color',
+                          style: TextStyle(
+                            color: _selectedColor, // Text color
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+
                   const Spacer(),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const RichMessageWriter(),
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('Complex editor?'),
+                  ),
                 ],
               ),
               const SizedBox(

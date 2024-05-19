@@ -7,7 +7,7 @@ import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/tablet_contact_details_screen.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
-import 'package:text_call/widgets/contacts_screen_widgets/contact_details.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/contact_details_pane.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_letter_avatar.dart';
 import 'package:text_call/widgets/keypad_screen_widgets/keypad.dart';
 
@@ -159,7 +159,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
                           ],
                         ),
                         Expanded(
-                          child: ContactDetails(
+                          child: ContactDetailsPane(
                             contact: contact,
                             stackContainerWidths:
                                 MediaQuery.sizeOf(context).width -
@@ -234,7 +234,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
                 ),
         ),
         SizedBox(
-          width: MediaQuery.sizeOf(context).width *.8,
+          width: MediaQuery.sizeOf(context).width * .8,
           child: AutoSizeTextField(
             controller: _inputedDigitsTextController,
             onChanged: (value) {},
@@ -243,7 +243,10 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
             keyboardType: TextInputType.none,
             textAlign: TextAlign.center,
             decoration: const InputDecoration(border: InputBorder.none),
-            style: const TextStyle(fontSize: 43, fontWeight: FontWeight.bold,),
+            style: const TextStyle(
+              fontSize: 43,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         Keypad(

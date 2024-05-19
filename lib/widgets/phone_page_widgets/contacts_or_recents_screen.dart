@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
+import 'package:text_call/screens/contact_details_screen.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
-import 'package:text_call/widgets/contacts_screen_widgets/contact_details.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/contact_details_pane.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contacts_list.dart';
 import 'package:text_call/widgets/recents_screen_widgets/recents_list.dart';
 
@@ -47,40 +48,11 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
   }
 
   void _goToPage({Contact? selectedContact, Recent? selectedRecent}) {
-    const stackPadding = EdgeInsets.symmetric(horizontal: 10);
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => SafeArea(
-          child: Scaffold(
-            appBar: AppBar(
-              leading: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new,
-                ),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-            resizeToAvoidBottomInset: false,
-            body: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? null
-                    : Colors.grey[200],
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: selectedRecent == null
-                  ? ContactDetails(
-                      contact: selectedContact,
-                      stackContainerWidths: MediaQuery.sizeOf(context).width -
-                          stackPadding.horizontal,
-                    )
-                  : ContactDetails(
-                      recent: selectedRecent,
-                      stackContainerWidths: MediaQuery.sizeOf(context).width -
-                          stackPadding.horizontal,
-                    ),
-            ),
-          ),
+        builder: (context) => ContactDetailsScreen(
+          selectedContact: selectedContact,
+          selectedRecent: selectedRecent,
         ),
       ),
     );
@@ -105,7 +77,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
                   ),
                 ),
               )
-            : ContactDetails(
+            : ContactDetailsPane(
                 key: ObjectKey(_currentContact),
                 contact: _currentContact,
                 stackContainerWidths: MediaQuery.sizeOf(context).width * .425,
@@ -156,7 +128,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
                 ),
               ),
             )
-          : ContactDetails(
+          : ContactDetailsPane(
               key: ObjectKey(_currentRecent!),
               recent: _currentRecent,
               stackContainerWidths: MediaQuery.sizeOf(context).width * .425,
@@ -197,7 +169,8 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => SentMessageScreen(
-              howSmsIsOpened: HowSmsIsOpened.notFromTerminatedToShowMessage,
+              howSmsIsOpened: HowSmsIsOpened
+                  .notFromTerminatedToShowMessageAfterAccessRequestGranted,
               message: selectedRecent.message,
             ),
           ),

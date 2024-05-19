@@ -11,8 +11,8 @@ import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as syspaths;
 
-class ContactCardWProfilePicStack extends ConsumerStatefulWidget {
-  const ContactCardWProfilePicStack({
+class ContactInfoCard extends ConsumerStatefulWidget {
+  const ContactInfoCard({
     super.key,
     required this.contact,
     this.recent,
@@ -24,12 +24,11 @@ class ContactCardWProfilePicStack extends ConsumerStatefulWidget {
   final double width;
 
   @override
-  ConsumerState<ContactCardWProfilePicStack> createState() =>
+  ConsumerState<ContactInfoCard> createState() =>
       _ContactCardWProfilePicStackState();
 }
 
-class _ContactCardWProfilePicStackState
-    extends ConsumerState<ContactCardWProfilePicStack> {
+class _ContactCardWProfilePicStackState extends ConsumerState<ContactInfoCard> {
   final _nonTransparentContainerheight = 180.0;
 
   final _circleAvatarRadius = 40.0;

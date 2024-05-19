@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/providers/contacts_provider.dart';
@@ -113,7 +114,6 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
                 },
                 title: const Text('Dark Mode'),
               ),
-              
               ListTile(
                 leading: const Icon(Icons.settings),
                 title: const Text('Settings'),
@@ -130,7 +130,14 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
               ),
               const Spacer(),
               ListTile(
-                leading: const Icon(Icons.logout),
+                leading: SvgPicture.asset(
+                  'assets/icons/logout.svg',
+                  height: 24,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).iconTheme.color!,
+                    BlendMode.srcIn,
+                  ),
+                ),
                 title: const Text('Log Out'),
                 onTap: () => _logout(),
               ),

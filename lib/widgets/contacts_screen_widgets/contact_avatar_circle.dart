@@ -16,6 +16,12 @@ class ContactAvatarCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    late bool forSelectingImage;
+    if (onCirclePressed != null) {
+      forSelectingImage = true;
+    } else {
+      forSelectingImage = false;
+    }
     late final Widget activeContent;
     if (onCirclePressed != null) {
       activeContent = InkWell(
@@ -36,7 +42,11 @@ class ContactAvatarCircle extends StatelessWidget {
         backgroundColor: imagePath == null ? Colors.blue : null,
         foregroundColor: Colors.white,
         backgroundImage: imagePath == null ? null : FileImage(File(imagePath!)),
-        child: imagePath != null ? null : const Icon(Icons.add_a_photo),
+        child: imagePath != null
+            ? null
+            : forSelectingImage
+                ? const Icon(Icons.add_a_photo)
+                : const Icon(Icons.camera_alt),
       );
     }
 

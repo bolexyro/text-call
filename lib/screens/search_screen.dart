@@ -6,7 +6,7 @@ import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
-import 'package:text_call/widgets/contacts_screen_widgets/contact_details.dart';
+import 'package:text_call/widgets/contacts_screen_widgets/contact_details_pane.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_letter_avatar.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';
 
@@ -46,7 +46,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     : Colors.grey[200],
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: ContactDetails(
+              child: ContactDetailsPane(
                 contact: selectedContact,
                 stackContainerWidths:
                     MediaQuery.sizeOf(context).width - stackPadding.horizontal,
@@ -75,7 +75,7 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
           )
-        : ContactDetails(
+        : ContactDetailsPane(
             key: ObjectKey(_currentContact),
             contact: _currentContact,
             stackContainerWidths: MediaQuery.sizeOf(context).width * .425,
@@ -249,113 +249,118 @@ class _MainSearchWidgetState extends ConsumerState<MainSearchWidget> {
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: List.generate(contacts.length, (index) {
-                      final contactN = contacts[index];
-                      final specialChStartIndex =
-                          contactN.name.toLowerCase().indexOf(currentSeachText);
+                    children: List.generate(
+                      contacts.length,
+                      (index) {
+                        final contactN = contacts[index];
+                        final specialChStartIndex = contactN.name
+                            .toLowerCase()
+                            .indexOf(currentSeachText);
 
-                      final specialChEndIndex =
-                          specialChStartIndex + currentSeachText.length;
-                      _expandedBoolsList.add(false);
-                      return ExpandableListTile(
-                        justARegularListTile: !isPhone,
-                        isExpanded: _expandedBoolsList[index],
-                        title: RichText(
-                          text: TextSpan(
-                            text:
-                                contactN.name.substring(0, specialChStartIndex),
-                            style: DefaultTextStyle.of(context).style,
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: contactN.name.substring(
-                                    specialChStartIndex, specialChEndIndex),
-                                style: const TextStyle(color: Colors.blue),
-                              ),
-                              TextSpan(
-                                text:
-                                    contactN.name.substring(specialChEndIndex),
-                              ),
-                            ],
-                          ),
-                        ),
-                        leading: isPhone
-                            ? GestureDetector(
-                                onTap: () {
-                                  widget.onContactSelected(contactN);
-                                },
-                                child: contactN.imagePath != null
-                                    ? Hero(
-                                        tag: contactN.phoneNumber,
-                                        child: ContactAvatarCircle(
-                                          avatarRadius: 20,
-                                          imagePath: contactN.imagePath,
-                                        ),
-                                      )
-                                    : ContactLetterAvatar(
-                                        contactName: contactN.name),
-                              )
-                            : contactN.imagePath != null
-                                ? ContactAvatarCircle(
-                                    avatarRadius: 20,
-                                    imagePath: contactN.imagePath,
-                                  )
-                                : ContactLetterAvatar(
-                                    contactName: contactN.name),
-                        tileOnTapped: () {
-                          if (isPhone) {
-                            _changeTileExpandedStatus(index);
-                            return;
-                          }
-                          widget.onContactSelected(contactN);
-                        },
-                        expandedContent: Column(
-                          children: [
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Text(
-                              'Mobile ${contactN.localPhoneNumber}',
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    showMessageWriterModalSheet(
-                                      calleeName: contactN.name,
-                                      calleePhoneNumber: contactN.phoneNumber,
-                                      context: context,
-                                    );
-                                  },
-                                  icon: SvgPicture.asset(
-                                    'assets/icons/message-ring.svg',
-                                    height: 24,
-                                    colorFilter: ColorFilter.mode(
-                                      Theme.of(context).iconTheme.color!,
-                                      BlendMode.srcIn,
-                                    ),
-                                  ),
+                        final specialChEndIndex =
+                            specialChStartIndex + currentSeachText.length;
+                        _expandedBoolsList.add(false);
+                        return ExpandableListTile(
+                          justARegularListTile: !isPhone,
+                          isExpanded: _expandedBoolsList[index],
+                          title: RichText(
+                            text: TextSpan(
+                              text: contactN.name
+                                  .substring(0, specialChStartIndex),
+                              style: DefaultTextStyle.of(context).style,
+                              children: <TextSpan>[
+                                TextSpan(
+                                  text: contactN.name.substring(
+                                      specialChStartIndex, specialChEndIndex),
+                                  style: const TextStyle(color: Colors.blue),
                                 ),
-                                IconButton(
-                                  onPressed: () {
-                                    widget.onContactSelected(contactN);
-                                  },
-                                  icon: Icon(
-                                    Icons.info_outlined,
-                                    color: Theme.of(context).iconTheme.color!,
-                                  ),
+                                TextSpan(
+                                  text: contactN.name
+                                      .substring(specialChEndIndex),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      );
-                    }),
+                          ),
+                          leading: isPhone
+                              ? GestureDetector(
+                                  onTap: () {
+                                    widget.onContactSelected(contactN);
+                                  },
+                                  child: contactN.imagePath != null
+                                      ? Hero(
+                                          tag: contactN.phoneNumber,
+                                          child: ContactAvatarCircle(
+                                            avatarRadius: 20,
+                                            imagePath: contactN.imagePath,
+                                          ),
+                                        )
+                                      : ContactLetterAvatar(
+                                          contactName: contactN.name),
+                                )
+                              : contactN.imagePath != null
+                                  ? ContactAvatarCircle(
+                                      avatarRadius: 20,
+                                      imagePath: contactN.imagePath,
+                                    )
+                                  : ContactLetterAvatar(
+                                      contactName: contactN.name),
+                          tileOnTapped: () {
+                            if (isPhone) {
+                              _changeTileExpandedStatus(index);
+                              return;
+                            }
+                            widget.onContactSelected(contactN);
+                          },
+                          expandedContent: Column(
+                            children: [
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                'Mobile ${contactN.localPhoneNumber}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      showMessageWriterModalSheet(
+                                        calleeName: contactN.name,
+                                        calleePhoneNumber: contactN.phoneNumber,
+                                        context: context,
+                                      );
+                                    },
+                                    icon: SvgPicture.asset(
+                                      'assets/icons/message-ring.svg',
+                                      height: 24,
+                                      colorFilter: ColorFilter.mode(
+                                        Theme.of(context).iconTheme.color!,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      widget.onContactSelected(contactN);
+                                    },
+                                    icon: Icon(
+                                      Icons.info_outlined,
+                                      color: Theme.of(context).iconTheme.color!,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),

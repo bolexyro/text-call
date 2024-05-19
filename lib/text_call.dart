@@ -57,7 +57,7 @@ class _TextCallState extends State<TextCall> {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      themeMode:widget.themeMode,
+      themeMode: widget.themeMode,
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
@@ -91,7 +91,7 @@ class _TextCallState extends State<TextCall> {
               }
               return const SentMessageScreen(
                 message: null,
-                howSmsIsOpened: HowSmsIsOpened.fromTerminatedForPickedCall,
+                howSmsIsOpened: HowSmsIsOpened.fromTerminatedToPickCall,
               );
             }
 
@@ -104,7 +104,8 @@ class _TextCallState extends State<TextCall> {
               }
               return const SentMessageScreen(
                 message: null,
-                howSmsIsOpened: HowSmsIsOpened.fromTerminatedForRequestAccess,
+                howSmsIsOpened:
+                    HowSmsIsOpened.fromTerminatedToGrantOrDeyRequestAccess,
               );
             }
 
@@ -112,7 +113,8 @@ class _TextCallState extends State<TextCall> {
                 HowAppIsOPened.fromTerminatedToShowMessage) {
               return const SentMessageScreen(
                   message: null,
-                  howSmsIsOpened: HowSmsIsOpened.fromTerminatedToShowMessage);
+                  howSmsIsOpened: HowSmsIsOpened
+                      .fromTerminatedToShowMessageAfterAccessRequestGranted);
             }
 
             if (userInfo['isUserLoggedIn'] != true) {

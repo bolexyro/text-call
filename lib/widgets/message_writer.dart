@@ -5,6 +5,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 // import 'package:fleather/fleather.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
@@ -170,7 +171,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       ],
                     ),
                   ),
-
                   const Spacer(),
                   ElevatedButton(
                     onPressed: () => Navigator.of(context).push(
@@ -179,13 +179,33 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
+                                            backgroundColor: Theme.of(context).primaryColor,
+
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text('Complex editor?'),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/editor.svg',
+                          height: 24,
+                          colorFilter:
+                              ColorFilter.mode(_selectedColor, BlendMode.srcIn),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Complex Editor?',
+                          style: TextStyle(
+                            color: _selectedColor, // Text color
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

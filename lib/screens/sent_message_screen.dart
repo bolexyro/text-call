@@ -56,6 +56,7 @@ class TheColumnWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: AnimatedTextKit(
+        displayFullTextOnTap: true,
         animatedTexts: [
           TyperAnimatedText(
             message.message,
@@ -70,7 +71,6 @@ class TheColumnWidget extends StatelessWidget {
             speed: const Duration(milliseconds: 100),
           ),
         ],
-        displayFullTextOnTap: true,
         repeatForever: false,
         totalRepeatCount: 1,
       ),

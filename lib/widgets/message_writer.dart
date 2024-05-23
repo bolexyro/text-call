@@ -14,7 +14,7 @@ import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/rich_message_writer.dart';
 import 'package:text_call/utils/utils.dart';
-import 'package:text_call/widgets/choose_color_dialog.dart';
+import 'package:text_call/widgets/dialogs/choose_color_dialog.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:google_fonts/google_fonts.dart';
 

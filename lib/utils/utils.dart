@@ -13,7 +13,7 @@ import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/widgets/camera_or_gallery.dart';
-import 'package:text_call/widgets/contacts_screen_widgets/add_contact_dialog.dart';
+import 'package:text_call/widgets/dialogs/add_contact_dialog.dart';
 import 'package:text_call/widgets/message_writer.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
@@ -169,6 +169,7 @@ void showADialog({
   showAdaptiveDialog(
     context: context,
     builder: (context) => AlertDialog.adaptive(
+      contentPadding: EdgeInsets.zero,
       backgroundColor: isDarkMode
           ? Theme.of(context).colorScheme.errorContainer
           : Theme.of(context).colorScheme.error,

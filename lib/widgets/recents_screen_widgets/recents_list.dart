@@ -15,7 +15,7 @@ import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';
 import 'package:intl/intl.dart';
 import 'package:grouped_list/grouped_list.dart';
-import 'package:text_call/widgets/filter_dialog.dart';
+import 'package:text_call/widgets/dialogs/filter_dialog.dart';
 
 class RecentsList extends ConsumerStatefulWidget {
   const RecentsList({

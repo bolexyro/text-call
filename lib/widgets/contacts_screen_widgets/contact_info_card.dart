@@ -202,13 +202,15 @@ class _ContactCardWProfilePicStackState extends ConsumerState<ContactInfoCard> {
                                 await imageFile
                                     .copy('${appDir.path}/$filename');
 
-                                setState(() {
-                                  _updatedContact = Contact(
-                                    name: _updatedContact.name,
-                                    phoneNumber: _updatedContact.phoneNumber,
-                                    imagePath: imageFile.path,
-                                  );
-                                });
+                                setState(
+                                  () {
+                                    _updatedContact = Contact(
+                                      name: _updatedContact.name,
+                                      phoneNumber: _updatedContact.phoneNumber,
+                                      imagePath: imageFile.path,
+                                    );
+                                  },
+                                );
                                 ref
                                     .read(contactsProvider.notifier)
                                     .updateContact(

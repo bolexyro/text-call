@@ -9,7 +9,7 @@ import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/search_screen.dart';
 import 'package:text_call/utils/utils.dart';
-import 'package:text_call/widgets/confirm_delete_dialog.dart';
+import 'package:text_call/widgets/dialogs/confirm_delete_dialog.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_letter_avatar.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';

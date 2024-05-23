@@ -234,15 +234,15 @@ class _KeypadState extends ConsumerState<Keypad> {
               SizedBox(
                 width: buttonWidth,
                 height: buttonHeight,
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: _isCheckingIfNumberExists
-                      ? () {}
-                      : () {
-                          _phoneNumberVerification(context, ref);
-                        },
-                  child: Padding(
-                    padding: EdgeInsets.all(buttonHeight * .15),
+                child: Padding(
+                  padding: EdgeInsets.all(buttonHeight * .15),
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: _isCheckingIfNumberExists
+                        ? () {}
+                        : () {
+                            _phoneNumberVerification(context, ref);
+                          },
                     child: Container(
                       decoration: const BoxDecoration(
                         color: Colors.blue,

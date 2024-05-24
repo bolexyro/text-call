@@ -297,7 +297,7 @@ Future<void> sendAccessRequestStatus(
   await prefs.reload();
   final recentId = prefs.getString('recentId');
   final requesterPhoneNumber = prefs.getString('requesterPhoneNumber');
-  final requesteePhoneNumber = prefs.getString('phoneNumber');
+  final requesteePhoneNumber = prefs.getString('myPhoneNumber');
 
   if (accessRequestStatus == AccessRequestStatus.granted) {
     final url = Uri.https('text-call-backend.onrender.com',
@@ -312,7 +312,7 @@ Future<void> sendAccessRequestStatus(
 
 void sendAccessRequest(Recent recent) async {
   final prefs = await SharedPreferences.getInstance();
-  final String? requesterPhoneNumber = prefs.getString('phoneNumber');
+  final String? requesterPhoneNumber = prefs.getString('myPhoneNumber');
   final url = Uri.https('text-call-backend.onrender.com',
       'send-access-request/$requesterPhoneNumber/${recent.contact.phoneNumber}/${recent.id}');
   http.get(url);

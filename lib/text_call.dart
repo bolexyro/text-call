@@ -91,7 +91,7 @@ class _TextCallState extends State<TextCall> {
               }
               return const SentMessageScreen(
                 message: null,
-                howSmsIsOpened: HowSmsIsOpened.fromTerminatedToPickCall,
+                howSmsIsOpened: HowSmsIsOpened.fromTerminatedForPickCall,
               );
             }
 

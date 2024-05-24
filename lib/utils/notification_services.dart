@@ -17,7 +17,6 @@ Future<String> _getCallerName(String phoneNumber) async {
   final db = await getDatabase();
   final data = await db
       .query('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
-  await db.close();
   if (data.isEmpty) {
     return changeIntlToLocal(phoneNumber);
   } else {
@@ -85,7 +84,7 @@ Future<void> messageHandler(RemoteMessage message) async {
           title: 'Access Request Update',
           body: '$requesteeName has denied your request',
           autoDismissible: true,
-          category: NotificationCategory.Call,
+          category: NotificationCategory.Status,
           fullScreenIntent: true,
           wakeUpScreen: true,
           backgroundColor: Colors.green,
@@ -93,6 +92,7 @@ Future<void> messageHandler(RemoteMessage message) async {
         ),
       );
     }
+    return;
   }
 
   final String callMessage = message.data['message'];
@@ -132,9 +132,9 @@ Future<void> fcmSetup() async {
 }
 
 // From what I understand, the onBackgroudMessage handler is in a different isolate and thus has no access to the data from the main isolate.
-// Hence everything is pretty much null.
+// So using gloabl variables and changing them with this background handler will not work
 // https://stackoverflow.com/questions/65664203/flutter-global-variable-becomes-null-when-app-is-in-background
-// https://github.com/firebase/flutterfi  re/issues/1878
+// https://github.com/firebase/flutterfire/issues/1878
 @pragma('vm:entry-point')
 Future<void> fcmBackgroundHandler(RemoteMessage message) async {
   await messageHandler(message);
@@ -168,6 +168,7 @@ class NotificationController {
       ReceivedAction receivedAction) async {
     if (receivedAction.buttonKeyPressed == 'REJECT_CALL') {
       final prefs = await SharedPreferences.getInstance();
+      // we are reloading because some things might have been changed in the background
       await prefs.reload();
       final String? callMessage = prefs.getString('callMessage');
       final String? backgroundColor = prefs.getString('backgroundColor');
@@ -202,7 +203,6 @@ class NotificationController {
           'categoryName': newRecent.category.name,
         },
       );
-      await db.close();
     } else if (receivedAction.buttonKeyPressed == 'ACCEPT_CALL') {
       final prefs = await SharedPreferences.getInstance();
       await prefs.reload();
@@ -228,7 +228,7 @@ class NotificationController {
         MaterialPageRoute(
           builder: (context) => SentMessageScreen(
             message: message,
-            howSmsIsOpened: HowSmsIsOpened.notFromTerminatedToPickCall,
+            howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
           ),
         ),
       );
@@ -248,14 +248,12 @@ class NotificationController {
         if (receivedAction.id!.toString().startsWith('11')) {
           return;
         }
-
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         final String? recentId = prefs.getString('recentId');
 
         final db = await getDatabase();
         final data =
             await db.query('recents', where: 'id = ?', whereArgs: [recentId]);
-
         if (data.isEmpty) {
           return;
         }

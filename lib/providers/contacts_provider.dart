@@ -25,21 +25,11 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
           ),
         )
         .toList();
-  state = contactsList;
+    state = contactsList;
   }
 
   Future<void> addContact(Contact newContact) async {
     final db = await getDatabase();
-
-    // final data = await db.query(
-    //   contactsTableName,
-    //   where: 'phoneNumber = ?',
-    //   whereArgs: [newContact.phoneNumber],
-    // );
-    // print('data is $data');
-    // if (data.isNotEmpty) {
-    //   return;
-    // }
 
     db.insert(
       contactsTableName,

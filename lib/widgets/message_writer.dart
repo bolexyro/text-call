@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
-// import 'package:fleather/fleather.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -36,14 +35,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     duration: const Duration(milliseconds: 800),
   );
 
-  late String recentId;
-
+  late String _recentId;
   late Future _animationDelay;
-  Color _selectedColor = const Color.fromARGB(255, 13, 214, 214);
-
   WebSocketChannel? _channel;
-
   bool _callSending = false;
+  Color _selectedColor = const Color.fromARGB(255, 13, 214, 214);
   final _colorizeColors = [
     Colors.purple,
     Colors.blue,
@@ -71,16 +67,16 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
     // the delay before we assume call was not picked
     _animationDelay = Future.delayed(
-      const Duration(seconds: 40),
+      const Duration(seconds: 60),
     );
 
-    recentId = DateTime.now().toString();
+    _recentId = DateTime.now().toString();
     // make sure to remove this line oo. it is only important for debugging purposes
-    prefs.setString('recentId', recentId);
+    prefs.setString('recentId', _recentId);
     _channel!.sink.add(
       json.encode(
         {
-          'message_id': recentId,
+          'message_id': _recentId,
           'caller_phone_number': callerPhoneNumber,
           'callee_phone_number': widget.calleePhoneNumber,
           'message': _messageController.text,
@@ -123,20 +119,13 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 maxLines: null,
                 keyboardType: TextInputType.multiline,
                 textCapitalization: TextCapitalization.sentences,
-                cursorColor: Colors.black,
                 decoration: InputDecoration(
                   hintText: 'Enter the message you want to call them with',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   labelText: 'Message',
-                  labelStyle: const TextStyle(color: Colors.black),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Colors.black,
-                    ),
-                  ),
+                
                 ),
               ),
               const SizedBox(
@@ -155,7 +144,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       ),
                     ),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.color_lens,
                             color: _selectedColor // Icon color
@@ -188,7 +176,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       ),
                     ),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
                         SvgPicture.asset(
                           'assets/icons/editor.svg',
@@ -270,9 +257,10 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 category: RecentCategory.outgoingRejected,
                 message: Message(
                     message: _messageController.text,
-                    backgroundColor: _selectedColor),
-                id: recentId,
+                    backgroundColor: _selectedColor,),
+                id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
+                callTime: DateTime.parse(_recentId),
               );
 
               ref.read(recentsProvider.notifier).addRecent(recent);
@@ -307,7 +295,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 message: Message(
                     message: _messageController.text,
                     backgroundColor: _selectedColor),
-                id: recentId,
+                id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
               );
               ref.read(recentsProvider.notifier).addRecent(recent);
@@ -330,7 +318,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               );
             }
             return const Text(
-                'This shoul be for some case that is not available yet');
+                'This should be for some case that is not available yet');
           } else {
             return FutureBuilder(
               future: _animationDelay,
@@ -344,7 +332,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   message: Message(
                       message: _messageController.text,
                       backgroundColor: _selectedColor),
-                  id: recentId,
+                  id: _recentId,
                   phoneNumber: widget.calleePhoneNumber,
                 );
 

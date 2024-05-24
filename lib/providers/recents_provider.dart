@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
@@ -17,11 +18,11 @@ RecentCategory? _getCategoryEnumFromText({required String recentCategoryText}) {
   return null;
 }
 
-Future<List> getContactAndExistsStatus({required String phoneNumber}) async {
-  final db = await getDatabase();
+Future<List> getContactAndExistsStatus({required String phoneNumber, required Database db,}) async {
   final data = await db
       .query('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
   final contactExists = data.isNotEmpty;
+
   return [
     Contact(
       name: contactExists
@@ -53,12 +54,12 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
                 row['backgroundColorBlue'] as int,
               ),
             ),
-            contact: (await getContactAndExistsStatus(
+            contact: (await getContactAndExistsStatus(db: db,
                 phoneNumber: row['phoneNumber'] as String))[0],
             category: _getCategoryEnumFromText(
               recentCategoryText: row['categoryName'] as String,
             )!,
-            recentIsAContact: (await getContactAndExistsStatus(
+            recentIsAContact: (await getContactAndExistsStatus(db: db,
                 phoneNumber: row['phoneNumber'] as String))[1],
             callTime: DateTime.parse(row['callTime'] as String),
           ),
@@ -85,7 +86,7 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
       },
     );
 
-    final contactAndContactExistsStatus = await getContactAndExistsStatus(
+    final contactAndContactExistsStatus = await getContactAndExistsStatus(db: db,
         phoneNumber: newRecent.contact.phoneNumber);
     newRecent = Recent.fromRecent(
       recent: newRecent,

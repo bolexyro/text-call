@@ -8,11 +8,7 @@ Text Call is an innovative communication app that combines the urgency of a phon
 - **Future Plans**: Visit the [Roadmap](#roadmap) section to learn about planned features and enhancements.
 
 ## Demo
-<video width="1000" height="500" controls>
-  <source src="Demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
+https://github.com/adebola-duf/text-call/assets/113560716/e8dbc9e6-ea73-4f08-a650-aa202f69a931
 
 ## Getting Started / Installation
 

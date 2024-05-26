@@ -125,7 +125,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   labelText: 'Message',
-                
                 ),
               ),
               const SizedBox(
@@ -167,8 +166,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                                            backgroundColor: Theme.of(context).primaryColor,
-
+                      backgroundColor: Theme.of(context).primaryColor,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -229,6 +227,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final snapshotData = json.decode(snapshot.data);
+            print(snapshotData );
             if (snapshotData['call_status'] == 'error') {
               return Padding(
                 padding: const EdgeInsets.only(top: 10.0),
@@ -256,8 +255,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               final recent = Recent.withoutContactObject(
                 category: RecentCategory.outgoingRejected,
                 message: Message(
-                    message: _messageController.text,
-                    backgroundColor: _selectedColor,),
+                  message: _messageController.text,
+                  backgroundColor: _selectedColor,
+                ),
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
                 callTime: DateTime.parse(_recentId),
@@ -315,6 +315,36 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 ],
                 displayFullTextOnTap: true,
                 repeatForever: true,
+              );
+            }
+            if (snapshotData['call_status'] == 'callee_busy') {
+              Future.delayed(const Duration(seconds: 3), () {
+                setState(() {
+                  _callSending = false;
+                });
+              });
+              return Padding(
+                padding: const EdgeInsets.only(top: 10.0),
+                child: Column(
+                  children: [
+                    AnimatedTextKit(
+                      animatedTexts: [
+                        TyperAnimatedText(
+                          'The number you are calling is receiving another call rn. Try again in less than 20 seconds',
+                          textAlign: TextAlign.center,
+                          textStyle: GoogleFonts.pacifico(
+                              fontSize: 32,
+                              color: const Color.fromARGB(255, 139, 105, 2)),
+                          speed: const Duration(milliseconds: 100),
+                        ),
+                      ],
+                      displayFullTextOnTap: true,
+                      repeatForever: false,
+                      totalRepeatCount: 1,
+                    ),
+                    Lottie.asset('assets/animations/call_missed.json'),
+                  ],
+                ),
               );
             }
             return const Text(

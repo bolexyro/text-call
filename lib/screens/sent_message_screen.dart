@@ -1,3 +1,4 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 
 import 'package:text_call/screens/sent_message_screens/sms_from_terminated.dart';
@@ -469,3 +470,57 @@ class SentMessageScreen extends StatelessWidget {
         message: message, howSmsIsOpened: howSmsIsOpened);
   }
 }
+
+
+class MyAnimatedTextWidget extends StatelessWidget {
+  const MyAnimatedTextWidget({
+    super.key,
+    required this.message,
+  });
+
+  final Message message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: AnimatedTextKit(
+        displayFullTextOnTap: true,
+        animatedTexts: [
+          TyperAnimatedText(
+            message.message,
+            textAlign: TextAlign.center,
+            textStyle: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 40,
+              color: message.backgroundColor.computeLuminance() > 0.5
+                  ? Colors.black
+                  : Colors.white,
+            ),
+            speed: const Duration(milliseconds: 100),
+          ),
+        ],
+        repeatForever: false,
+        totalRepeatCount: 1,
+      ),
+    );
+  }
+}
+
+class ScaffoldTitle extends StatelessWidget {
+  const ScaffoldTitle({
+    super.key,
+    required this.color,
+  });
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      'From your loved one or not hehe.',
+      style: TextStyle(
+          color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white),
+    );
+  }
+}
+

@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
+import 'package:text_call/providers/floating_buttons_visible_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
@@ -36,7 +36,7 @@ class SmsNotFromTerminated extends ConsumerWidget {
   }
 }
 
-class TheStackWidget extends StatefulWidget {
+class TheStackWidget extends ConsumerStatefulWidget {
   const TheStackWidget({
     super.key,
     required this.message,
@@ -47,15 +47,16 @@ class TheStackWidget extends StatefulWidget {
   final HowSmsIsOpened howSmsIsOpened;
 
   @override
-  State<TheStackWidget> createState() => _TheStackWidgetState();
+  ConsumerState<TheStackWidget> createState() => _TheStackWidgetState();
 }
 
-class _TheStackWidgetState extends State<TheStackWidget> {
-  bool floatingButtonsVisible = true;
+class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
   final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
+    bool floatingButtonsVisible = ref.watch(floatingButtonsVisibleProvider);
+
     return Stack(
       children: [
         SizedBox(
@@ -64,15 +65,15 @@ class _TheStackWidgetState extends State<TheStackWidget> {
             child: NotificationListener<ScrollNotification>(
               onNotification: (scrollNotification) {
                 if (scrollNotification is UserScrollNotification) {
-                  if (scrollNotification.direction == ScrollDirection.reverse) {
-                    setState(() {
-                        floatingButtonsVisible = false;
-                      });
+                  if (scrollNotification.direction == ScrollDirection.forward) {
+                    ref
+                        .read(floatingButtonsVisibleProvider.notifier)
+                        .updateVisibility(true);
                   } else if (scrollNotification.direction ==
-                      ScrollDirection.forward) {
-                    setState(() {
-                      floatingButtonsVisible = true;
-                    });
+                      ScrollDirection.reverse) {
+                    ref
+                        .read(floatingButtonsVisibleProvider.notifier)
+                        .updateVisibility(false);
                   }
                 }
                 return false;
@@ -86,7 +87,8 @@ class _TheStackWidgetState extends State<TheStackWidget> {
           ),
         ),
         if (widget.howSmsIsOpened ==
-            HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess && floatingButtonsVisible)
+                HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess &&
+            floatingButtonsVisible)
           Positioned(
             width: MediaQuery.sizeOf(context).width,
             bottom: 20,
@@ -191,7 +193,7 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
             : Colors.white,
       ),
       forceMaterialTransparency: true,
-      title: scaffoldTitle(message.backgroundColor),
+      title: ScaffoldTitle(color: message.backgroundColor),
     ),
     body: TheStackWidget(
       howSmsIsOpened: howSmsIsOpened,
@@ -202,44 +204,3 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
   // }
 }
 
-Widget scaffoldTitle(Color color) {
-  return Text(
-    'From your loved one or not hehe.',
-    style: TextStyle(
-        color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white),
-  );
-}
-
-class MyAnimatedTextWidget extends StatelessWidget {
-  const MyAnimatedTextWidget({
-    super.key,
-    required this.message,
-  });
-
-  final Message message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: AnimatedTextKit(
-        displayFullTextOnTap: true,
-        animatedTexts: [
-          TyperAnimatedText(
-            message.message,
-            textAlign: TextAlign.center,
-            textStyle: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 40,
-              color: message.backgroundColor.computeLuminance() > 0.5
-                  ? Colors.black
-                  : Colors.white,
-            ),
-            speed: const Duration(milliseconds: 100),
-          ),
-        ],
-        repeatForever: false,
-        totalRepeatCount: 1,
-      ),
-    );
-  }
-}

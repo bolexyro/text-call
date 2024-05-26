@@ -228,7 +228,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           if (snapshot.hasData) {
             final snapshotData = json.decode(snapshot.data);
             print(snapshotData );
-            if (snapshotData['call_status'] == 'error') {
+            if (snapshotData['call_status'] == 'errord') {
               return Padding(
                 padding: const EdgeInsets.only(top: 10.0),
                 child: Stack(

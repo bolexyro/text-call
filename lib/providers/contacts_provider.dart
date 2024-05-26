@@ -46,13 +46,20 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
       {required String oldContactPhoneNumber,
       required Contact newContact}) async {
     final db = await getDatabase();
-    db.update(
+    await db.update(
       contactsTableName,
       {
         'phoneNumber': newContact.phoneNumber,
         'name': newContact.name,
         'imagePath': newContact.imagePath
       },
+      where: 'phoneNumber = ?',
+      whereArgs: [oldContactPhoneNumber],
+    );
+
+    await db.update(
+      'recents',
+      {'phoneNumber': newContact.phoneNumber},
       where: 'phoneNumber = ?',
       whereArgs: [oldContactPhoneNumber],
     );
@@ -65,10 +72,21 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
 
   void deleteContact(String phoneNumber) async {
     final db = await getDatabase();
-    await db.delete(contactsTableName,
-        where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
+    await db.delete(
+      contactsTableName,
+      where: 'phoneNumber = ?',
+      whereArgs: [phoneNumber],
+    );
+
+    await db.delete(
+      'recents',
+      where: 'phoneNumber = ?',
+      whereArgs: [phoneNumber],
+    );
     state = List.from(state)
-      ..removeWhere((contact) => contact.phoneNumber == phoneNumber);
+      ..removeWhere(
+        (contact) => contact.phoneNumber == phoneNumber,
+      );
   }
 }
 

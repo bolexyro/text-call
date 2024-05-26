@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/providers/recents_provider.dart';
@@ -73,7 +74,7 @@ class MyAnimatedTextWidget extends StatelessWidget {
   }
 }
 
-class TheStackWidget extends StatelessWidget {
+class TheStackWidget extends StatefulWidget {
   const TheStackWidget({
     super.key,
     required this.message,
@@ -84,22 +85,53 @@ class TheStackWidget extends StatelessWidget {
   final HowSmsIsOpened howSmsIsOpened;
 
   @override
+  State<TheStackWidget> createState() => _TheStackWidgetState();
+}
+
+class _TheStackWidgetState extends State<TheStackWidget> {
+  // buttonw will be visible when the screen is displayed at first.
+  // and they'll also be visible when we are scrolling up
+  // they'd be !visible when we are scrolling down.
+
+  bool floatingButtonsVisible = true;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
   Widget build(BuildContext context) {
-    final backgroundActualColor = message.backgroundColor;
+    final backgroundActualColor = widget.message.backgroundColor;
 
     return Stack(
       children: [
         SizedBox(
           height: double.infinity,
           child: Center(
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: MyAnimatedTextWidget(message: message),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (scrollNotification) {
+                if (scrollNotification is UserScrollNotification) {
+                  if (scrollNotification.direction == ScrollDirection.forward) {
+                    setState(() {
+                      floatingButtonsVisible = false;
+                    });
+                  } else if (scrollNotification.direction ==
+                      ScrollDirection.reverse) {
+                    setState(() {
+                      floatingButtonsVisible = true;
+                    });
+                  }
+                }
+                return false;
+              },
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: MyAnimatedTextWidget(message: widget.message),
+              ),
             ),
           ),
         ),
-        if (howSmsIsOpened ==
-            HowSmsIsOpened.fromTerminatedToGrantOrDeyRequestAccess)
+        if (widget.howSmsIsOpened ==
+                HowSmsIsOpened.fromTerminatedToGrantOrDeyRequestAccess &&
+            floatingButtonsVisible)
           Positioned(
             width: MediaQuery.sizeOf(context).width,
             bottom: 20,
@@ -119,7 +151,7 @@ class TheStackWidget extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(20),
                     backgroundColor:
-                        makeColorLighter(message.backgroundColor, -10),
+                        makeColorLighter(widget.message.backgroundColor, -10),
                     shape: const CircleBorder(),
                   ),
                   child: const Icon(
@@ -141,7 +173,7 @@ class TheStackWidget extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(20),
                     backgroundColor:
-                        makeColorLighter(message.backgroundColor, -10),
+                        makeColorLighter(widget.message.backgroundColor, -10),
                     shape: const CircleBorder(),
                   ),
                   child: const Icon(

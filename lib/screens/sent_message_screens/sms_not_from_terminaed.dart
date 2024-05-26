@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/message.dart';
@@ -34,7 +35,8 @@ class SmsNotFromTerminated extends ConsumerWidget {
     );
   }
 }
-class TheStackWidget extends StatelessWidget {
+
+class TheStackWidget extends StatefulWidget {
   const TheStackWidget({
     super.key,
     required this.message,
@@ -45,20 +47,46 @@ class TheStackWidget extends StatelessWidget {
   final HowSmsIsOpened howSmsIsOpened;
 
   @override
+  State<TheStackWidget> createState() => _TheStackWidgetState();
+}
+
+class _TheStackWidgetState extends State<TheStackWidget> {
+  bool floatingButtonsVisible = true;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         SizedBox(
           height: double.infinity,
           child: Center(
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: MyAnimatedTextWidget(message: message),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (scrollNotification) {
+                if (scrollNotification is UserScrollNotification) {
+                  if (scrollNotification.direction == ScrollDirection.reverse) {
+                    setState(() {
+                        floatingButtonsVisible = false;
+                      });
+                  } else if (scrollNotification.direction ==
+                      ScrollDirection.forward) {
+                    setState(() {
+                      floatingButtonsVisible = true;
+                    });
+                  }
+                }
+                return false;
+              },
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: MyAnimatedTextWidget(message: widget.message),
+              ),
             ),
           ),
         ),
-        if (howSmsIsOpened ==
-            HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess)
+        if (widget.howSmsIsOpened ==
+            HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess && floatingButtonsVisible)
           Positioned(
             width: MediaQuery.sizeOf(context).width,
             bottom: 20,
@@ -68,7 +96,7 @@ class TheStackWidget extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     sendAccessRequestStatus(AccessRequestStatus.granted);
-                    if (howSmsIsOpened ==
+                    if (widget.howSmsIsOpened ==
                         HowSmsIsOpened
                             .notFromTerminatedToGrantOrDeyRequestAccess) {
                       Navigator.of(context).pop();
@@ -84,7 +112,7 @@ class TheStackWidget extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(20),
                     backgroundColor:
-                        makeColorLighter(message.backgroundColor, -10),
+                        makeColorLighter(widget.message.backgroundColor, -10),
                     shape: const CircleBorder(),
                   ),
                   child: const Icon(
@@ -101,7 +129,7 @@ class TheStackWidget extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(20),
                     backgroundColor:
-                        makeColorLighter(message.backgroundColor, -10),
+                        makeColorLighter(widget.message.backgroundColor, -10),
                     shape: const CircleBorder(),
                   ),
                   child: const Icon(

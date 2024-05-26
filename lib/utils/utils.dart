@@ -368,6 +368,7 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
 
     if (contactAlreadyExistingWithNewPhoneNumber.isNotEmpty) {
       ref.read(contactsProvider.notifier).updateContact(
+            ref: ref,
             oldContactPhoneNumber: phoneNumber,
             newContact: Contact(
               name: originalContact.name,
@@ -376,6 +377,7 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
             ),
           );
       ref.read(contactsProvider.notifier).updateContact(
+            ref: ref,
             oldContactPhoneNumber: originalContact.phoneNumber,
             newContact: Contact(
               name: '${originalContact.name}(previous)',
@@ -385,6 +387,7 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
           );
     } else {
       ref.read(contactsProvider.notifier).updateContact(
+            ref: ref,
             oldContactPhoneNumber: originalContact.phoneNumber,
             newContact: Contact(
               name: originalContact.name,

@@ -18,7 +18,10 @@ RecentCategory? _getCategoryEnumFromText({required String recentCategoryText}) {
   return null;
 }
 
-Future<List> getContactAndExistsStatus({required String phoneNumber, required Database db,}) async {
+Future<List> getContactAndExistsStatus({
+  required String phoneNumber,
+  required Database db,
+}) async {
   final data = await db
       .query('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
   final contactExists = data.isNotEmpty;
@@ -54,19 +57,42 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
                 row['backgroundColorBlue'] as int,
               ),
             ),
-            contact: (await getContactAndExistsStatus(db: db,
-                phoneNumber: row['phoneNumber'] as String))[0],
+            contact: (await getContactAndExistsStatus(
+                db: db, phoneNumber: row['phoneNumber'] as String))[0],
             category: _getCategoryEnumFromText(
               recentCategoryText: row['categoryName'] as String,
             )!,
-            recentIsAContact: (await getContactAndExistsStatus(db: db,
-                phoneNumber: row['phoneNumber'] as String))[1],
+            recentIsAContact: (await getContactAndExistsStatus(
+                db: db, phoneNumber: row['phoneNumber'] as String))[1],
             callTime: DateTime.parse(row['callTime'] as String),
           ),
         )
         .toList();
     final resolvedRecents = await Future.wait(recentsList);
     state = resolvedRecents;
+  }
+
+  Future<void> updateRecentContact(
+      String oldPhoneNumber, Contact newContact) async {
+    final List<Recent> updatedRecents = state.map(
+      (recent) {
+        if (recent.contact.phoneNumber == oldPhoneNumber) {
+          return Recent(
+            contact: Contact(
+              name: newContact.name,
+              phoneNumber: newContact.phoneNumber,
+              imagePath: newContact.imagePath,
+            ),
+            category: recent.category,
+            message: recent.message,
+            id: recent.id,
+          );
+        }
+        return recent;
+      },
+    ).toList();
+
+    state = updatedRecents;
   }
 
   void addRecent(Recent newRecent) async {
@@ -86,8 +112,8 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
       },
     );
 
-    final contactAndContactExistsStatus = await getContactAndExistsStatus(db: db,
-        phoneNumber: newRecent.contact.phoneNumber);
+    final contactAndContactExistsStatus = await getContactAndExistsStatus(
+        db: db, phoneNumber: newRecent.contact.phoneNumber);
     newRecent = Recent.fromRecent(
       recent: newRecent,
       recentIsAContact: contactAndContactExistsStatus[1],

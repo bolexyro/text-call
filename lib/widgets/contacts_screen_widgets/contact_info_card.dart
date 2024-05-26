@@ -214,6 +214,7 @@ class _ContactCardWProfilePicStackState extends ConsumerState<ContactInfoCard> {
                                 ref
                                     .read(contactsProvider.notifier)
                                     .updateContact(
+                                      ref: ref,
                                       oldContactPhoneNumber:
                                           _updatedContact.phoneNumber,
                                       newContact: _updatedContact,

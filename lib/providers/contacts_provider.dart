@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
+import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/utils/utils.dart';
 
 const String contactsTableName = 'contacts';
@@ -43,7 +44,8 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
   }
 
   Future<void> updateContact(
-      {required String oldContactPhoneNumber,
+      {required WidgetRef ref,
+      required String oldContactPhoneNumber,
       required Contact newContact}) async {
     final db = await getDatabase();
     await db.update(
@@ -68,6 +70,9 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
       ..removeWhere((contact) => contact.phoneNumber == oldContactPhoneNumber);
     newState.add(newContact);
     state = newState;
+    await ref
+        .read(recentsProvider.notifier)
+        .updateRecentContact(oldContactPhoneNumber, newContact);
   }
 
   void deleteContact(String phoneNumber) async {

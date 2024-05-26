@@ -113,9 +113,11 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
           name: _nameController.text,
           phoneNumber: changeLocalToIntl(_phoneNumberController.text),
           imagePath: _imageFile?.path,
+          isMyContact: widget.contact!.isMyContact,
         );
 
         await ref.read(contactsProvider.notifier).updateContact(
+              ref: ref,
               oldContactPhoneNumber: widget.contact!.phoneNumber,
               newContact: newContact,
             );

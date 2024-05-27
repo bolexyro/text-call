@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:swipe_to/swipe_to.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/search_screen.dart';
@@ -313,52 +313,48 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                         _expandedBoolsMap.containsKey(contactN)
                             ? _expandedBoolsMap[contactN]!
                             : false;
-                    return Slidable(
-                      startActionPane: ActionPane(
-                        motion: const BehindMotion(),
-                        children: [
-                          CustomSlidableAction(
-                            onPressed: (context) {
-                              showMessageWriterModalSheet(
-                                  context: context,
-                                  calleePhoneNumber: contactN.phoneNumber,
-                                  calleeName: contactN.name);
-                            },
-                            backgroundColor: const Color(0xFF21B7CA),
-                            foregroundColor: Colors.white,
-                            child: SvgPicture.asset(
-                              'assets/icons/message-ring.svg',
-                              height: 30,
-                              colorFilter: const ColorFilter.mode(
-                                  Colors.white, BlendMode.srcIn),
-                            ),
+                    return SwipeTo(
+                      onRightSwipe: (_) {
+                        showMessageWriterModalSheet(
+                          context: context,
+                          calleePhoneNumber: contactN.phoneNumber,
+                          calleeName: contactN.name,
+                        );
+                      },
+                      rightSwipeWidget: Container(
+                        color: const Color(0xFF21B7CA),
+                        width: 180,
+                        height: 70,
+                        child: Center(
+                          child: SvgPicture.asset(
+                            'assets/icons/message-ring.svg',
+                            height: 30,
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.srcIn),
                           ),
-                        ],
+                        ),
                       ),
-                      endActionPane: contactN.isMyContact
-                          ? null
-                          : ActionPane(
-                              motion: const BehindMotion(),
-                              children: [
-                                CustomSlidableAction(
-                                  onPressed: (context) {
-                                    _showDeleteDialog(context, contactN);
-                                  },
-                                  backgroundColor:
-                                      Theme.of(context).brightness ==
-                                              Brightness.dark
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .errorContainer
-                                          : Theme.of(context).colorScheme.error,
-                                  foregroundColor: Colors.white,
-                                  child: const Icon(
-                                    Icons.delete,
-                                    size: 30,
-                                  ),
-                                ),
-                              ],
-                            ),
+                      onLeftSwipe: (_) {
+                        _showDeleteDialog(context, contactN);
+                      },
+                      offsetDx: .5,
+                      leftSwipeWidget: SingleChildScrollView(
+                                                scrollDirection: Axis.horizontal,
+
+                        child: Container(
+                          width: 200,
+                          height: 70,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(context).colorScheme.errorContainer
+                              : Theme.of(context).colorScheme.error,
+                          child: const Icon(
+                            Icons.delete,
+                            size: 30,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+
                       child: ExpandableListTile(
                         justARegularListTile:
                             widget.screen == Screen.phone ? false : true,

@@ -68,6 +68,7 @@ dependencies:
   flutter_quill_extensions: ^9.3.13
   audio_waveforms: ^1.0.5
   gap: ^3.0.1
+  video_player: ^2.8.6
 
 dev_dependencies:
   flutter_test:

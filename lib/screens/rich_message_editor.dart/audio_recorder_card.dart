@@ -81,7 +81,7 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Stack(
         children: [
           Card(
@@ -160,7 +160,7 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
                             ),
                             Gap(5),
                             Text(
-                              'Restart',
+                              'Restarta',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Color.fromARGB(255, 113, 139, 207),

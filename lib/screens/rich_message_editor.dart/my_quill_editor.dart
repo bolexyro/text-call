@@ -28,6 +28,20 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
               multiRowsDisplay: !_collapseToolbar,
               customButtons: [
                 QuillToolbarCustomButtonOptions(
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                    ),
+                    child: const Icon(
+                      Icons.delete,
+                      color: Color.fromARGB(255, 255, 57, 43),
+                    ),
+                  ),
+                  onPressed: () {},
+                ),
+                QuillToolbarCustomButtonOptions(
                   icon: RotatedBox(
                     quarterTurns: _collapseToolbar ? 2 : 0,
                     child: SvgPicture.asset(

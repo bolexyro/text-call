@@ -3,7 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class AudioRecorderCard extends StatefulWidget {
-  const AudioRecorderCard({super.key});
+  const AudioRecorderCard({
+    super.key,
+    required this.onDelete,
+    required this.keyInMap,
+  });
+
+  final int keyInMap;
+  final void Function(int key) onDelete;
 
   @override
   State<AudioRecorderCard> createState() => _AudioRecorderCardState();
@@ -65,7 +72,7 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
     }
   }
 
-  void _refreshWave() async{
+  void _refreshWave() async {
     if (_isRecording) {
       await recorderController.stop();
       await recorderController.record();
@@ -208,15 +215,18 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
           ),
           Positioned(
             right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).scaffoldBackgroundColor,
-              ),
-              child: const Icon(
-                Icons.delete,
-                color: Color.fromARGB(255, 255, 57, 43),
+            child: GestureDetector(
+              onTap: () => widget.onDelete(widget.keyInMap),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
+                child: const Icon(
+                  Icons.delete,
+                  color: Color.fromARGB(255, 255, 57, 43),
+                ),
               ),
             ),
           ),

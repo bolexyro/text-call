@@ -7,9 +7,13 @@ class MyVideoPlayer extends StatefulWidget {
   const MyVideoPlayer({
     super.key,
     required this.videoFile,
+    required this.onDelete,
+    required this.keyInMap,
   });
 
   final File videoFile;
+  final int keyInMap;
+  final void Function(int key) onDelete;
 
   @override
   State<MyVideoPlayer> createState() => _MyVideoPlayerState();
@@ -39,40 +43,44 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   Widget build(BuildContext context) {
     return _controller.value.isInitialized
         ? Stack(
-          clipBehavior: Clip.none,
-          children: [
-            SizedBox(
-              height: 550,
-              child: GestureDetector(
-                onTap: (){
-                  setState(() {
-                    _controller.value.isPlaying
-                        ? _controller.pause()
-                        : _controller.play();
-                  });
-                },
-                child: AspectRatio(
+            clipBehavior: Clip.none,
+            children: [
+              SizedBox(
+                height: 550,
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _controller.value.isPlaying
+                          ? _controller.pause()
+                          : _controller.play();
+                    });
+                  },
+                  child: AspectRatio(
                     aspectRatio: _controller.value.aspectRatio,
                     child: VideoPlayer(_controller),
                   ),
+                ),
               ),
-            ), Positioned(
-            right: -10,
-            top: -10,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).scaffoldBackgroundColor,
+              Positioned(
+                right: -10,
+                top: -10,
+                child: GestureDetector(
+                  onTap: () => widget.onDelete(widget.keyInMap),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                    ),
+                    child: const Icon(
+                      Icons.delete,
+                      color: Color.fromARGB(255, 255, 57, 43),
+                    ),
+                  ),
+                ),
               ),
-              child: const Icon(
-                Icons.delete,
-                color: Color.fromARGB(255, 255, 57, 43),
-              ),
-            ),
-          ),
-          ],
-        )
+            ],
+          )
         : Container();
   }
 }

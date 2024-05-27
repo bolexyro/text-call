@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:text_call/screens/rich_message_editor.dart/audio_recorder_card.dart';
+import 'package:text_call/screens/rich_message_editor.dart/image_displayer.dart';
 import 'package:text_call/screens/rich_message_editor.dart/my_quill_editor.dart';
 import 'package:text_call/screens/rich_message_editor.dart/my_video_player.dart';
 import 'package:text_call/utils/constants.dart';
@@ -19,11 +20,22 @@ class RichMessageEditorScreen extends StatefulWidget {
 }
 
 class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
-  final List<Widget> _displayedWidgets = [];
+  // this index would be the keys for the widgets in the list
+  int index = -1;
+  final Map<int, Widget> _displayedWidgetsMap = {};
   void _addTextEditor() {
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
-      _displayedWidgets.add(const MyQuillEditor());
+      _displayedWidgetsMap[++index] = MyQuillEditor(
+        keyInMap: index,
+        onDelete: _removeMediaWidget,
+      );
+    });
+  }
+
+  void _removeMediaWidget(int key) {
+    setState(() {
+      _displayedWidgetsMap.remove(key);
     });
   }
 
@@ -44,34 +56,11 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
       return null;
     }
     setState(() {
-      _displayedWidgets.add(
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            SizedBox(
-              height: 550,
-              child: Image.file(
-                File(pickedImage.path),
-              ),
-            ),
-            Positioned(
-              right: -10,
-              top: -10,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                ),
-                child: const Icon(
-                  Icons.delete,
-                  color: Color.fromARGB(255, 255, 57, 43),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
+      _displayedWidgetsMap[++index] = (ImageDisplayer(
+        keyInMap: index,
+        onDelete: _removeMediaWidget,
+        imageFile: File(pickedImage.path),
+      ));
     });
   }
 
@@ -79,8 +68,9 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
 
     setState(() {
-      _displayedWidgets.add(
-        const AudioRecorderCard(),
+      _displayedWidgetsMap[++index] = AudioRecorderCard(
+        keyInMap: index,
+        onDelete: _removeMediaWidget,
       );
     });
   }
@@ -102,10 +92,10 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
       return null;
     }
     setState(() {
-      _displayedWidgets.add(
-        MyVideoPlayer(
-          videoFile: File(pickedVideo.path),
-        ),
+      _displayedWidgetsMap[++index] = MyVideoPlayer(
+        keyInMap: index,
+        onDelete: _removeMediaWidget,
+        videoFile: File(pickedVideo.path),
       );
     });
   }
@@ -178,7 +168,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
                 ],
               ),
             ),
-            if (_displayedWidgets.isEmpty)
+            if (_displayedWidgetsMap.isEmpty)
               Expanded(
                 child: Center(
                   child: Transform.rotate(
@@ -195,12 +185,14 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
                   ),
                 ),
               ),
-            if (_displayedWidgets.isNotEmpty)
+            if (_displayedWidgetsMap.isNotEmpty)
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Column(children: _displayedWidgets),
+                    child: Column(
+                      children: _displayedWidgetsMap.values.toList(),
+                    ),
                   ),
                 ),
               ),

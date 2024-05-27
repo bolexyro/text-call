@@ -7,7 +7,14 @@ import 'package:text_call/screens/preview_screen.dart';
 import 'package:text_call/utils/constants.dart';
 
 class MyQuillEditor extends StatefulWidget {
-  const MyQuillEditor({super.key});
+  const MyQuillEditor({
+    super.key,
+    required this.onDelete,
+    required this.keyInMap,
+  });
+
+  final int keyInMap;
+  final void Function(int key) onDelete;
 
   @override
   State<MyQuillEditor> createState() => _MyQuillEditorState();
@@ -28,18 +35,11 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
               multiRowsDisplay: !_collapseToolbar,
               customButtons: [
                 QuillToolbarCustomButtonOptions(
-                  icon: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                    ),
-                    child: const Icon(
-                      Icons.delete,
-                      color: Color.fromARGB(255, 255, 57, 43),
-                    ),
+                  icon: const Icon(
+                    Icons.delete,
+                    color: Color.fromARGB(255, 255, 57, 43),
                   ),
-                  onPressed: () {},
+                  onPressed: () => widget.onDelete(widget.keyInMap),
                 ),
                 QuillToolbarCustomButtonOptions(
                   icon: RotatedBox(

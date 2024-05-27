@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/message.dart';
+import 'package:text_call/utils/constants.dart';
 
 enum RecentCategory {
   outgoingAccepted,
@@ -15,23 +16,23 @@ enum RecentCategory {
 Map<RecentCategory, Widget> recentCategoryIconMap = {
   RecentCategory.outgoingAccepted: SvgPicture.asset(
     'assets/icons/outgoing-call.svg',
-    height: 24,
+    height: kIconHeight,
     colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
   ),
   RecentCategory.outgoingUnanswered: SvgPicture.asset(
     'assets/icons/outgoing-call.svg',
-    height: 24,
+    height: kIconHeight,
     colorFilter: const ColorFilter.mode(
         Color.fromARGB(255, 185, 112, 2), BlendMode.srcIn),
   ),
   RecentCategory.outgoingRejected: SvgPicture.asset(
     'assets/icons/outgoing-call.svg',
-    height: 24,
+    height: kIconHeight,
     colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn),
   ),
   RecentCategory.incomingAccepted: SvgPicture.asset(
     'assets/icons/incoming-call.svg',
-    height: 24,
+    height: kIconHeight,
     colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
   ),
 
@@ -40,7 +41,7 @@ Map<RecentCategory, Widget> recentCategoryIconMap = {
 
   RecentCategory.incomingRejected: SvgPicture.asset(
     'assets/icons/incoming-call.svg',
-    height: 24,
+    height: kIconHeight,
     colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn),
   ),
 };

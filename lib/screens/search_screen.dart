@@ -63,7 +63,7 @@ class _SearchScreenState extends State<SearchScreen> {
     final isDarkMode =
         Theme.of(context).brightness == Brightness.dark ? true : false;
     final bool isPhone =
-        MediaQuery.sizeOf(context).width < tabletWidth ? true : false;
+        MediaQuery.sizeOf(context).width < kTabletWidth ? true : false;
     final activeContent = _currentContact == null
         ? const Padding(
             padding: EdgeInsets.all(10.0),
@@ -164,7 +164,7 @@ class _MainSearchWidgetState extends ConsumerState<MainSearchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = MediaQuery.sizeOf(context).width < tabletWidth;
+    bool isPhone = MediaQuery.sizeOf(context).width < kTabletWidth;
     return Column(
       children: [
         Padding(
@@ -338,7 +338,7 @@ class _MainSearchWidgetState extends ConsumerState<MainSearchWidget> {
                                     },
                                     icon: SvgPicture.asset(
                                       'assets/icons/message-ring.svg',
-                                      height: 24,
+                                      height: kIconHeight,
                                       colorFilter: ColorFilter.mode(
                                         Theme.of(context).iconTheme.color!,
                                         BlendMode.srcIn,

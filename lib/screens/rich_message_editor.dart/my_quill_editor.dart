@@ -2,40 +2,29 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter_quill_extensions/flutter_quill_embeds.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:text_call/screens/preview_screen.dart';
+import 'package:text_call/utils/constants.dart';
 
-class RichMessageWriter extends StatefulWidget {
-  const RichMessageWriter({super.key});
+class MyQuillEditor extends StatefulWidget {
+  const MyQuillEditor({super.key});
 
   @override
-  State<RichMessageWriter> createState() => _RichMessageWriterState();
+  State<MyQuillEditor> createState() => _MyQuillEditorState();
 }
 
-class _RichMessageWriterState extends State<RichMessageWriter> {
+class _MyQuillEditorState extends State<MyQuillEditor> {
   final QuillController _controller = QuillController.basic();
-  bool _collapseToolbar = false;
+  bool _collapseToolbar = true;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            // showAdaptiveDialog(context: context, builder: (context) => AlertDialog.adaptive(
-            //   content: ,
-            // ))
-            Navigator.of(context).pop();
-          },
-          icon: const Icon(Icons.arrow_back_ios_new),
-        ),
-      ),
-      body: Column(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
         children: [
           QuillToolbar.simple(
             configurations: QuillSimpleToolbarConfigurations(
-              embedButtons: FlutterQuillEmbeds.toolbarButtons(),
               multiRowsDisplay: !_collapseToolbar,
               customButtons: [
                 QuillToolbarCustomButtonOptions(
@@ -43,7 +32,7 @@ class _RichMessageWriterState extends State<RichMessageWriter> {
                     quarterTurns: _collapseToolbar ? 2 : 0,
                     child: SvgPicture.asset(
                       'assets/icons/collapse.svg',
-                      height: 24,
+                      height: kIconHeight,
                       colorFilter: ColorFilter.mode(
                         Theme.of(context).iconTheme.color!,
                         BlendMode.srcIn,
@@ -62,6 +51,7 @@ class _RichMessageWriterState extends State<RichMessageWriter> {
                   onPressed: () {
                     final json =
                         jsonEncode(_controller.document.toDelta().toJson());
+                    print(json);
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => PreviewScreen(documentJson: json),
@@ -91,15 +81,18 @@ class _RichMessageWriterState extends State<RichMessageWriter> {
           const SizedBox(
             height: 5,
           ),
-          Expanded(
+          Container(
+            decoration: BoxDecoration(
+                border: Border.all(), borderRadius: BorderRadius.circular(10)),
+            height: 200,
             child: QuillEditor.basic(
               configurations: QuillEditorConfigurations(
-                embedBuilders: FlutterQuillEmbeds.editorBuilders(),
                 scrollable: true,
                 autoFocus: true,
                 padding: EdgeInsets.only(
                   left: 12,
                   right: 12,
+                  top: 12,
                   bottom: MediaQuery.viewInsetsOf(context).bottom + 20,
                 ),
                 keyboardAppearance: Theme.of(context).brightness,

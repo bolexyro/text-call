@@ -65,7 +65,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     if (widget.whichScreen == WhichScreen.contact) {
-      if (availableWidth > tabletWidth) {
+      if (availableWidth > kTabletWidth) {
         final activeContent = _currentContact == null
             ? const Padding(
                 padding: EdgeInsets.all(10.0),
@@ -116,7 +116,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
       );
     }
 
-    if (availableWidth > tabletWidth) {
+    if (availableWidth > kTabletWidth) {
       final activeContent = _currentRecent == null
           ? const Padding(
               padding: EdgeInsets.all(10.0),

@@ -11,7 +11,8 @@ import 'package:confetti/confetti.dart';
 import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
-import 'package:text_call/screens/rich_message_writer.dart';
+import 'package:text_call/screens/rich_message_editor.dart/rich_message_editor_screen.dart';
+import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/dialogs/choose_color_dialog.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -162,7 +163,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   ElevatedButton(
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const RichMessageWriter(),
+                        builder: (context) => const RichMessageEditorScreen(),
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -177,7 +178,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       children: [
                         SvgPicture.asset(
                           'assets/icons/editor.svg',
-                          height: 24,
+                          height: kIconHeight,
                           colorFilter:
                               ColorFilter.mode(_selectedColor, BlendMode.srcIn),
                         ),
@@ -227,7 +228,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final snapshotData = json.decode(snapshot.data);
-            print(snapshotData );
+            print(snapshotData);
             if (snapshotData['call_status'] == 'errord') {
               return Padding(
                 padding: const EdgeInsets.only(top: 10.0),

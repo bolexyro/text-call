@@ -1,1 +1,2 @@
-const double tabletWidth = 520;
+const double kTabletWidth = 520;
+const double kIconHeight = 24;

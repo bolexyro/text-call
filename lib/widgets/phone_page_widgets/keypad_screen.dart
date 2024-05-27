@@ -132,7 +132,7 @@ class _KeypadScreenState extends ConsumerState<KeypadScreen> {
     const stackPadding = EdgeInsets.symmetric(horizontal: 10);
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => MediaQuery.sizeOf(context).width > tabletWidth
+        builder: (context) => MediaQuery.sizeOf(context).width > kTabletWidth
             ? TabletContactDetailsScreen(contact: contact)
             : SafeArea(
                 child: Scaffold(

@@ -1,27 +1,29 @@
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:text_call/screens/rich_message_editor.dart/wave_bubble.dart';
 
 class AudioRecorderCard extends StatefulWidget {
   const AudioRecorderCard({
     super.key,
     required this.onDelete,
     required this.keyInMap,
+    required this.savePath,
   });
 
   final int keyInMap;
   final void Function(int key) onDelete;
+  final void Function(String path, int key) savePath;
 
   @override
   State<AudioRecorderCard> createState() => _AudioRecorderCardState();
 }
-
 class _AudioRecorderCardState extends State<AudioRecorderCard> {
   late final RecorderController recorderController;
 
   String? path;
-  String? musicFile;
   bool _isRecording = false;
+  bool _recordingStarted = false;
   bool isRecordingCompleted = false;
 
   @override
@@ -41,10 +43,12 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
   void _stopRecording() async {
     try {
       recorderController.reset();
-      path = await recorderController.stop(false);
+      final String? localPath = await recorderController.stop(false);
 
-      if (path != null) {
+      if (localPath != null) {
         isRecordingCompleted = true;
+        widget.savePath(localPath, widget.keyInMap);
+        path = localPath;
         debugPrint('path is $path');
       }
     } catch (e) {
@@ -52,6 +56,7 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
     } finally {
       setState(() {
         _isRecording = false;
+        _recordingStarted = false;
       });
     }
   }
@@ -61,22 +66,34 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
       if (_isRecording) {
         await recorderController.pause();
       } else {
-        await recorderController.record(path: path); // Path is optional
+        await recorderController.record(); // Path is optional
       }
     } catch (e) {
       debugPrint(e.toString());
     } finally {
       setState(() {
+        if (_recordingStarted == false) {
+          _recordingStarted = true;
+        }
         _isRecording = !_isRecording;
       });
     }
   }
 
-  void _refreshWave() async {
+  void _restart() async {
     if (_isRecording) {
       await recorderController.stop();
       await recorderController.record();
     }
+  }
+
+  void _takeAnotherAudio() {
+    setState(() {
+      path = null;
+      _isRecording = false;
+      _recordingStarted = false;
+      isRecordingCompleted = false;
+    });
   }
 
   @override
@@ -96,40 +113,33 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
             color: const Color.fromARGB(225, 229, 238, 249),
             child: Column(
               children: [
-                const SizedBox(height: 10),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  child: _isRecording
-                      ? AudioWaveforms(
-                          enableGesture: true,
-                          size:
-                              Size(MediaQuery.of(context).size.width / 1.2, 50),
-                          recorderController: recorderController,
-                          waveStyle: const WaveStyle(
-                            waveColor: Colors.white,
-                            extendWaveform: true,
-                            showMiddleLine: false,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12.0),
-                            color: const Color.fromARGB(255, 110, 151, 183),
-                          ),
-                          padding: const EdgeInsets.only(left: 18),
-                          margin: const EdgeInsets.symmetric(horizontal: 15),
-                        )
-                      : Container(
-                          width: MediaQuery.of(context).size.width / 1.2,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 110, 151, 183),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          padding: const EdgeInsets.only(left: 18),
-                          margin: const EdgeInsets.symmetric(horizontal: 15),
-                        ),
+                Padding(
+                  padding:
+                      const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: path == null
+                        ? AudioWaveforms(
+                            enableGesture: true,
+                            size: const Size(double.infinity, 70),
+                            recorderController: recorderController,
+                            waveStyle: const WaveStyle(
+                              waveColor: Colors.white,
+                              extendWaveform: true,
+                              showMiddleLine: false,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: const Color.fromARGB(255, 110, 151, 183),
+                            ),
+                            padding: const EdgeInsets.only(left: 18),
+                          )
+                        : WaveBubble(audioPath: path!),
+                  ),
                 ),
                 const Gap(5),
-                StreamBuilder<Duration>(
+                if (path == null)
+                  StreamBuilder<Duration>(
                     stream: recorderController.onCurrentDuration,
                     builder: (context, snapshot) {
                       final duration = snapshot.data ?? Duration.zero;
@@ -145,70 +155,124 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
                             color: Color.fromARGB(255, 45, 59, 78),
                             fontSize: 20),
                       );
-                    }),
+                    },
+                  ),
+                if (path != null) const SizedBox(height: 28),
                 const Gap(5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    GestureDetector(
-                      onTap: _refreshWave,
+                if (path != null)
+                  Center(
+                    child: GestureDetector(
+                      onTap: _takeAnotherAudio,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 5.0, horizontal: 8.0),
-                        decoration: const ShapeDecoration(
-                          shape: StadiumBorder(),
-                          color: Colors.white,
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Color.fromARGB(255, 255, 209, 205),
+                          shape: BoxShape.circle,
                         ),
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.refresh,
-                              color: Color.fromARGB(255, 113, 139, 207),
-                            ),
-                            Gap(5),
-                            Text(
-                              'Restarta',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Color.fromARGB(255, 113, 139, 207),
-                              ),
-                            ),
-                          ],
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            color: Color.fromARGB(255, 255, 171, 171),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.refresh,
+                            size: 30,
+                          ),
                         ),
                       ),
                     ),
-                    RecordButton(
-                      isRecording: _isRecording,
-                      onTap: _startOrPauseRecording,
-                    ),
-                    GestureDetector(
-                      onTap: _stopRecording,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 5.0, horizontal: 8.0),
-                        decoration: const ShapeDecoration(
-                          shape: StadiumBorder(),
-                          color: Colors.white,
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.stop,
-                              color: Color.fromARGB(255, 45, 59, 78),
-                            ),
-                            Gap(5),
-                            Text(
-                              'Stop',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 45, 59, 78),
+                  ),
+                if (path == null)
+                  LayoutBuilder(builder: (context, constraints) {
+                    final eachWidgetsWidth = constraints.maxWidth / 3;
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        SizedBox(
+                          width: eachWidgetsWidth,
+                          child: Center(
+                            child: Opacity(
+                              opacity: _isRecording ? 1 : 0.0,
+                              child: GestureDetector(
+                                onTap: _isRecording ? _restart : null,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 5.0, horizontal: 12.0),
+                                  decoration: const ShapeDecoration(
+                                    shape: StadiumBorder(),
+                                    color: Colors.white,
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.refresh,
+                                        color:
+                                            Color.fromARGB(255, 113, 139, 207),
+                                      ),
+                                      Gap(5),
+                                      Text(
+                                        'Restart',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Color.fromARGB(
+                                              255, 113, 139, 207),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
+                        SizedBox(
+                          width: eachWidgetsWidth,
+                          child: RecordButton(
+                            isRecording: _isRecording,
+                            onTap: _startOrPauseRecording,
+                          ),
+                        ),
+                        SizedBox(
+                          width: eachWidgetsWidth,
+                          child: Center(
+                            child: Opacity(
+                              opacity: _recordingStarted ? 1 : 0.0,
+                              child: GestureDetector(
+                                onTap: _stopRecording,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 5.0, horizontal: 12.0),
+                                  decoration: const ShapeDecoration(
+                                    shape: StadiumBorder(),
+                                    color: Colors.white,
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.stop,
+                                        color: Color.fromARGB(255, 45, 59, 78),
+                                      ),
+                                      Gap(5),
+                                      Text(
+                                        'Stop',
+                                        style: TextStyle(
+                                          color:
+                                              Color.fromARGB(255, 45, 59, 78),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
                 const SizedBox(height: 10),
               ],
             ),

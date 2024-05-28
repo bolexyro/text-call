@@ -1,11 +1,11 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter_quill_extensions/flutter_quill_embeds.dart';
 
-class PreviewScreen extends StatelessWidget {
-  const PreviewScreen({
+class DocDisplayer extends StatelessWidget {
+  const DocDisplayer({
     super.key,
     required this.documentJson,
   });
@@ -14,28 +14,23 @@ class PreviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final QuillController controller = QuillController(
+    final colors = [Colors.blue, Colors.red, Colors.purple, Colors.green];
+    final controller = QuillController(
       document: Document.fromJson(jsonDecode(documentJson)),
       selection: const TextSelection.collapsed(offset: 0),
       readOnly: true,
-      
     );
-    return Scaffold(
-      appBar: AppBar(),
-      
-      body: QuillEditor.basic(
+
+    return Container(
+      color: colors[Random().nextInt(4)],
+      child: QuillEditor.basic(
         configurations: QuillEditorConfigurations(
           showCursor: false,
-          embedBuilders: FlutterQuillEmbeds.editorBuilders(),
-          scrollable: true,
-          autoFocus: true,
           padding: EdgeInsets.only(
             left: 12,
             right: 12,
             bottom: MediaQuery.viewInsetsOf(context).bottom + 20,
           ),
-          keyboardAppearance: Theme.of(context).brightness,
-          placeholder: 'Start typing....',
           controller: controller,
           sharedConfigurations: const QuillSharedConfigurations(
             locale: Locale('de'),

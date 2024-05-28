@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,6 +9,7 @@ import 'package:text_call/screens/rich_message_editor.dart/audio_recorder_card.d
 import 'package:text_call/screens/rich_message_editor.dart/image_displayer.dart';
 import 'package:text_call/screens/rich_message_editor.dart/my_quill_editor.dart';
 import 'package:text_call/screens/rich_message_editor.dart/my_video_player.dart';
+import 'package:text_call/screens/rich_message_editor.dart/preview_screen.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/widgets/camera_or_gallery.dart';
 
@@ -23,10 +25,21 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   // this index would be the keys for the widgets in the list
   int index = -1;
   final Map<int, Widget> _displayedWidgetsMap = {};
+  final Map<int, QuillController> _controllersMap = {};
+  final Map<int, String> _audioPathsMap = {};
+  // final Map<>
+
+  // bool _isSaving = false;
+
   void _addTextEditor() {
     FocusManager.instance.primaryFocus?.unfocus();
+    final newIndex = ++index;
+    final controller = QuillController.basic();
     setState(() {
-      _displayedWidgetsMap[++index] = MyQuillEditor(
+      _controllersMap[newIndex] = controller;
+      _displayedWidgetsMap[newIndex] = MyQuillEditor(
+        key: ValueKey(newIndex),
+        controller: controller,
         keyInMap: index,
         onDelete: _removeMediaWidget,
       );
@@ -40,6 +53,8 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   }
 
   void _addImage() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+
     ImageSource? source = await showModalBottomSheet(
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
@@ -55,12 +70,16 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     if (pickedImage == null) {
       return null;
     }
+
+    final newIndex = ++index;
+
     setState(() {
-      _displayedWidgetsMap[++index] = (ImageDisplayer(
-        keyInMap: index,
+      _displayedWidgetsMap[newIndex] = ImageDisplayer(
+        key: ValueKey(newIndex),
+        keyInMap: newIndex,
         onDelete: _removeMediaWidget,
         imageFile: File(pickedImage.path),
-      ));
+      );
     });
   }
 
@@ -68,14 +87,25 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
 
     setState(() {
-      _displayedWidgetsMap[++index] = AudioRecorderCard(
-        keyInMap: index,
+      final newIndex = ++index;
+      _displayedWidgetsMap[newIndex] = AudioRecorderCard(
+        key: ValueKey(newIndex),
+        keyInMap: newIndex,
         onDelete: _removeMediaWidget,
+        savePath: _getAudioPath,
       );
     });
   }
 
+  void _getAudioPath(String path, int index) async {
+    _audioPathsMap[index] = path;
+    print('fafafio ${await File(path).exists()}');
+    print('audio path $index ${_audioPathsMap[index]}');
+  }
+
   void _addVideo() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+
     ImageSource? source = await showModalBottomSheet(
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
@@ -91,13 +121,27 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     if (pickedVideo == null) {
       return null;
     }
+    final newIndex = ++index;
     setState(() {
-      _displayedWidgetsMap[++index] = MyVideoPlayer(
-        keyInMap: index,
+      _displayedWidgetsMap[newIndex] = MyVideoPlayer(
+        key: ValueKey(newIndex),
+        keyInMap: newIndex,
         onDelete: _removeMediaWidget,
         videoFile: File(pickedVideo.path),
       );
     });
+  }
+
+  void _goToPreviewScreen() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => PreviewScreen(
+          audioPathsMap: _audioPathsMap,
+          displayedWidgetsMap: _displayedWidgetsMap,
+          controllersMap: _controllersMap,
+        ),
+      ),
+    );
   }
 
   @override
@@ -159,7 +203,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: _goToPreviewScreen,
                     icon: SvgPicture.asset(
                       'assets/icons/file-done.svg',
                       height: kIconHeight,

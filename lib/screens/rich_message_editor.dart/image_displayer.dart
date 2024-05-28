@@ -19,10 +19,7 @@ class ImageDisplayer extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        SizedBox(
-          height: 550,
-          child: Image.file(imageFile),
-        ),
+        Image.file(imageFile),
         Positioned(
           right: -10,
           top: -10,

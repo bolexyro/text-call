@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:text_call/screens/preview_screen.dart';
 import 'package:text_call/utils/constants.dart';
 
 class MyQuillEditor extends StatefulWidget {
@@ -11,17 +8,26 @@ class MyQuillEditor extends StatefulWidget {
     super.key,
     required this.onDelete,
     required this.keyInMap,
+    required this.controller,
   });
 
   final int keyInMap;
   final void Function(int key) onDelete;
+  // final QuillController _controller = QuillController.basic();
+  final QuillController controller;
 
   @override
   State<MyQuillEditor> createState() => _MyQuillEditorState();
 }
 
 class _MyQuillEditorState extends State<MyQuillEditor> {
-  final QuillController _controller = QuillController.basic();
+  late final QuillController _controller;
+  @override
+  initState() {
+    _controller = widget.controller;
+    super.initState();
+  }
+
   bool _collapseToolbar = true;
 
   @override
@@ -63,14 +69,14 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
                     height: 30,
                   ),
                   onPressed: () {
-                    final json =
-                        jsonEncode(_controller.document.toDelta().toJson());
-                    print(json);
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => PreviewScreen(documentJson: json),
-                      ),
-                    );
+                    // final json =
+                    //     jsonEncode(_controller.document.toDelta().toJson());
+                    // print(json);
+                    // Navigator.of(context).push(
+                    //   MaterialPageRoute(
+                    //     builder: (context) => PreviewScreen(documentJson: json),
+                    //   ),
+                    // );
                   },
                 ),
               ],

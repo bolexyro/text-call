@@ -128,6 +128,10 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
                 title: const Text('Cancel'),
                 onTap: () => Navigator.of(context).pop(),
               ),
+              ListTile(
+                title: const Text('Draft'),
+                onTap: () {},
+              ),
               const Spacer(),
               ListTile(
                 leading: SvgPicture.asset(

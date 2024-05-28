@@ -1,0 +1,14 @@
+{
+    "document": {
+        "backgroundColor": {
+            "alpha": 255,
+            "red": 100,
+            "green": 200,
+            "blue": 90
+        },
+        "quillDocJson": ""
+    },
+    "image": "imagePath",
+    "video": "videoPath",
+    "audio": "audioPath"
+}

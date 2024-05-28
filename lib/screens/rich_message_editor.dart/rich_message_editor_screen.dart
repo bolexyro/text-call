@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -48,6 +49,43 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
         curve: Curves.easeOut,
       );
     });
+  }
+
+  Map<String, dynamic> _createMyOwnCustomDocumentJson() {
+    final Map<String, dynamic> myOwnCustomDocumemntJson = {};
+    for (final kvPair in _displayedWidgetsMap.entries) {
+      if (kvPair.value.runtimeType == MyQuillEditor &&
+          _controllersMap[kvPair.key]!.document.toDelta().toJson()[0]
+                  ['insert'] !=
+              '\n') {
+        final bgColor =
+            _quillEditorBackgroundColorMap[kvPair.key] ?? Colors.white;
+        myOwnCustomDocumemntJson['document'] = {
+          'backgroundColor': {
+            'alpha': bgColor.alpha,
+            'red': bgColor.red,
+            'blue': bgColor.blue,
+            'green': bgColor.green,
+          },
+          'quillDocJson': jsonEncode(
+            _controllersMap[kvPair.key]!.document.toDelta().toJson(),
+          ),
+        };
+      }
+      if (kvPair.value.runtimeType == AudioRecorderCard &&
+          _audioPathsMap[kvPair.key] != null) {
+        myOwnCustomDocumemntJson['audio'] = _audioPathsMap[kvPair.key]!;
+      }
+
+      if (kvPair.value.runtimeType == MyVideoPlayer) {
+        myOwnCustomDocumemntJson['video'] = _videoPathsMap[kvPair.key]!;
+      }
+
+      if (kvPair.value.runtimeType == ImageDisplayer) {
+        myOwnCustomDocumemntJson['image'] = _imagePathsMap[kvPair.key]!;
+      }
+    }
+    return myOwnCustomDocumemntJson;
   }
 
   void _addTextEditor() {
@@ -173,12 +211,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => PreviewScreen(
-          quillEditorBackgroundColorMap: _quillEditorBackgroundColorMap,
-          imagePathsMap: _imagePathsMap,
-          videoPathsMap: _videoPathsMap,
-          audioPathsMap: _audioPathsMap,
-          displayedWidgetsMap: _displayedWidgetsMap,
-          controllersMap: _controllersMap,
+          myOwnCustomDocumemntJson: _createMyOwnCustomDocumentJson(),
         ),
       ),
     );
@@ -186,7 +219,6 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _scrollToEnd();
     final bool isLightMode = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
       body: SafeArea(
@@ -256,8 +288,8 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
                   IconButton(
                     onPressed: _goToPreviewScreen,
                     icon: SvgPicture.asset(
-                      'assets/icons/file-done.svg',
-                      height: 30,
+                      'assets/icons/preview.svg',
+                      height: kIconHeight,
                     ),
                   ),
                 ],

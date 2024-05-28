@@ -1,32 +1,20 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
-import 'package:text_call/screens/rich_message_editor.dart/audio_recorder_card.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:text_call/screens/rich_message_editor.dart/doc_displayer.dart';
 import 'package:text_call/screens/rich_message_editor.dart/image_displayer.dart';
-import 'package:text_call/screens/rich_message_editor.dart/my_quill_editor.dart';
 import 'package:text_call/screens/rich_message_editor.dart/my_video_player.dart';
 import 'package:text_call/screens/rich_message_editor.dart/wave_bubble.dart';
+import 'package:text_call/utils/utils.dart';
 
 class PreviewScreen extends StatelessWidget {
   const PreviewScreen({
     super.key,
-    required this.displayedWidgetsMap,
-    required this.controllersMap,
-    required this.audioPathsMap,
-    required this.imagePathsMap,
-    required this.videoPathsMap,
-    required this.quillEditorBackgroundColorMap,
+    required this.myOwnCustomDocumemntJson,
   });
 
-  final Map<int, Widget> displayedWidgetsMap;
-  final Map<int, QuillController> controllersMap;
-  final Map<int, String> audioPathsMap;
-  final Map<int, String> imagePathsMap;
-  final Map<int, String> videoPathsMap;
-  final Map<int, Color> quillEditorBackgroundColorMap;
+  final Map<String, dynamic> myOwnCustomDocumemntJson;
 
   @override
   Widget build(BuildContext context) {
@@ -37,47 +25,45 @@ class PreviewScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back_ios_new),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop(myOwnCustomDocumemntJson);
+            },
+            icon: SvgPicture.asset(
+              'assets/icons/file-done.svg',
+              height: 30,
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
           child: Column(
             children: [
-              for (final kvPair in displayedWidgetsMap.entries)
+              for (final kvPair in myOwnCustomDocumemntJson.entries)
                 Column(
                   children: [
-                    if (kvPair.value.runtimeType == MyQuillEditor &&
-                        controllersMap[kvPair.key]!
-                                .document
-                                .toDelta()
-                                .toJson()[0]['insert'] !=
-                            '\n')
+                    if (kvPair.key == 'document')
                       DocDisplayer(
                         backgroundColor:
-                            quillEditorBackgroundColorMap[kvPair.key] ??
-                                Colors.white,
-                        documentJson: jsonEncode(
-                          controllersMap[kvPair.key]!
-                              .document
-                              .toDelta()
-                              .toJson(),
-                        ),
+                            deJsonifyColor(kvPair.value['backgroundColor']),
+                        documentJson: kvPair.value['quillDocJson'],
                       ),
-                    if (kvPair.value.runtimeType == AudioRecorderCard &&
-                        audioPathsMap[kvPair.key] != null)
+                    if (kvPair.key == 'audio')
                       WaveBubble(
-                        audioPath: audioPathsMap[kvPair.key]!,
+                        audioPath: kvPair.value,
                       ),
-                    if (kvPair.value.runtimeType == MyVideoPlayer)
+                    if (kvPair.key == 'video')
                       MyVideoPlayer(
-                        videoFile: File(videoPathsMap[kvPair.key]!),
-                        keyInMap: kvPair.key,
+                        videoFile: File(kvPair.value),
                         forPreview: true,
                       ),
-                    if (kvPair.value.runtimeType == ImageDisplayer)
+                    if (kvPair.key == 'image')
                       ImageDisplayer(
-                        imageFile: File(imagePathsMap[kvPair.key]!),
-                        keyInMap: kvPair.key,
+                        imageFile: File(kvPair.value),
                         forPreview: true,
                       ),
                     const SizedBox(

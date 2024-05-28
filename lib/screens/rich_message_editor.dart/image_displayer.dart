@@ -3,16 +3,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 class ImageDisplayer extends StatelessWidget {
+  // if not for preview, keyInMp and onDelete should be non null
   const ImageDisplayer({
     super.key,
     required this.imageFile,
     this.onDelete,
-    required this.keyInMap,
+    this.keyInMap,
     this.forPreview = false,
   });
 
   final File imageFile;
-  final int keyInMap;
+  final int? keyInMap;
   final void Function(int key)? onDelete;
   final bool forPreview;
 
@@ -33,7 +34,7 @@ class ImageDisplayer extends StatelessWidget {
             right: -10,
             top: -10,
             child: GestureDetector(
-              onTap: () => onDelete!(keyInMap),
+              onTap: () => onDelete!(keyInMap!),
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(

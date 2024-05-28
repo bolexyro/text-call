@@ -4,16 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class MyVideoPlayer extends StatefulWidget {
+  // if not for preview, keyInMp and onDelete should be non null
   const MyVideoPlayer({
     super.key,
     required this.videoFile,
-    required this.keyInMap,
+     this.keyInMap,
     this.onDelete,
     this.forPreview = false,
   });
 
   final File videoFile;
-  final int keyInMap;
+  final int? keyInMap;
   final void Function(int key)? onDelete;
   final bool forPreview;
 
@@ -75,7 +76,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                 right: -10,
                 top: -10,
                 child: GestureDetector(
-                  onTap: () => widget.onDelete!(widget.keyInMap),
+                  onTap: () => widget.onDelete!(widget.keyInMap!),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(

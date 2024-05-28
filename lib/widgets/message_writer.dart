@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:lottie/lottie.dart';
@@ -11,6 +12,7 @@ import 'package:confetti/confetti.dart';
 import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
+import 'package:text_call/screens/rich_message_editor.dart/preview_screen.dart';
 import 'package:text_call/screens/rich_message_editor.dart/rich_message_editor_screen.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
@@ -106,6 +108,26 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   }
 
   @override
+  void initState() {
+    messageWriterMessageBox = TextField(
+      controller: _messageController,
+      minLines: 4,
+      maxLines: null,
+      keyboardType: TextInputType.multiline,
+      textCapitalization: TextCapitalization.sentences,
+      decoration: InputDecoration(
+        hintText: 'Enter the message you want to call them with',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        labelText: 'Message',
+      ),
+    );
+    super.initState();
+  }
+
+  late Widget messageWriterMessageBox;
+  @override
   Widget build(BuildContext context) {
     Widget messageWriterContent = Padding(
       padding: const EdgeInsets.only(top: 8.0),
@@ -114,20 +136,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
           child: Column(
             children: [
-              TextField(
-                controller: _messageController,
-                minLines: 4,
-                maxLines: null,
-                keyboardType: TextInputType.multiline,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: InputDecoration(
-                  hintText: 'Enter the message you want to call them with',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  labelText: 'Message',
-                ),
-              ),
+              messageWriterMessageBox,
               const SizedBox(
                 height: 30,
               ),
@@ -161,11 +170,22 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   ),
                   const Spacer(),
                   ElevatedButton(
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const RichMessageEditorScreen(),
-                      ),
-                    ),
+                    onPressed: () async {
+                      final Map<String, dynamic>? myOwnCustomDocumemntJson =
+                          await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const RichMessageEditorScreen(),
+                        ),
+                      );
+
+                      if (myOwnCustomDocumemntJson != null) {
+                        setState(() {
+                          messageWriterMessageBox = FilePreview(
+                            myOwnCustomDocumemntJson: myOwnCustomDocumemntJson,
+                          );
+                        });
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       padding: const EdgeInsets.symmetric(
@@ -450,6 +470,77 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class FilePreview extends StatelessWidget {
+  const FilePreview({
+    super.key,
+    required this.myOwnCustomDocumemntJson,
+  });
+  final Map<String, dynamic> myOwnCustomDocumemntJson;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) =>
+              PreviewScreen(myOwnCustomDocumemntJson: myOwnCustomDocumemntJson),
+        ),
+      ),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Theme.of(context).brightness == Brightness.dark
+              ? makeColorLighter(Theme.of(context).primaryColor, 20)
+              : const Color.fromARGB(255, 176, 208, 235),
+        ),
+        child: Center(
+          child: Row(
+            children: [
+              const SizedBox(
+                width: 10,
+              ),
+              SvgPicture.asset(
+                'assets/icons/regular-file.svg',
+                height: 40,
+              ),
+              const SizedBox(
+                width: 20,
+              ),
+              const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Complex_Message.txtcall',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text('Click to view')
+                ],
+              ),
+              const Spacer(),
+              Column(
+                children: [
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.edit),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.delete),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                width: 30,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -197,7 +197,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         });
       }
     } else {
-      print('giannis');
       setState(() {
         _isAuthenticating = false;
       });

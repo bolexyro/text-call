@@ -32,6 +32,24 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   final Map<int, String> _videoPathsMap = {};
   final Map<int, Color> _quillEditorBackgroundColorMap = {};
 
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
   void _addTextEditor() {
     FocusManager.instance.primaryFocus?.unfocus();
     final newIndex = ++index;
@@ -46,6 +64,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
         onDelete: _removeMediaWidget,
       );
     });
+    _scrollToEnd();
   }
 
   void _removeMediaWidget(int key) {
@@ -93,6 +112,8 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
         imageFile: File(pickedImage.path),
       );
     });
+
+    _scrollToEnd();
   }
 
   void _addAudio() {
@@ -107,6 +128,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
         savePath: _getAudioPath,
       );
     });
+    _scrollToEnd();
   }
 
   void _getAudioPath(String path, int index) async {
@@ -141,6 +163,8 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
         videoFile: File(pickedVideo.path),
       );
     });
+
+    _scrollToEnd();
   }
 
   void _goToPreviewScreen() {
@@ -162,17 +186,22 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _scrollToEnd();
     final bool isLightMode = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 7.0, top: 10.0),
+              padding: const EdgeInsets.only(left: 5.0, top: 6.0),
               child: Row(
                 children: [
                   IconButton(
                     onPressed: () async {
+                      if (_displayedWidgetsMap.isEmpty) {
+                        Navigator.of(context).pop();
+                        return;
+                      }
                       final bool? toDiscard = await showAdaptiveDialog(
                         context: context,
                         builder: (context) => const ConfirmDiscardDialog(),
@@ -235,10 +264,10 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
               ),
             ),
             if (!isLightMode)
-            Container(
-              color: Colors.white,
-              height: 10.0,
-            ),
+              Container(
+                color: Colors.white,
+                height: 10.0,
+              ),
             if (_displayedWidgetsMap.isEmpty)
               Expanded(
                 child: Center(
@@ -259,8 +288,9 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
             if (_displayedWidgetsMap.isNotEmpty)
               Expanded(
                 child: Container(
-                  color: !isLightMode? Colors.white: null,
+                  color: !isLightMode ? Colors.white : null,
                   child: SingleChildScrollView(
+                    controller: _scrollController,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8.0, vertical: 10),

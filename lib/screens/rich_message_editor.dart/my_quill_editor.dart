@@ -74,22 +74,22 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
                     BlendMode.srcIn,
                   ),
                 ),
-                onPressed: ()  async{
+                onPressed: () async {
                   FocusManager.instance.primaryFocus?.unfocus();
                   Color? selectedColor = _backgroundColor;
-                    selectedColor = await showAdaptiveDialog(
-                      context: context,
-                      builder: (context) {
-                        return ChooseColorDialog(
-                          initialPickerColor: _backgroundColor,
-                        );
-                      },
-                    );
-                    setState(() {
-                      _backgroundColor = selectedColor ?? _backgroundColor;
-                    });
-                    widget.onBackgroundColorChanged(
-                        widget.keyInMap, _backgroundColor);
+                  selectedColor = await showAdaptiveDialog(
+                    context: context,
+                    builder: (context) {
+                      return ChooseColorDialog(
+                        initialPickerColor: _backgroundColor,
+                      );
+                    },
+                  );
+                  setState(() {
+                    _backgroundColor = selectedColor ?? _backgroundColor;
+                  });
+                  widget.onBackgroundColorChanged(
+                      widget.keyInMap, _backgroundColor);
                 },
               ),
             ],
@@ -115,7 +115,7 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
           height: 5,
         ),
         Padding(
-          padding: const EdgeInsets.only(bottom: 10.0),
+          padding: const EdgeInsets.only(bottom: 10),
           child: Container(
             decoration: BoxDecoration(
               color: _backgroundColor,

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -8,13 +7,13 @@ class DocDisplayer extends StatelessWidget {
   const DocDisplayer({
     super.key,
     required this.documentJson,
+    required this.backgroundColor,
   });
 
   final String documentJson;
-
+  final Color backgroundColor;
   @override
   Widget build(BuildContext context) {
-    final colors = [Colors.blue, Colors.red, Colors.purple, Colors.green];
     final controller = QuillController(
       document: Document.fromJson(jsonDecode(documentJson)),
       selection: const TextSelection.collapsed(offset: 0),
@@ -22,7 +21,11 @@ class DocDisplayer extends StatelessWidget {
     );
 
     return Container(
-      color: colors[Random().nextInt(4)],
+      decoration: BoxDecoration(
+        border: Border.all(width: 2),
+        borderRadius: BorderRadius.circular(5),
+        color: backgroundColor,
+      ),
       child: QuillEditor.basic(
         configurations: QuillEditorConfigurations(
           showCursor: false,

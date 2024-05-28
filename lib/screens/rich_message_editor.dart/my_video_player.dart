@@ -7,13 +7,15 @@ class MyVideoPlayer extends StatefulWidget {
   const MyVideoPlayer({
     super.key,
     required this.videoFile,
-    required this.onDelete,
     required this.keyInMap,
+    this.onDelete,
+    this.forPreview = false,
   });
 
   final File videoFile;
   final int keyInMap;
-  final void Function(int key) onDelete;
+  final void Function(int key)? onDelete;
+  final bool forPreview;
 
   @override
   State<MyVideoPlayer> createState() => _MyVideoPlayerState();
@@ -27,10 +29,12 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
     _controller = VideoPlayerController.file(
       widget.videoFile,
       videoPlayerOptions: VideoPlayerOptions(allowBackgroundPlayback: true),
-    )..initialize().then((_) {
+    )
+      ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() {});
-      })..setLooping(true);
+      })
+      ..setLooping(true);
   }
 
   @override
@@ -53,16 +57,25 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                         : _controller.play();
                   });
                 },
-                child: AspectRatio(
-                  aspectRatio: _controller.value.aspectRatio,
-                  child: VideoPlayer(_controller),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 10.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(width: 2),
+                    ),
+                    child: AspectRatio(
+                      aspectRatio: _controller.value.aspectRatio,
+                      child: VideoPlayer(_controller),
+                    ),
+                  ),
                 ),
               ),
+              if (!widget.forPreview)
               Positioned(
                 right: -10,
                 top: -10,
                 child: GestureDetector(
-                  onTap: () => widget.onDelete(widget.keyInMap),
+                  onTap: () => widget.onDelete!(widget.keyInMap),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(

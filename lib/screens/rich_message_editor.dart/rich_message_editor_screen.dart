@@ -27,9 +27,9 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   final Map<int, Widget> _displayedWidgetsMap = {};
   final Map<int, QuillController> _controllersMap = {};
   final Map<int, String> _audioPathsMap = {};
-  // final Map<>
-
-  // bool _isSaving = false;
+  final Map<int, String> _imagePathsMap = {};
+  final Map<int, String> _videoPathsMap = {};
+  final Map<int, Color> _quillEditorBackgroundColorMap = {};
 
   void _addTextEditor() {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -38,6 +38,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     setState(() {
       _controllersMap[newIndex] = controller;
       _displayedWidgetsMap[newIndex] = MyQuillEditor(
+        onBackgroundColorChanged: _changeAnEditorsBgColor,
         key: ValueKey(newIndex),
         controller: controller,
         keyInMap: index,
@@ -49,7 +50,16 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   void _removeMediaWidget(int key) {
     setState(() {
       _displayedWidgetsMap.remove(key);
+      _controllersMap.remove(key);
+      _audioPathsMap.remove(key);
+      _imagePathsMap.remove(key);
+      _videoPathsMap.remove(key);
+      _quillEditorBackgroundColorMap.remove(key);
     });
+  }
+
+  void _changeAnEditorsBgColor(int key, Color color) {
+    _quillEditorBackgroundColorMap[key] = color;
   }
 
   void _addImage() async {
@@ -73,6 +83,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
 
     final newIndex = ++index;
 
+    _imagePathsMap[newIndex] = pickedImage.path;
     setState(() {
       _displayedWidgetsMap[newIndex] = ImageDisplayer(
         key: ValueKey(newIndex),
@@ -122,6 +133,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
       return null;
     }
     final newIndex = ++index;
+    _videoPathsMap[newIndex] = pickedVideo.path;
     setState(() {
       _displayedWidgetsMap[newIndex] = MyVideoPlayer(
         key: ValueKey(newIndex),
@@ -133,9 +145,14 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   }
 
   void _goToPreviewScreen() {
+    FocusManager.instance.primaryFocus?.unfocus();
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => PreviewScreen(
+          quillEditorBackgroundColorMap: _quillEditorBackgroundColorMap,
+          imagePathsMap: _imagePathsMap,
+          videoPathsMap: _videoPathsMap,
           audioPathsMap: _audioPathsMap,
           displayedWidgetsMap: _displayedWidgetsMap,
           controllersMap: _controllersMap,
@@ -206,7 +223,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
                     onPressed: _goToPreviewScreen,
                     icon: SvgPicture.asset(
                       'assets/icons/file-done.svg',
-                      height: kIconHeight,
+                      height: 30,
                     ),
                   ),
                 ],
@@ -231,11 +248,15 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
               ),
             if (_displayedWidgetsMap.isNotEmpty)
               Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Column(
-                      children: _displayedWidgetsMap.values.toList(),
+                child: Container(
+                  color: Colors.white,
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 10),
+                      child: Column(
+                        children: _displayedWidgetsMap.values.toList(),
+                      ),
                     ),
                   ),
                 ),

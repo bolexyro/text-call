@@ -18,6 +18,7 @@ class AudioRecorderCard extends StatefulWidget {
   @override
   State<AudioRecorderCard> createState() => _AudioRecorderCardState();
 }
+
 class _AudioRecorderCardState extends State<AudioRecorderCard> {
   late final RecorderController recorderController;
 
@@ -105,12 +106,16 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.only(bottom: 10.0),
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          Card(
-            elevation: 0,
-            color: const Color.fromARGB(225, 229, 238, 249),
+          Container(
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(225, 229, 238, 249),
+              border: Border.all(width: 2),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Column(
               children: [
                 Padding(
@@ -129,9 +134,9 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
                               showMiddleLine: false,
                             ),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12.0),
-                              color: const Color.fromARGB(255, 110, 151, 183),
-                            ),
+                                borderRadius: BorderRadius.circular(12.0),
+                                color: const Color.fromARGB(255, 110, 151, 183),
+                                border: Border.all(width: 2)),
                             padding: const EdgeInsets.only(left: 18),
                           )
                         : WaveBubble(audioPath: path!),
@@ -166,13 +171,13 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: const BoxDecoration(
-                          color: Color.fromARGB(255, 255, 209, 205),
+                          color: Color.fromARGB(223, 178, 200, 228),
                           shape: BoxShape.circle,
                         ),
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: const BoxDecoration(
-                            color: Color.fromARGB(255, 255, 171, 171),
+                            color: Color.fromARGB(255, 153, 193, 224),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -278,7 +283,8 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
             ),
           ),
           Positioned(
-            right: 0,
+            right: -10,
+            top: -10,
             child: GestureDetector(
               onTap: () => widget.onDelete(widget.keyInMap),
               child: Container(
@@ -337,6 +343,7 @@ class RecordButton extends StatelessWidget {
               ? const Icon(
                   Icons.pause,
                   size: 35,
+                  color: Colors.black,
                 )
               : Container(
                   decoration: const BoxDecoration(

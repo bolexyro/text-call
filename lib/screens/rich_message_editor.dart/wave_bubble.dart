@@ -55,6 +55,7 @@ class _WaveBubbleState extends State<WaveBubble> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: const Color.fromARGB(255, 110, 151, 183),
+        border: Border.all(width: 2),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

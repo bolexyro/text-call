@@ -23,16 +23,14 @@ class DocDisplayer extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(width: 2),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(12),
         color: backgroundColor,
       ),
       child: QuillEditor.basic(
         configurations: QuillEditorConfigurations(
           showCursor: false,
-          padding: EdgeInsets.only(
-            left: 12,
-            right: 12,
-            bottom: MediaQuery.viewInsetsOf(context).bottom + 20,
+          padding: const EdgeInsets.all(12
+         
           ),
           controller: controller,
           sharedConfigurations: const QuillSharedConfigurations(

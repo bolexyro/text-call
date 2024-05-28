@@ -129,6 +129,13 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
                 onTap: () => Navigator.of(context).pop(),
               ),
               ListTile(
+                leading: SvgPicture.asset(
+                  'assets/icons/draft.svg',
+                  height: 24,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).iconTheme.color!,
+                    BlendMode.srcIn,
+                  ),),
                 title: const Text('Draft'),
                 onTap: () {},
               ),

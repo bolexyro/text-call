@@ -30,6 +30,7 @@ class PreviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(displayedWidgetsMap[3].runtimeType == ImageDisplayer);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(),
@@ -41,27 +42,35 @@ class PreviewScreen extends StatelessWidget {
               for (final kvPair in displayedWidgetsMap.entries)
                 Column(
                   children: [
-                    if (kvPair.value.runtimeType == MyQuillEditor)
+                    if (kvPair.value.runtimeType == MyQuillEditor &&
+                        controllersMap[kvPair.key]!
+                                .document
+                                .toDelta()
+                                .toJson()[0]['insert'] !=
+                            '\n')
                       DocDisplayer(
-                        backgroundColor: quillEditorBackgroundColorMap[kvPair.key]!,
+                        backgroundColor:
+                            quillEditorBackgroundColorMap[kvPair.key] ??
+                                Colors.white,
                         documentJson: jsonEncode(
                           controllersMap[kvPair.key]!
                               .document
                               .toDelta()
                               .toJson(),
                         ),
-                      )
-                    else if (kvPair.value.runtimeType == AudioRecorderCard)
+                      ),
+                    if (kvPair.value.runtimeType == AudioRecorderCard &&
+                        audioPathsMap[kvPair.key] != null)
                       WaveBubble(
                         audioPath: audioPathsMap[kvPair.key]!,
-                      )
-                    else if (kvPair.value.runtimeType == MyVideoPlayer)
+                      ),
+                    if (kvPair.value.runtimeType == MyVideoPlayer)
                       MyVideoPlayer(
                         videoFile: File(videoPathsMap[kvPair.key]!),
                         keyInMap: kvPair.key,
                         forPreview: true,
-                      )
-                    else
+                      ),
+                    if (kvPair.value.runtimeType == ImageDisplayer)
                       ImageDisplayer(
                         imageFile: File(imagePathsMap[kvPair.key]!),
                         keyInMap: kvPair.key,

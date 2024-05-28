@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-class ConfirmDeleteDialog extends StatelessWidget {
-  const ConfirmDeleteDialog({
+class ConfirmDiscardDialog extends StatelessWidget {
+  const ConfirmDiscardDialog({
     super.key,
-    required this.contactName,
   });
-
-  final String contactName;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +40,7 @@ class ConfirmDeleteDialog extends StatelessWidget {
             height: 10,
           ),
           Text(
-            'Delete Contact - $contactName',
+            'Discard changes',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 25,
@@ -52,7 +49,7 @@ class ConfirmDeleteDialog extends StatelessWidget {
             ),
           ),
           const Text(
-            'This action cannot be undone.',
+            'Are you sure you want to discard your changes? This action cannot be undone.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 17,
@@ -98,7 +95,7 @@ class ConfirmDeleteDialog extends StatelessWidget {
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 5.0),
                   child: Text(
-                    'Delete',
+                    'Discard',
                     style: TextStyle(fontSize: 17),
                   ),
                 ),

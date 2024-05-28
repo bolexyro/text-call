@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:text_call/screens/rich_message_editor.dart/audio_recorder_card.dart';
+import 'package:text_call/screens/rich_message_editor.dart/confirm_discard_dialog.dart';
 import 'package:text_call/screens/rich_message_editor.dart/image_displayer.dart';
 import 'package:text_call/screens/rich_message_editor.dart/my_quill_editor.dart';
 import 'package:text_call/screens/rich_message_editor.dart/my_video_player.dart';
@@ -110,8 +111,6 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
 
   void _getAudioPath(String path, int index) async {
     _audioPathsMap[index] = path;
-    print('fafafio ${await File(path).exists()}');
-    print('audio path $index ${_audioPathsMap[index]}');
   }
 
   void _addVideo() async {
@@ -173,8 +172,14 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
               child: Row(
                 children: [
                   IconButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
+                    onPressed: () async {
+                      final bool? toDiscard = await showAdaptiveDialog(
+                        context: context,
+                        builder: (context) => const ConfirmDiscardDialog(),
+                      );
+                      if (toDiscard == true) {
+                        Navigator.of(context).pop();
+                      }
                     },
                     icon: const Icon(Icons.arrow_back_ios_new),
                   ),
@@ -229,6 +234,11 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
                 ],
               ),
             ),
+            if (!isLightMode)
+            Container(
+              color: Colors.white,
+              height: 10.0,
+            ),
             if (_displayedWidgetsMap.isEmpty)
               Expanded(
                 child: Center(
@@ -249,7 +259,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
             if (_displayedWidgetsMap.isNotEmpty)
               Expanded(
                 child: Container(
-                  color: Colors.white,
+                  color: !isLightMode? Colors.white: null,
                   child: SingleChildScrollView(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(

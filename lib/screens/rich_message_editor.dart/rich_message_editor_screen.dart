@@ -420,7 +420,6 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
             ),
             IconButton(
               onPressed: () {
-             
                 if (!_changesHaveBeenMade()) {
                   Navigator.of(context).pop();
                   return;
@@ -436,40 +435,59 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
         ),
         automaticallyImplyLeading: false,
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            if (_displayedWidgetsMap.isEmpty)
-              Expanded(
-                child: Center(
-                  child: Transform.rotate(
-                    angle: .785,
-                    child: Text(
-                      'Tabula Rasa',
-                      style: GoogleFonts.baskervville(
-                        textStyle: const TextStyle(
-                          fontSize: 60,
-                          fontWeight: FontWeight.bold,
+      body: PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) async {
+          if (didPop) {
+            return;
+          }
+          if (!_changesHaveBeenMade()) {
+            Navigator.of(context).pop();
+            return;
+          }
+          final bool? toDiscard = await showAdaptiveDialog(
+            context: context,
+            builder: (context) => const ConfirmDiscardDialog(),
+          );
+          if (toDiscard == true) {
+            Navigator.of(context).pop();
+          }
+        },
+        child: SafeArea(
+          child: Column(
+            children: [
+              if (_displayedWidgetsMap.isEmpty)
+                Expanded(
+                  child: Center(
+                    child: Transform.rotate(
+                      angle: .785,
+                      child: Text(
+                        'Tabula Rasa',
+                        style: GoogleFonts.baskervville(
+                          textStyle: const TextStyle(
+                            fontSize: 60,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            if (_displayedWidgetsMap.isNotEmpty)
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0, vertical: 10),
-                    child: Column(
-                      children: _displayedWidgetsMap.values.toList(),
+              if (_displayedWidgetsMap.isNotEmpty)
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 10),
+                      child: Column(
+                        children: _displayedWidgetsMap.values.toList(),
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

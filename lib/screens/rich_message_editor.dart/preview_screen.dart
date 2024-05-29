@@ -15,7 +15,7 @@ class PreviewScreen extends StatelessWidget {
     this.forExtremePreview = false,
   });
 
-  final Map<int,Map<String, dynamic>> bolexyroJson;
+  final Map<int, Map<String, dynamic>> bolexyroJson;
   final bool forExtremePreview;
 
   @override
@@ -33,7 +33,9 @@ class PreviewScreen extends StatelessWidget {
                 IconButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    Navigator.of(context).pop(bolexyroJson);
+                    if (bolexyroJson.isNotEmpty) {
+                      Navigator.of(context).pop(bolexyroJson);
+                    }
                   },
                   icon: SvgPicture.asset(
                     'assets/icons/file-done.svg',
@@ -52,9 +54,10 @@ class PreviewScreen extends StatelessWidget {
                   children: [
                     if (indexMainMediaMapPair.value.keys.first == 'document')
                       DocDisplayer(
-                        backgroundColor:
-                            deJsonifyColor(indexMainMediaMapPair.value['document']['backgroundColor']),
-                        documentJson: indexMainMediaMapPair.value['document']['quillDocJson'],
+                        backgroundColor: deJsonifyColor(indexMainMediaMapPair
+                            .value['document']['backgroundColor']),
+                        documentJson: indexMainMediaMapPair.value['document']
+                            ['quillDocJson'],
                       ),
                     if (indexMainMediaMapPair.value.keys.first == 'audio')
                       WaveBubble(

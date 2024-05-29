@@ -4,10 +4,10 @@ import 'package:flutter_svg/svg.dart';
 class ConfirmDeleteDialog extends StatelessWidget {
   const ConfirmDeleteDialog({
     super.key,
-    required this.contactName,
+    required this.title,
   });
 
-  final String contactName;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class ConfirmDeleteDialog extends StatelessWidget {
             height: 10,
           ),
           Text(
-            'Delete Contact - $contactName',
+            title,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 25,

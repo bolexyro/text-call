@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_svg/svg.dart';
@@ -21,9 +20,9 @@ import 'package:text_call/widgets/camera_or_gallery.dart';
 class RichMessageEditorScreen extends StatefulWidget {
   const RichMessageEditorScreen({
     super.key,
-    this.bolexyroJSon,
+    this.bolexyroJson,
   });
-  final Map<int, Map<String, dynamic>>? bolexyroJSon;
+  final Map<int, Map<String, dynamic>>? bolexyroJson;
 
   @override
   State<RichMessageEditorScreen> createState() =>
@@ -44,12 +43,12 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
 
   @override
   void initState() {
-    if (widget.bolexyroJSon != null) {
+    if (widget.bolexyroJson != null) {
       //indexMainMediaMapPair =
       // "1": {
       //     "audio": "audioPath"
       // }
-      for (final indexMainMediaMapPair in widget.bolexyroJSon!.entries) {
+      for (final indexMainMediaMapPair in widget.bolexyroJson!.entries) {
         final mapMedia = indexMainMediaMapPair.value;
         if (mapMedia.keys.first == 'document') {
           _addTextEditor(
@@ -263,7 +262,11 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     }
   }
 
-  void _getAudioPath(String path, int index) async {
+  void _getAudioPath(String? path, int index) async {
+    if (path == null) {
+      _audioPathsMap.remove(index);
+      return;
+    }
     _audioPathsMap[index] = path;
   }
 
@@ -274,7 +277,9 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       context: context,
-      builder: (context) => const CameraOrGallery(),
+      builder: (context) => const CameraOrGallery(
+        forVideo: true,
+      ),
     );
     final ImagePicker picker = ImagePicker();
 
@@ -311,92 +316,129 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     );
   }
 
+  bool _changesHaveBeenMade() {
+    bool displayeWidgetsMapContainsOnlyAudioRecorderCard = true;
+    for (final widgets in _displayedWidgetsMap.values) {
+      if (widgets.runtimeType != AudioRecorderCard) {
+        displayeWidgetsMapContainsOnlyAudioRecorderCard = false;
+      }
+    }
+    if (_displayedWidgetsMap.isEmpty ||
+        (displayeWidgetsMapContainsOnlyAudioRecorderCard &&
+            _audioPathsMap.isEmpty) ||
+        const DeepCollectionEquality()
+            .equals(widget.bolexyroJson, _createMyOwnCustomDocumentJson())) {
+      return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isLightMode = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
+      backgroundColor: kLightTheme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        titleSpacing: 0.0,
+        title: Row(
+          children: [
+            IconButton(
+              onPressed: () async {
+                if (!_changesHaveBeenMade()) {
+                  Navigator.of(context).pop();
+                  return;
+                }
+                final bool? toDiscard = await showAdaptiveDialog(
+                  context: context,
+                  builder: (context) => const ConfirmDiscardDialog(),
+                );
+                if (toDiscard == true) {
+                  Navigator.of(context).pop();
+                }
+              },
+              icon: const Icon(Icons.arrow_back_ios_new),
+            ),
+            const Spacer(),
+            IconButton(
+              onPressed: _addAudio,
+              icon: SvgPicture.asset(
+                'assets/icons/audio.svg',
+                height: kIconHeight,
+                colorFilter: isLightMode
+                    ? null
+                    : ColorFilter.mode(
+                        Theme.of(context).iconTheme.color!,
+                        BlendMode.srcIn,
+                      ),
+              ),
+            ),
+            IconButton(
+              onPressed: _addImage,
+              icon: SvgPicture.asset(
+                'assets/icons/add-image.svg',
+                height: kIconHeight,
+                colorFilter: isLightMode
+                    ? null
+                    : ColorFilter.mode(
+                        Theme.of(context).iconTheme.color!,
+                        BlendMode.srcIn,
+                      ),
+              ),
+            ),
+            IconButton(
+              onPressed: _addVideo,
+              icon: SvgPicture.asset(
+                'assets/icons/add-video.svg',
+                height: kIconHeight,
+                colorFilter: isLightMode
+                    ? null
+                    : ColorFilter.mode(
+                        Theme.of(context).iconTheme.color!,
+                        BlendMode.srcIn,
+                      ),
+              ),
+            ),
+            IconButton(
+              onPressed: _addTextEditor,
+              icon: SvgPicture.asset(
+                'assets/icons/add-text-editor.svg',
+                height: kIconHeight,
+                colorFilter: isLightMode
+                    ? null
+                    : ColorFilter.mode(
+                        Theme.of(context).iconTheme.color!,
+                        BlendMode.srcIn,
+                      ),
+              ),
+            ),
+            IconButton(
+              onPressed: _goToPreviewScreen,
+              icon: SvgPicture.asset(
+                'assets/icons/preview.svg',
+                height: kIconHeight,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+             
+                if (!_changesHaveBeenMade()) {
+                  Navigator.of(context).pop();
+                  return;
+                }
+                Navigator.of(context).pop(_createMyOwnCustomDocumentJson());
+              },
+              icon: SvgPicture.asset(
+                'assets/icons/file-done.svg',
+                height: 30,
+              ),
+            ),
+          ],
+        ),
+        automaticallyImplyLeading: false,
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 5.0, top: 6.0),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () async {
-                      if (_displayedWidgetsMap.isEmpty ||
-                          const DeepCollectionEquality().equals(
-                              widget.bolexyroJSon,
-                              _createMyOwnCustomDocumentJson())) {
-                        Navigator.of(context).pop();
-                        return;
-                      }
-                      final bool? toDiscard = await showAdaptiveDialog(
-                        context: context,
-                        builder: (context) => const ConfirmDiscardDialog(),
-                      );
-                      if (toDiscard == true) {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    icon: const Icon(Icons.arrow_back_ios_new),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: _addAudio,
-                    icon: SvgPicture.asset(
-                      'assets/icons/audio.svg',
-                      height: kIconHeight,
-                      colorFilter: isLightMode
-                          ? null
-                          : ColorFilter.mode(Theme.of(context).iconTheme.color!,
-                              BlendMode.srcIn),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: _addImage,
-                    icon: SvgPicture.asset(
-                      'assets/icons/add-image.svg',
-                      height: kIconHeight,
-                      colorFilter: isLightMode
-                          ? null
-                          : ColorFilter.mode(Theme.of(context).iconTheme.color!,
-                              BlendMode.srcIn),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: _addVideo,
-                    icon: SvgPicture.asset(
-                      'assets/icons/add-video.svg',
-                      height: kIconHeight,
-                      colorFilter: isLightMode
-                          ? null
-                          : ColorFilter.mode(Theme.of(context).iconTheme.color!,
-                              BlendMode.srcIn),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: _addTextEditor,
-                    icon: SvgPicture.asset(
-                      'assets/icons/add-text-editor.svg',
-                      height: kIconHeight,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: _goToPreviewScreen,
-                    icon: SvgPicture.asset(
-                      'assets/icons/preview.svg',
-                      height: kIconHeight,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (!isLightMode)
-              Container(
-                color: Colors.white,
-                height: 10.0,
-              ),
             if (_displayedWidgetsMap.isEmpty)
               Expanded(
                 child: Center(
@@ -416,16 +458,13 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
               ),
             if (_displayedWidgetsMap.isNotEmpty)
               Expanded(
-                child: Container(
-                  color: !isLightMode ? Colors.white : null,
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 10),
-                      child: Column(
-                        children: _displayedWidgetsMap.values.toList(),
-                      ),
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 10),
+                    child: Column(
+                      children: _displayedWidgetsMap.values.toList(),
                     ),
                   ),
                 ),

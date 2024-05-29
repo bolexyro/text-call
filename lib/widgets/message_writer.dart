@@ -565,7 +565,7 @@ class FileUiPlaceHolder extends StatelessWidget {
                           await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => RichMessageEditorScreen(
-                            bolexyroJSon: bolexyroJson,
+                            bolexyroJson: bolexyroJson,
                           ),
                         ),
                       );

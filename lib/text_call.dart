@@ -6,6 +6,7 @@ import 'package:text_call/screens/auth_screen.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/screens/splash_screen.dart';
+import 'package:text_call/utils/constants.dart';
 
 enum HowAppIsOPened {
   fromTerminatedForRequestAccess,
@@ -58,13 +59,8 @@ class _TextCallState extends State<TextCall> {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       themeMode: widget.themeMode,
-      theme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-      ),
-      darkTheme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue, brightness: Brightness.dark),
-      ),
+      theme: kLightTheme,
+      darkTheme:kDarkTheme,
       navigatorKey: TextCall.navigatorKey,
       debugShowCheckedModeBanner: false,
       home: FutureBuilder(

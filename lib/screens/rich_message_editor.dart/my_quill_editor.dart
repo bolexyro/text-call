@@ -126,21 +126,24 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
               borderRadius: BorderRadius.circular(12),
             ),
             height: 200,
-            child: QuillEditor.basic(
-              configurations: QuillEditorConfigurations(
-                scrollable: true,
-                autoFocus: true,
-                padding: EdgeInsets.only(
-                  left: 12,
-                  right: 12,
-                  top: 12,
-                  bottom: MediaQuery.viewInsetsOf(context).bottom + 20,
-                ),
-                keyboardAppearance: Theme.of(context).brightness,
-                placeholder: 'Start typing....',
-                controller: _controller,
-                sharedConfigurations: const QuillSharedConfigurations(
-                  locale: Locale('de'),
+            child: Theme(
+              data: kLightTheme,
+              child: QuillEditor.basic(
+                configurations: QuillEditorConfigurations(
+                  scrollable: true,
+                  autoFocus: true,
+                  padding: EdgeInsets.only(
+                    left: 12,
+                    right: 12,
+                    top: 12,
+                    bottom: MediaQuery.viewInsetsOf(context).bottom + 20,
+                  ),
+                  keyboardAppearance: Theme.of(context).brightness,
+                  placeholder: 'Start typing....',
+                  controller: _controller,
+                  sharedConfigurations: const QuillSharedConfigurations(
+                    locale: Locale('de'),
+                  ),
                 ),
               ),
             ),

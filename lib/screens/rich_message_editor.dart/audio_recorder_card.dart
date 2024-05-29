@@ -2,6 +2,7 @@ import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:text_call/screens/rich_message_editor.dart/wave_bubble.dart';
+import 'package:text_call/utils/constants.dart';
 
 class AudioRecorderCard extends StatefulWidget {
   const AudioRecorderCard({
@@ -15,7 +16,7 @@ class AudioRecorderCard extends StatefulWidget {
   final int keyInMap;
   final String? initialAudioPath;
   final void Function(int key) onDelete;
-  final void Function(String path, int key) savePath;
+  final void Function(String? path, int key) savePath;
 
   @override
   State<AudioRecorderCard> createState() => _AudioRecorderCardState();
@@ -30,7 +31,6 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
 
   @override
   void initState() {
-    print('this is widget.initialauiopath ${widget.initialAudioPath}');
     if (widget.initialAudioPath != null) {
       _recordingStarted = true;
       _path = widget.initialAudioPath!;
@@ -55,7 +55,6 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
       if (localPath != null) {
         widget.savePath(localPath, widget.keyInMap);
         _path = localPath;
-        debugPrint('path is $_path');
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -94,6 +93,7 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
   }
 
   void _takeAnotherAudio() {
+    widget.savePath(null, widget.keyInMap);
     setState(() {
       _path = null;
       _isRecording = false;
@@ -109,7 +109,6 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
 
   @override
   Widget build(BuildContext context) {
-    print('this is path $_path');
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
       child: Stack(
@@ -296,7 +295,7 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Theme.of(context).scaffoldBackgroundColor,
+                  color: kLightTheme.scaffoldBackgroundColor,
                 ),
                 child: const Icon(
                   Icons.delete,

@@ -5,7 +5,12 @@ import 'package:image_picker/image_picker.dart';
 
 // ignore: must_be_immutable
 class CameraOrGallery extends StatelessWidget {
-  const CameraOrGallery({super.key});
+  const CameraOrGallery({
+    super.key,
+    this.forVideo = false,
+  });
+
+  final bool forVideo;
 
   @override
   Widget build(BuildContext context) {
@@ -58,21 +63,25 @@ class CameraOrGallery extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       IconButton(
-                          onPressed: () {
-                            Navigator.of(context).pop(ImageSource.camera);
-                          },
-                          iconSize: 40,
-                          icon: const Icon(
-                            Icons.camera_alt_rounded,
-                          )),
+                        onPressed: () {
+                          Navigator.of(context).pop(ImageSource.camera);
+                        },
+                        iconSize: forVideo ? 55 : 40,
+                        icon: Icon(
+                          forVideo ? Icons.videocam : Icons.camera_alt_rounded,
+                        ),
+                      ),
                       IconButton(
-                          iconSize: 40,
-                          onPressed: () {
-                            Navigator.of(context).pop(ImageSource.gallery);
-                          },
-                          icon: const Icon(
-                            Icons.photo_library_rounded,
-                          )),
+                        iconSize: 40,
+                        onPressed: () {
+                          Navigator.of(context).pop(ImageSource.gallery);
+                        },
+                        icon: Icon(
+                          forVideo
+                              ? Icons.video_collection
+                              : Icons.photo_library_rounded,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(

@@ -64,7 +64,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
     final bool? toDelete = await showAdaptiveDialog(
       context: context,
       builder: (context) => ConfirmDeleteDialog(
-        contactName: contact.name,
+        title: 'Delete Contact - ${contact.name}',
       ),
     );
     if (toDelete != true) {

@@ -12,6 +12,7 @@ import 'package:confetti/confetti.dart';
 import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
+import 'package:text_call/screens/rich_message_editor.dart/confirm_discard_dialog.dart';
 import 'package:text_call/screens/rich_message_editor.dart/preview_screen.dart';
 import 'package:text_call/screens/rich_message_editor.dart/rich_message_editor_screen.dart';
 import 'package:text_call/utils/constants.dart';
@@ -49,6 +50,27 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     Colors.yellow,
     Colors.red,
   ];
+
+  late Widget messageWriterMessageBox;
+
+  @override
+  void initState() {
+    messageWriterMessageBox = TextField(
+      controller: _messageController,
+      minLines: 4,
+      maxLines: null,
+      keyboardType: TextInputType.multiline,
+      textCapitalization: TextCapitalization.sentences,
+      decoration: InputDecoration(
+        hintText: 'Enter the message you want to call them with',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        labelText: 'Message',
+      ),
+    );
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -107,26 +129,35 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     });
   }
 
-  @override
-  void initState() {
-    messageWriterMessageBox = TextField(
-      controller: _messageController,
-      minLines: 4,
-      maxLines: null,
-      keyboardType: TextInputType.multiline,
-      textCapitalization: TextCapitalization.sentences,
-      decoration: InputDecoration(
-        hintText: 'Enter the message you want to call them with',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        labelText: 'Message',
-      ),
-    );
-    super.initState();
+  void _updateMyOwnDocumentJson(Map<String, dynamic> newDocumentJson) {
+    setState(() {
+      messageWriterMessageBox = FileUiPlaceHolder(
+        onMyOwnDocumentJsonUpdated: _updateMyOwnDocumentJson,
+        onDelete: _resetMessageWriterMessageBox,
+        myOwnCustomDocumemntJson: newDocumentJson,
+      );
+    });
   }
 
-  late Widget messageWriterMessageBox;
+  void _resetMessageWriterMessageBox() {
+    setState(() {
+      messageWriterMessageBox = TextField(
+        controller: _messageController,
+        minLines: 4,
+        maxLines: null,
+        keyboardType: TextInputType.multiline,
+        textCapitalization: TextCapitalization.sentences,
+        decoration: InputDecoration(
+          hintText: 'Enter the message you want to call them with',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          labelText: 'Message',
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget messageWriterContent = Padding(
@@ -179,11 +210,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       );
 
                       if (myOwnCustomDocumemntJson != null) {
-                        setState(() {
-                          messageWriterMessageBox = FilePreview(
-                            myOwnCustomDocumemntJson: myOwnCustomDocumemntJson,
-                          );
-                        });
+                        _updateMyOwnDocumentJson(myOwnCustomDocumemntJson);
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -248,8 +275,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final snapshotData = json.decode(snapshot.data);
-            print(snapshotData);
-            if (snapshotData['call_status'] == 'errord') {
+            if (snapshotData['call_status'] == 'error') {
               return Padding(
                 padding: const EdgeInsets.only(top: 10.0),
                 child: Stack(
@@ -474,20 +500,27 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   }
 }
 
-class FilePreview extends StatelessWidget {
-  const FilePreview({
+class FileUiPlaceHolder extends StatelessWidget {
+  const FileUiPlaceHolder({
     super.key,
     required this.myOwnCustomDocumemntJson,
+    required this.onDelete,
+    required this.onMyOwnDocumentJsonUpdated,
   });
   final Map<String, dynamic> myOwnCustomDocumemntJson;
+  final void Function() onDelete;
+  final void Function(Map<String, dynamic> newMyOwnDocumentJson)
+      onMyOwnDocumentJsonUpdated;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) =>
-              PreviewScreen(myOwnCustomDocumemntJson: myOwnCustomDocumemntJson),
+          builder: (context) => PreviewScreen(
+            myOwnCustomDocumemntJson: myOwnCustomDocumemntJson,
+            forExtremePreview: true,
+          ),
         ),
       ),
       child: Container(
@@ -525,11 +558,32 @@ class FilePreview extends StatelessWidget {
               Column(
                 children: [
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      final Map<String, dynamic>? newMyOwnDocumentJson =
+                          await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => RichMessageEditorScreen(
+                            myOwnCustomDocumemntJson: myOwnCustomDocumemntJson,
+                          ),
+                        ),
+                      );
+
+                      if (newMyOwnDocumentJson != null) {
+                        onMyOwnDocumentJsonUpdated(newMyOwnDocumentJson);
+                      }
+                    },
                     icon: const Icon(Icons.edit),
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      final bool? toDiscard = await showAdaptiveDialog(
+                        context: context,
+                        builder: (context) => const ConfirmDiscardDialog(),
+                      );
+                      if (toDiscard == true) {
+                        onDelete();
+                      }
+                    },
                     icon: const Icon(Icons.delete),
                   ),
                 ],

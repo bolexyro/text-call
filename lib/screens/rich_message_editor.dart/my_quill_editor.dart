@@ -11,12 +11,14 @@ class MyQuillEditor extends StatefulWidget {
     required this.keyInMap,
     required this.controller,
     required this.onBackgroundColorChanged,
+    this.initialBgColor,
   });
 
   final int keyInMap;
   final void Function(int key) onDelete;
   final void Function(int key, Color newColor) onBackgroundColorChanged;
   final QuillController controller;
+  final Color? initialBgColor;
 
   @override
   State<MyQuillEditor> createState() => _MyQuillEditorState();
@@ -24,11 +26,12 @@ class MyQuillEditor extends StatefulWidget {
 
 class _MyQuillEditorState extends State<MyQuillEditor> {
   late final QuillController _controller;
-  Color _backgroundColor = Colors.white;
+  late Color _backgroundColor;
 
   @override
   initState() {
     _controller = widget.controller;
+    _backgroundColor = widget.initialBgColor ?? Colors.white;
     super.initState();
   }
 

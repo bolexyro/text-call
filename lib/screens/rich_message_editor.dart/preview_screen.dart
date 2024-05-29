@@ -12,9 +12,11 @@ class PreviewScreen extends StatelessWidget {
   const PreviewScreen({
     super.key,
     required this.myOwnCustomDocumemntJson,
+    this.forExtremePreview = false,
   });
 
   final Map<String, dynamic> myOwnCustomDocumemntJson;
+  final bool forExtremePreview;
 
   @override
   Widget build(BuildContext context) {
@@ -25,18 +27,20 @@ class PreviewScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back_ios_new),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop(myOwnCustomDocumemntJson);
-            },
-            icon: SvgPicture.asset(
-              'assets/icons/file-done.svg',
-              height: 30,
-            ),
-          ),
-        ],
+        actions: forExtremePreview
+            ? null
+            : [
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop(myOwnCustomDocumemntJson);
+                  },
+                  icon: SvgPicture.asset(
+                    'assets/icons/file-done.svg',
+                    height: 30,
+                  ),
+                ),
+              ],
       ),
       body: SingleChildScrollView(
         child: Padding(

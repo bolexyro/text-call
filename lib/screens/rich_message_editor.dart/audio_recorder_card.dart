@@ -9,9 +9,11 @@ class AudioRecorderCard extends StatefulWidget {
     required this.onDelete,
     required this.keyInMap,
     required this.savePath,
+    this.initialAudioPath,
   });
 
   final int keyInMap;
+  final String? initialAudioPath;
   final void Function(int key) onDelete;
   final void Function(String path, int key) savePath;
 
@@ -22,15 +24,19 @@ class AudioRecorderCard extends StatefulWidget {
 class _AudioRecorderCardState extends State<AudioRecorderCard> {
   late final RecorderController recorderController;
 
-  String? path;
+  String? _path;
   bool _isRecording = false;
   bool _recordingStarted = false;
-  bool isRecordingCompleted = false;
 
   @override
   void initState() {
-    super.initState();
+    print('this is widget.initialauiopath ${widget.initialAudioPath}');
+    if (widget.initialAudioPath != null) {
+      _recordingStarted = true;
+      _path = widget.initialAudioPath!;
+    }
     _initialiseControllers();
+    super.initState();
   }
 
   void _initialiseControllers() {
@@ -47,10 +53,9 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
       final String? localPath = await recorderController.stop(false);
 
       if (localPath != null) {
-        isRecordingCompleted = true;
         widget.savePath(localPath, widget.keyInMap);
-        path = localPath;
-        debugPrint('path is $path');
+        _path = localPath;
+        debugPrint('path is $_path');
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -90,10 +95,9 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
 
   void _takeAnotherAudio() {
     setState(() {
-      path = null;
+      _path = null;
       _isRecording = false;
       _recordingStarted = false;
-      isRecordingCompleted = false;
     });
   }
 
@@ -105,6 +109,7 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
 
   @override
   Widget build(BuildContext context) {
+    print('this is path $_path');
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
       child: Stack(
@@ -123,7 +128,7 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
                       const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
-                    child: path == null
+                    child: _path == null
                         ? AudioWaveforms(
                             enableGesture: true,
                             size: const Size(double.infinity, 70),
@@ -139,11 +144,11 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
                                 border: Border.all(width: 2)),
                             padding: const EdgeInsets.only(left: 18),
                           )
-                        : WaveBubble(audioPath: path!),
+                        : WaveBubble(audioPath: _path!),
                   ),
                 ),
                 const Gap(5),
-                if (path == null)
+                if (_path == null)
                   StreamBuilder<Duration>(
                     stream: recorderController.onCurrentDuration,
                     builder: (context, snapshot) {
@@ -162,9 +167,9 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
                       );
                     },
                   ),
-                if (path != null) const SizedBox(height: 28),
+                if (_path != null) const SizedBox(height: 28),
                 const Gap(5),
-                if (path != null)
+                if (_path != null)
                   Center(
                     child: GestureDetector(
                       onTap: _takeAnotherAudio,
@@ -188,7 +193,7 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
                       ),
                     ),
                   ),
-                if (path == null)
+                if (_path == null)
                   LayoutBuilder(builder: (context, constraints) {
                     final eachWidgetsWidth = constraints.maxWidth / 3;
                     return Row(

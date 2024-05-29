@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_svg/svg.dart';
@@ -13,10 +14,15 @@ import 'package:text_call/screens/rich_message_editor.dart/my_quill_editor.dart'
 import 'package:text_call/screens/rich_message_editor.dart/my_video_player.dart';
 import 'package:text_call/screens/rich_message_editor.dart/preview_screen.dart';
 import 'package:text_call/utils/constants.dart';
+import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/camera_or_gallery.dart';
 
 class RichMessageEditorScreen extends StatefulWidget {
-  const RichMessageEditorScreen({super.key});
+  const RichMessageEditorScreen({
+    super.key,
+    this.myOwnCustomDocumemntJson,
+  });
+  final Map<String, dynamic>? myOwnCustomDocumemntJson;
 
   @override
   State<RichMessageEditorScreen> createState() =>
@@ -26,14 +32,64 @@ class RichMessageEditorScreen extends StatefulWidget {
 class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   // this index would be the keys for the widgets in the list
   int index = -1;
-  final Map<int, Widget> _displayedWidgetsMap = {};
-  final Map<int, QuillController> _controllersMap = {};
-  final Map<int, String> _audioPathsMap = {};
-  final Map<int, String> _imagePathsMap = {};
-  final Map<int, String> _videoPathsMap = {};
-  final Map<int, Color> _quillEditorBackgroundColorMap = {};
+  late final Map<int, Widget> _displayedWidgetsMap = {};
+  late final Map<int, QuillController> _controllersMap = {};
+  late final Map<int, String> _audioPathsMap = {};
+  late final Map<int, String> _imagePathsMap = {};
+  late final Map<int, String> _videoPathsMap = {};
+  late final Map<int, Color> _quillEditorBackgroundColorMap = {};
 
   final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    if (widget.myOwnCustomDocumemntJson != null) {
+      for (final kvPair in widget.myOwnCustomDocumemntJson!.entries) {
+        if (kvPair.key == 'document') {
+          _addTextEditor(
+            initialBgColor: deJsonifyColor(kvPair.value['backgroundColor']),
+            withoutSetState: true,
+            contollerParam: QuillController(
+              document: Document.fromJson(
+                jsonDecode(
+                  kvPair.value['quillDocJson'],
+                ),
+              ),
+              selection: const TextSelection.collapsed(offset: 0),
+            ),
+          );
+        }
+
+        if (kvPair.key == 'image') {
+          final newIndex = ++index;
+          _imagePathsMap[newIndex] = kvPair.value;
+          _displayedWidgetsMap[newIndex] = ImageDisplayer(
+            key: ValueKey(newIndex),
+            keyInMap: newIndex,
+            onDelete: _removeMediaWidget,
+            imageFile: File(kvPair.value),
+          );
+        }
+
+        if (kvPair.key == 'video') {
+          final newIndex = ++index;
+          _videoPathsMap[newIndex] = kvPair.value;
+          _displayedWidgetsMap[newIndex] = MyVideoPlayer(
+            key: ValueKey(newIndex),
+            keyInMap: newIndex,
+            onDelete: _removeMediaWidget,
+            videoFile: File(kvPair.value),
+          );
+        }
+
+        if (kvPair.key == 'audio') {
+          _addAudio(initialAudioPath: kvPair.value, withoutSetState: true);
+          _getAudioPath(kvPair.value, index);
+        }
+      }
+    }
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -53,7 +109,10 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
 
   Map<String, dynamic> _createMyOwnCustomDocumentJson() {
     final Map<String, dynamic> myOwnCustomDocumemntJson = {};
+    print(_displayedWidgetsMap);
+    print(_audioPathsMap);
     for (final kvPair in _displayedWidgetsMap.entries) {
+      print(kvPair.key);
       if (kvPair.value.runtimeType == MyQuillEditor &&
           _controllersMap[kvPair.key]!.document.toDelta().toJson()[0]
                   ['insert'] !=
@@ -85,24 +144,41 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
         myOwnCustomDocumemntJson['image'] = _imagePathsMap[kvPair.key]!;
       }
     }
+    print('myowncustomdocumentjson $myOwnCustomDocumemntJson');
     return myOwnCustomDocumemntJson;
   }
 
-  void _addTextEditor() {
+  void _addTextEditor(
+      {bool withoutSetState = false,
+      QuillController? contollerParam,
+      Color? initialBgColor}) {
     FocusManager.instance.primaryFocus?.unfocus();
     final newIndex = ++index;
-    final controller = QuillController.basic();
-    setState(() {
+    final controller = contollerParam ?? QuillController.basic();
+
+    if (withoutSetState) {
       _controllersMap[newIndex] = controller;
       _displayedWidgetsMap[newIndex] = MyQuillEditor(
+        initialBgColor: initialBgColor,
         onBackgroundColorChanged: _changeAnEditorsBgColor,
         key: ValueKey(newIndex),
         controller: controller,
         keyInMap: index,
         onDelete: _removeMediaWidget,
       );
-    });
-    _scrollToEnd();
+    } else {
+      setState(() {
+        _controllersMap[newIndex] = controller;
+        _displayedWidgetsMap[newIndex] = MyQuillEditor(
+          onBackgroundColorChanged: _changeAnEditorsBgColor,
+          key: ValueKey(newIndex),
+          controller: controller,
+          keyInMap: index,
+          onDelete: _removeMediaWidget,
+        );
+      });
+      _scrollToEnd();
+    }
   }
 
   void _removeMediaWidget(int key) {
@@ -154,19 +230,30 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     _scrollToEnd();
   }
 
-  void _addAudio() {
+  void _addAudio({bool withoutSetState = false, String? initialAudioPath}) {
     FocusManager.instance.primaryFocus?.unfocus();
 
-    setState(() {
+    if (withoutSetState) {
       final newIndex = ++index;
       _displayedWidgetsMap[newIndex] = AudioRecorderCard(
+        initialAudioPath: initialAudioPath,
         key: ValueKey(newIndex),
         keyInMap: newIndex,
         onDelete: _removeMediaWidget,
         savePath: _getAudioPath,
       );
-    });
-    _scrollToEnd();
+    } else {
+      setState(() {
+        final newIndex = ++index;
+        _displayedWidgetsMap[newIndex] = AudioRecorderCard(
+          key: ValueKey(newIndex),
+          keyInMap: newIndex,
+          onDelete: _removeMediaWidget,
+          savePath: _getAudioPath,
+        );
+      });
+      _scrollToEnd();
+    }
   }
 
   void _getAudioPath(String path, int index) async {
@@ -230,7 +317,9 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
                 children: [
                   IconButton(
                     onPressed: () async {
-                      if (_displayedWidgetsMap.isEmpty) {
+                      if (_displayedWidgetsMap.isEmpty ||
+                          mapEquals(widget.myOwnCustomDocumemntJson,
+                              _createMyOwnCustomDocumentJson())) {
                         Navigator.of(context).pop();
                         return;
                       }

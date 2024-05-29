@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -20,9 +21,9 @@ import 'package:text_call/widgets/camera_or_gallery.dart';
 class RichMessageEditorScreen extends StatefulWidget {
   const RichMessageEditorScreen({
     super.key,
-    this.myOwnCustomDocumemntJson,
+    this.bolexyroJSon,
   });
-  final Map<String, dynamic>? myOwnCustomDocumemntJson;
+  final Map<int, Map<String, dynamic>>? bolexyroJSon;
 
   @override
   State<RichMessageEditorScreen> createState() =>
@@ -43,16 +44,22 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
 
   @override
   void initState() {
-    if (widget.myOwnCustomDocumemntJson != null) {
-      for (final kvPair in widget.myOwnCustomDocumemntJson!.entries) {
-        if (kvPair.key == 'document') {
+    if (widget.bolexyroJSon != null) {
+      //indexMainMediaMapPair =
+      // "1": {
+      //     "audio": "audioPath"
+      // }
+      for (final indexMainMediaMapPair in widget.bolexyroJSon!.entries) {
+        final mapMedia = indexMainMediaMapPair.value;
+        if (mapMedia.keys.first == 'document') {
           _addTextEditor(
-            initialBgColor: deJsonifyColor(kvPair.value['backgroundColor']),
+            initialBgColor:
+                deJsonifyColor(mapMedia['document']['backgroundColor']),
             withoutSetState: true,
             contollerParam: QuillController(
               document: Document.fromJson(
                 jsonDecode(
-                  kvPair.value['quillDocJson'],
+                  mapMedia['document']['quillDocJson'],
                 ),
               ),
               selection: const TextSelection.collapsed(offset: 0),
@@ -60,31 +67,31 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
           );
         }
 
-        if (kvPair.key == 'image') {
+        if (mapMedia.keys.first == 'image') {
           final newIndex = ++index;
-          _imagePathsMap[newIndex] = kvPair.value;
+          _imagePathsMap[newIndex] = mapMedia['image'];
           _displayedWidgetsMap[newIndex] = ImageDisplayer(
             key: ValueKey(newIndex),
             keyInMap: newIndex,
             onDelete: _removeMediaWidget,
-            imageFile: File(kvPair.value),
+            imageFile: File(mapMedia['image']),
           );
         }
 
-        if (kvPair.key == 'video') {
+        if (mapMedia.keys.first == 'video') {
           final newIndex = ++index;
-          _videoPathsMap[newIndex] = kvPair.value;
+          _videoPathsMap[newIndex] = mapMedia['video'];
           _displayedWidgetsMap[newIndex] = MyVideoPlayer(
             key: ValueKey(newIndex),
             keyInMap: newIndex,
             onDelete: _removeMediaWidget,
-            videoFile: File(kvPair.value),
+            videoFile: File(mapMedia['video']),
           );
         }
 
-        if (kvPair.key == 'audio') {
-          _addAudio(initialAudioPath: kvPair.value, withoutSetState: true);
-          _getAudioPath(kvPair.value, index);
+        if (mapMedia.keys.first == 'audio') {
+          _addAudio(initialAudioPath: mapMedia['audio'], withoutSetState: true);
+          _getAudioPath(mapMedia['audio'], index);
         }
       }
     }
@@ -107,45 +114,45 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     });
   }
 
-  Map<String, dynamic> _createMyOwnCustomDocumentJson() {
-    final Map<String, dynamic> myOwnCustomDocumemntJson = {};
-    print(_displayedWidgetsMap);
-    print(_audioPathsMap);
+  Map<int, Map<String, dynamic>> _createMyOwnCustomDocumentJson() {
+    final Map<int, Map<String, dynamic>> bolexyroJSon = {};
+    int index = 0;
     for (final kvPair in _displayedWidgetsMap.entries) {
-      print(kvPair.key);
       if (kvPair.value.runtimeType == MyQuillEditor &&
           _controllersMap[kvPair.key]!.document.toDelta().toJson()[0]
                   ['insert'] !=
               '\n') {
         final bgColor =
             _quillEditorBackgroundColorMap[kvPair.key] ?? Colors.white;
-        myOwnCustomDocumemntJson['document'] = {
-          'backgroundColor': {
-            'alpha': bgColor.alpha,
-            'red': bgColor.red,
-            'blue': bgColor.blue,
-            'green': bgColor.green,
+        bolexyroJSon[index] = {
+          'document': {
+            'backgroundColor': {
+              'alpha': bgColor.alpha,
+              'red': bgColor.red,
+              'blue': bgColor.blue,
+              'green': bgColor.green,
+            },
+            'quillDocJson': jsonEncode(
+              _controllersMap[kvPair.key]!.document.toDelta().toJson(),
+            ),
           },
-          'quillDocJson': jsonEncode(
-            _controllersMap[kvPair.key]!.document.toDelta().toJson(),
-          ),
         };
       }
       if (kvPair.value.runtimeType == AudioRecorderCard &&
           _audioPathsMap[kvPair.key] != null) {
-        myOwnCustomDocumemntJson['audio'] = _audioPathsMap[kvPair.key]!;
+        bolexyroJSon[index] = {'audio': _audioPathsMap[kvPair.key]!};
       }
 
       if (kvPair.value.runtimeType == MyVideoPlayer) {
-        myOwnCustomDocumemntJson['video'] = _videoPathsMap[kvPair.key]!;
+        bolexyroJSon[index] = {'video': _videoPathsMap[kvPair.key]!};
       }
 
       if (kvPair.value.runtimeType == ImageDisplayer) {
-        myOwnCustomDocumemntJson['image'] = _imagePathsMap[kvPair.key]!;
+        bolexyroJSon[index] = {'image': _imagePathsMap[kvPair.key]!};
       }
+      index++;
     }
-    print('myowncustomdocumentjson $myOwnCustomDocumemntJson');
-    return myOwnCustomDocumemntJson;
+    return bolexyroJSon;
   }
 
   void _addTextEditor(
@@ -298,7 +305,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => PreviewScreen(
-          myOwnCustomDocumemntJson: _createMyOwnCustomDocumentJson(),
+          bolexyroJson: _createMyOwnCustomDocumentJson(),
         ),
       ),
     );
@@ -318,7 +325,8 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
                   IconButton(
                     onPressed: () async {
                       if (_displayedWidgetsMap.isEmpty ||
-                          mapEquals(widget.myOwnCustomDocumemntJson,
+                          const DeepCollectionEquality().equals(
+                              widget.bolexyroJSon,
                               _createMyOwnCustomDocumentJson())) {
                         Navigator.of(context).pop();
                         return;

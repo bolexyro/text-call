@@ -129,12 +129,13 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     });
   }
 
-  void _updateMyOwnDocumentJson(Map<String, dynamic> newDocumentJson) {
+  void _updateMyOwnDocumentJson(
+      Map<int, Map<String, dynamic>> newBolexyroJson) {
     setState(() {
       messageWriterMessageBox = FileUiPlaceHolder(
-        onMyOwnDocumentJsonUpdated: _updateMyOwnDocumentJson,
+        onBolexroJsonUpdated: _updateMyOwnDocumentJson,
         onDelete: _resetMessageWriterMessageBox,
-        myOwnCustomDocumemntJson: newDocumentJson,
+        bolexyroJson: newBolexyroJson,
       );
     });
   }
@@ -202,7 +203,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   const Spacer(),
                   ElevatedButton(
                     onPressed: () async {
-                      final Map<String, dynamic>? myOwnCustomDocumemntJson =
+                      final Map<int, Map<String, dynamic>>?
+                          myOwnCustomDocumemntJson =
                           await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => const RichMessageEditorScreen(),
@@ -503,14 +505,14 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 class FileUiPlaceHolder extends StatelessWidget {
   const FileUiPlaceHolder({
     super.key,
-    required this.myOwnCustomDocumemntJson,
+    required this.bolexyroJson,
     required this.onDelete,
-    required this.onMyOwnDocumentJsonUpdated,
+    required this.onBolexroJsonUpdated,
   });
-  final Map<String, dynamic> myOwnCustomDocumemntJson;
+  final Map<int, Map<String, dynamic>> bolexyroJson;
   final void Function() onDelete;
-  final void Function(Map<String, dynamic> newMyOwnDocumentJson)
-      onMyOwnDocumentJsonUpdated;
+  final void Function(Map<int, Map<String, dynamic>> newBolexyroJson)
+      onBolexroJsonUpdated;
 
   @override
   Widget build(BuildContext context) {
@@ -518,7 +520,7 @@ class FileUiPlaceHolder extends StatelessWidget {
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => PreviewScreen(
-            myOwnCustomDocumemntJson: myOwnCustomDocumemntJson,
+            bolexyroJson: bolexyroJson,
             forExtremePreview: true,
           ),
         ),
@@ -559,17 +561,17 @@ class FileUiPlaceHolder extends StatelessWidget {
                 children: [
                   IconButton(
                     onPressed: () async {
-                      final Map<String, dynamic>? newMyOwnDocumentJson =
+                      final Map<int, Map<String, dynamic>>? newBolexyroJson =
                           await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => RichMessageEditorScreen(
-                            myOwnCustomDocumemntJson: myOwnCustomDocumemntJson,
+                            bolexyroJSon: bolexyroJson,
                           ),
                         ),
                       );
 
-                      if (newMyOwnDocumentJson != null) {
-                        onMyOwnDocumentJsonUpdated(newMyOwnDocumentJson);
+                      if (newBolexyroJson != null) {
+                        onBolexroJsonUpdated(newBolexyroJson);
                       }
                     },
                     icon: const Icon(Icons.edit),

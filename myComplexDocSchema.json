@@ -1,14 +1,23 @@
+// the name of this json is bolexyroJson
 {
-    "document": {
-        "backgroundColor": {
-            "alpha": 255,
-            "red": 100,
-            "green": 200,
-            "blue": 90
-        },
-        "quillDocJson": ""
+    "1": {
+        "audio": "audioPath"
     },
-    "image": "imagePath",
-    "video": "videoPath",
-    "audio": "audioPath"
+    "2": {
+        "document": {
+            "backgroundColor": {
+                "alpha": 255,
+                "red": 100,
+                "green": 200,
+                "blue": 90
+            },
+            "quillDocJson": ""
+        }
+    },
+    "3": {
+        "video": "videoPath"
+    },
+    "4": {
+        "image": "imagePath"
+    }
 }

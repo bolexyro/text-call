@@ -11,11 +11,11 @@ import 'package:text_call/utils/utils.dart';
 class PreviewScreen extends StatelessWidget {
   const PreviewScreen({
     super.key,
-    required this.myOwnCustomDocumemntJson,
+    required this.bolexyroJson,
     this.forExtremePreview = false,
   });
 
-  final Map<String, dynamic> myOwnCustomDocumemntJson;
+  final Map<int,Map<String, dynamic>> bolexyroJson;
   final bool forExtremePreview;
 
   @override
@@ -33,7 +33,7 @@ class PreviewScreen extends StatelessWidget {
                 IconButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    Navigator.of(context).pop(myOwnCustomDocumemntJson);
+                    Navigator.of(context).pop(bolexyroJson);
                   },
                   icon: SvgPicture.asset(
                     'assets/icons/file-done.svg',
@@ -47,27 +47,27 @@ class PreviewScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
           child: Column(
             children: [
-              for (final kvPair in myOwnCustomDocumemntJson.entries)
+              for (final indexMainMediaMapPair in bolexyroJson.entries)
                 Column(
                   children: [
-                    if (kvPair.key == 'document')
+                    if (indexMainMediaMapPair.value.keys.first == 'document')
                       DocDisplayer(
                         backgroundColor:
-                            deJsonifyColor(kvPair.value['backgroundColor']),
-                        documentJson: kvPair.value['quillDocJson'],
+                            deJsonifyColor(indexMainMediaMapPair.value['document']['backgroundColor']),
+                        documentJson: indexMainMediaMapPair.value['document']['quillDocJson'],
                       ),
-                    if (kvPair.key == 'audio')
+                    if (indexMainMediaMapPair.value.keys.first == 'audio')
                       WaveBubble(
-                        audioPath: kvPair.value,
+                        audioPath: indexMainMediaMapPair.value['audio'],
                       ),
-                    if (kvPair.key == 'video')
+                    if (indexMainMediaMapPair.value.keys.first == 'video')
                       MyVideoPlayer(
-                        videoFile: File(kvPair.value),
+                        videoFile: File(indexMainMediaMapPair.value['video']),
                         forPreview: true,
                       ),
-                    if (kvPair.key == 'image')
+                    if (indexMainMediaMapPair.value.keys.first == 'image')
                       ImageDisplayer(
-                        imageFile: File(kvPair.value),
+                        imageFile: File(indexMainMediaMapPair.value['image']),
                         forPreview: true,
                       ),
                     const SizedBox(

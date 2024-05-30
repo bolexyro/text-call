@@ -27,7 +27,7 @@ class MyQuillEditor extends StatefulWidget {
 class _MyQuillEditorState extends State<MyQuillEditor> {
   late final QuillController _controller;
   late Color _backgroundColor;
-
+  bool _collapseToolbar = true;
   Color? lastColorUsedByUser;
 
   @override
@@ -37,14 +37,13 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
     super.initState();
   }
 
-  bool _collapseToolbar = true;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         QuillToolbar.simple(
-          configurations: QuillSimpleToolbarConfigurations(
+          configurations: QuillSimpleToolbarConfigurations(            
             multiRowsDisplay: !_collapseToolbar,
             customButtons: [
               QuillToolbarCustomButtonOptions(

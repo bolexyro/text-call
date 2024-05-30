@@ -323,15 +323,6 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
               deJsonifyColor(json.decode(backgroundColor));
           return Scaffold(
             appBar: AppBar(
-              leading: IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.arrow_back_ios_new),
-              ),
-              iconTheme: IconThemeData(
-                color: backgroundActualColor.computeLuminance() > 0.5
-                    ? Colors.black
-                    : Colors.white,
-              ),
               forceMaterialTransparency: true,
               title: ScaffoldTitle(color: backgroundActualColor),
             ),

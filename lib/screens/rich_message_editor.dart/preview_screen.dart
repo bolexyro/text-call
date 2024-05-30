@@ -13,16 +13,19 @@ class PreviewScreen extends StatelessWidget {
     super.key,
     required this.bolexyroJson,
     this.forExtremePreview = false,
+    this.showPreviewText = true,
   });
 
   final Map<int, Map<String, dynamic>> bolexyroJson;
   final bool forExtremePreview;
+  final bool showPreviewText;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        title: showPreviewText ? const Text('PREVIEW') : null,
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back_ios_new),

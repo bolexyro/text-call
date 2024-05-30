@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:text_call/screens/rich_message_editor.dart/wave_bubble.dart';
-import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 
 class AudioRecorderCard extends StatefulWidget {
@@ -306,7 +305,7 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: kLightTheme.scaffoldBackgroundColor,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                 ),
                 child: SvgPicture.asset(
                   'assets/icons/delete.svg',

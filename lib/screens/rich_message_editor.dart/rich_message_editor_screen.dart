@@ -362,7 +362,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   Widget build(BuildContext context) {
     final bool isLightMode = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
-      backgroundColor: kLightTheme.scaffoldBackgroundColor,
+      // backgroundColor: kLightTheme.scaffoldBackgroundColor,
       appBar: AppBar(
         titleSpacing: 0.0,
         title: Row(
@@ -446,6 +446,12 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
               icon: SvgPicture.asset(
                 'assets/icons/preview.svg',
                 height: kIconHeight,
+                colorFilter: isLightMode
+                    ? null
+                    : ColorFilter.mode(
+                        Theme.of(context).iconTheme.color!,
+                        BlendMode.srcIn,
+                      ),
               ),
             ),
             IconButton(

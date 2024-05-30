@@ -454,7 +454,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         }
         if (messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
             (messageWriterMessageBox.runtimeType == TextField &&
-                _messageController.text.isNotEmpty)) {
+                _messageController.text.isNotEmpty) && messageWriterContent.runtimeType != StreamBuilder) {
           final bool? toDiscard = await showAdaptiveDialog(
             context: context,
             builder: (context) => const ConfirmDialog(
@@ -482,7 +482,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               FocusManager.instance.primaryFocus?.unfocus();
               if (messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
                   (messageWriterMessageBox.runtimeType == TextField &&
-                      _messageController.text.isNotEmpty)) {
+                      _messageController.text.isNotEmpty && messageWriterContent.runtimeType != StreamBuilder)) {
                 final bool? toDiscard = await showAdaptiveDialog(
                   context: context,
                   builder: (context) => const ConfirmDialog(
@@ -596,7 +596,7 @@ class FileUiPlaceHolder extends StatelessWidget {
           child: Row(
             children: [
               const SizedBox(
-                width: 10,
+                width: 29,
               ),
               SvgPicture.asset(
                 'assets/icons/regular-file.svg',

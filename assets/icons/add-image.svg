@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
-<svg width="800px" height="800px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<rect x="0" fill="none" width="24" height="24"/>
-<g>
-<path d="M23 4v2h-3v3h-2V6h-3V4h3V1h2v3h3zm-8.5 7c.828 0 1.5-.672 1.5-1.5S15.328 8 14.5 8 13 8.672 13 9.5s.672 1.5 1.5 1.5zm3.5 3.234l-.513-.57c-.794-.885-2.18-.885-2.976 0l-.655.73L9 9l-3 3.333V6h7V4H6c-1.105 0-2 .895-2 2v12c0 1.105.895 2 2 2h12c1.105 0 2-.895 2-2v-7h-2v3.234z"/>
-</g>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+<svg width="800px" height="800px" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="SVGRepo_bgCarrier" stroke-width="0"/>
+<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+<g id="SVGRepo_iconCarrier"> <path d="M38 21V40C38 41.1046 37.1046 42 36 42H8C6.89543 42 6 41.1046 6 40V12C6 10.8954 6.89543 10 8 10H26.3636" stroke="#000000" stroke-width="4" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/> <path d="M12 31.0308L18 23L21 26L24.5 20.5L32 31.0308H12Z" fill="#2F88FF" stroke="#000000" stroke-width="4" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/> <path d="M34 10H42" stroke="#000000" stroke-width="4" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/> <path d="M37.9941 5.79544V13.7954" stroke="#000000" stroke-width="4" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/> </g>
 </svg>

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:video_player/video_player.dart';
 
 class MyVideoPlayer extends StatefulWidget {
@@ -8,7 +9,7 @@ class MyVideoPlayer extends StatefulWidget {
   const MyVideoPlayer({
     super.key,
     required this.videoFile,
-     this.keyInMap,
+    this.keyInMap,
     this.onDelete,
     this.forPreview = false,
   });
@@ -72,24 +73,27 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                 ),
               ),
               if (!widget.forPreview)
-              Positioned(
-                right: -10,
-                top: -10,
-                child: GestureDetector(
-                  onTap: () => widget.onDelete!(widget.keyInMap!),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                    ),
-                    child: const Icon(
-                      Icons.delete,
-                      color: Color.fromARGB(255, 255, 57, 43),
+                Positioned(
+                  right: -10,
+                  top: -10,
+                  child: GestureDetector(
+                    onTap: () => widget.onDelete!(widget.keyInMap!),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                      child: SvgPicture.asset(
+                        'assets/icons/delete.svg',
+                        colorFilter: const ColorFilter.mode(
+                          Color.fromARGB(255, 255, 57, 43),
+                          BlendMode.srcIn,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
             ],
           )
         : Container();

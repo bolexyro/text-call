@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class ImageDisplayer extends StatelessWidget {
   // if not for preview, keyInMp and onDelete should be non null
@@ -41,9 +42,12 @@ class ImageDisplayer extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: Theme.of(context).scaffoldBackgroundColor,
                 ),
-                child: const Icon(
-                  Icons.delete,
-                  color: Color.fromARGB(255, 255, 57, 43),
+                child: SvgPicture.asset(
+                  'assets/icons/delete.svg',
+                  colorFilter: const ColorFilter.mode(
+                    Color.fromARGB(255, 255, 57, 43),
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             ),

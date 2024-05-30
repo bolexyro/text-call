@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:text_call/screens/rich_message_editor.dart/wave_bubble.dart';
 import 'package:text_call/utils/constants.dart';
+import 'package:text_call/utils/utils.dart';
 
 class AudioRecorderCard extends StatefulWidget {
   const AudioRecorderCard({
@@ -29,6 +30,7 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
   String? _path;
   bool _isRecording = false;
   bool _recordingStarted = false;
+  late Future<String> _recordingDirectory;
 
   @override
   void initState() {
@@ -36,6 +38,8 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
       _recordingStarted = true;
       _path = widget.initialAudioPath!;
     }
+    _recordingDirectory =
+        messageWriterDirectoryPath(specificDirectory: 'audio');
     _initialiseControllers();
     super.initState();
   }
@@ -72,7 +76,12 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
       if (_isRecording) {
         await recorderController.pause();
       } else {
-        await recorderController.record(); // Path is optional
+        final formattedDate = DateTime.now()
+            .toIso8601String()
+            .replaceAll(':', '-')
+            .replaceAll('.', '-');
+        final fileName = '${await _recordingDirectory}/$formattedDate.m4a';
+        await recorderController.record(path: fileName); // Path is optional
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -139,9 +148,10 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
                               showMiddleLine: false,
                             ),
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12.0),
-                                color: const Color.fromARGB(255, 110, 151, 183),
-                                border: Border.all(width: 2)),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: const Color.fromARGB(255, 110, 151, 183),
+                              border: Border.all(width: 2),
+                            ),
                             padding: const EdgeInsets.only(left: 18),
                           )
                         : WaveBubble(audioPath: _path!),

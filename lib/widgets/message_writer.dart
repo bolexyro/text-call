@@ -446,59 +446,116 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         },
       );
     }
-    return Stack(
-      children: [
-        GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            color: Colors.transparent,
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
-              child: Container(
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.0)),
-              ),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) {
+          return;
+        }
+        if (messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
+            (messageWriterMessageBox.runtimeType == TextField &&
+                _messageController.text.isNotEmpty)) {
+          final bool? toDiscard = await showAdaptiveDialog(
+            context: context,
+            builder: (context) => const ConfirmDialog(
+              title: 'Discard changes',
+              subtitle:
+                  'Are you sure you want to discard your changes? This action cannot be undone.',
+              mainButtonText: 'Discard',
             ),
-          ),
-        ),
-        Positioned(
-          bottom: 0,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.sizeOf(context).height * .6,
-            ),
+          );
+          if (toDiscard == true) {
+            Navigator.of(context).pop();
+            messageWriterDirectoryPath(specificDirectory: null).then(
+              (messageWriterDirectoryPath) =>
+                  deleteDirectory(messageWriterDirectoryPath),
+            );
+          }
+        } else {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Stack(
+        children: [
+          GestureDetector(
+            onTap: () async {
+              FocusManager.instance.primaryFocus?.unfocus();
+              if (messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
+                  (messageWriterMessageBox.runtimeType == TextField &&
+                      _messageController.text.isNotEmpty)) {
+                final bool? toDiscard = await showAdaptiveDialog(
+                  context: context,
+                  builder: (context) => const ConfirmDialog(
+                    title: 'Discard changes',
+                    subtitle:
+                        'Are you sure you want to discard your changes? This action cannot be undone.',
+                    mainButtonText: 'Discard',
+                  ),
+                );
+
+                if (toDiscard == true) {
+                  Navigator.of(context).pop();
+                  messageWriterDirectoryPath(specificDirectory: null).then(
+                    (messageWriterDirectoryPath) =>
+                        deleteDirectory(messageWriterDirectoryPath),
+                  );
+                }
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
             child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? makeColorLighter(Theme.of(context).primaryColor, 15)
-                    : const Color.fromARGB(255, 207, 222, 234),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(25),
+              color: Colors.transparent,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+                child: Container(
+                  decoration:
+                      BoxDecoration(color: Colors.white.withOpacity(0.0)),
                 ),
               ),
-              child: Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.sizeOf(context).width,
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                          0, 0, 0, MediaQuery.viewInsetsOf(context).vertical),
-                      child: SingleChildScrollView(child: messageWriterContent),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.sizeOf(context).height * .6,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? makeColorLighter(Theme.of(context).primaryColor, 15)
+                      : const Color.fromARGB(255, 207, 222, 234),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(25),
+                  ),
+                ),
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                            0, 0, 0, MediaQuery.viewInsetsOf(context).vertical),
+                        child:
+                            SingleChildScrollView(child: messageWriterContent),
+                      ),
                     ),
-                  ),
-                  ConfettiWidget(
-                    confettiController: _confettiController,
-                    shouldLoop: true,
-                    blastDirectionality: BlastDirectionality.explosive,
-                    numberOfParticles: 30,
-                    emissionFrequency: 0.1,
-                  ),
-                ],
+                    ConfettiWidget(
+                      confettiController: _confettiController,
+                      shouldLoop: true,
+                      blastDirectionality: BlastDirectionality.explosive,
+                      numberOfParticles: 30,
+                      emissionFrequency: 0.1,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
@@ -114,7 +115,8 @@ Future<void> showMessageWriterModalSheet(
     required String calleePhoneNumber}) async {
   // if (!await checkForInternetConnection(context)) {
   showModalBottomSheet(
-    isDismissible: true,
+    enableDrag: false,
+    isDismissible: false,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     context: context,
@@ -421,4 +423,45 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
       builder: (context) => const PhonePageScreen(),
     ),
   );
+}
+
+Future<String> messageWriterDirectoryPath(
+    {required String? specificDirectory}) async {
+  final directory = await getApplicationDocumentsDirectory();
+  String path = '${directory.path}/messageWriter';
+  if (specificDirectory != null) {
+    path = '${directory.path}/messageWriter/$specificDirectory';
+  }
+
+  final dir = Directory(path);
+  if (!(await dir.exists())) {
+    await dir.create(recursive: true);
+  }
+
+  return path;
+}
+
+Future<void> deleteFile(String filePath) async {
+  final file = File(filePath);
+  try {
+    if (await file.exists()) {
+      await file.delete();
+      print('file deleted');
+    }
+  } catch (e) {
+    print('Error bro $e');
+  }
+}
+
+Future<void> deleteDirectory(String dirPath) async {
+  final directory = Directory(dirPath);
+
+  try {
+    if (await directory.exists()) {
+      await directory.delete(recursive: true);
+      print('folder deleted');
+    }
+  } catch (e) {
+    print('Error bro $e');
+  }
 }

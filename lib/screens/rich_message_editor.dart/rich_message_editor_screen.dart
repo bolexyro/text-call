@@ -38,11 +38,19 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   late final Map<int, String> _imagePathsMap = {};
   late final Map<int, String> _videoPathsMap = {};
   late final Map<int, Color> _quillEditorBackgroundColorMap = {};
+  late final Future<String> _imageDirectoryPath;
+  late final Future<String?> _videoDirectoryPath;
 
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
+    _imageDirectoryPath =
+        messageWriterDirectoryPath(specificDirectory: 'images');
+
+    _videoDirectoryPath =
+        messageWriterDirectoryPath(specificDirectory: 'videos');
+
     if (widget.bolexyroJson != null) {
       //indexMainMediaMapPair =
       // "1": {
@@ -192,6 +200,17 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   }
 
   void _removeMediaWidget(int key) {
+    if (_audioPathsMap[key] != null) {
+      deleteFile(_audioPathsMap[key]!);
+    }
+
+    if (_videoPathsMap[key] != null) {
+      deleteFile(_videoPathsMap[key]!);
+    }
+
+    if (_imagePathsMap[key] != null) {
+      deleteFile(_imagePathsMap[key]!);
+    }
     setState(() {
       _displayedWidgetsMap.remove(key);
       _controllersMap.remove(key);
@@ -227,13 +246,17 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
 
     final newIndex = ++index;
 
-    _imagePathsMap[newIndex] = pickedImage.path;
+    final filePath = '${await _imageDirectoryPath}/${pickedImage.name}';
+    pickedImage.saveTo(filePath);
+
+    _imagePathsMap[newIndex] = filePath;
+
     setState(() {
       _displayedWidgetsMap[newIndex] = ImageDisplayer(
         key: ValueKey(newIndex),
         keyInMap: newIndex,
         onDelete: _removeMediaWidget,
-        imageFile: File(pickedImage.path),
+        imageFile: File(filePath),
       );
     });
 
@@ -294,14 +317,20 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     if (pickedVideo == null) {
       return null;
     }
+
     final newIndex = ++index;
-    _videoPathsMap[newIndex] = pickedVideo.path;
+
+    final filePath = '${await _videoDirectoryPath}/${pickedVideo.name}';
+    pickedVideo.saveTo(filePath);
+
+    _videoPathsMap[newIndex] = filePath;
+
     setState(() {
       _displayedWidgetsMap[newIndex] = MyVideoPlayer(
         key: ValueKey(newIndex),
         keyInMap: newIndex,
         onDelete: _removeMediaWidget,
-        videoFile: File(pickedVideo.path),
+        videoFile: File(filePath),
       );
     });
 

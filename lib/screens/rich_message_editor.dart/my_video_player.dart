@@ -25,6 +25,7 @@ class MyVideoPlayer extends StatefulWidget {
 
 class _MyVideoPlayerState extends State<MyVideoPlayer> {
   late VideoPlayerController _controller;
+  late Duration _videoDuration;
   @override
   void initState() {
     super.initState();
@@ -35,6 +36,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() {});
+        _videoDuration = _controller.value.duration;
       })
       ..setLooping(false);
   }
@@ -43,6 +45,22 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  String _formatDuration(Duration duration) {
+    int totalSeconds = duration.inSeconds;
+    int seconds = totalSeconds % 60;
+    int totalMinutes = totalSeconds ~/ 60;
+    int minutes = totalMinutes % 60;
+    int hours = totalMinutes ~/ 60;
+
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    } else if (minutes > 0) {
+      return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    } else {
+      return '0:${seconds.toString().padLeft(2, '0')}';
+    }
   }
 
   @override
@@ -94,6 +112,34 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                     ),
                   ),
                 ),
+              Positioned(
+                left: 5,
+                top: 5,
+                child: Container(
+                  decoration: const ShapeDecoration(
+                    shape: StadiumBorder(),
+                    color: Colors.black54,
+                  ),
+                  padding: const EdgeInsets.fromLTRB(5, 0, 8, 0),
+                  child: !_controller.value.isPlaying
+                      ? Row(
+                          children: [
+                            const Icon(Icons.play_arrow),
+                            Text(
+                              _formatDuration(_videoDuration),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            const Icon(Icons.pause),
+                            Text(
+                              _formatDuration(_controller.value.position),
+                            ),
+                          ],
+                        ),
+                ),
+              )
             ],
           )
         : Container();

@@ -158,6 +158,13 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     });
   }
 
+  bool _showDiscardDialog(Widget messageWriterContent){
+    return messageWriterContent.runtimeType != StreamBuilder &&
+                messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
+            (messageWriterMessageBox.runtimeType == TextField &&
+                    _messageController.text.isNotEmpty);
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget messageWriterContent = Padding(
@@ -452,9 +459,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         if (didPop) {
           return;
         }
-        if (messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
-            (messageWriterMessageBox.runtimeType == TextField &&
-                _messageController.text.isNotEmpty) && messageWriterContent.runtimeType != StreamBuilder) {
+        if (_showDiscardDialog(messageWriterContent)) {
           final bool? toDiscard = await showAdaptiveDialog(
             context: context,
             builder: (context) => const ConfirmDialog(
@@ -480,9 +485,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           GestureDetector(
             onTap: () async {
               FocusManager.instance.primaryFocus?.unfocus();
-              if (messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
-                  (messageWriterMessageBox.runtimeType == TextField &&
-                      _messageController.text.isNotEmpty && messageWriterContent.runtimeType != StreamBuilder)) {
+              if (_showDiscardDialog(messageWriterContent)) {
                 final bool? toDiscard = await showAdaptiveDialog(
                   context: context,
                   builder: (context) => const ConfirmDialog(

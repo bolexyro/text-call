@@ -151,7 +151,6 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
       }
       index++;
     }
-    print(bolexyroJson);
     return bolexyroJson;
   }
 
@@ -162,6 +161,10 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     final newIndex = ++index;
     final controller = contollerParam ?? QuillController.basic();
+
+    if (initialBgColor != null) {
+      _quillEditorBackgroundColorMap[newIndex] = initialBgColor;
+    }
 
     if (withoutSetState) {
       _controllersMap[newIndex] = controller;

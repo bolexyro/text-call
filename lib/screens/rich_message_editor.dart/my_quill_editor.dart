@@ -28,6 +28,8 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
   late final QuillController _controller;
   late Color _backgroundColor;
 
+  Color? lastColorUsedByUser;
+
   @override
   initState() {
     _controller = widget.controller;
@@ -46,14 +48,37 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
             multiRowsDisplay: !_collapseToolbar,
             customButtons: [
               QuillToolbarCustomButtonOptions(
-                icon: SvgPicture.asset(
-                  'assets/icons/delete.svg',
-                  colorFilter: const ColorFilter.mode(
-                    Color.fromARGB(255, 255, 57, 43),
-                    BlendMode.srcIn,
-                  ),
+                icon: Row(
+                  children: [
+                    const Text('BG'),
+                    SvgPicture.asset(
+                      'assets/icons/background-color.svg',
+                      height: kIconHeight,
+                      colorFilter: ColorFilter.mode(
+                        Theme.of(context).iconTheme.color!,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ],
                 ),
-                onPressed: () => widget.onDelete(widget.keyInMap),
+                onPressed: () async {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  Color? selectedColor = _backgroundColor;
+                  selectedColor = await showAdaptiveDialog(
+                    context: context,
+                    builder: (context) {
+                      return ChooseColorDialog(
+                        initialPickerColor: lastColorUsedByUser ??
+                            const Color.fromARGB(255, 153, 83, 78),
+                      );
+                    },
+                  );
+                  setState(() {
+                    _backgroundColor = selectedColor ?? _backgroundColor;
+                  });
+                  widget.onBackgroundColorChanged(
+                      widget.keyInMap, _backgroundColor);
+                },
               ),
               QuillToolbarCustomButtonOptions(
                 icon: RotatedBox(
@@ -73,30 +98,13 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
               ),
               QuillToolbarCustomButtonOptions(
                 icon: SvgPicture.asset(
-                  'assets/icons/background-color.svg',
-                  height: kIconHeight,
-                  colorFilter: ColorFilter.mode(
-                    Theme.of(context).iconTheme.color!,
+                  'assets/icons/delete.svg',
+                  colorFilter: const ColorFilter.mode(
+                    Color.fromARGB(255, 255, 57, 43),
                     BlendMode.srcIn,
                   ),
                 ),
-                onPressed: () async {
-                  FocusManager.instance.primaryFocus?.unfocus();
-                  Color? selectedColor = _backgroundColor;
-                  selectedColor = await showAdaptiveDialog(
-                    context: context,
-                    builder: (context) {
-                      return ChooseColorDialog(
-                        initialPickerColor: _backgroundColor,
-                      );
-                    },
-                  );
-                  setState(() {
-                    _backgroundColor = selectedColor ?? _backgroundColor;
-                  });
-                  widget.onBackgroundColorChanged(
-                      widget.keyInMap, _backgroundColor);
-                },
+                onPressed: () => widget.onDelete(widget.keyInMap),
               ),
             ],
             controller: _controller,

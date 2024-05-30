@@ -202,6 +202,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   const Spacer(),
                   ElevatedButton(
                     onPressed: () async {
+                      FocusManager.instance.primaryFocus?.unfocus();
+
                       final Map<int, Map<String, dynamic>>?
                           myOwnCustomDocumemntJson =
                           await Navigator.of(context).push(
@@ -531,6 +533,7 @@ class FileUiPlaceHolder extends StatelessWidget {
           color: Theme.of(context).brightness == Brightness.dark
               ? makeColorLighter(Theme.of(context).primaryColor, 20)
               : const Color.fromARGB(255, 176, 208, 235),
+          border: Border.all(width: 1),
         ),
         child: Center(
           child: Row(

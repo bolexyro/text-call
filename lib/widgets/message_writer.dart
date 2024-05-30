@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:lottie/lottie.dart';
@@ -12,12 +11,12 @@ import 'package:confetti/confetti.dart';
 import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
-import 'package:text_call/screens/rich_message_editor.dart/confirm_discard_dialog.dart';
 import 'package:text_call/screens/rich_message_editor.dart/preview_screen.dart';
 import 'package:text_call/screens/rich_message_editor.dart/rich_message_editor_screen.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/dialogs/choose_color_dialog.dart';
+import 'package:text_call/widgets/dialogs/confirm_dialog.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -580,13 +579,24 @@ class FileUiPlaceHolder extends StatelessWidget {
                     onPressed: () async {
                       final bool? toDiscard = await showAdaptiveDialog(
                         context: context,
-                        builder: (context) => const ConfirmDiscardDialog(),
+                        builder: (context) => const ConfirmDialog(
+                          title: 'Discard changes',
+                          subtitle:
+                              'Are you sure you want to discard your changes? This action cannot be undone.',
+                          mainButtonText: 'Discard',
+                        ),
                       );
                       if (toDiscard == true) {
                         onDelete();
                       }
                     },
-                    icon: const Icon(Icons.delete),
+                    icon: SvgPicture.asset(
+                      'assets/icons/delete.svg',
+                      colorFilter: const ColorFilter.mode(
+                        Color.fromARGB(255, 255, 57, 43),
+                        BlendMode.srcIn,
+                      ),
+                    ),
                   ),
                 ],
               ),

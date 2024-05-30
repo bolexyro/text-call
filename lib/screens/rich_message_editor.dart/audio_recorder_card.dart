@@ -1,5 +1,6 @@
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:text_call/screens/rich_message_editor.dart/wave_bubble.dart';
 import 'package:text_call/utils/constants.dart';
@@ -297,9 +298,12 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
                   shape: BoxShape.circle,
                   color: kLightTheme.scaffoldBackgroundColor,
                 ),
-                child: const Icon(
-                  Icons.delete,
-                  color: Color.fromARGB(255, 255, 57, 43),
+                child: SvgPicture.asset(
+                  'assets/icons/delete.svg',
+                  colorFilter: const ColorFilter.mode(
+                    Color.fromARGB(255, 255, 57, 43),
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             ),

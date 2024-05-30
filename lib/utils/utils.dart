@@ -169,7 +169,7 @@ void showADialog({
   showAdaptiveDialog(
     context: context,
     builder: (context) => AlertDialog.adaptive(
-      contentPadding: EdgeInsets.zero,
+      contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 10),
       backgroundColor: isDarkMode
           ? Theme.of(context).colorScheme.errorContainer
           : Theme.of(context).colorScheme.error,
@@ -189,6 +189,9 @@ void showADialog({
             textAlign: TextAlign.center,
             style: const TextStyle(
                 fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
+          ),
+          const SizedBox(
+            height: 10,
           ),
           SizedBox(
             width: double.infinity,

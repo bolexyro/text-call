@@ -69,7 +69,6 @@ dependencies:
   audio_waveforms: ^1.0.5
   gap: ^3.0.1
   video_player: ^2.8.6
-  swipe_to: ^1.0.6
   collection: ^1.18.0
 
 dev_dependencies:

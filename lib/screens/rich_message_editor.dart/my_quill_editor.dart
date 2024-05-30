@@ -46,9 +46,12 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
             multiRowsDisplay: !_collapseToolbar,
             customButtons: [
               QuillToolbarCustomButtonOptions(
-                icon: const Icon(
-                  Icons.delete,
-                  color: Color.fromARGB(255, 255, 57, 43),
+                icon: SvgPicture.asset(
+                  'assets/icons/delete.svg',
+                  colorFilter: const ColorFilter.mode(
+                    Color.fromARGB(255, 255, 57, 43),
+                    BlendMode.srcIn,
+                  ),
                 ),
                 onPressed: () => widget.onDelete(widget.keyInMap),
               ),

@@ -330,7 +330,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 onPressed: _isAuthenticating == true
                     ? null
                     : () {
-                        print('nope');
                         _validateForm();
                       },
                 style: ElevatedButton.styleFrom(

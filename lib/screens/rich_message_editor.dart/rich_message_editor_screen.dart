@@ -8,7 +8,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:text_call/screens/rich_message_editor.dart/audio_recorder_card.dart';
-import 'package:text_call/screens/rich_message_editor.dart/confirm_discard_dialog.dart';
 import 'package:text_call/screens/rich_message_editor.dart/image_displayer.dart';
 import 'package:text_call/screens/rich_message_editor.dart/my_quill_editor.dart';
 import 'package:text_call/screens/rich_message_editor.dart/my_video_player.dart';
@@ -16,6 +15,7 @@ import 'package:text_call/screens/rich_message_editor.dart/preview_screen.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/camera_or_gallery.dart';
+import 'package:text_call/widgets/dialogs/confirm_dialog.dart';
 
 class RichMessageEditorScreen extends StatefulWidget {
   const RichMessageEditorScreen({
@@ -114,7 +114,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   }
 
   Map<int, Map<String, dynamic>> _createMyOwnCustomDocumentJson() {
-    final Map<int, Map<String, dynamic>> bolexyroJSon = {};
+    final Map<int, Map<String, dynamic>> bolexyroJson = {};
     int index = 0;
     for (final kvPair in _displayedWidgetsMap.entries) {
       if (kvPair.value.runtimeType == MyQuillEditor &&
@@ -123,7 +123,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
               '\n') {
         final bgColor =
             _quillEditorBackgroundColorMap[kvPair.key] ?? Colors.white;
-        bolexyroJSon[index] = {
+        bolexyroJson[index] = {
           'document': {
             'backgroundColor': {
               'alpha': bgColor.alpha,
@@ -139,19 +139,20 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
       }
       if (kvPair.value.runtimeType == AudioRecorderCard &&
           _audioPathsMap[kvPair.key] != null) {
-        bolexyroJSon[index] = {'audio': _audioPathsMap[kvPair.key]!};
+        bolexyroJson[index] = {'audio': _audioPathsMap[kvPair.key]!};
       }
 
       if (kvPair.value.runtimeType == MyVideoPlayer) {
-        bolexyroJSon[index] = {'video': _videoPathsMap[kvPair.key]!};
+        bolexyroJson[index] = {'video': _videoPathsMap[kvPair.key]!};
       }
 
       if (kvPair.value.runtimeType == ImageDisplayer) {
-        bolexyroJSon[index] = {'image': _imagePathsMap[kvPair.key]!};
+        bolexyroJson[index] = {'image': _imagePathsMap[kvPair.key]!};
       }
       index++;
     }
-    return bolexyroJSon;
+    print(bolexyroJson);
+    return bolexyroJson;
   }
 
   void _addTextEditor(
@@ -317,15 +318,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   }
 
   bool _changesHaveBeenMade() {
-    bool displayeWidgetsMapContainsOnlyAudioRecorderCard = true;
-    for (final widgets in _displayedWidgetsMap.values) {
-      if (widgets.runtimeType != AudioRecorderCard) {
-        displayeWidgetsMapContainsOnlyAudioRecorderCard = false;
-      }
-    }
-    if (_displayedWidgetsMap.isEmpty ||
-        (displayeWidgetsMapContainsOnlyAudioRecorderCard &&
-            _audioPathsMap.isEmpty) ||
+    if (_createMyOwnCustomDocumentJson().isEmpty ||
         const DeepCollectionEquality()
             .equals(widget.bolexyroJson, _createMyOwnCustomDocumentJson())) {
       return false;
@@ -350,7 +343,12 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
                 }
                 final bool? toDiscard = await showAdaptiveDialog(
                   context: context,
-                  builder: (context) => const ConfirmDiscardDialog(),
+                  builder: (context) => const ConfirmDialog(
+                    title: 'Discard changes',
+                    subtitle:
+                        'Are you sure you want to discard your changes? This action cannot be undone.',
+                    mainButtonText: 'Discard',
+                  ),
                 );
                 if (toDiscard == true) {
                   Navigator.of(context).pop();
@@ -447,7 +445,12 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
           }
           final bool? toDiscard = await showAdaptiveDialog(
             context: context,
-            builder: (context) => const ConfirmDiscardDialog(),
+            builder: (context) => const ConfirmDialog(
+              title: 'Discard changes',
+              subtitle:
+                  'Are you sure you want to discard your changes? This action cannot be undone.',
+              mainButtonText: 'Discard',
+            ),
           );
           if (toDiscard == true) {
             Navigator.of(context).pop();

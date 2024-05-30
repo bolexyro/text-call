@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-class ConfirmDiscardDialog extends StatelessWidget {
-  const ConfirmDiscardDialog({
+class ConfirmDialog extends StatelessWidget {
+  const ConfirmDialog({
     super.key,
+    required this.title,
+    required this.subtitle,
+    required this.mainButtonText,
   });
+
+  final String title;
+  final String subtitle;
+  final String mainButtonText;
 
   @override
   Widget build(BuildContext context) {
@@ -39,21 +46,27 @@ class ConfirmDiscardDialog extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          Text(
-            'Discard changes',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 25,
-              color: isDarkMode ? Colors.white : Colors.black,
-              fontWeight: FontWeight.bold,
+          SizedBox(
+            width: 250,
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 25,
+                color: isDarkMode ? Colors.white : Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          const Text(
-            'Are you sure you want to discard your changes? This action cannot be undone.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 17,
-              color: Color.fromARGB(255, 153, 153, 153),
+          SizedBox(
+            width: 300,
+            child: Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 17,
+                color: Color.fromARGB(255, 153, 153, 153),
+              ),
             ),
           ),
           const SizedBox(
@@ -92,11 +105,11 @@ class ConfirmDiscardDialog extends StatelessWidget {
                     borderRadius: BorderRadius.circular(5),
                   ),
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 5.0),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
                   child: Text(
-                    'Discard',
-                    style: TextStyle(fontSize: 17),
+                    mainButtonText,
+                    style: const TextStyle(fontSize: 17),
                   ),
                 ),
               ),

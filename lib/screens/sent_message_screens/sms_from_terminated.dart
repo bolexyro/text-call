@@ -6,6 +6,7 @@ import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/providers/floating_buttons_visible_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
+import 'package:text_call/screens/rich_message_editor.dart/preview_screen_content.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/models/recent.dart';
@@ -37,12 +38,14 @@ class SmsFromTerminated extends ConsumerWidget {
 class TheStackWidget extends ConsumerStatefulWidget {
   const TheStackWidget({
     super.key,
-    required this.message,
     required this.howSmsIsOpened,
+    required this.regularMessage,
+    required this.complexMessage,
   });
 
-  final RegularMessage message;
   final HowSmsIsOpened howSmsIsOpened;
+  final RegularMessage? regularMessage;
+  final ComplexMessage? complexMessage;
 
   @override
   ConsumerState<TheStackWidget> createState() => _TheStackWidgetState();
@@ -57,36 +60,39 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundActualColor = widget.message.backgroundColor;
     bool floatingButtonsVisible = ref.watch(floatingButtonsVisibleProvider);
 
     return Stack(
       children: [
         SizedBox(
           height: double.infinity,
-          child: Center(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (scrollNotification) {
-                if (scrollNotification is UserScrollNotification) {
-                  if (scrollNotification.direction == ScrollDirection.forward) {
-                    ref
-                        .read(floatingButtonsVisibleProvider.notifier)
-                        .updateVisibility(false);
-                  } else if (scrollNotification.direction ==
-                      ScrollDirection.reverse) {
-                    ref
-                        .read(floatingButtonsVisibleProvider.notifier)
-                        .updateVisibility(false);
-                  }
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (scrollNotification) {
+              if (scrollNotification is UserScrollNotification) {
+                if (scrollNotification.direction == ScrollDirection.forward) {
+                  ref
+                      .read(floatingButtonsVisibleProvider.notifier)
+                      .updateVisibility(false);
+                } else if (scrollNotification.direction ==
+                    ScrollDirection.reverse) {
+                  ref
+                      .read(floatingButtonsVisibleProvider.notifier)
+                      .updateVisibility(false);
                 }
-                return false;
-              },
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: MyAnimatedTextWidget(message: widget.message),
-              ),
-            ),
+              }
+              return false;
+            },
+            child: widget.regularMessage == null
+                ? PreviewScreenContent(
+                    bolexyroJson: widget.complexMessage!.bolexyroJson)
+                : Center(
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child:
+                          MyAnimatedTextWidget(message: widget.regularMessage!),
+                    ),
+                  ),
           ),
         ),
         if (widget.howSmsIsOpened ==
@@ -110,8 +116,10 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(20),
-                    backgroundColor:
-                        makeColorLighter(widget.message.backgroundColor, -10),
+                    backgroundColor: widget.regularMessage == null
+                        ? Colors.black
+                        : makeColorLighter(
+                            widget.regularMessage!.backgroundColor, -10),
                     shape: const CircleBorder(),
                   ),
                   child: const Icon(
@@ -132,8 +140,10 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(20),
-                    backgroundColor:
-                        makeColorLighter(widget.message.backgroundColor, -10),
+                    backgroundColor: widget.regularMessage == null
+                        ? Colors.black
+                        : makeColorLighter(
+                            widget.regularMessage!.backgroundColor, -10),
                     shape: const CircleBorder(),
                   ),
                   child: const Icon(
@@ -151,12 +161,19 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(20),
                     shape: const CircleBorder(),
-                    backgroundColor: makeColorLighter(backgroundActualColor, 5),
+                    backgroundColor: widget.regularMessage == null
+                        ? Colors.black
+                        : makeColorLighter(
+                            widget.regularMessage!.backgroundColor, 5),
                   ),
                   child: Icon(
                     Icons.home,
-                    color: backgroundActualColor.computeLuminance() > 0.5
-                        ? Colors.black
+                    color: widget.regularMessage != null
+                        ? widget.regularMessage!.backgroundColor
+                                    .computeLuminance() >
+                                0.5
+                            ? Colors.black
+                            : Colors.white
                         : Colors.white,
                   ),
                 )
@@ -172,12 +189,9 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
   const WidgetToRenderBasedOnHowAppIsOpened({
     super.key,
     required this.howSmsIsOpened,
-    // required this.message,
   });
 
   final HowSmsIsOpened howSmsIsOpened;
-  // final RegularMessage? message;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bool floatingButtonsVisible =
@@ -234,8 +248,19 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
                     );
                   }
                   final data = snapshot.data!;
-                  final message = RegularMessage.fromJsonString(
-                      data[0]['messageJson'] as String);
+
+                  final regularMessage = data[0]['messageType'] == 'regular'
+                      ? RegularMessage.fromJsonString(
+                          data[0]['messageJson'] as String,
+                        )
+                      : null;
+                  final complexMessage = data[0]['messageType'] == 'complex'
+                      ? ComplexMessage(
+                          complexMessageJsonString:
+                              data[0]['messageJson'] as String,
+                        )
+                      : null;
+
                   return Scaffold(
                     floatingActionButton: howSmsIsOpened ==
                                 HowSmsIsOpened
@@ -249,12 +274,16 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
                               ),
                             ),
                             shape: const CircleBorder(),
-                            backgroundColor:
-                                makeColorLighter(message.backgroundColor, 5),
+                            backgroundColor: regularMessage == null
+                                ? Colors.black
+                                : makeColorLighter(
+                                    regularMessage.backgroundColor, 5),
                             child: Icon(
                               Icons.home,
-                              color:
-                                  message.backgroundColor.computeLuminance() >
+                              color: regularMessage == null
+                                  ? Colors.white
+                                  : regularMessage.backgroundColor
+                                              .computeLuminance() >
                                           0.5
                                       ? Colors.black
                                       : Colors.white,
@@ -263,9 +292,10 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
                         : null,
                     body: TheStackWidget(
                       howSmsIsOpened: howSmsIsOpened,
-                      message: message,
+                      regularMessage: regularMessage,
+                      complexMessage: complexMessage,
                     ),
-                    backgroundColor: message.backgroundColor,
+                    backgroundColor: regularMessage?.backgroundColor,
                   );
                 },
               );
@@ -313,41 +343,47 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
 
           ref.read(recentsProvider.notifier).addRecent(newRecent);
 
-          // for now since we are only supporting regular message we can assume that regular messaage is not going to be null
-          final backgroundActualColor =
-              newRecent.regularMessage!.backgroundColor;
           return Scaffold(
             appBar: AppBar(
               forceMaterialTransparency: true,
-              title: ScaffoldTitle(color: backgroundActualColor),
+              title: newRecent.regularMessage == null
+                  ? null
+                  : ScaffoldTitle(
+                      color: newRecent.regularMessage!.backgroundColor),
             ),
-            floatingActionButton: howSmsIsOpened ==
-                        HowSmsIsOpened.fromTerminatedForPickCall &&
-                    floatingButtonsVisible
-                ? FloatingActionButton(
-                    onPressed: () => Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => const PhonePageScreen(),
-                      ),
-                    ),
-                    shape: const CircleBorder(),
-                    backgroundColor: makeColorLighter(backgroundActualColor, 5),
-                    child: Icon(
-                      Icons.home,
-                      color: backgroundActualColor.computeLuminance() > 0.5
-                          ? Colors.black
-                          : Colors.white,
-                    ),
-                  )
-                : null,
-            backgroundColor: backgroundActualColor,
+            floatingActionButton:
+                howSmsIsOpened == HowSmsIsOpened.fromTerminatedForPickCall &&
+                        floatingButtonsVisible
+                    ? FloatingActionButton(
+                        onPressed: () => Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const PhonePageScreen(),
+                          ),
+                        ),
+                        shape: const CircleBorder(),
+                        backgroundColor: newRecent.regularMessage == null
+                            ? Colors.black
+                            : makeColorLighter(
+                                newRecent.regularMessage!.backgroundColor,
+                                5,
+                              ),
+                        child: Icon(
+                          Icons.home,
+                          color: newRecent.regularMessage == null
+                              ? Colors.white
+                              : newRecent.regularMessage!.backgroundColor
+                                          .computeLuminance() >
+                                      0.5
+                                  ? Colors.black
+                                  : Colors.white,
+                        ),
+                      )
+                    : null,
+            backgroundColor: newRecent.regularMessage?.backgroundColor,
             body: TheStackWidget(
               howSmsIsOpened: howSmsIsOpened,
-              // we are assuming for now that it iis only regular message we are receiving
-              message: RegularMessage(
-                messageString: newRecent.regularMessage!.messageString,
-                backgroundColor: newRecent.regularMessage!.backgroundColor,
-              ),
+              regularMessage: newRecent.regularMessage,
+              complexMessage: newRecent.complexMessage,
             ),
           );
         },

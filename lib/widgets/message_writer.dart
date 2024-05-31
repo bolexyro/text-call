@@ -96,7 +96,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     );
 
     _recentId = DateTime.now().toString();
-    // make sure to remove this line oo. it is only important for debugging purposes
     prefs.setString('recentId', _recentId);
 
     // final xyz = jsonEncode(upToDateBolexyroJson!);

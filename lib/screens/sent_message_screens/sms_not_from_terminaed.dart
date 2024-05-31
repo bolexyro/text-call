@@ -16,24 +16,23 @@ import 'package:text_call/utils/utils.dart';
 class SmsNotFromTerminated extends ConsumerWidget {
   const SmsNotFromTerminated({
     super.key,
-    required this.regularMessage,
     required this.howSmsIsOpened,
+    required this.regularMessage,
     required this.complexMessage,
   });
 
-  // this message should not be null if howsmsisopened == notfromterminatedtoshowmessage
+  // this messages should not be null if howsmsisopened == notfromterminatedtoshowmessage
+  final HowSmsIsOpened howSmsIsOpened;
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;
-  final HowSmsIsOpened howSmsIsOpened;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    print('regular message is ${regularMessage?.toJsonString}');
     return SafeArea(
       child: widgetToRenderBasedOnHowAppIsOpened(
-        complexMessage: complexMessage,
-        regularMessage: regularMessage,
         howSmsIsOpened: howSmsIsOpened,
+        regularMessage: regularMessage,
+        complexMessage: complexMessage,
         ref: ref,
         context: context,
       ),
@@ -44,14 +43,14 @@ class SmsNotFromTerminated extends ConsumerWidget {
 class TheStackWidget extends ConsumerStatefulWidget {
   const TheStackWidget({
     super.key,
+    required this.howSmsIsOpened,
     required this.regularMessage,
     required this.complexMessage,
-    required this.howSmsIsOpened,
   });
 
+  final HowSmsIsOpened howSmsIsOpened;
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;
-  final HowSmsIsOpened howSmsIsOpened;
 
   @override
   ConsumerState<TheStackWidget> createState() => _TheStackWidgetState();
@@ -68,34 +67,34 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
       children: [
         SizedBox(
           height: double.infinity,
-          child: Center(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (scrollNotification) {
-                if (scrollNotification is UserScrollNotification) {
-                  if (scrollNotification.direction == ScrollDirection.forward) {
-                    ref
-                        .read(floatingButtonsVisibleProvider.notifier)
-                        .updateVisibility(true);
-                  } else if (scrollNotification.direction ==
-                      ScrollDirection.reverse) {
-                    ref
-                        .read(floatingButtonsVisibleProvider.notifier)
-                        .updateVisibility(false);
-                  }
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (scrollNotification) {
+              if (scrollNotification is UserScrollNotification) {
+                if (scrollNotification.direction == ScrollDirection.forward) {
+                  ref
+                      .read(floatingButtonsVisibleProvider.notifier)
+                      .updateVisibility(true);
+                } else if (scrollNotification.direction ==
+                    ScrollDirection.reverse) {
+                  ref
+                      .read(floatingButtonsVisibleProvider.notifier)
+                      .updateVisibility(false);
                 }
-                return false;
-              },
-              child: widget.regularMessage == null
-                  ? PreviewScreenContent(
-                      bolexyroJson: widget.complexMessage!.bolexyroJson,
-                    )
-                  : SingleChildScrollView(
+              }
+              return false;
+            },
+            child: widget.regularMessage == null
+                ? PreviewScreenContent(
+                    bolexyroJson: widget.complexMessage!.bolexyroJson,
+                  )
+                : Center(
+                    child: SingleChildScrollView(
                       controller: _scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
                       child:
                           MyAnimatedTextWidget(message: widget.regularMessage!),
                     ),
-            ),
+                  ),
           ),
         ),
         if (widget.howSmsIsOpened ==
@@ -181,28 +180,20 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
     prefsFuture.then((prefs) {
       prefs.reload();
 
-      // final String? messageJsonString = prefs.getString('messageJsonString');
       final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
       final String? recentId = prefs.getString('recentId');
-      // final String? messageType = prefs.getString('messageType');
 
       final newRecent = Recent.withoutContactObject(
         category: RecentCategory.incomingAccepted,
-        // regularMessage: messageType == 'regular'
-        //     ? RegularMessage.fromJsonString(messageJsonString!)
-        //     : null,
-        // complexMessage: messageType == 'complex'
-        //     ? ComplexMessage(complexMessageJsonString: messageJsonString!)
-        //     : null,
         regularMessage: regularMessage,
-        complexMessage: null,
+        complexMessage: complexMessage,
         id: recentId!,
         phoneNumber: callerPhoneNumber!,
       );
       ref.read(recentsProvider.notifier).addRecent(newRecent);
     });
   }
- 
+
   return Scaffold(
     appBar: AppBar(
       leading: IconButton(
@@ -217,9 +208,9 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
             )
           : null,
       forceMaterialTransparency: true,
-      title: regularMessage != null
-          ? ScaffoldTitle(color: regularMessage.backgroundColor)
-          : null,
+      title: regularMessage == null
+          ? null
+          : ScaffoldTitle(color: regularMessage.backgroundColor),
     ),
     body: TheStackWidget(
       howSmsIsOpened: howSmsIsOpened,

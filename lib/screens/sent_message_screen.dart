@@ -454,7 +454,7 @@ class SentMessageScreen extends StatelessWidget {
     required this.howSmsIsOpened,
   });
 
-  // this message should not be null if howsmsisopened == notfromterminatedtoshow message
+  // this messages should not be null if howsmsisopened == notfromterminatedtoshow message
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;
   final HowSmsIsOpened howSmsIsOpened;
@@ -466,7 +466,9 @@ class SentMessageScreen extends StatelessWidget {
         howSmsIsOpened ==
             HowSmsIsOpened
                 .fromTerminatedToShowMessageAfterAccessRequestGranted) {
-      return SmsFromTerminated(howSmsIsOpened: howSmsIsOpened);
+      return SmsFromTerminated(
+        howSmsIsOpened: howSmsIsOpened,
+      );
     }
     return SmsNotFromTerminated(
       regularMessage: regularMessage,

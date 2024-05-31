@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:another_flushbar/flushbar.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -96,16 +94,16 @@ Future<void> messageHandler(RemoteMessage message) async {
     return;
   }
 
-  final String messageJsonString = message.data['message'];
-  final String callerPhoneNumber = message.data['caller_phone_number'];
   final String recentId = message.data['message_id'];
+  final String messageJsonString = message.data['message_json_string'];
+  final String callerPhoneNumber = message.data['caller_phone_number'];
   final String messageType = message.data['my_message_type'];
   final String callerName = await _getCallerName(callerPhoneNumber);
 
   final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('recentId', recentId);
   await prefs.setString('messageJsonString', messageJsonString);
   await prefs.setString('callerPhoneNumber', callerPhoneNumber);
-  await prefs.setString('recentId', recentId);
   await prefs.setString('messageType', messageType);
 
   createAwesomeNotification(
@@ -164,9 +162,9 @@ class NotificationController {
       final prefs = await SharedPreferences.getInstance();
       // we are reloading because some things might have been changed in the background
       await prefs.reload();
+      final String? recentId = prefs.getString('recentId');
       final String? messageJsonString = prefs.getString('messageJsonString');
       final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
-      final String? recentId = prefs.getString('recentId');
       final String? messageType = prefs.getString('messageType');
 
       final url = Uri.https(
@@ -190,8 +188,9 @@ class NotificationController {
     } else if (receivedAction.buttonKeyPressed == 'ACCEPT_CALL') {
       final prefs = await SharedPreferences.getInstance();
       await prefs.reload();
+      final String? messageJsonString = prefs.getString('messageJsonString');
       final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
-
+      final String? messageType = prefs.getString('messageType');
       final url = Uri.https(
           'text-call-backend.onrender.com', 'call/accepted/$callerPhoneNumber');
       http.get(url);
@@ -202,13 +201,12 @@ class NotificationController {
             FlushbarPosition.TOP, TextCall.navigatorKey.currentContext!);
         return;
       }
-      final String? callMessage = prefs.getString('callMessage');
-      final String? backgroundColor = prefs.getString('backgroundColor');
-      final RegularMessage message = RegularMessage(
-        messageString: callMessage!,
-        backgroundColor:
-            deJsonifyColorMapToColor(json.decode(backgroundColor!)),
-      );
+
+      // final message = messageType == 'regular'
+      //     ? RegularMessage.fromJsonString(messageJsonString!)
+      //     : ComplexMessage(complexMessageJsonString: messageJsonString!);
+
+      final message = RegularMessage.fromJsonString(messageJsonString!);
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
           builder: (context) => SentMessageScreen(
@@ -249,15 +247,8 @@ class NotificationController {
                   ? HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess
                   : HowSmsIsOpened
                       .notFromTerminatedToShowMessageAfterAccessRequestGranted,
-              message: RegularMessage(
-                messageString: data[0]['message'] as String,
-                backgroundColor: Color.fromARGB(
-                  data[0]['backgroundColorAlpha'] as int,
-                  data[0]['backgroundColorRed'] as int,
-                  data[0]['backgroundColorGreen'] as int,
-                  data[0]['backgroundColorBlue'] as int,
-                ),
-              ),
+              message: RegularMessage.fromJsonString(
+                  data[0]['messageJson'] as String),
             ),
           ),
         );

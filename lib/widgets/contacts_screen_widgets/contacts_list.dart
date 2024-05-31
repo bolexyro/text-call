@@ -5,6 +5,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/search_screen.dart';
@@ -171,6 +172,20 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                           ),
                         );
                       },
+                      // onPressed: () async {
+                      //   final prefs = await SharedPreferences.getInstance();
+                      //   await prefs.setString('messageJsonString',
+                      //       '{"messageString":"hello from the other side","backgroundColor":{"red":13,"blue":214,"green":214,"alpha":255}}');
+                      //   await prefs.setString(
+                      //       'callerPhoneNumber', '+2349098875567');
+                      //   await prefs.setString('messageType', 'regular');
+
+                      //   createAwesomeNotification(
+                      //     title: 'debugging skills is calling',
+                      //     body: 'Might be urgent. Schrödinger\'s message',
+                      //     notificationPurpose: NotificationPurpose.forCall,
+                      //   );
+                      // },
                       icon: const Icon(Icons.search),
                     ),
                     const SizedBox(width: 10),

@@ -175,10 +175,10 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                       onPressed: () async {
                         final prefs = await SharedPreferences.getInstance();
                         await prefs.setString('messageJsonString',
-                            '{"messageString":"hello from the other side sike","backgroundColor":{"red":13,"blue":214,"green":90,"alpha":255}}');
+                            '{"0":{"document":{"backgroundColor":{"alpha":255,"red":255,"blue":255,"green":255},"quillDocJson":"[{\\"insert\\":\\"Fffffffffffffff\\\\n\\"}]"}}}');
                         await prefs.setString(
                             'callerPhoneNumber', '+2349098875567');
-                        await prefs.setString('messageType', 'regular');
+                        await prefs.setString('messageType', 'complex');
 
                         createAwesomeNotification(
                           title: 'debugging skills is calling',

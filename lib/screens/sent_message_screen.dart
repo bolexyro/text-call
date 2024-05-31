@@ -1,5 +1,6 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:text_call/models/complex_message.dart';
 
 import 'package:text_call/screens/sent_message_screens/sms_from_terminated.dart';
 import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
@@ -448,12 +449,14 @@ enum HowSmsIsOpened {
 class SentMessageScreen extends StatelessWidget {
   const SentMessageScreen({
     super.key,
-    required this.message,
+    required this.regularMessage,
+    required this.complexMessage,
     required this.howSmsIsOpened,
   });
 
   // this message should not be null if howsmsisopened == notfromterminatedtoshow message
-  final RegularMessage? message;
+  final RegularMessage? regularMessage;
+  final ComplexMessage? complexMessage;
   final HowSmsIsOpened howSmsIsOpened;
   @override
   Widget build(BuildContext context) {
@@ -463,11 +466,13 @@ class SentMessageScreen extends StatelessWidget {
         howSmsIsOpened ==
             HowSmsIsOpened
                 .fromTerminatedToShowMessageAfterAccessRequestGranted) {
-      return SmsFromTerminated(
-          howSmsIsOpened: howSmsIsOpened);
+      return SmsFromTerminated(howSmsIsOpened: howSmsIsOpened);
     }
     return SmsNotFromTerminated(
-        message: message, howSmsIsOpened: howSmsIsOpened);
+      regularMessage: regularMessage,
+      complexMessage: complexMessage,
+      howSmsIsOpened: howSmsIsOpened,
+    );
   }
 }
 

@@ -190,7 +190,7 @@ class NotificationController {
       await prefs.reload();
       final String? messageJsonString = prefs.getString('messageJsonString');
       final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
-      // final String? messageType = prefs.getString('messageType');
+      final String? messageType = prefs.getString('messageType');
       final url = Uri.https(
           'text-call-backend.onrender.com', 'call/accepted/$callerPhoneNumber');
       http.get(url);
@@ -202,15 +202,15 @@ class NotificationController {
         return;
       }
 
-      // final message = messageType == 'regular'
-      //     ? RegularMessage.fromJsonString(messageJsonString!)
-      //     : ComplexMessage(complexMessageJsonString: messageJsonString!);
-
-      final message = RegularMessage.fromJsonString(messageJsonString!);
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
           builder: (context) => SentMessageScreen(
-            message: message,
+            complexMessage: messageType == 'complex'
+                ? ComplexMessage(complexMessageJsonString: messageJsonString!)
+                : null,
+            regularMessage: messageType == 'regular'
+                ? RegularMessage.fromJsonString(messageJsonString!)
+                : null,
             howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
           ),
         ),
@@ -247,8 +247,17 @@ class NotificationController {
                   ? HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess
                   : HowSmsIsOpened
                       .notFromTerminatedToShowMessageAfterAccessRequestGranted,
-              message: RegularMessage.fromJsonString(
-                  data[0]['messageJson'] as String),
+              regularMessage: data[0]['messageType'] == 'regular'
+                  ? RegularMessage.fromJsonString(
+                      data[0]['messageJson'] as String,
+                    )
+                  : null,
+              complexMessage: data[0]['messageType'] == 'complex'
+                  ? ComplexMessage(
+                      complexMessageJsonString:
+                          data[0]['messageJson'] as String,
+                    )
+                  : null,
             ),
           ),
         );

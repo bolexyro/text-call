@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
@@ -22,12 +23,16 @@ class ContactDetailsPane extends ConsumerWidget {
   final Recent? recent;
   final double stackContainerWidths;
 
-  void _goToSentMessageScreen(BuildContext context, RegularMessage message) {
+  void _goToSentMessageScreen(
+      {required BuildContext context,
+      required RegularMessage? regularMessage,
+      required ComplexMessage? complexMessage}) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => SentMessageScreen(
         howSmsIsOpened: HowSmsIsOpened
             .notFromTerminatedToShowMessageAfterAccessRequestGranted,
-        message: message,
+        regularMessage: regularMessage,
+        complexMessage: complexMessage,
       ),
     ));
   }
@@ -76,7 +81,10 @@ class ContactDetailsPane extends ConsumerWidget {
           recent!.category != RecentCategory.incomingRejected
               ? ElevatedButton(
                   onPressed: () {
-                    _goToSentMessageScreen(context, recent!.regularMessage!);
+                    _goToSentMessageScreen(
+                        context: context,
+                        regularMessage: recent!.regularMessage,
+                        complexMessage: recent!.complexMessage);
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(

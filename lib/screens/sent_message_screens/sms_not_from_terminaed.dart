@@ -2,32 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:text_call/models/complex_message.dart';
 // import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/floating_buttons_visible_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
+import 'package:text_call/screens/rich_message_editor.dart/preview_screen_content.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/utils/utils.dart';
 
 class SmsNotFromTerminated extends ConsumerWidget {
   const SmsNotFromTerminated({
     super.key,
-    required this.message,
+    required this.regularMessage,
     required this.howSmsIsOpened,
+    required this.complexMessage,
   });
 
-  // this message should not be null if howsmsisopened == notfromterminatedtoshow message
-  final RegularMessage? message;
+  // this message should not be null if howsmsisopened == notfromterminatedtoshowmessage
+  final RegularMessage? regularMessage;
+  final ComplexMessage? complexMessage;
   final HowSmsIsOpened howSmsIsOpened;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    print('regular message is ${message?.toJsonString}');
+    print('regular message is ${regularMessage?.toJsonString}');
     return SafeArea(
       child: widgetToRenderBasedOnHowAppIsOpened(
-        message: message,
+        complexMessage: complexMessage,
+        regularMessage: regularMessage,
         howSmsIsOpened: howSmsIsOpened,
         ref: ref,
         context: context,
@@ -39,11 +44,13 @@ class SmsNotFromTerminated extends ConsumerWidget {
 class TheStackWidget extends ConsumerStatefulWidget {
   const TheStackWidget({
     super.key,
-    required this.message,
+    required this.regularMessage,
+    required this.complexMessage,
     required this.howSmsIsOpened,
   });
 
-  final RegularMessage message;
+  final RegularMessage? regularMessage;
+  final ComplexMessage? complexMessage;
   final HowSmsIsOpened howSmsIsOpened;
 
   @override
@@ -78,11 +85,16 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
                 }
                 return false;
               },
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: MyAnimatedTextWidget(message: widget.message),
-              ),
+              child: widget.regularMessage == null
+                  ? PreviewScreenContent(
+                      bolexyroJson: widget.complexMessage!.bolexyroJson,
+                    )
+                  : SingleChildScrollView(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child:
+                          MyAnimatedTextWidget(message: widget.regularMessage!),
+                    ),
             ),
           ),
         ),
@@ -113,8 +125,10 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(20),
-                    backgroundColor:
-                        makeColorLighter(widget.message.backgroundColor, -10),
+                    backgroundColor: widget.regularMessage == null
+                        ? Colors.black
+                        : makeColorLighter(
+                            widget.regularMessage!.backgroundColor, -10),
                     shape: const CircleBorder(),
                   ),
                   child: const Icon(
@@ -130,8 +144,10 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(20),
-                    backgroundColor:
-                        makeColorLighter(widget.message.backgroundColor, -10),
+                    backgroundColor: widget.regularMessage == null
+                        ? Colors.black
+                        : makeColorLighter(
+                            widget.regularMessage!.backgroundColor, -10),
                     shape: const CircleBorder(),
                   ),
                   child: const Icon(
@@ -150,7 +166,8 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
 
 Widget widgetToRenderBasedOnHowAppIsOpened(
     {required HowSmsIsOpened howSmsIsOpened,
-    required RegularMessage? message,
+    required RegularMessage? regularMessage,
+    required ComplexMessage? complexMessage,
     required WidgetRef ref,
     required BuildContext context}) {
   // if (howSmsIsOpened ==
@@ -177,7 +194,7 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
         // complexMessage: messageType == 'complex'
         //     ? ComplexMessage(complexMessageJsonString: messageJsonString!)
         //     : null,
-        regularMessage: message!,
+        regularMessage: regularMessage,
         complexMessage: null,
         id: recentId!,
         phoneNumber: callerPhoneNumber!,
@@ -185,25 +202,31 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
       ref.read(recentsProvider.notifier).addRecent(newRecent);
     });
   }
+ 
   return Scaffold(
     appBar: AppBar(
       leading: IconButton(
         onPressed: () => Navigator.of(context).pop(),
         icon: const Icon(Icons.arrow_back_ios_new),
       ),
-      iconTheme: IconThemeData(
-        color: message!.backgroundColor.computeLuminance() > 0.5
-            ? Colors.black
-            : Colors.white,
-      ),
+      iconTheme: regularMessage != null
+          ? IconThemeData(
+              color: regularMessage.backgroundColor.computeLuminance() > 0.5
+                  ? Colors.black
+                  : Colors.white,
+            )
+          : null,
       forceMaterialTransparency: true,
-      title: ScaffoldTitle(color: message.backgroundColor),
+      title: regularMessage != null
+          ? ScaffoldTitle(color: regularMessage.backgroundColor)
+          : null,
     ),
     body: TheStackWidget(
       howSmsIsOpened: howSmsIsOpened,
-      message: message,
+      regularMessage: regularMessage,
+      complexMessage: complexMessage,
     ),
-    backgroundColor: message.backgroundColor,
+    backgroundColor: regularMessage?.backgroundColor,
   );
   // }
 }

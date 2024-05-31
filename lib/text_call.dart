@@ -60,7 +60,7 @@ class _TextCallState extends State<TextCall> {
     return GetMaterialApp(
       themeMode: widget.themeMode,
       theme: kLightTheme,
-      darkTheme:kDarkTheme,
+      darkTheme: kDarkTheme,
       navigatorKey: TextCall.navigatorKey,
       debugShowCheckedModeBanner: false,
       home: FutureBuilder(
@@ -86,7 +86,8 @@ class _TextCallState extends State<TextCall> {
                 );
               }
               return const SentMessageScreen(
-                message: null,
+                complexMessage: null,
+                regularMessage: null,
                 howSmsIsOpened: HowSmsIsOpened.fromTerminatedForPickCall,
               );
             }
@@ -99,7 +100,8 @@ class _TextCallState extends State<TextCall> {
                 );
               }
               return const SentMessageScreen(
-                message: null,
+                complexMessage: null,
+                regularMessage: null,
                 howSmsIsOpened:
                     HowSmsIsOpened.fromTerminatedToGrantOrDeyRequestAccess,
               );
@@ -108,7 +110,8 @@ class _TextCallState extends State<TextCall> {
             if (widget.howAppIsOPened ==
                 HowAppIsOPened.fromTerminatedToShowMessage) {
               return const SentMessageScreen(
-                  message: null,
+                  complexMessage: null,
+                  regularMessage: null,
                   howSmsIsOpened: HowSmsIsOpened
                       .fromTerminatedToShowMessageAfterAccessRequestGranted);
             }

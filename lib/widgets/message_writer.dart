@@ -51,6 +51,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   ];
 
   late Widget messageWriterMessageBox;
+  Map<int, Map<String, dynamic>>? upToDateBolexyroJson;
 
   @override
   void initState() {
@@ -85,9 +86,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     _channel = WebSocketChannel.connect(
       Uri.parse('wss://text-call-backend.onrender.com/ws/$callerPhoneNumber'),
     );
-    setState(() {
-      _callSending = true;
-    });
+    // setState(() {
+    //   _callSending = true;
+    // });
 
     // the delay before we assume call was not picked
     _animationDelay = Future.delayed(
@@ -97,21 +98,37 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     _recentId = DateTime.now().toString();
     // make sure to remove this line oo. it is only important for debugging purposes
     prefs.setString('recentId', _recentId);
-    print(callerPhoneNumber);
+
+//  final xyz = jsonEncode(_convertKeysToStrings(upToDateBolexyroJson!));
+
     _channel!.sink.add(
       json.encode(
         {
           'caller_phone_number': callerPhoneNumber,
           'callee_phone_number': widget.calleePhoneNumber,
-          'message_json_string': RegularMessage(
-                  messageString: _messageController.text,
-                  backgroundColor: _selectedColor,
-                ).toJsonString,
-          'my_message_type': 'regular',
+          'message_json_string':
+              messageWriterMessageBox.runtimeType == FileUiPlaceHolder
+                  ? jsonEncode(_convertKeysToStrings(upToDateBolexyroJson!))
+                  : RegularMessage(
+                      messageString: _messageController.text,
+                      backgroundColor: _selectedColor,
+                    ).toJsonString,
+          'my_message_type':
+              messageWriterMessageBox.runtimeType == FileUiPlaceHolder
+                  ? 'complex'
+                  : 'regular',
           'message_id': _recentId,
         },
       ),
     );
+  }
+
+  // Function to convert a map with integer keys to a map with string keys
+  Map<String, dynamic> _convertKeysToStrings(
+      Map<int, Map<String, dynamic>> originalMap) {
+    return originalMap.map((key, value) {
+      return MapEntry(key.toString(), value);
+    });
   }
 
   void _showColorPicker() async {
@@ -134,6 +151,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
   void _updateMyOwnDocumentJson(
       Map<int, Map<String, dynamic>> newBolexyroJson) {
+    upToDateBolexyroJson = newBolexyroJson;
     setState(() {
       messageWriterMessageBox = FileUiPlaceHolder(
         onBolexroJsonUpdated: _updateMyOwnDocumentJson,

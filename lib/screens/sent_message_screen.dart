@@ -464,7 +464,7 @@ class SentMessageScreen extends StatelessWidget {
             HowSmsIsOpened
                 .fromTerminatedToShowMessageAfterAccessRequestGranted) {
       return SmsFromTerminated(
-          message: message, howSmsIsOpened: howSmsIsOpened);
+          howSmsIsOpened: howSmsIsOpened);
     }
     return SmsNotFromTerminated(
         message: message, howSmsIsOpened: howSmsIsOpened);

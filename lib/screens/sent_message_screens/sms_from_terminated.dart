@@ -18,19 +18,16 @@ import 'package:text_call/models/regular_message.dart';
 class SmsFromTerminated extends ConsumerWidget {
   const SmsFromTerminated({
     super.key,
-    required this.message,
     required this.howSmsIsOpened,
   });
 
   // this message should not be null if howsmsisopened == notfromterminatedtoshow message
-  final RegularMessage? message;
   final HowSmsIsOpened howSmsIsOpened;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
       child: WidgetToRenderBasedOnHowAppIsOpened(
-        message: message,
         howSmsIsOpened: howSmsIsOpened,
       ),
     );
@@ -175,11 +172,11 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
   const WidgetToRenderBasedOnHowAppIsOpened({
     super.key,
     required this.howSmsIsOpened,
-    required this.message,
+    // required this.message,
   });
 
   final HowSmsIsOpened howSmsIsOpened;
-  final RegularMessage? message;
+  // final RegularMessage? message;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -237,15 +234,8 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
                     );
                   }
                   final data = snapshot.data!;
-                  final RegularMessage message = RegularMessage(
-                    messageString: data[0]['message'] as String,
-                    backgroundColor: Color.fromARGB(
-                      data[0]['backgroundColorAlpha'] as int,
-                      data[0]['backgroundColorRed'] as int,
-                      data[0]['backgroundColorGreen'] as int,
-                      data[0]['backgroundColorBlue'] as int,
-                    ),
-                  );
+                  final message = RegularMessage.fromJsonString(
+                      data[0]['messageJson'] as String);
                   return Scaffold(
                     floatingActionButton: howSmsIsOpened ==
                                 HowSmsIsOpened

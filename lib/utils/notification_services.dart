@@ -190,7 +190,7 @@ class NotificationController {
       await prefs.reload();
       final String? messageJsonString = prefs.getString('messageJsonString');
       final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
-      final String? messageType = prefs.getString('messageType');
+      // final String? messageType = prefs.getString('messageType');
       final url = Uri.https(
           'text-call-backend.onrender.com', 'call/accepted/$callerPhoneNumber');
       http.get(url);

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:text_call/models/complex_message.dart';
+// import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/floating_buttons_visible_provider.dart';
@@ -164,19 +164,21 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
     prefsFuture.then((prefs) {
       prefs.reload();
 
-      final String? messageJsonString = prefs.getString('messageJsonString');
+      // final String? messageJsonString = prefs.getString('messageJsonString');
       final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
       final String? recentId = prefs.getString('recentId');
-      final String? messageType = prefs.getString('messageType');
+      // final String? messageType = prefs.getString('messageType');
 
       final newRecent = Recent.withoutContactObject(
         category: RecentCategory.incomingAccepted,
-        regularMessage: messageType == 'regular'
-            ? RegularMessage.fromJsonString(messageJsonString!)
-            : null,
-        complexMessage: messageType == 'complex'
-            ? ComplexMessage(complexMessageJsonString: messageJsonString!)
-            : null,
+        // regularMessage: messageType == 'regular'
+        //     ? RegularMessage.fromJsonString(messageJsonString!)
+        //     : null,
+        // complexMessage: messageType == 'complex'
+        //     ? ComplexMessage(complexMessageJsonString: messageJsonString!)
+        //     : null,
+        regularMessage: message!,
+        complexMessage: null,
         id: recentId!,
         phoneNumber: callerPhoneNumber!,
       );

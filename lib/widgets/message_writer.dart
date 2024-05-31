@@ -103,7 +103,10 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         {
           'caller_phone_number': callerPhoneNumber,
           'callee_phone_number': widget.calleePhoneNumber,
-          'message_json_string': _messageController.text,
+          'message_json_string': RegularMessage(
+                  messageString: _messageController.text,
+                  backgroundColor: _selectedColor,
+                ).toJsonString,
           'my_message_type': 'regular',
           'message_id': _recentId,
         },

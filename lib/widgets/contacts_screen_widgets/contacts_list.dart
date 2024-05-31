@@ -165,27 +165,27 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                       icon: const Icon(Icons.person_add),
                     ),
                     IconButton(
-                      onPressed: () async {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const SearchScreen(),
-                          ),
-                        );
-                      },
                       // onPressed: () async {
-                      //   final prefs = await SharedPreferences.getInstance();
-                      //   await prefs.setString('messageJsonString',
-                      //       '{"messageString":"hello from the other side","backgroundColor":{"red":13,"blue":214,"green":214,"alpha":255}}');
-                      //   await prefs.setString(
-                      //       'callerPhoneNumber', '+2349098875567');
-                      //   await prefs.setString('messageType', 'regular');
-
-                      //   createAwesomeNotification(
-                      //     title: 'debugging skills is calling',
-                      //     body: 'Might be urgent. Schrödinger\'s message',
-                      //     notificationPurpose: NotificationPurpose.forCall,
+                      //   Navigator.of(context).push(
+                      //     MaterialPageRoute(
+                      //       builder: (context) => const SearchScreen(),
+                      //     ),
                       //   );
                       // },
+                      onPressed: () async {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString('messageJsonString',
+                            '{"messageString":"hello from the other side sike","backgroundColor":{"red":13,"blue":214,"green":90,"alpha":255}}');
+                        await prefs.setString(
+                            'callerPhoneNumber', '+2349098875567');
+                        await prefs.setString('messageType', 'regular');
+
+                        createAwesomeNotification(
+                          title: 'debugging skills is calling',
+                          body: 'Might be urgent. Schrödinger\'s message',
+                          notificationPurpose: NotificationPurpose.forCall,
+                        );
+                      },
                       icon: const Icon(Icons.search),
                     ),
                     const SizedBox(width: 10),

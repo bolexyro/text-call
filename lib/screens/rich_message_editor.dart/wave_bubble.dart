@@ -16,7 +16,7 @@ class WaveBubble extends StatefulWidget {
 }
 
 class _WaveBubbleState extends State<WaveBubble> {
-  late PlayerController controller;
+  late PlayerController _playerController;
   late StreamSubscription _playerStateSubscription;
 
   final playerWaveStyle = const PlayerWaveStyle(
@@ -28,12 +28,12 @@ class _WaveBubbleState extends State<WaveBubble> {
   @override
   void initState() {
     super.initState();
-    controller = PlayerController()
+    _playerController = PlayerController()
       ..preparePlayer(
         path: widget.audioPath,
         shouldExtractWaveform: true,
       );
-    _playerStateSubscription = controller.onPlayerStateChanged.listen(
+    _playerStateSubscription = _playerController.onPlayerStateChanged.listen(
       (_) {
         if (mounted) {
           setState(() {});
@@ -44,7 +44,7 @@ class _WaveBubbleState extends State<WaveBubble> {
 
   @override
   void dispose() {
-    controller.dispose();
+    _playerController.dispose();
     _playerStateSubscription.cancel();
     super.dispose();
   }
@@ -60,17 +60,17 @@ class _WaveBubbleState extends State<WaveBubble> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (!controller.playerState.isStopped)
+          if (!_playerController.playerState.isStopped)
             IconButton(
               onPressed: () async {
-                controller.playerState.isPlaying
-                    ? await controller.pausePlayer()
-                    : await controller.startPlayer(
+                _playerController.playerState.isPlaying
+                    ? await _playerController.pausePlayer()
+                    : await _playerController.startPlayer(
                         finishMode: FinishMode.pause,
                       );
               },
               icon: Icon(
-                controller.playerState.isPlaying
+                _playerController.playerState.isPlaying
                     ? Icons.stop
                     : Icons.play_arrow,
               ),
@@ -79,12 +79,18 @@ class _WaveBubbleState extends State<WaveBubble> {
               highlightColor: Colors.transparent,
             ),
           Expanded(
-            child: AudioFileWaveforms(
-              padding: const EdgeInsets.only(right: 10),
-              size: const Size(double.infinity, 70),
-              playerController: controller,
-              waveformType: WaveformType.fitWidth,
-              playerWaveStyle: playerWaveStyle,
+            child: Column(
+              children: [
+                AudioFileWaveforms(
+                  enableSeekGesture: true,
+                  padding: const EdgeInsets.only(right: 10),
+                  size: const Size(double.infinity, 70),
+                  playerController: _playerController,
+                  waveformType: WaveformType.fitWidth,
+                  playerWaveStyle: playerWaveStyle,
+                ),
+                Text(widget.audioPath),
+              ],
             ),
           ),
         ],

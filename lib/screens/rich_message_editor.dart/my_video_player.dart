@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:video_player/video_player.dart';
@@ -26,6 +25,7 @@ class MyVideoPlayer extends StatefulWidget {
 class _MyVideoPlayerState extends State<MyVideoPlayer> {
   late VideoPlayerController _controller;
   late Duration _videoDuration;
+
   @override
   void initState() {
     super.initState();
@@ -39,10 +39,21 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
         _videoDuration = _controller.value.duration;
       })
       ..setLooping(false);
+    _controller.addListener(_checkVideoCompletion);
+  }
+
+  void _checkVideoCompletion() {
+    if (_controller.value.position == _controller.value.duration) {
+      setState(() {
+        _controller.seekTo(Duration.zero);
+        _videoDuration = Duration.zero;
+      });
+    }
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_checkVideoCompletion);
     _controller.dispose();
     super.dispose();
   }
@@ -62,6 +73,8 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
       return '0:${seconds.toString().padLeft(2, '0')}';
     }
   }
+
+  final videoIsDone = false;
 
   @override
   Widget build(BuildContext context) {
@@ -130,13 +143,19 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                             ),
                           ],
                         )
-                      : Row(
-                          children: [
-                            const Icon(Icons.pause),
-                            Text(
-                              _formatDuration(_controller.value.position),
-                            ),
-                          ],
+                      : ValueListenableBuilder(
+                          valueListenable: _controller,
+                          builder: (BuildContext context,
+                              VideoPlayerValue value, Widget? child) {
+                            return Row(
+                              children: [
+                                const Icon(Icons.pause),
+                                Text(
+                                  _formatDuration(value.position),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                 ),
               )

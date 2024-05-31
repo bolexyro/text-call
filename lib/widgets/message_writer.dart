@@ -158,11 +158,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     });
   }
 
-  bool _showDiscardDialog(Widget messageWriterContent){
+  bool _showDiscardDialog(Widget messageWriterContent) {
     return messageWriterContent.runtimeType != StreamBuilder &&
-                messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
-            (messageWriterMessageBox.runtimeType == TextField &&
-                    _messageController.text.isNotEmpty);
+            messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
+        (messageWriterMessageBox.runtimeType == TextField &&
+            _messageController.text.isNotEmpty);
   }
 
   @override
@@ -285,6 +285,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final snapshotData = json.decode(snapshot.data);
+            print(snapshotData);
             if (snapshotData['call_status'] == 'error') {
               return Padding(
                 padding: const EdgeInsets.only(top: 10.0),
@@ -307,7 +308,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   ],
                 ),
               );
-            } else if (snapshotData['call_status'] == 'rejected') {
+            }
+            if (snapshotData['call_status'] == 'rejected') {
               // create a recent in your table
               final recent = Recent.withoutContactObject(
                 category: RecentCategory.outgoingRejected,
@@ -375,11 +377,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               );
             }
             if (snapshotData['call_status'] == 'callee_busy') {
-              Future.delayed(const Duration(seconds: 3), () {
-                setState(() {
-                  _callSending = false;
-                });
-              });
               return Padding(
                 padding: const EdgeInsets.only(top: 10.0),
                 child: Column(
@@ -398,6 +395,13 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       displayFullTextOnTap: true,
                       repeatForever: false,
                       totalRepeatCount: 1,
+                      onFinished: () {
+                        Future.delayed(const Duration(seconds: 2), () {
+                          setState(() {
+                            _callSending = false;
+                          });
+                        });
+                      },
                     ),
                     Lottie.asset('assets/animations/call_missed.json'),
                   ],

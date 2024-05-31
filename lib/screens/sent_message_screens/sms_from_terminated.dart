@@ -1,16 +1,15 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/providers/floating_buttons_visible_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/models/recent.dart';
-import 'package:text_call/models/message.dart';
+import 'package:text_call/models/regular_message.dart';
 
 // fromTerminatedToGrantOrDeyRequestAccess,
 // fromTerminatedForPickCall,
@@ -24,7 +23,7 @@ class SmsFromTerminated extends ConsumerWidget {
   });
 
   // this message should not be null if howsmsisopened == notfromterminatedtoshow message
-  final Message? message;
+  final RegularMessage? message;
   final HowSmsIsOpened howSmsIsOpened;
 
   @override
@@ -45,7 +44,7 @@ class TheStackWidget extends ConsumerStatefulWidget {
     required this.howSmsIsOpened,
   });
 
-  final Message message;
+  final RegularMessage message;
   final HowSmsIsOpened howSmsIsOpened;
 
   @override
@@ -180,7 +179,7 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
   });
 
   final HowSmsIsOpened howSmsIsOpened;
-  final Message? message;
+  final RegularMessage? message;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -238,8 +237,8 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
                     );
                   }
                   final data = snapshot.data!;
-                  final Message message = Message(
-                    message: data[0]['message'] as String,
+                  final RegularMessage message = RegularMessage(
+                    messageString: data[0]['message'] as String,
                     backgroundColor: Color.fromARGB(
                       data[0]['backgroundColorAlpha'] as int,
                       data[0]['backgroundColorRed'] as int,
@@ -303,24 +302,30 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
           final prefs = snapshot.data;
           prefs!.reload();
 
-          final String? callMessage = prefs.getString('callMessage');
-          final String? backgroundColor = prefs.getString('backgroundColor');
+          final String? messageJsonString =
+              prefs.getString('messageJsonString');
           final String? callerPhoneNumber =
               prefs.getString('callerPhoneNumber');
           final String? recentId = prefs.getString('recentId');
+          final String? messageType = prefs.getString('messageType');
 
           final newRecent = Recent.withoutContactObject(
-              category: RecentCategory.incomingAccepted,
-              message: Message(
-                message: callMessage!,
-                backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
-              ),
-              id: recentId!,
-              phoneNumber: callerPhoneNumber!);
+            category: RecentCategory.incomingAccepted,
+            regularMessage: messageType == 'regular'
+                ? RegularMessage.fromJsonString(messageJsonString!)
+                : null,
+            complexMessage: messageType == 'complex'
+                ? ComplexMessage(complexMessageJsonString: messageJsonString!)
+                : null,
+            id: recentId!,
+            phoneNumber: callerPhoneNumber!,
+          );
 
           ref.read(recentsProvider.notifier).addRecent(newRecent);
+
+          // for now since we are only supporting regular message we can assume that regular messaage is not going to be null
           final backgroundActualColor =
-              deJsonifyColor(json.decode(backgroundColor));
+              newRecent.regularMessage!.backgroundColor;
           return Scaffold(
             appBar: AppBar(
               forceMaterialTransparency: true,
@@ -348,9 +353,10 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
             backgroundColor: backgroundActualColor,
             body: TheStackWidget(
               howSmsIsOpened: howSmsIsOpened,
-              message: Message(
-                message: newRecent.message.message,
-                backgroundColor: newRecent.message.backgroundColor,
+              // we are assuming for now that it iis only regular message we are receiving
+              message: RegularMessage(
+                messageString: newRecent.regularMessage!.messageString,
+                backgroundColor: newRecent.regularMessage!.backgroundColor,
               ),
             ),
           );

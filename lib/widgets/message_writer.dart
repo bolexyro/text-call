@@ -8,7 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
-import 'package:text_call/models/message.dart';
+import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/rich_message_editor.dart/preview_screen.dart';
@@ -97,14 +97,15 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     _recentId = DateTime.now().toString();
     // make sure to remove this line oo. it is only important for debugging purposes
     prefs.setString('recentId', _recentId);
+    print(callerPhoneNumber);
     _channel!.sink.add(
       json.encode(
         {
-          'message_id': _recentId,
           'caller_phone_number': callerPhoneNumber,
           'callee_phone_number': widget.calleePhoneNumber,
-          'message': _messageController.text,
-          'background_color': jsonifyColor(_selectedColor),
+          'message_json_string': _messageController.text,
+          'my_message_type': 'regular',
+          'message_id': _recentId,
         },
       ),
     );
@@ -160,9 +161,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
   bool _showDiscardDialog(Widget messageWriterContent) {
     return messageWriterContent.runtimeType != StreamBuilder &&
-            messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
-        (messageWriterMessageBox.runtimeType == TextField &&
-            _messageController.text.isNotEmpty);
+        (messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
+            (messageWriterMessageBox.runtimeType == TextField &&
+                _messageController.text.isNotEmpty));
   }
 
   @override
@@ -313,10 +314,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               // create a recent in your table
               final recent = Recent.withoutContactObject(
                 category: RecentCategory.outgoingRejected,
-                message: Message(
-                  message: _messageController.text,
+                regularMessage: RegularMessage(
+                  messageString: _messageController.text,
                   backgroundColor: _selectedColor,
                 ),
+                complexMessage: null,
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
                 callTime: DateTime.parse(_recentId),
@@ -351,9 +353,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             if (snapshotData['call_status'] == 'accepted') {
               final recent = Recent.withoutContactObject(
                 category: RecentCategory.outgoingAccepted,
-                message: Message(
-                    message: _messageController.text,
-                    backgroundColor: _selectedColor),
+                regularMessage: RegularMessage(
+                  messageString: _messageController.text,
+                  backgroundColor: _selectedColor,
+                ),
+                complexMessage: null,
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
               );
@@ -420,9 +424,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 }
                 final recent = Recent.withoutContactObject(
                   category: RecentCategory.outgoingUnanswered,
-                  message: Message(
-                      message: _messageController.text,
-                      backgroundColor: _selectedColor),
+                  regularMessage: RegularMessage(
+                    messageString: _messageController.text,
+                    backgroundColor: _selectedColor,
+                  ),
+                  complexMessage: null,
                   id: _recentId,
                   phoneNumber: widget.calleePhoneNumber,
                 );
@@ -489,6 +495,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           GestureDetector(
             onTap: () async {
               FocusManager.instance.primaryFocus?.unfocus();
+              print(
+                  'should discard ${_showDiscardDialog(messageWriterContent)}');
               if (_showDiscardDialog(messageWriterContent)) {
                 final bool? toDiscard = await showAdaptiveDialog(
                   context: context,

@@ -6,7 +6,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:text_call/models/message.dart';
+import 'package:text_call/models/complex_message.dart';
+import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 
 import 'package:text_call/screens/sent_message_screen.dart';
@@ -95,25 +96,18 @@ Future<void> messageHandler(RemoteMessage message) async {
     return;
   }
 
-  final String callMessage = message.data['message'];
+  final String messageJsonString = message.data['message'];
   final String callerPhoneNumber = message.data['caller_phone_number'];
-  final Map<String, int> backgroundColorMap = {
-    'red': int.parse(message.data['red']),
-    'blue': int.parse(message.data['blue']),
-    'green': int.parse(message.data['green']),
-    'alpha': int.parse(message.data['alpha']),
-  };
   final String recentId = message.data['message_id'];
+  final String messageType = message.data['my_message_type'];
   final String callerName = await _getCallerName(callerPhoneNumber);
 
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('callMessage', callMessage);
+  await prefs.setString('messageJsonString', messageJsonString);
   await prefs.setString('callerPhoneNumber', callerPhoneNumber);
   await prefs.setString('recentId', recentId);
-  await prefs.setString(
-    'backgroundColor',
-    json.encode(backgroundColorMap),
-  );
+  await prefs.setString('messageType', messageType);
+
   createAwesomeNotification(
     title: '$callerName is calling',
     body: 'Might be urgent. Schrödinger\'s message',
@@ -170,10 +164,10 @@ class NotificationController {
       final prefs = await SharedPreferences.getInstance();
       // we are reloading because some things might have been changed in the background
       await prefs.reload();
-      final String? callMessage = prefs.getString('callMessage');
-      final String? backgroundColor = prefs.getString('backgroundColor');
+      final String? messageJsonString = prefs.getString('messageJsonString');
       final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
       final String? recentId = prefs.getString('recentId');
+      final String? messageType = prefs.getString('messageType');
 
       final url = Uri.https(
           'text-call-backend.onrender.com', 'call/rejected/$callerPhoneNumber');
@@ -181,28 +175,18 @@ class NotificationController {
 
       final db = await getDatabase();
       final newRecent = Recent.withoutContactObject(
-          category: RecentCategory.incomingRejected,
-          message: Message(
-            message: callMessage!,
-            backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
-          ),
-          id: recentId!,
-          phoneNumber: callerPhoneNumber!);
-
-      db.insert(
-        'recents',
-        {
-          'id': newRecent.id,
-          'backgroundColorAlpha': newRecent.message.backgroundColor.alpha,
-          'backgroundColorRed': newRecent.message.backgroundColor.red,
-          'backgroundColorGreen': newRecent.message.backgroundColor.green,
-          'backgroundColorBlue': newRecent.message.backgroundColor.blue,
-          'message': newRecent.message.message,
-          'callTime': newRecent.callTime.toString(),
-          'phoneNumber': newRecent.contact.phoneNumber,
-          'categoryName': newRecent.category.name,
-        },
+        category: RecentCategory.incomingRejected,
+        regularMessage: messageType == 'regular'
+            ? RegularMessage.fromJsonString(messageJsonString!)
+            : null,
+        complexMessage: messageType == 'complex'
+            ? ComplexMessage(complexMessageJsonString: messageJsonString!)
+            : null,
+        id: recentId!,
+        phoneNumber: callerPhoneNumber!,
       );
+
+      addRecentToDb(newRecent, db);
     } else if (receivedAction.buttonKeyPressed == 'ACCEPT_CALL') {
       final prefs = await SharedPreferences.getInstance();
       await prefs.reload();
@@ -220,9 +204,10 @@ class NotificationController {
       }
       final String? callMessage = prefs.getString('callMessage');
       final String? backgroundColor = prefs.getString('backgroundColor');
-      final Message message = Message(
-        message: callMessage!,
-        backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
+      final RegularMessage message = RegularMessage(
+        messageString: callMessage!,
+        backgroundColor:
+            deJsonifyColorMapToColor(json.decode(backgroundColor!)),
       );
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
@@ -264,8 +249,8 @@ class NotificationController {
                   ? HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess
                   : HowSmsIsOpened
                       .notFromTerminatedToShowMessageAfterAccessRequestGranted,
-              message: Message(
-                message: data[0]['message'] as String,
+              message: RegularMessage(
+                messageString: data[0]['message'] as String,
                 backgroundColor: Color.fromARGB(
                   data[0]['backgroundColorAlpha'] as int,
                   data[0]['backgroundColorRed'] as int,

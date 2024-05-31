@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/contact.dart';
-import 'package:text_call/models/message.dart';
+import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/utils/utils.dart';
 
@@ -48,15 +48,15 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
         .map(
           (row) async => Recent(
             id: row['id'] as String,
-            message: Message(
-              message: row['message'] as String,
-              backgroundColor: Color.fromARGB(
-                row['backgroundColorAlpha'] as int,
-                row['backgroundColorRed'] as int,
-                row['backgroundColorGreen'] as int,
-                row['backgroundColorBlue'] as int,
-              ),
-            ),
+            regularMessage: row['messageType'] == 'regular'
+                ? RegularMessage.fromJsonString(
+                    row['messageJson'] as String,
+                  )
+                : null,
+            complexMessage: row['messageType'] == 'complex'
+                ? ComplexMessage(
+                    complexMessageJsonString: row['messageJson'] as String)
+                : null,
             contact: (await getContactAndExistsStatus(
                 db: db, phoneNumber: row['phoneNumber'] as String))[0],
             category: _getCategoryEnumFromText(
@@ -84,7 +84,8 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
               imagePath: newContact.imagePath,
             ),
             category: recent.category,
-            message: recent.message,
+            complexMessage: recent.complexMessage,
+            regularMessage: recent.regularMessage,
             id: recent.id,
           );
         }
@@ -97,20 +98,7 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
 
   void addRecent(Recent newRecent) async {
     final db = await getDatabase();
-    db.insert(
-      'recents',
-      {
-        'id': newRecent.id,
-        'backgroundColorAlpha': newRecent.message.backgroundColor.alpha,
-        'backgroundColorRed': newRecent.message.backgroundColor.red,
-        'backgroundColorGreen': newRecent.message.backgroundColor.green,
-        'backgroundColorBlue': newRecent.message.backgroundColor.blue,
-        'message': newRecent.message.message,
-        'callTime': newRecent.callTime.toString(),
-        'phoneNumber': newRecent.contact.phoneNumber,
-        'categoryName': newRecent.category.name,
-      },
-    );
+    addRecentToDb(newRecent, db);
 
     final contactAndContactExistsStatus = await getContactAndExistsStatus(
         db: db, phoneNumber: newRecent.contact.phoneNumber);

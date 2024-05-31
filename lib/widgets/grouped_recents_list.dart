@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
-import 'package:text_call/models/message.dart';
+import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/utils/utils.dart';
@@ -47,7 +47,7 @@ class _GroupedRecentsListState extends State<GroupedRecentsList> {
     });
   }
 
-  void _goToSentMessageScreen(Message message) {
+  void _goToSentMessageScreen(RegularMessage message) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => SentMessageScreen(
         howSmsIsOpened: HowSmsIsOpened
@@ -98,7 +98,7 @@ class _GroupedRecentsListState extends State<GroupedRecentsList> {
                   recentN.category != RecentCategory.incomingRejected
                       ? ElevatedButton(
                           onPressed: () {
-                            _goToSentMessageScreen(recentN.message);
+                            _goToSentMessageScreen(recentN.regularMessage!);
                           },
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(

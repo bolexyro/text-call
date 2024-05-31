@@ -171,7 +171,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
             builder: (context) => SentMessageScreen(
               howSmsIsOpened: HowSmsIsOpened
                   .notFromTerminatedToShowMessageAfterAccessRequestGranted,
-              message: selectedRecent.message,
+              message: selectedRecent.regularMessage,
             ),
           ),
         );

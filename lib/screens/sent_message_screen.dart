@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:text_call/screens/sent_message_screens/sms_from_terminated.dart';
 import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
-import 'package:text_call/models/message.dart';
+import 'package:text_call/models/regular_message.dart';
 
 // sms = sent message screen
 enum HowSmsIsOpened {
@@ -453,7 +453,7 @@ class SentMessageScreen extends StatelessWidget {
   });
 
   // this message should not be null if howsmsisopened == notfromterminatedtoshow message
-  final Message? message;
+  final RegularMessage? message;
   final HowSmsIsOpened howSmsIsOpened;
   @override
   Widget build(BuildContext context) {
@@ -471,14 +471,13 @@ class SentMessageScreen extends StatelessWidget {
   }
 }
 
-
 class MyAnimatedTextWidget extends StatelessWidget {
   const MyAnimatedTextWidget({
     super.key,
     required this.message,
   });
 
-  final Message message;
+  final RegularMessage message;
 
   @override
   Widget build(BuildContext context) {
@@ -487,7 +486,7 @@ class MyAnimatedTextWidget extends StatelessWidget {
         displayFullTextOnTap: true,
         animatedTexts: [
           TyperAnimatedText(
-            message.message,
+            message.messageString,
             textAlign: TextAlign.center,
             textStyle: TextStyle(
               fontWeight: FontWeight.bold,
@@ -523,4 +522,3 @@ class ScaffoldTitle extends StatelessWidget {
     );
   }
 }
-

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/contact.dart';
-import 'package:text_call/models/message.dart';
+import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/utils/constants.dart';
 
 enum RecentCategory {
@@ -35,10 +36,8 @@ Map<RecentCategory, Widget> recentCategoryIconMap = {
     height: kIconHeight,
     colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
   ),
-
   RecentCategory.incomingMissed:
       const Icon(Icons.phone_missed, color: Colors.blue),
-
   RecentCategory.incomingRejected: SvgPicture.asset(
     'assets/icons/incoming-call.svg',
     height: kIconHeight,
@@ -59,11 +58,13 @@ class Recent {
   Recent({
     required this.contact,
     required this.category,
-    required this.message,
+    required this.regularMessage,
+    required this.complexMessage,
     DateTime? callTime,
     this.recentIsAContact = false,
     required this.id,
-  }) : callTime = callTime ?? DateTime.now();
+  })  : callTime = callTime ?? DateTime.now()
+       ;
 
   Recent.fromRecent({
     required Recent recent,
@@ -76,12 +77,14 @@ class Recent {
             imagePath: null),
         category = recent.category,
         callTime = recent.callTime,
-        message = recent.message,
+        regularMessage = recent.regularMessage,
+        complexMessage = recent.complexMessage,
         id = recent.id;
 
   Recent.withoutContactObject({
     required this.category,
-    required this.message,
+    required this.regularMessage,
+    required this.complexMessage,
     required this.id,
     DateTime? callTime,
     required String phoneNumber,
@@ -91,14 +94,17 @@ class Recent {
           name: 'name',
           phoneNumber: phoneNumber,
           imagePath: null,
-        );
+        )
+       ;
 
   final Contact contact;
   final RecentCategory category;
   final DateTime callTime;
-  final Message message;
-  final bool recentIsAContact;
   // this id would be the same on the caller and callee's phones. It is used to identify the recent message
   // we are requesting access for
   final String id;
+  final bool recentIsAContact;
+
+  final RegularMessage? regularMessage;
+  final ComplexMessage? complexMessage;
 }

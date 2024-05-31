@@ -1,10 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:text_call/models/message.dart';
+import 'package:text_call/models/complex_message.dart';
+import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/floating_buttons_visible_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
@@ -20,11 +19,12 @@ class SmsNotFromTerminated extends ConsumerWidget {
   });
 
   // this message should not be null if howsmsisopened == notfromterminatedtoshow message
-  final Message? message;
+  final RegularMessage? message;
   final HowSmsIsOpened howSmsIsOpened;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    print('regular message is ${message?.toJsonString}');
     return SafeArea(
       child: widgetToRenderBasedOnHowAppIsOpened(
         message: message,
@@ -43,7 +43,7 @@ class TheStackWidget extends ConsumerStatefulWidget {
     required this.howSmsIsOpened,
   });
 
-  final Message message;
+  final RegularMessage message;
   final HowSmsIsOpened howSmsIsOpened;
 
   @override
@@ -150,7 +150,7 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
 
 Widget widgetToRenderBasedOnHowAppIsOpened(
     {required HowSmsIsOpened howSmsIsOpened,
-    required Message? message,
+    required RegularMessage? message,
     required WidgetRef ref,
     required BuildContext context}) {
   // if (howSmsIsOpened ==
@@ -164,20 +164,22 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
     prefsFuture.then((prefs) {
       prefs.reload();
 
-      final String? callMessage = prefs.getString('callMessage');
-      final String? backgroundColor = prefs.getString('backgroundColor');
+      final String? messageJsonString = prefs.getString('messageJsonString');
       final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
       final String? recentId = prefs.getString('recentId');
+      final String? messageType = prefs.getString('messageType');
 
       final newRecent = Recent.withoutContactObject(
-          category: RecentCategory.incomingAccepted,
-          message: Message(
-            message: callMessage!,
-            backgroundColor: deJsonifyColor(json.decode(backgroundColor!)),
-          ),
-          id: recentId!,
-          phoneNumber: callerPhoneNumber!);
-
+        category: RecentCategory.incomingAccepted,
+        regularMessage: messageType == 'regular'
+            ? RegularMessage.fromJsonString(messageJsonString!)
+            : null,
+        complexMessage: messageType == 'complex'
+            ? ComplexMessage(complexMessageJsonString: messageJsonString!)
+            : null,
+        id: recentId!,
+        phoneNumber: callerPhoneNumber!,
+      );
       ref.read(recentsProvider.notifier).addRecent(newRecent);
     });
   }
@@ -203,4 +205,3 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
   );
   // }
 }
-

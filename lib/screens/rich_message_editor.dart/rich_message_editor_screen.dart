@@ -60,8 +60,8 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
         final mapMedia = indexMainMediaMapPair.value;
         if (mapMedia.keys.first == 'document') {
           _addTextEditor(
-            initialBgColor:
-                deJsonifyColor(mapMedia['document']['backgroundColor']),
+            initialBgColor: deJsonifyColorMapToColor(
+                mapMedia['document']['backgroundColor']),
             withoutSetState: true,
             contollerParam: QuillController(
               document: Document.fromJson(

@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqlite_api.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/contacts_provider.dart';
@@ -138,7 +139,7 @@ Future<sql.Database> getDatabase() async {
       await db.execute(
           'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT, imagePath TEXT)');
       await db.execute(
-          'CREATE TABLE recents ( id TEXT , callTime TEXT PRIMARY KEY , phoneNumber TEXT, categoryName TEXT, message TEXT, backgroundColorRed INTEGER, backgroundColorGreen INTEGER, backgroundColorBlue INTEGER, backgroundColorAlpha INTEGER)');
+          'CREATE TABLE recents ( id TEXT , callTime TEXT PRIMARY KEY , phoneNumber TEXT, categoryName TEXT, messageJson TEXT, messageType TEXT)');
     },
   );
   return db;
@@ -227,7 +228,7 @@ Future<bool> checkIfNumberExists(String phoneNumber) async {
   return document.exists;
 }
 
-Color deJsonifyColor(Map<String, dynamic> colorMap) {
+Color deJsonifyColorMapToColor(Map<String, dynamic> colorMap) {
   return Color.fromARGB(
     colorMap['alpha']!,
     colorMap['red']!,
@@ -236,7 +237,7 @@ Color deJsonifyColor(Map<String, dynamic> colorMap) {
   );
 }
 
-Map<String, int> jsonifyColor(Color color) {
+Map<String, dynamic> jsonifyColor(Color color) {
   return {
     'red': color.red,
     'blue': color.blue,
@@ -464,4 +465,21 @@ Future<void> deleteDirectory(String dirPath) async {
   } catch (e) {
     print('Error bro $e');
   }
+}
+
+void addRecentToDb(Recent newRecent, Database db) {
+  print(newRecent.regularMessage!.backgroundColor);
+  db.insert(
+    'recents',
+    {
+      'id': newRecent.id,
+      'messageJson': newRecent.regularMessage == null
+          ? newRecent.complexMessage!.complexMessageJsonString
+          : newRecent.regularMessage!.toJsonString,
+      'callTime': newRecent.callTime.toString(),
+      'phoneNumber': newRecent.contact.phoneNumber,
+      'categoryName': newRecent.category.name,
+      'messageType': newRecent.regularMessage == null ? 'complex' : 'regular',
+    },
+  );
 }

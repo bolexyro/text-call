@@ -14,7 +14,7 @@ class ContactDetailsScreen extends StatelessWidget {
   final Contact? selectedContact;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {    
     const stackPadding = EdgeInsets.symmetric(horizontal: 10);
 
     return SafeArea(

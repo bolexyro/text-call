@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:text_call/models/contact.dart';
-import 'package:text_call/models/message.dart';
+import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
@@ -22,7 +22,7 @@ class ContactDetailsPane extends ConsumerWidget {
   final Recent? recent;
   final double stackContainerWidths;
 
-  void _goToSentMessageScreen(BuildContext context, Message message) {
+  void _goToSentMessageScreen(BuildContext context, RegularMessage message) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => SentMessageScreen(
         howSmsIsOpened: HowSmsIsOpened
@@ -76,7 +76,7 @@ class ContactDetailsPane extends ConsumerWidget {
           recent!.category != RecentCategory.incomingRejected
               ? ElevatedButton(
                   onPressed: () {
-                    _goToSentMessageScreen(context, recent!.message);
+                    _goToSentMessageScreen(context, recent!.regularMessage!);
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(

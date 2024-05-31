@@ -57,8 +57,9 @@ class PreviewScreen extends StatelessWidget {
                   children: [
                     if (indexMainMediaMapPair.value.keys.first == 'document')
                       DocDisplayer(
-                        backgroundColor: deJsonifyColor(indexMainMediaMapPair
-                            .value['document']['backgroundColor']),
+                        backgroundColor: deJsonifyColorMapToColor(
+                            indexMainMediaMapPair.value['document']
+                                ['backgroundColor']),
                         documentJson: indexMainMediaMapPair.value['document']
                             ['quillDocJson'],
                       ),

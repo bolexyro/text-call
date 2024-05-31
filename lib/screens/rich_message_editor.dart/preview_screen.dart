@@ -10,7 +10,7 @@ class PreviewScreen extends StatelessWidget {
     this.showPreviewText = true,
   });
 
-  final Map<int, Map<String, dynamic>> bolexyroJson;
+  final Map<String, dynamic> bolexyroJson;
   final bool forExtremePreview;
   final bool showPreviewText;
 

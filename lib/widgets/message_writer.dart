@@ -51,7 +51,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   ];
 
   late Widget messageWriterMessageBox;
-  Map<int, Map<String, dynamic>>? upToDateBolexyroJson;
+  Map<String, dynamic>? upToDateBolexyroJson;
 
   @override
   void initState() {
@@ -86,9 +86,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     _channel = WebSocketChannel.connect(
       Uri.parse('wss://text-call-backend.onrender.com/ws/$callerPhoneNumber'),
     );
-    // setState(() {
-    //   _callSending = true;
-    // });
+    setState(() {
+      _callSending = true;
+    });
 
     // the delay before we assume call was not picked
     _animationDelay = Future.delayed(
@@ -99,7 +99,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     // make sure to remove this line oo. it is only important for debugging purposes
     prefs.setString('recentId', _recentId);
 
-//  final xyz = jsonEncode(_convertKeysToStrings(upToDateBolexyroJson!));
+    // final xyz = jsonEncode(upToDateBolexyroJson!);
+    // print(xyz);
 
     _channel!.sink.add(
       json.encode(
@@ -108,7 +109,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           'callee_phone_number': widget.calleePhoneNumber,
           'message_json_string':
               messageWriterMessageBox.runtimeType == FileUiPlaceHolder
-                  ? jsonEncode(_convertKeysToStrings(upToDateBolexyroJson!))
+                  ? jsonEncode(upToDateBolexyroJson!)
                   : RegularMessage(
                       messageString: _messageController.text,
                       backgroundColor: _selectedColor,
@@ -121,14 +122,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         },
       ),
     );
-  }
-
-  // Function to convert a map with integer keys to a map with string keys
-  Map<String, dynamic> _convertKeysToStrings(
-      Map<int, Map<String, dynamic>> originalMap) {
-    return originalMap.map((key, value) {
-      return MapEntry(key.toString(), value);
-    });
   }
 
   void _showColorPicker() async {
@@ -149,8 +142,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     });
   }
 
-  void _updateMyOwnDocumentJson(
-      Map<int, Map<String, dynamic>> newBolexyroJson) {
+  void _updateMyOwnDocumentJson(Map<String, dynamic> newBolexyroJson) {
     upToDateBolexyroJson = newBolexyroJson;
     setState(() {
       messageWriterMessageBox = FileUiPlaceHolder(
@@ -233,8 +225,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     onPressed: () async {
                       FocusManager.instance.primaryFocus?.unfocus();
 
-                      final Map<int, Map<String, dynamic>>?
-                          myOwnCustomDocumemntJson =
+                      final Map<String, dynamic>? myOwnCustomDocumemntJson =
                           await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => const RichMessageEditorScreen(),
@@ -603,9 +594,9 @@ class FileUiPlaceHolder extends StatelessWidget {
     required this.onDelete,
     required this.onBolexroJsonUpdated,
   });
-  final Map<int, Map<String, dynamic>> bolexyroJson;
+  final Map<String, dynamic> bolexyroJson;
   final void Function() onDelete;
-  final void Function(Map<int, Map<String, dynamic>> newBolexyroJson)
+  final void Function(Map<String, dynamic> newBolexyroJson)
       onBolexroJsonUpdated;
 
   @override
@@ -656,7 +647,7 @@ class FileUiPlaceHolder extends StatelessWidget {
                 children: [
                   IconButton(
                     onPressed: () async {
-                      final Map<int, Map<String, dynamic>>? newBolexyroJson =
+                      final Map<String, dynamic>? newBolexyroJson =
                           await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => RichMessageEditorScreen(

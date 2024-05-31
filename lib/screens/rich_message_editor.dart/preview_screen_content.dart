@@ -13,7 +13,7 @@ class PreviewScreenContent extends StatelessWidget {
     required this.bolexyroJson,
   });
 
-  final Map<int, Map<String, dynamic>> bolexyroJson;
+  final Map<String, dynamic> bolexyroJson;
 
   @override
   Widget build(BuildContext context) {

@@ -22,7 +22,7 @@ class RichMessageEditorScreen extends StatefulWidget {
     super.key,
     this.bolexyroJson,
   });
-  final Map<int, Map<String, dynamic>>? bolexyroJson;
+  final Map<String, dynamic>? bolexyroJson;
 
   @override
   State<RichMessageEditorScreen> createState() =>
@@ -121,8 +121,8 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     });
   }
 
-  Map<int, Map<String, dynamic>> _createMyOwnCustomDocumentJson() {
-    final Map<int, Map<String, dynamic>> bolexyroJson = {};
+   Map<String, dynamic> _createMyOwnCustomDocumentJson() {
+    final  Map<String, dynamic> bolexyroJson = {};
     int index = 0;
     for (final kvPair in _displayedWidgetsMap.entries) {
       if (kvPair.value.runtimeType == MyQuillEditor &&
@@ -131,7 +131,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
               '\n') {
         final bgColor =
             _quillEditorBackgroundColorMap[kvPair.key] ?? Colors.white;
-        bolexyroJson[index] = {
+        bolexyroJson[index.toString()] = {
           'document': {
             'backgroundColor': {
               'alpha': bgColor.alpha,
@@ -147,15 +147,15 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
       }
       if (kvPair.value.runtimeType == AudioRecorderCard &&
           _audioPathsMap[kvPair.key] != null) {
-        bolexyroJson[index] = {'audio': _audioPathsMap[kvPair.key]!};
+        bolexyroJson[index.toString()] = {'audio': _audioPathsMap[kvPair.key]!};
       }
 
       if (kvPair.value.runtimeType == MyVideoPlayer) {
-        bolexyroJson[index] = {'video': _videoPathsMap[kvPair.key]!};
+        bolexyroJson[index.toString()] = {'video': _videoPathsMap[kvPair.key]!};
       }
 
       if (kvPair.value.runtimeType == ImageDisplayer) {
-        bolexyroJson[index] = {'image': _imagePathsMap[kvPair.key]!};
+        bolexyroJson[index.toString()] = {'image': _imagePathsMap[kvPair.key]!};
       }
       index++;
     }

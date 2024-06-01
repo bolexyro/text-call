@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:text_call/utils/constants.dart';
 import 'package:video_player/video_player.dart';
 
 class MyVideoPlayer extends StatefulWidget {
-  // if not for preview, keyInMp and onDelete should be non null
   const MyVideoPlayer({
     super.key,
     required this.videoPath,
@@ -26,7 +26,6 @@ class MyVideoPlayer extends StatefulWidget {
 
 class _MyVideoPlayerState extends State<MyVideoPlayer> {
   late VideoPlayerController _controller;
-  late Duration _videoDuration;
 
   @override
   void initState() {
@@ -39,9 +38,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                 VideoPlayerOptions(allowBackgroundPlayback: true),
           )
       ..initialize().then((_) {
-        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() {});
-        _videoDuration = _controller.value.duration;
       })
       ..setLooping(false);
     _controller.addListener(_checkVideoCompletion);
@@ -51,7 +48,6 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
     if (_controller.value.position == _controller.value.duration) {
       setState(() {
         _controller.seekTo(Duration.zero);
-        _videoDuration = Duration.zero;
       });
     }
   }
@@ -79,93 +75,241 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
     }
   }
 
-  final videoIsDone = false;
+  void _goFullScreen() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => FullScreenVideoPlayer(
+          videoPath: widget.videoPath,
+          videoController: _controller,
+          formatDuration: _formatDuration,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return _controller.value.isInitialized
-        ? Stack(
-            clipBehavior: Clip.none,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _controller.value.isPlaying
-                        ? _controller.pause()
-                        : _controller.play();
-                  });
-                },
-                child: Padding(
+        ? SizedBox(
+            height: 400,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Padding(
                   padding: const EdgeInsets.only(bottom: 10.0),
                   child: Container(
+                    width: double.infinity,
                     decoration: BoxDecoration(
+                      color: Colors.black,
                       border: Border.all(width: 2),
                     ),
                     child: AspectRatio(
                       aspectRatio: _controller.value.aspectRatio,
-                      child: VideoPlayer(_controller),
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: SizedBox(
+                          width: _controller.value.size.width,
+                          height: _controller.value.size.height,
+                          child: Hero(
+                            tag: widget.videoPath,
+                            child: GestureDetector(
+                              onDoubleTap: _goFullScreen,
+                              onTap: () {
+                                setState(() {
+                                  _controller.value.isPlaying
+                                      ? _controller.pause()
+                                      : _controller.play();
+                                });
+                              },
+                              child: VideoPlayer(_controller),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
+                  ),
+                ),
+                if (!widget.forPreview)
+                  Positioned(
+                    right: -10,
+                    top: -10,
+                    child: GestureDetector(
+                      onTap: () => widget.onDelete!(widget.keyInMap!),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                        child: SvgPicture.asset(
+                          'assets/icons/delete.svg',
+                          colorFilter: const ColorFilter.mode(
+                            Color.fromARGB(255, 255, 57, 43),
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  left: 5,
+                  top: 5,
+                  child: VideoStatusDisplay(
+                    controller: _controller,
+                    formatDuration: _formatDuration,
+                  ),
+                ),
+                Positioned(
+                  right: 10,
+                  bottom: 20,
+                  child: GestureDetector(
+                    onTap: _goFullScreen,
+                    child: SvgPicture.asset(
+                      'assets/icons/full-screen.svg',
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
+                      height: kIconHeight,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        : const SizedBox(
+            height: 400,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+  }
+}
+
+class FullScreenVideoPlayer extends StatefulWidget {
+  const FullScreenVideoPlayer({
+    super.key,
+    required this.videoPath,
+    required this.videoController,
+    required this.formatDuration,
+  });
+
+  final String videoPath;
+  final VideoPlayerController videoController;
+  final String Function(Duration duration) formatDuration;
+
+  @override
+  State<FullScreenVideoPlayer> createState() => _FullScreenVideoPlayerState();
+}
+
+class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
+  @override
+  void initState() {
+    super.initState();
+    widget.videoController.addListener(_checkVideoCompletion);
+  }
+
+  void _checkVideoCompletion() {
+    if (widget.videoController.value.position ==
+        widget.videoController.value.duration) {
+      setState(() {
+        widget.videoController.seekTo(Duration.zero);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.videoController.removeListener(_checkVideoCompletion);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Center(
+          child: Stack(
+            children: [
+              Hero(
+                tag: widget.videoPath,
+                child: AspectRatio(
+                  aspectRatio: widget.videoController.value.aspectRatio,
+                  child: GestureDetector(
+                    onDoubleTap: () => Navigator.of(context).pop(),
+                    onTap: () {
+                      setState(() {
+                        widget.videoController.value.isPlaying
+                            ? widget.videoController.pause()
+                            : widget.videoController.play();
+                      });
+                    },
+                    child: VideoPlayer(widget.videoController),
                   ),
                 ),
               ),
-              if (!widget.forPreview)
-                Positioned(
-                  right: -10,
-                  top: -10,
-                  child: GestureDetector(
-                    onTap: () => widget.onDelete!(widget.keyInMap!),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                      ),
-                      child: SvgPicture.asset(
-                        'assets/icons/delete.svg',
-                        colorFilter: const ColorFilter.mode(
-                          Color.fromARGB(255, 255, 57, 43),
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               Positioned(
                 left: 5,
                 top: 5,
-                child: Container(
-                  decoration: const ShapeDecoration(
-                    shape: StadiumBorder(),
-                    color: Colors.black54,
-                  ),
-                  padding: const EdgeInsets.fromLTRB(5, 0, 8, 0),
-                  child: !_controller.value.isPlaying
-                      ? Row(
-                          children: [
-                            const Icon(Icons.play_arrow),
-                            Text(
-                              _formatDuration(_videoDuration),
-                            ),
-                          ],
-                        )
-                      : ValueListenableBuilder(
-                          valueListenable: _controller,
-                          builder: (BuildContext context,
-                              VideoPlayerValue value, Widget? child) {
-                            return Row(
-                              children: [
-                                const Icon(Icons.pause),
-                                Text(
-                                  _formatDuration(value.position),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
+                child: VideoStatusDisplay(
+                  controller: widget.videoController,
+                  formatDuration: widget.formatDuration,
                 ),
-              )
+              ),
             ],
-          )
-        : Container();
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class VideoStatusDisplay extends StatelessWidget {
+  const VideoStatusDisplay({
+    super.key,
+    required this.controller,
+    required this.formatDuration,
+  });
+
+  final VideoPlayerController controller;
+  final String Function(Duration duration) formatDuration;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const ShapeDecoration(
+        shape: StadiumBorder(),
+        color: Colors.white54,
+      ),
+      padding: const EdgeInsets.fromLTRB(5, 0, 8, 0),
+      child: !controller.value.isPlaying
+          ? Row(
+              children: [
+                const Icon(Icons.play_arrow),
+                Text(
+                  formatDuration(
+                    controller.value.position == Duration.zero
+                        ? controller.value.duration
+                        : controller.value.position,
+                  ),
+                ),
+              ],
+            )
+          : ValueListenableBuilder(
+              valueListenable: controller,
+              builder: (BuildContext context, VideoPlayerValue value,
+                  Widget? child) {
+                return Row(
+                  children: [
+                    const Icon(Icons.pause),
+                    Text(
+                      formatDuration(value.position),
+                    ),
+                  ],
+                );
+              },
+            ),
+    );
   }
 }

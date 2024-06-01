@@ -523,7 +523,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
                     controller: _scrollController,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 10),
+                          horizontal: 10.0, vertical: 10),
                       child: Column(
                         children: _displayedWidgetsMap.values.toList(),
                       ),

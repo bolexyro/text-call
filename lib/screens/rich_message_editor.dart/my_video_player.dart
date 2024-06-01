@@ -134,7 +134,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                     right: -10,
                     top: -10,
                     child: GestureDetector(
-                      onTap: () => widget.onDelete!(widget.keyInMap!),
+                      onTap: () => widget.onDelete!(widget.keyInMap!,),
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(

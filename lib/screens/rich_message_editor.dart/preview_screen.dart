@@ -16,7 +16,6 @@ class PreviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(bolexyroJson);
     return Scaffold(
       // backgroundColor: Colors.white,
       appBar: AppBar(
@@ -26,7 +25,11 @@ class PreviewScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new),
         ),
         actions: [
-          Switch(value: true, onChanged: (f) {}),
+          // Switch(value: true, onChanged: (f) {}),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.download),
+          ),
           if (!forExtremePreview)
             IconButton(
               onPressed: () {

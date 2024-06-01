@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:text_call/utils/constants.dart';
@@ -45,8 +46,14 @@ class ImageDisplayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageWidget = networkImage
-        ? Image.network(
-            imagePath,
+        ? CachedNetworkImage(
+            imageUrl: imagePath,
+            progressIndicatorBuilder: (context, url, downloadProgress) =>
+                Center(
+              child:
+                  CircularProgressIndicator(value: downloadProgress.progress),
+            ),
+            errorWidget: (context, url, error) => const Icon(Icons.error),
             fit: BoxFit.contain,
           )
         : Image.file(
@@ -60,19 +67,22 @@ class ImageDisplayer extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 10.0),
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                border: Border.all(width: 2),
-              ),
-              child: GestureDetector(
-                onDoubleTap: () {
-                  _goFullScreen(context, imageWidget);
-                },
-                child: Hero(
-                  tag: imagePath,
-                  child: imageWidget,
+            child: Center(
+              child: Container(
+                height: double.infinity,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  border: Border.all(width: 2),
+                ),
+                child: GestureDetector(
+                  onDoubleTap: () {
+                    _goFullScreen(context, imageWidget);
+                  },
+                  child: Hero(
+                    tag: imagePath,
+                    child: imageWidget,
+                  ),
                 ),
               ),
             ),

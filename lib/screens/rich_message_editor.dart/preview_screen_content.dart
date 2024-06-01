@@ -49,9 +49,6 @@ class PreviewScreenContent extends StatelessWidget {
                       forPreview: true,
                       networkImage: networkContent,
                     ),
-                  const SizedBox(
-                    height: 10,
-                  ),
                 ],
               )
           ],

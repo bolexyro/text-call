@@ -70,6 +70,7 @@ dependencies:
   gap: ^3.0.1
   video_player: ^2.8.6
   collection: ^1.18.0
+  firebase_storage: ^11.7.7
 
 dev_dependencies:
   flutter_test:

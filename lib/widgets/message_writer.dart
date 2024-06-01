@@ -1,13 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
+import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
@@ -19,6 +22,7 @@ import 'package:text_call/widgets/dialogs/choose_color_dialog.dart';
 import 'package:text_call/widgets/dialogs/confirm_dialog.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:path/path.dart' as path;
 
 class MessageWriter extends ConsumerStatefulWidget {
   const MessageWriter({
@@ -42,6 +46,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   late Future _animationDelay;
   WebSocketChannel? _channel;
   bool _callSending = false;
+  bool _filesUploading = false;
   Color _selectedColor = const Color.fromARGB(255, 13, 214, 214);
   final _colorizeColors = [
     Colors.purple,
@@ -86,9 +91,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     _channel = WebSocketChannel.connect(
       Uri.parse('wss://text-call-backend.onrender.com/ws/$callerPhoneNumber'),
     );
-    setState(() {
-      _callSending = true;
-    });
 
     // the delay before we assume call was not picked
     _animationDelay = Future.delayed(
@@ -100,6 +102,13 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
     // final xyz = jsonEncode(upToDateBolexyroJson!);
     // print(xyz);
+
+    if (messageWriterMessageBox.runtimeType == FileUiPlaceHolder) {
+      await _editBolexyroJsonToContainStorageUrls(upToDateBolexyroJson!);
+    }
+    setState(() {
+      _callSending = true;
+    });
 
     _channel!.sink.add(
       json.encode(
@@ -121,6 +130,59 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         },
       ),
     );
+  }
+
+  Future<Map<String, dynamic>> _editBolexyroJsonToContainStorageUrls(
+      Map<String, dynamic> upToDateBolexyroJson) async {
+    setState(() {
+      _filesUploading = true;
+    });
+    final storageRef = FirebaseStorage.instance.ref();
+    final imagesRef = storageRef.child('images');
+    final audioRef = storageRef.child('audio');
+    final videosRef = storageRef.child('videos');
+
+    for (final indexMainMediaMapPair in upToDateBolexyroJson.entries) {
+      final mapMedia = indexMainMediaMapPair.value as Map<String, dynamic>;
+      if (mapMedia.keys.first == 'image') {
+        final thisImageLocalPath = mapMedia.values.first;
+        final thisImageFile = File(thisImageLocalPath);
+        final thisImageRef = imagesRef
+            .child('${DateTime.now()}${path.basename(thisImageFile.path)}');
+        await thisImageRef.putFile(thisImageFile);
+
+        final thisImageUrl = await thisImageRef.getDownloadURL();
+        upToDateBolexyroJson[indexMainMediaMapPair.key]['image'] = thisImageUrl;
+      }
+
+      if (mapMedia.keys.first == 'video') {
+        final thisVideoLocalPath = mapMedia.values.first;
+        final thisVideoFile = File(thisVideoLocalPath);
+        final thisVideoRef = videosRef
+            .child('${DateTime.now()}${path.basename(thisVideoFile.path)}');
+        await thisVideoRef.putFile(thisVideoFile);
+
+        final thisVideoUrl = await thisVideoRef.getDownloadURL();
+        upToDateBolexyroJson[indexMainMediaMapPair.key]['video'] = thisVideoUrl;
+      }
+
+      if (mapMedia.keys.first == 'audio') {
+        final thisAudioLocalPath = mapMedia.values.first;
+        final thisAudioFile = File(thisAudioLocalPath);
+        final thisAudioRef = audioRef
+            .child('${DateTime.now()}${path.basename(thisAudioFile.path)}');
+        await thisAudioRef.putFile(thisAudioFile);
+
+        final thisAudioUrl = await thisAudioRef.getDownloadURL();
+        upToDateBolexyroJson[indexMainMediaMapPair.key]['audio'] = thisAudioUrl;
+      }
+    }
+    print('done and dusted');
+    print(upToDateBolexyroJson);
+    setState(() {
+      _filesUploading = false;
+    });
+    return upToDateBolexyroJson;
   }
 
   void _showColorPicker() async {
@@ -153,6 +215,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   }
 
   void _resetMessageWriterMessageBox() {
+    upToDateBolexyroJson = null;
     setState(() {
       messageWriterMessageBox = TextField(
         controller: _messageController,
@@ -325,11 +388,18 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               // create a recent in your table
               final recent = Recent.withoutContactObject(
                 category: RecentCategory.outgoingRejected,
-                regularMessage: RegularMessage(
-                  messageString: _messageController.text,
-                  backgroundColor: _selectedColor,
-                ),
-                complexMessage: null,
+                regularMessage: upToDateBolexyroJson == null
+                    ? RegularMessage(
+                        messageString: _messageController.text,
+                        backgroundColor: _selectedColor,
+                      )
+                    : null,
+                complexMessage: upToDateBolexyroJson == null
+                    ? null
+                    : ComplexMessage(
+                        complexMessageJsonString:
+                            jsonEncode(upToDateBolexyroJson),
+                      ),
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
                 callTime: DateTime.parse(_recentId),
@@ -362,13 +432,21 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               );
             }
             if (snapshotData['call_status'] == 'accepted') {
+              print(upToDateBolexyroJson);
               final recent = Recent.withoutContactObject(
                 category: RecentCategory.outgoingAccepted,
-                regularMessage: RegularMessage(
-                  messageString: _messageController.text,
-                  backgroundColor: _selectedColor,
-                ),
-                complexMessage: null,
+                regularMessage: upToDateBolexyroJson == null
+                    ? RegularMessage(
+                        messageString: _messageController.text,
+                        backgroundColor: _selectedColor,
+                      )
+                    : null,
+                complexMessage: upToDateBolexyroJson == null
+                    ? null
+                    : ComplexMessage(
+                        complexMessageJsonString:
+                            jsonEncode(upToDateBolexyroJson),
+                      ),
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
               );
@@ -435,11 +513,18 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 }
                 final recent = Recent.withoutContactObject(
                   category: RecentCategory.outgoingUnanswered,
-                  regularMessage: RegularMessage(
-                    messageString: _messageController.text,
-                    backgroundColor: _selectedColor,
-                  ),
-                  complexMessage: null,
+                  regularMessage: upToDateBolexyroJson == null
+                      ? RegularMessage(
+                          messageString: _messageController.text,
+                          backgroundColor: _selectedColor,
+                        )
+                      : null,
+                  complexMessage: upToDateBolexyroJson == null
+                      ? null
+                      : ComplexMessage(
+                          complexMessageJsonString:
+                              jsonEncode(upToDateBolexyroJson),
+                        ),
                   id: _recentId,
                   phoneNumber: widget.calleePhoneNumber,
                 );
@@ -475,114 +560,152 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       );
     }
     return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) async {
-        if (didPop) {
-          return;
-        }
-        if (_showDiscardDialog(messageWriterContent)) {
-          final bool? toDiscard = await showAdaptiveDialog(
-            context: context,
-            builder: (context) => const ConfirmDialog(
-              title: 'Discard changes',
-              subtitle:
-                  'Are you sure you want to discard your changes? This action cannot be undone.',
-              mainButtonText: 'Discard',
-            ),
-          );
-          if (toDiscard == true) {
-            Navigator.of(context).pop();
-            messageWriterDirectoryPath(specificDirectory: null).then(
-              (messageWriterDirectoryPath) =>
-                  deleteDirectory(messageWriterDirectoryPath),
-            );
+        canPop: false,
+        onPopInvoked: (didPop) async {
+          if (didPop) {
+            return;
           }
-        } else {
-          Navigator.of(context).pop();
-        }
-      },
-      child: Stack(
-        children: [
-          GestureDetector(
-            onTap: () async {
-              FocusManager.instance.primaryFocus?.unfocus();
-              print(
-                  'should discard ${_showDiscardDialog(messageWriterContent)}');
-              if (_showDiscardDialog(messageWriterContent)) {
-                final bool? toDiscard = await showAdaptiveDialog(
-                  context: context,
-                  builder: (context) => const ConfirmDialog(
-                    title: 'Discard changes',
-                    subtitle:
-                        'Are you sure you want to discard your changes? This action cannot be undone.',
-                    mainButtonText: 'Discard',
-                  ),
-                );
-
-                if (toDiscard == true) {
-                  Navigator.of(context).pop();
-                  messageWriterDirectoryPath(specificDirectory: null).then(
-                    (messageWriterDirectoryPath) =>
-                        deleteDirectory(messageWriterDirectoryPath),
+          if (_showDiscardDialog(messageWriterContent)) {
+            final bool? toDiscard = await showAdaptiveDialog(
+              context: context,
+              builder: (context) => const ConfirmDialog(
+                title: 'Discard changes',
+                subtitle:
+                    'Are you sure you want to discard your changes? This action cannot be undone.',
+                mainButtonText: 'Discard',
+              ),
+            );
+            if (toDiscard == true) {
+              Navigator.of(context).pop();
+              messageWriterDirectoryPath(specificDirectory: null).then(
+                (messageWriterDirectoryPath) =>
+                    deleteDirectory(messageWriterDirectoryPath),
+              );
+            }
+          } else {
+            Navigator.of(context).pop();
+          }
+        },
+        child: Stack(
+          children: [
+            GestureDetector(
+              onTap: () async {
+                FocusManager.instance.primaryFocus?.unfocus();
+                print(
+                    'should discard ${_showDiscardDialog(messageWriterContent)}');
+                if (_showDiscardDialog(messageWriterContent)) {
+                  final bool? toDiscard = await showAdaptiveDialog(
+                    context: context,
+                    builder: (context) => const ConfirmDialog(
+                      title: 'Discard changes',
+                      subtitle:
+                          'Are you sure you want to discard your changes? This action cannot be undone.',
+                      mainButtonText: 'Discard',
+                    ),
                   );
+
+                  if (toDiscard == true) {
+                    Navigator.of(context).pop();
+                    messageWriterDirectoryPath(specificDirectory: null).then(
+                      (messageWriterDirectoryPath) =>
+                          deleteDirectory(messageWriterDirectoryPath),
+                    );
+                  } else {
+                    Navigator.of(context).pop();
+                  }
+                } else {
+                  Navigator.of(context).pop();
                 }
-              } else {
-                Navigator.of(context).pop();
-              }
-            },
-            child: Container(
-              color: Colors.transparent,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
-                child: Container(
-                  decoration:
-                      BoxDecoration(color: Colors.white.withOpacity(0.0)),
+              },
+              child: Container(
+                color: Colors.transparent,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+                  child: Container(
+                    decoration:
+                        BoxDecoration(color: Colors.white.withOpacity(0.0)),
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: 0,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: MediaQuery.sizeOf(context).height * .6,
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? makeColorLighter(Theme.of(context).primaryColor, 15)
-                      : const Color.fromARGB(255, 207, 222, 234),
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(25),
+            Positioned(
+              bottom: 0,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.sizeOf(context).height * .6,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? makeColorLighter(Theme.of(context).primaryColor, 15)
+                        : const Color.fromARGB(255, 207, 222, 234),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(25),
+                    ),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.topCenter,
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.sizeOf(context).width,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(0, 0, 0,
+                              MediaQuery.viewInsetsOf(context).vertical),
+                          child: SingleChildScrollView(
+                              child: messageWriterContent),
+                        ),
+                      ),
+                      ConfettiWidget(
+                        confettiController: _confettiController,
+                        shouldLoop: true,
+                        blastDirectionality: BlastDirectionality.explosive,
+                        numberOfParticles: 30,
+                        emissionFrequency: 0.1,
+                      ),
+                    ],
                   ),
                 ),
-                child: Stack(
-                  alignment: Alignment.topCenter,
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.sizeOf(context).width,
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                            0, 0, 0, MediaQuery.viewInsetsOf(context).vertical),
-                        child:
-                            SingleChildScrollView(child: messageWriterContent),
+              ),
+            ),
+            if (_filesUploading)
+              Positioned(
+                bottom: 0,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.sizeOf(context).height * .6,
+                    minWidth: MediaQuery.sizeOf(context).width,
+                  ),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(25),
+                        ),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 20),
+                            Text(
+                              'Uploading files, please wait...',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium!
+                                  .copyWith(color: Colors.white),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    ConfettiWidget(
-                      confettiController: _confettiController,
-                      shouldLoop: true,
-                      blastDirectionality: BlastDirectionality.explosive,
-                      numberOfParticles: 30,
-                      emissionFrequency: 0.1,
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ));
   }
 }
 

@@ -7,16 +7,18 @@ class MyVideoPlayer extends StatefulWidget {
   // if not for preview, keyInMp and onDelete should be non null
   const MyVideoPlayer({
     super.key,
-    required this.videoFile,
+    required this.videoPath,
     this.keyInMap,
     this.onDelete,
     this.forPreview = false,
+    required this.networkVideo,
   });
 
-  final File videoFile;
+  final String videoPath;
   final int? keyInMap;
   final void Function(int key)? onDelete;
   final bool forPreview;
+  final bool networkVideo;
 
   @override
   State<MyVideoPlayer> createState() => _MyVideoPlayerState();
@@ -29,10 +31,13 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.file(
-      widget.videoFile,
-      videoPlayerOptions: VideoPlayerOptions(allowBackgroundPlayback: true),
-    )
+    _controller = widget.networkVideo
+        ? VideoPlayerController.networkUrl(Uri.parse(widget.videoPath))
+        : VideoPlayerController.file(
+            File(widget.videoPath),
+            videoPlayerOptions:
+                VideoPlayerOptions(allowBackgroundPlayback: true),
+          )
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() {});

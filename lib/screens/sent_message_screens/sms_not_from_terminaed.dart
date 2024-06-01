@@ -85,6 +85,7 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
             },
             child: widget.regularMessage == null
                 ? PreviewScreenContent(
+                    networkContent: true,
                     bolexyroJson: widget.complexMessage!.bolexyroJson,
                   )
                 : Center(

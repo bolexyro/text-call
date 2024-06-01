@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:text_call/screens/rich_message_editor.dart/doc_displayer.dart';
 import 'package:text_call/screens/rich_message_editor.dart/image_displayer.dart';
@@ -11,9 +9,11 @@ class PreviewScreenContent extends StatelessWidget {
   const PreviewScreenContent({
     super.key,
     required this.bolexyroJson,
+    required this.networkContent,
   });
 
   final Map<String, dynamic> bolexyroJson;
+  final bool networkContent;
 
   @override
   Widget build(BuildContext context) {
@@ -39,13 +39,15 @@ class PreviewScreenContent extends StatelessWidget {
                     ),
                   if (indexMainMediaMapPair.value.keys.first == 'video')
                     MyVideoPlayer(
-                      videoFile: File(indexMainMediaMapPair.value['video']),
+                      videoPath: indexMainMediaMapPair.value['video'],
                       forPreview: true,
+                      networkVideo: networkContent,
                     ),
                   if (indexMainMediaMapPair.value.keys.first == 'image')
                     ImageDisplayer(
-                      imageFile: File(indexMainMediaMapPair.value['image']),
+                      imagePath: indexMainMediaMapPair.value['image'],
                       forPreview: true,
+                      networkImage: networkContent,
                     ),
                   const SizedBox(
                     height: 10,

@@ -468,7 +468,6 @@ Future<void> deleteDirectory(String dirPath) async {
 }
 
 void addRecentToDb(Recent newRecent, Database db) {
-  print(newRecent.regularMessage!.backgroundColor);
   db.insert(
     'recents',
     {

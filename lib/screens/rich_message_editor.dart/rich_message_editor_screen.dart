@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -81,7 +80,8 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
             key: ValueKey(newIndex),
             keyInMap: newIndex,
             onDelete: _removeMediaWidget,
-            imageFile: File(mapMedia['image']),
+            imagePath: mapMedia['image'],
+            networkImage: false,
           );
         }
 
@@ -92,7 +92,8 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
             key: ValueKey(newIndex),
             keyInMap: newIndex,
             onDelete: _removeMediaWidget,
-            videoFile: File(mapMedia['video']),
+            videoPath: mapMedia['video'],
+            networkVideo: false,
           );
         }
 
@@ -121,8 +122,8 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     });
   }
 
-   Map<String, dynamic> _createMyOwnCustomDocumentJson() {
-    final  Map<String, dynamic> bolexyroJson = {};
+  Map<String, dynamic> _createMyOwnCustomDocumentJson() {
+    final Map<String, dynamic> bolexyroJson = {};
     int index = 0;
     for (final kvPair in _displayedWidgetsMap.entries) {
       if (kvPair.value.runtimeType == MyQuillEditor &&
@@ -256,7 +257,8 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
         key: ValueKey(newIndex),
         keyInMap: newIndex,
         onDelete: _removeMediaWidget,
-        imageFile: File(filePath),
+        imagePath: filePath,
+        networkImage: false,
       );
     });
 
@@ -330,7 +332,8 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
         key: ValueKey(newIndex),
         keyInMap: newIndex,
         onDelete: _removeMediaWidget,
-        videoFile: File(filePath),
+        videoPath: filePath,
+        networkVideo: false,
       );
     });
 

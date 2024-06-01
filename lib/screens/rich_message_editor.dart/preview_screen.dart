@@ -18,31 +18,32 @@ class PreviewScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     print(bolexyroJson);
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
       appBar: AppBar(
         title: showPreviewText ? const Text('PREVIEW') : null,
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back_ios_new),
         ),
-        actions: forExtremePreview
-            ? null
-            : [
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    if (bolexyroJson.isNotEmpty) {
-                      Navigator.of(context).pop(bolexyroJson);
-                    }
-                  },
-                  icon: SvgPicture.asset(
-                    'assets/icons/file-done.svg',
-                    height: 30,
-                  ),
-                ),
-              ],
+        actions: [
+          Switch(value: true, onChanged: (f) {}),
+          if (!forExtremePreview)
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (bolexyroJson.isNotEmpty) {
+                  Navigator.of(context).pop(bolexyroJson);
+                }
+              },
+              icon: SvgPicture.asset(
+                'assets/icons/file-done.svg',
+                height: 30,
+              ),
+            ),
+        ],
       ),
       body: PreviewScreenContent(
+        networkContent: false,
         bolexyroJson: bolexyroJson,
       ),
     );

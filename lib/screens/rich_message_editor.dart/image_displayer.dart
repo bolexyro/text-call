@@ -7,16 +7,18 @@ class ImageDisplayer extends StatelessWidget {
   // if not for preview, keyInMp and onDelete should be non null
   const ImageDisplayer({
     super.key,
-    required this.imageFile,
+    required this.imagePath,
     this.onDelete,
     this.keyInMap,
     this.forPreview = false,
+    required this.networkImage,
   });
 
-  final File imageFile;
+  final String imagePath;
   final int? keyInMap;
   final void Function(int key)? onDelete;
   final bool forPreview;
+  final bool networkImage;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +29,9 @@ class ImageDisplayer extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 10.0),
           child: Container(
             decoration: BoxDecoration(border: Border.all(width: 2)),
-            child: Image.file(imageFile),
+            child: networkImage
+                ? Image.network(imagePath)
+                : Image.file(File(imagePath)),
           ),
         ),
         if (!forPreview)

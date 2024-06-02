@@ -13,3 +13,5 @@ final kDarkTheme = ThemeData.from(
     brightness: Brightness.dark,
   ),
 );
+
+const double kSpaceBtwWidgetsInPreviewOrRichTextEditor = 10;

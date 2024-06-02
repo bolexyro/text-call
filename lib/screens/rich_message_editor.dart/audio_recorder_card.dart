@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:text_call/screens/rich_message_editor.dart/wave_bubble.dart';
+import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 
 class AudioRecorderCard extends StatefulWidget {
@@ -119,7 +120,8 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
+      padding: const EdgeInsets.only(
+          bottom: kSpaceBtwWidgetsInPreviewOrRichTextEditor),
       child: Stack(
         clipBehavior: Clip.none,
         children: [

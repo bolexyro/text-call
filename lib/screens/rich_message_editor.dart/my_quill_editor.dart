@@ -128,7 +128,7 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
           height: 5,
         ),
         Padding(
-          padding: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.only(bottom: kSpaceBtwWidgetsInPreviewOrRichTextEditor),
           child: Container(
             decoration: BoxDecoration(
               color: _backgroundColor,

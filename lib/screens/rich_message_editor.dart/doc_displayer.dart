@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:text_call/utils/constants.dart';
 
 class DocDisplayer extends StatelessWidget {
   const DocDisplayer({
@@ -21,6 +22,8 @@ class DocDisplayer extends StatelessWidget {
     );
 
     return Container(
+      margin: const EdgeInsets.only(
+          bottom: kSpaceBtwWidgetsInPreviewOrRichTextEditor),
       decoration: BoxDecoration(
         border: Border.all(width: 2),
         borderRadius: BorderRadius.circular(12),
@@ -29,9 +32,7 @@ class DocDisplayer extends StatelessWidget {
       child: QuillEditor.basic(
         configurations: QuillEditorConfigurations(
           showCursor: false,
-          padding: const EdgeInsets.all(12
-         
-          ),
+          padding: const EdgeInsets.all(12),
           controller: controller,
           sharedConfigurations: const QuillSharedConfigurations(
             locale: Locale('de'),

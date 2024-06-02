@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:video_player/video_player.dart';
+import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 
 class MyVideoPlayer extends StatefulWidget {
   const MyVideoPlayer({
@@ -25,22 +26,30 @@ class MyVideoPlayer extends StatefulWidget {
 }
 
 class _MyVideoPlayerState extends State<MyVideoPlayer> {
-  late VideoPlayerController _controller;
+  late dynamic _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = widget.networkVideo
-        ? VideoPlayerController.networkUrl(Uri.parse(widget.videoPath))
-        : VideoPlayerController.file(
-            File(widget.videoPath),
-            videoPlayerOptions:
-                VideoPlayerOptions(allowBackgroundPlayback: true),
-          )
-      ..initialize().then((_) {
-        setState(() {});
-      })
-      ..setLooping(false);
+
+    if (widget.networkVideo) {
+      _controller = CachedVideoPlayerPlusController.networkUrl(
+        Uri.parse(widget.videoPath),
+      )
+        ..initialize().then((_) {
+          setState(() {});
+        })
+        ..setLooping(false);
+    } else {
+      _controller = VideoPlayerController.file(
+        File(widget.videoPath),
+        videoPlayerOptions: VideoPlayerOptions(allowBackgroundPlayback: true),
+      )
+        ..initialize().then((_) {
+          setState(() {});
+        })
+        ..setLooping(false);
+    }
     _controller.addListener(_checkVideoCompletion);
   }
 
@@ -96,7 +105,8 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
               clipBehavior: Clip.none,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
+                  padding: const EdgeInsets.only(
+                      bottom: kSpaceBtwWidgetsInPreviewOrRichTextEditor),
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
@@ -121,7 +131,9 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                                       : _controller.play();
                                 });
                               },
-                              child: VideoPlayer(_controller),
+                              child: widget.networkVideo
+                                  ? CachedVideoPlayerPlus(_controller)
+                                  : VideoPlayer(_controller),
                             ),
                           ),
                         ),
@@ -134,7 +146,9 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                     right: -10,
                     top: -10,
                     child: GestureDetector(
-                      onTap: () => widget.onDelete!(widget.keyInMap!,),
+                      onTap: () => widget.onDelete!(
+                        widget.keyInMap!,
+                      ),
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
@@ -195,7 +209,7 @@ class FullScreenVideoPlayer extends StatefulWidget {
   });
 
   final String videoPath;
-  final VideoPlayerController videoController;
+  final dynamic videoController;
   final String Function(Duration duration) formatDuration;
 
   @override
@@ -272,7 +286,7 @@ class VideoStatusDisplay extends StatelessWidget {
     required this.formatDuration,
   });
 
-  final VideoPlayerController controller;
+  final dynamic controller;
   final String Function(Duration duration) formatDuration;
 
   @override
@@ -296,20 +310,36 @@ class VideoStatusDisplay extends StatelessWidget {
                 ),
               ],
             )
-          : ValueListenableBuilder(
-              valueListenable: controller,
-              builder: (BuildContext context, VideoPlayerValue value,
-                  Widget? child) {
-                return Row(
-                  children: [
-                    const Icon(Icons.pause),
-                    Text(
-                      formatDuration(value.position),
-                    ),
-                  ],
-                );
-              },
-            ),
+          : controller.runtimeType == CachedVideoPlayerPlusController
+              ? ValueListenableBuilder(
+                  valueListenable:
+                      controller as CachedVideoPlayerPlusController,
+                  builder: (BuildContext context,
+                      CachedVideoPlayerPlusValue value, Widget? child) {
+                    return Row(
+                      children: [
+                        const Icon(Icons.pause),
+                        Text(
+                          formatDuration(value.position),
+                        ),
+                      ],
+                    );
+                  },
+                )
+              : ValueListenableBuilder(
+                  valueListenable: controller as VideoPlayerController,
+                  builder: (BuildContext context, VideoPlayerValue value,
+                      Widget? child) {
+                    return Row(
+                      children: [
+                        const Icon(Icons.pause),
+                        Text(
+                          formatDuration(value.position),
+                        ),
+                      ],
+                    );
+                  },
+                ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
+import 'package:text_call/utils/constants.dart';
 
 class WaveBubble extends StatefulWidget {
   const WaveBubble({
@@ -52,6 +53,8 @@ class _WaveBubbleState extends State<WaveBubble> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.only(
+          bottom: kSpaceBtwWidgetsInPreviewOrRichTextEditor),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: const Color.fromARGB(255, 110, 151, 183),

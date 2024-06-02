@@ -66,7 +66,7 @@ class ImageDisplayer extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Padding(
-            padding: const EdgeInsets.only(bottom: 10.0),
+            padding: const EdgeInsets.only(bottom: kSpaceBtwWidgetsInPreviewOrRichTextEditor),
             child: Center(
               child: Container(
                 height: double.infinity,

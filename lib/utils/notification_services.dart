@@ -243,7 +243,7 @@ class NotificationController {
           return;
         }
 
-        if (receivedAction.channelKey == '12') {
+        if (receivedAction.id!.toString().startsWith('12')) {
           await db.update(
             'recents',
             {

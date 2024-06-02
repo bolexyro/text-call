@@ -53,6 +53,16 @@ Future<void> messageHandler(RemoteMessage message) async {
     if (accessRequestStatus == 'granted') {
       final DateTime currentDate = DateTime.now();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final db = await getDatabase();
+
+      await db.update(
+        'recents',
+        {
+          'canBeViewed': 1,
+        },
+        where: 'id = ?',
+        whereArgs: [recentId],
+      );
 
       await prefs.setString('recentId', recentId);
       AwesomeNotifications().createNotification(
@@ -243,16 +253,6 @@ class NotificationController {
           return;
         }
 
-        if (receivedAction.id!.toString().startsWith('12')) {
-          await db.update(
-            'recents',
-            {
-              'canBeViewed': 1,
-            },
-            where: 'recentId = ?',
-            whereArgs: [recentId],
-          );
-        }
         Navigator.of(TextCall.navigatorKey.currentContext!).push(
           MaterialPageRoute(
             builder: (context) => SmsNotFromTerminated(

@@ -25,15 +25,17 @@ class ImageDisplayer extends StatelessWidget {
   void _goFullScreen(BuildContext context, Widget imageWidget) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => Scaffold(
-          backgroundColor: Colors.black,
-          body: SafeArea(
-            child: Center(
-              child: Hero(
-                tag: imagePath,
-                child: GestureDetector(
-                  onDoubleTap: () => Navigator.of(context).pop(),
-                  child: imageWidget,
+        builder: (context) => GestureDetector(
+          onDoubleTap: () => Navigator.of(context).pop(),
+          child: Scaffold(
+            backgroundColor: Colors.black,
+            body: SafeArea(
+              child: Center(
+                child: InteractiveViewer(
+                  child: Hero(
+                    tag: imagePath,
+                    child: imageWidget,
+                  ),
                 ),
               ),
             ),
@@ -66,8 +68,12 @@ class ImageDisplayer extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Padding(
-            padding: const EdgeInsets.only(bottom: kSpaceBtwWidgetsInPreviewOrRichTextEditor),
-            child: Center(
+            padding: const EdgeInsets.only(
+                bottom: kSpaceBtwWidgetsInPreviewOrRichTextEditor),
+            child: GestureDetector(
+              onDoubleTap: () {
+                _goFullScreen(context, imageWidget);
+              },
               child: Container(
                 height: double.infinity,
                 width: double.infinity,
@@ -75,10 +81,7 @@ class ImageDisplayer extends StatelessWidget {
                   color: Colors.black,
                   border: Border.all(width: 2),
                 ),
-                child: GestureDetector(
-                  onDoubleTap: () {
-                    _goFullScreen(context, imageWidget);
-                  },
+                child: Center(
                   child: Hero(
                     tag: imagePath,
                     child: imageWidget,

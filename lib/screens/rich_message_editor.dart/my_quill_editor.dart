@@ -141,7 +141,7 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
               child: QuillEditor.basic(
                 configurations: QuillEditorConfigurations(
                   scrollable: true,
-                  autoFocus: true,
+                  autoFocus: false,
                   padding: EdgeInsets.only(
                     left: 12,
                     right: 12,

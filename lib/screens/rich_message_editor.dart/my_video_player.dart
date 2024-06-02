@@ -107,33 +107,36 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                 Padding(
                   padding: const EdgeInsets.only(
                       bottom: kSpaceBtwWidgetsInPreviewOrRichTextEditor),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      border: Border.all(width: 2),
-                    ),
-                    child: AspectRatio(
-                      aspectRatio: _controller.value.aspectRatio,
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: SizedBox(
-                          width: _controller.value.size.width,
-                          height: _controller.value.size.height,
-                          child: Hero(
-                            tag: widget.videoPath,
-                            child: GestureDetector(
-                              onDoubleTap: _goFullScreen,
-                              onTap: () {
-                                setState(() {
-                                  _controller.value.isPlaying
-                                      ? _controller.pause()
-                                      : _controller.play();
-                                });
-                              },
-                              child: widget.networkVideo
-                                  ? CachedVideoPlayerPlus(_controller)
-                                  : VideoPlayer(_controller),
+                  child: GestureDetector(
+                    onDoubleTap: _goFullScreen,
+                    onTap: () {
+                      setState(() {
+                        _controller.value.isPlaying
+                            ? _controller.pause()
+                            : _controller.play();
+                      });
+                    },
+                    child: Container(
+                      height: double.infinity,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        border: Border.all(width: 2),
+                      ),
+                      child: Center(
+                        child: AspectRatio(
+                          aspectRatio: _controller.value.aspectRatio,
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: SizedBox(
+                              width: _controller.value.size.width,
+                              height: _controller.value.size.height,
+                              child: Hero(
+                                tag: widget.videoPath,
+                                child: widget.networkVideo
+                                    ? CachedVideoPlayerPlus(_controller)
+                                    : VideoPlayer(_controller),
+                              ),
                             ),
                           ),
                         ),
@@ -240,38 +243,38 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Center(
-          child: Stack(
-            children: [
-              Hero(
-                tag: widget.videoPath,
-                child: AspectRatio(
-                  aspectRatio: widget.videoController.value.aspectRatio,
-                  child: GestureDetector(
-                    onDoubleTap: () => Navigator.of(context).pop(),
-                    onTap: () {
-                      setState(() {
-                        widget.videoController.value.isPlaying
-                            ? widget.videoController.pause()
-                            : widget.videoController.play();
-                      });
-                    },
+    return GestureDetector(
+      onDoubleTap: () => Navigator.of(context).pop(),
+      onTap: () {
+        setState(() {
+          widget.videoController.value.isPlaying
+              ? widget.videoController.pause()
+              : widget.videoController.play();
+        });
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: Center(
+            child: Stack(
+              children: [
+                Hero(
+                  tag: widget.videoPath,
+                  child: AspectRatio(
+                    aspectRatio: widget.videoController.value.aspectRatio,
                     child: VideoPlayer(widget.videoController),
                   ),
                 ),
-              ),
-              Positioned(
-                left: 5,
-                top: 5,
-                child: VideoStatusDisplay(
-                  controller: widget.videoController,
-                  formatDuration: widget.formatDuration,
+                Positioned(
+                  left: 5,
+                  top: 5,
+                  child: VideoStatusDisplay(
+                    controller: widget.videoController,
+                    formatDuration: widget.formatDuration,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

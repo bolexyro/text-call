@@ -44,6 +44,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
   late String _recentId;
   late Future _animationDelay;
+  late String _callerPhoneNumber;
   WebSocketChannel? _channel;
   bool _callSending = false;
   bool _filesUploading = false;
@@ -57,6 +58,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
   late Widget messageWriterMessageBox;
   Map<String, dynamic>? upToDateBolexyroJson;
+  Map<String, dynamic>? bolexyroJsonWithNetworkUrls;
 
   @override
   void initState() {
@@ -87,9 +89,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
   void _callSomeone(context) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final callerPhoneNumber = prefs.getString('myPhoneNumber');
+    _callerPhoneNumber = prefs.getString('myPhoneNumber')!;
     _channel = WebSocketChannel.connect(
-      Uri.parse('wss://text-call-backend.onrender.com/ws/$callerPhoneNumber'),
+      Uri.parse('wss://text-call-backend.onrender.com/ws/$_callerPhoneNumber'),
     );
 
     // the delay before we assume call was not picked
@@ -104,8 +106,10 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     // print(xyz);
 
     if (messageWriterMessageBox.runtimeType == FileUiPlaceHolder) {
-      await _editBolexyroJsonToContainStorageUrls(upToDateBolexyroJson!);
+      bolexyroJsonWithNetworkUrls =
+          await _editBolexyroJsonToContainStorageUrls(upToDateBolexyroJson!);
     }
+
     setState(() {
       _callSending = true;
     });
@@ -113,11 +117,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     _channel!.sink.add(
       json.encode(
         {
-          'caller_phone_number': callerPhoneNumber,
+          'caller_phone_number': _callerPhoneNumber,
           'callee_phone_number': widget.calleePhoneNumber,
           'message_json_string':
               messageWriterMessageBox.runtimeType == FileUiPlaceHolder
-                  ? jsonEncode(upToDateBolexyroJson!)
+                  ? jsonEncode(bolexyroJsonWithNetworkUrls!)
                   : RegularMessage(
                       messageString: _messageController.text,
                       backgroundColor: _selectedColor,
@@ -132,57 +136,57 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     );
   }
 
+  void _deleteRemoteFilesNotNeeded() {
+    // we are going to use the bolexyroJsonWithNetworkUrls to delete the ones not needed.
+  }
+
   Future<Map<String, dynamic>> _editBolexyroJsonToContainStorageUrls(
       Map<String, dynamic> upToDateBolexyroJson) async {
     setState(() {
       _filesUploading = true;
     });
+
     final storageRef = FirebaseStorage.instance.ref();
     final imagesRef = storageRef.child('images');
     final audioRef = storageRef.child('audio');
     final videosRef = storageRef.child('videos');
 
-    for (final indexMainMediaMapPair in upToDateBolexyroJson.entries) {
-      final mapMedia = indexMainMediaMapPair.value as Map<String, dynamic>;
-      if (mapMedia.keys.first == 'image') {
-        final thisImageLocalPath = mapMedia.values.first;
-        final thisImageFile = File(thisImageLocalPath);
-        final thisImageRef = imagesRef
-            .child('${DateTime.now()}${path.basename(thisImageFile.path)}');
-        await thisImageRef.putFile(thisImageFile);
+    final updatedBolexyroJson = jsonDecode(jsonEncode(upToDateBolexyroJson));
 
-        final thisImageUrl = await thisImageRef.getDownloadURL();
-        upToDateBolexyroJson[indexMainMediaMapPair.key]['image'] = thisImageUrl;
+    for (final entry in updatedBolexyroJson.entries) {
+      final mediaType = entry.value.keys.first;
+      final localPath = entry.value.values.first as String;
+      final file = File(localPath);
+
+      Reference mediaRef;
+
+      switch (mediaType) {
+        case 'image':
+          mediaRef = imagesRef.child(
+              '${DateTime.now()}-$_callerPhoneNumber-${path.basename(file.path)}');
+          break;
+        case 'video':
+          mediaRef = videosRef.child(
+              '${DateTime.now()}-$_callerPhoneNumber-${path.basename(file.path)}');
+          break;
+        case 'audio':
+          mediaRef = audioRef.child(
+              '${DateTime.now()}-$_callerPhoneNumber-${path.basename(file.path)}');
+          break;
+        default:
+          continue; // Skip if it's not one of the expected media types
       }
 
-      if (mapMedia.keys.first == 'video') {
-        final thisVideoLocalPath = mapMedia.values.first;
-        final thisVideoFile = File(thisVideoLocalPath);
-        final thisVideoRef = videosRef
-            .child('${DateTime.now()}${path.basename(thisVideoFile.path)}');
-        await thisVideoRef.putFile(thisVideoFile);
-
-        final thisVideoUrl = await thisVideoRef.getDownloadURL();
-        upToDateBolexyroJson[indexMainMediaMapPair.key]['video'] = thisVideoUrl;
-      }
-
-      if (mapMedia.keys.first == 'audio') {
-        final thisAudioLocalPath = mapMedia.values.first;
-        final thisAudioFile = File(thisAudioLocalPath);
-        final thisAudioRef = audioRef
-            .child('${DateTime.now()}${path.basename(thisAudioFile.path)}');
-        await thisAudioRef.putFile(thisAudioFile);
-
-        final thisAudioUrl = await thisAudioRef.getDownloadURL();
-        upToDateBolexyroJson[indexMainMediaMapPair.key]['audio'] = thisAudioUrl;
-      }
+      await mediaRef.putFile(file);
+      final downloadUrl = await mediaRef.getDownloadURL();
+      updatedBolexyroJson[entry.key][mediaType] = downloadUrl;
     }
-    print('done and dusted');
-    print(upToDateBolexyroJson);
+
     setState(() {
       _filesUploading = false;
     });
-    return upToDateBolexyroJson;
+
+    return updatedBolexyroJson;
   }
 
   void _showColorPicker() async {
@@ -366,19 +370,34 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 padding: const EdgeInsets.only(top: 10.0),
                 child: Stack(
                   children: [
-                    Opacity(
-                      opacity: .5,
-                      child: Lottie.asset(
-                        'assets/animations/404 user not found.json',
-                        height: 300,
-                      ),
+                    Lottie.asset(
+                      'assets/animations/404 user not found.json',
+                      height: 300,
                     ),
-                    Text(
-                      'The number you are trying to call doesn\'t exist. Are you sure you are not trying to call a previos version of your number.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.pacifico(
-                        fontSize: 32,
-                      ),
+                    Column(
+                      children: [
+                        Row(
+                          children: [
+                            IconButton(
+                              onPressed: () => setState(() {
+                                _callSending = false;
+                                _channel?.sink.close();
+                              }),
+                              icon: const Icon(
+                                Icons.arrow_back,
+                                size: 30,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          'The number you are trying to call doesn\'t exist. Are you sure you are not trying to call a previos version of your number.',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.pacifico(
+                            fontSize: 32,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -410,6 +429,20 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 padding: const EdgeInsets.only(top: 10.0),
                 child: Column(
                   children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => setState(() {
+                            _callSending = false;
+                            _channel?.sink.close();
+                          }),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            size: 30,
+                          ),
+                        ),
+                      ],
+                    ),
                     AnimatedTextKit(
                       animatedTexts: [
                         TyperAnimatedText(
@@ -452,21 +485,40 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               );
               ref.read(recentsProvider.notifier).addRecent(recent);
               _confettiController.play();
-              return AnimatedTextKit(
-                animatedTexts: [
-                  ColorizeAnimatedText(
-                    'Thy call hath been answered',
-                    textAlign: TextAlign.center,
-                    textStyle: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 50,
-                      fontFamily: 'Horizon',
-                    ),
-                    colors: _colorizeColors,
-                  )
+              return Column(
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => setState(() {
+                          _callSending = false;
+                          _channel?.sink.close();
+                          _confettiController.stop();
+                        }),
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          size: 30,
+                        ),
+                      ),
+                    ],
+                  ),
+                  AnimatedTextKit(
+                    animatedTexts: [
+                      ColorizeAnimatedText(
+                        'Thy call hath been answered',
+                        textAlign: TextAlign.center,
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 50,
+                          fontFamily: 'Horizon',
+                        ),
+                        colors: _colorizeColors,
+                      )
+                    ],
+                    displayFullTextOnTap: true,
+                    repeatForever: true,
+                  ),
                 ],
-                displayFullTextOnTap: true,
-                repeatForever: true,
               );
             }
             if (snapshotData['call_status'] == 'callee_busy') {
@@ -474,6 +526,20 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 padding: const EdgeInsets.only(top: 10.0),
                 child: Column(
                   children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => setState(() {
+                            _callSending = false;
+                            _channel?.sink.close();
+                          }),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            size: 30,
+                          ),
+                        ),
+                      ],
+                    ),
                     AnimatedTextKit(
                       animatedTexts: [
                         TyperAnimatedText(
@@ -490,9 +556,12 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       totalRepeatCount: 1,
                       onFinished: () {
                         Future.delayed(const Duration(seconds: 2), () {
-                          setState(() {
-                            _callSending = false;
-                          });
+                          if (_callSending) {
+                            _channel?.sink.close();
+                            setState(() {
+                              _callSending = false;
+                            });
+                          }
                         });
                       },
                     ),
@@ -534,6 +603,20 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   padding: const EdgeInsets.only(top: 10.0),
                   child: Column(
                     children: [
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () => setState(() {
+                              _callSending = false;
+                              _channel?.sink.close();
+                            }),
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              size: 30,
+                            ),
+                          ),
+                        ],
+                      ),
                       AnimatedTextKit(
                         animatedTexts: [
                           TyperAnimatedText(
@@ -591,8 +674,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             GestureDetector(
               onTap: () async {
                 FocusManager.instance.primaryFocus?.unfocus();
-                print(
-                    'should discard ${_showDiscardDialog(messageWriterContent)}');
                 if (_showDiscardDialog(messageWriterContent)) {
                   final bool? toDiscard = await showAdaptiveDialog(
                     context: context,
@@ -610,9 +691,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       (messageWriterDirectoryPath) =>
                           deleteDirectory(messageWriterDirectoryPath),
                     );
-                  } else {
-                    Navigator.of(context).pop();
-                  }
+                  } else {}
                 } else {
                   Navigator.of(context).pop();
                 }
@@ -630,39 +709,42 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             ),
             Positioned(
               bottom: 0,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: MediaQuery.sizeOf(context).height * .6,
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? makeColorLighter(Theme.of(context).primaryColor, 15)
-                        : const Color.fromARGB(255, 207, 222, 234),
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(25),
-                    ),
+              child: Opacity(
+                opacity: 1,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.sizeOf(context).height * .6,
                   ),
-                  child: Stack(
-                    alignment: Alignment.topCenter,
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.sizeOf(context).width,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 0,
-                              MediaQuery.viewInsetsOf(context).vertical),
-                          child: SingleChildScrollView(
-                              child: messageWriterContent),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? makeColorLighter(Theme.of(context).primaryColor, 15)
+                          : const Color.fromARGB(255, 207, 222, 234),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(25),
+                      ),
+                    ),
+                    child: Stack(
+                      alignment: Alignment.topCenter,
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.sizeOf(context).width,
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(0, 0, 0,
+                                MediaQuery.viewInsetsOf(context).vertical),
+                            child: SingleChildScrollView(
+                                child: messageWriterContent),
+                          ),
                         ),
-                      ),
-                      ConfettiWidget(
-                        confettiController: _confettiController,
-                        shouldLoop: true,
-                        blastDirectionality: BlastDirectionality.explosive,
-                        numberOfParticles: 30,
-                        emissionFrequency: 0.1,
-                      ),
-                    ],
+                        ConfettiWidget(
+                          confettiController: _confettiController,
+                          shouldLoop: true,
+                          blastDirectionality: BlastDirectionality.explosive,
+                          numberOfParticles: 30,
+                          emissionFrequency: 0.1,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -675,30 +757,27 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     minHeight: MediaQuery.sizeOf(context).height * .6,
                     minWidth: MediaQuery.sizeOf(context).width,
                   ),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(25),
-                        ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(25),
                       ),
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const CircularProgressIndicator(),
-                            const SizedBox(height: 20),
-                            Text(
-                              'Uploading files, please wait...',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium!
-                                  .copyWith(color: Colors.white),
-                            ),
-                          ],
-                        ),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Uploading files, please wait...',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium!
+                                .copyWith(color: Colors.white),
+                          ),
+                        ],
                       ),
                     ),
                   ),

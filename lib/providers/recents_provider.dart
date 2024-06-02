@@ -65,6 +65,7 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
             recentIsAContact: (await getContactAndExistsStatus(
                 db: db, phoneNumber: row['phoneNumber'] as String))[1],
             callTime: DateTime.parse(row['callTime'] as String),
+            canBeViewed: row['canBeViewed'] == 1 ? true : false,
           ),
         )
         .toList();
@@ -87,6 +88,7 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
             complexMessage: recent.complexMessage,
             regularMessage: recent.regularMessage,
             id: recent.id,
+            canBeViewed: recent.canBeViewed,
           );
         }
         return recent;

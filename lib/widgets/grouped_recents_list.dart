@@ -5,6 +5,7 @@ import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';
 
@@ -48,12 +49,14 @@ class _GroupedRecentsListState extends State<GroupedRecentsList> {
     });
   }
 
-  void _goToSentMessageScreen({required RegularMessage? regularMessage,required ComplexMessage ? complexMessage}) {
+  void _goToSentMessageScreen(
+      {required RegularMessage? regularMessage,
+      required ComplexMessage? complexMessage}) {
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => SentMessageScreen(
+      builder: (context) => SmsNotFromTerminated(
         howSmsIsOpened: HowSmsIsOpened
             .notFromTerminatedToShowMessageAfterAccessRequestGranted,
-        complexMessage:complexMessage ,
+        complexMessage: complexMessage,
         regularMessage: regularMessage,
       ),
     ));
@@ -96,28 +99,30 @@ class _GroupedRecentsListState extends State<GroupedRecentsList> {
                   Text(recntCategoryStringMap[recentN.category]!),
                 ],
               ),
-              expandedContent:
-                  recentN.category != RecentCategory.incomingRejected
-                      ? ElevatedButton(
-                          onPressed: () {
-                            _goToSentMessageScreen(regularMessage:  recentN.regularMessage, complexMessage: recentN.complexMessage,);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text('Show Message'),
-                        )
-                      : ElevatedButton(
-                          onPressed: () => sendAccessRequest(recentN),
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text('Request access'),
+              expandedContent: !recentN.canBeViewed
+                  ? ElevatedButton(
+                      onPressed: () {
+                        _goToSentMessageScreen(
+                          regularMessage: recentN.regularMessage,
+                          complexMessage: recentN.complexMessage,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
+                      ),
+                      child: const Text('Show Message'),
+                    )
+                  : ElevatedButton(
+                      onPressed: () => sendAccessRequest(recentN),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Request access'),
+                    ),
               isExpanded: _expandedBoolsMap[recentN]!,
               tileOnTapped: () => _changeTileExpandedStatus(recentN),
             ),

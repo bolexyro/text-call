@@ -7,6 +7,7 @@ import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_info_card.dart';
 import 'package:text_call/widgets/grouped_recents_list.dart';
@@ -28,7 +29,7 @@ class ContactDetailsPane extends ConsumerWidget {
       required RegularMessage? regularMessage,
       required ComplexMessage? complexMessage}) {
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => SentMessageScreen(
+      builder: (context) => SmsNotFromTerminated(
         howSmsIsOpened: HowSmsIsOpened
             .notFromTerminatedToShowMessageAfterAccessRequestGranted,
         regularMessage: regularMessage,
@@ -78,7 +79,7 @@ class ContactDetailsPane extends ConsumerWidget {
           const SizedBox(
             height: 7,
           ),
-          recent!.category != RecentCategory.incomingRejected
+          recent!.canBeViewed
               ? ElevatedButton(
                   onPressed: () {
                     _goToSentMessageScreen(

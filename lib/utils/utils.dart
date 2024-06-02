@@ -139,7 +139,7 @@ Future<sql.Database> getDatabase() async {
       await db.execute(
           'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT, imagePath TEXT)');
       await db.execute(
-          'CREATE TABLE recents ( id TEXT , callTime TEXT PRIMARY KEY , phoneNumber TEXT, categoryName TEXT, messageJson TEXT, messageType TEXT)');
+          'CREATE TABLE recents ( id TEXT , callTime TEXT PRIMARY KEY , phoneNumber TEXT, categoryName TEXT, messageJson TEXT, messageType TEXT, canBeViewed INTEGER)');
     },
   );
   return db;
@@ -479,6 +479,7 @@ void addRecentToDb(Recent newRecent, Database db) {
       'phoneNumber': newRecent.contact.phoneNumber,
       'categoryName': newRecent.category.name,
       'messageType': newRecent.regularMessage == null ? 'complex' : 'regular',
+      'canBeViewed': newRecent.canBeViewed ? 1 : 0,
     },
   );
 }

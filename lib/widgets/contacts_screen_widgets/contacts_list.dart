@@ -5,7 +5,6 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/search_screen.dart';
@@ -173,18 +172,23 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                       //   );
                       // },
                       onPressed: () async {
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setString('messageJsonString',
-                            '{"0":{"document":{"backgroundColor":{"alpha":255,"red":255,"blue":255,"green":255},"quillDocJson":"[{\\"insert\\":\\"Fffffffffffffff\\\\n\\"}]"}}}');
-                        await prefs.setString(
-                            'callerPhoneNumber', '+2349098875567');
-                        await prefs.setString('messageType', 'complex');
-
-                        createAwesomeNotification(
-                          title: 'debugging skills is calling',
-                          body: 'Might be urgent. Schrödinger\'s message',
-                          notificationPurpose: NotificationPurpose.forCall,
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SearchScreen(),
+                          ),
                         );
+                        // final prefs = await SharedPreferences.getInstance();
+                        // await prefs.setString('messageJsonString',
+                        //     '{"0":{"document":{"backgroundColor":{"alpha":255,"red":255,"blue":255,"green":255},"quillDocJson":"[{\\"insert\\":\\"Fffffffffffffff\\\\n\\"}]"}}}');
+                        // await prefs.setString(
+                        //     'callerPhoneNumber', '+2349098875567');
+                        // await prefs.setString('messageType', 'complex');
+
+                        // createAwesomeNotification(
+                        //   title: 'debugging skills is calling',
+                        //   body: 'Might be urgent. Schrödinger\'s message',
+                        //   notificationPurpose: NotificationPurpose.forCall,
+                        // );
                       },
                       icon: const Icon(Icons.search),
                     ),

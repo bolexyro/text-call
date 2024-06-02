@@ -3,7 +3,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/complex_message.dart';
-// import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/floating_buttons_visible_provider.dart';
@@ -21,7 +20,7 @@ class SmsNotFromTerminated extends ConsumerWidget {
     required this.complexMessage,
   });
 
-  // this messages should not be null if howsmsisopened == notfromterminatedtoshowmessage
+  // this messages should not be null if howsmsisopened == notFromTerminatedToShowMessageAfterAccessRequestGranted
   final HowSmsIsOpened howSmsIsOpened;
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;

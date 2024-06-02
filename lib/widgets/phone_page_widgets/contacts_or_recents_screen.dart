@@ -4,6 +4,7 @@ import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/screens/contact_details_screen.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_details_pane.dart';
@@ -168,7 +169,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
         }
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => SentMessageScreen(
+            builder: (context) => SmsNotFromTerminated(
               howSmsIsOpened: HowSmsIsOpened
                   .notFromTerminatedToShowMessageAfterAccessRequestGranted,
               regularMessage: selectedRecent.regularMessage,

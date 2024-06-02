@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/screens/auth_screen.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/screens/sent_message_screens/sms_from_terminated.dart';
 import 'package:text_call/screens/splash_screen.dart';
 import 'package:text_call/utils/constants.dart';
 
@@ -85,9 +86,7 @@ class _TextCallState extends State<TextCall> {
                   appOpenedFromPickedCall: true,
                 );
               }
-              return const SentMessageScreen(
-                complexMessage: null,
-                regularMessage: null,
+              return const SmsFromTerminated(
                 howSmsIsOpened: HowSmsIsOpened.fromTerminatedForPickCall,
               );
             }
@@ -99,9 +98,7 @@ class _TextCallState extends State<TextCall> {
                   appOpenedFromPickedCall: true,
                 );
               }
-              return const SentMessageScreen(
-                complexMessage: null,
-                regularMessage: null,
+              return const SmsFromTerminated(
                 howSmsIsOpened:
                     HowSmsIsOpened.fromTerminatedToGrantOrDeyRequestAccess,
               );
@@ -109,11 +106,10 @@ class _TextCallState extends State<TextCall> {
 
             if (widget.howAppIsOPened ==
                 HowAppIsOPened.fromTerminatedToShowMessage) {
-              return const SentMessageScreen(
-                  complexMessage: null,
-                  regularMessage: null,
-                  howSmsIsOpened: HowSmsIsOpened
-                      .fromTerminatedToShowMessageAfterAccessRequestGranted);
+              return const SmsFromTerminated(
+                howSmsIsOpened: HowSmsIsOpened
+                    .fromTerminatedToShowMessageAfterAccessRequestGranted,
+              );
             }
 
             if (userInfo['isUserLoggedIn'] != true) {

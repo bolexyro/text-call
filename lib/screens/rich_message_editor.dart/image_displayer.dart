@@ -27,11 +27,11 @@ class ImageDisplayer extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => GestureDetector(
           onDoubleTap: () => Navigator.of(context).pop(),
-          child: Scaffold(
-            backgroundColor: Colors.black,
-            body: SafeArea(
-              child: Center(
-                child: InteractiveViewer(
+          child: InteractiveViewer(
+            child: Scaffold(
+              backgroundColor: Colors.black,
+              body: SafeArea(
+                child: Center(
                   child: Hero(
                     tag: imagePath,
                     child: imageWidget,

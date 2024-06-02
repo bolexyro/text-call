@@ -243,37 +243,39 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onDoubleTap: () => Navigator.of(context).pop(),
-      onTap: () {
-        setState(() {
-          widget.videoController.value.isPlaying
-              ? widget.videoController.pause()
-              : widget.videoController.play();
-        });
-      },
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          child: Center(
-            child: Stack(
-              children: [
-                Hero(
-                  tag: widget.videoPath,
-                  child: AspectRatio(
-                    aspectRatio: widget.videoController.value.aspectRatio,
-                    child: VideoPlayer(widget.videoController),
+    return InteractiveViewer(
+      child: GestureDetector(
+        onDoubleTap: () => Navigator.of(context).pop(),
+        onTap: () {
+          setState(() {
+            widget.videoController.value.isPlaying
+                ? widget.videoController.pause()
+                : widget.videoController.play();
+          });
+        },
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: SafeArea(
+            child: Center(
+              child: Stack(
+                children: [
+                  Hero(
+                    tag: widget.videoPath,
+                    child: AspectRatio(
+                      aspectRatio: widget.videoController.value.aspectRatio,
+                      child: VideoPlayer(widget.videoController),
+                    ),
                   ),
-                ),
-                Positioned(
-                  left: 5,
-                  top: 5,
-                  child: VideoStatusDisplay(
-                    controller: widget.videoController,
-                    formatDuration: widget.formatDuration,
+                  Positioned(
+                    left: 5,
+                    top: 5,
+                    child: VideoStatusDisplay(
+                      controller: widget.videoController,
+                      formatDuration: widget.formatDuration,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

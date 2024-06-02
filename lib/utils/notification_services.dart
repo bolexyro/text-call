@@ -9,6 +9,7 @@ import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 
 import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
 import 'package:text_call/text_call.dart';
 import 'package:text_call/utils/utils.dart';
 
@@ -174,6 +175,7 @@ class NotificationController {
       final db = await getDatabase();
       final newRecent = Recent.withoutContactObject(
         category: RecentCategory.incomingRejected,
+        canBeViewed: false,
         regularMessage: messageType == 'regular'
             ? RegularMessage.fromJsonString(messageJsonString!)
             : null,
@@ -204,7 +206,7 @@ class NotificationController {
 
       Navigator.of(TextCall.navigatorKey.currentContext!).push(
         MaterialPageRoute(
-          builder: (context) => SentMessageScreen(
+          builder: (context) => SmsNotFromTerminated(
             complexMessage: messageType == 'complex'
                 ? ComplexMessage(complexMessageJsonString: messageJsonString!)
                 : null,
@@ -240,9 +242,20 @@ class NotificationController {
         if (data.isEmpty) {
           return;
         }
+
+        if (receivedAction.channelKey == '12') {
+          await db.update(
+            'recents',
+            {
+              'canBeViewed': 1,
+            },
+            where: 'recentId = ?',
+            whereArgs: [recentId],
+          );
+        }
         Navigator.of(TextCall.navigatorKey.currentContext!).push(
           MaterialPageRoute(
-            builder: (context) => SentMessageScreen(
+            builder: (context) => SmsNotFromTerminated(
               howSmsIsOpened: receivedAction.id!.toString().startsWith('10')
                   ? HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess
                   : HowSmsIsOpened

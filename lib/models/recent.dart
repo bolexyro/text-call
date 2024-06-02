@@ -62,9 +62,9 @@ class Recent {
     required this.complexMessage,
     DateTime? callTime,
     this.recentIsAContact = false,
+    this.canBeViewed = true,
     required this.id,
-  })  : callTime = callTime ?? DateTime.now()
-       ;
+  }) : callTime = callTime ?? DateTime.now();
 
   Recent.fromRecent({
     required Recent recent,
@@ -76,6 +76,7 @@ class Recent {
             phoneNumber: recent.contact.phoneNumber,
             imagePath: null),
         category = recent.category,
+        canBeViewed = recent.canBeViewed,
         callTime = recent.callTime,
         regularMessage = recent.regularMessage,
         complexMessage = recent.complexMessage,
@@ -89,13 +90,13 @@ class Recent {
     DateTime? callTime,
     required String phoneNumber,
     this.recentIsAContact = false,
+    this.canBeViewed = true,
   })  : callTime = callTime ?? DateTime.now(),
         contact = Contact(
           name: 'name',
           phoneNumber: phoneNumber,
           imagePath: null,
-        )
-       ;
+        );
 
   final Contact contact;
   final RecentCategory category;
@@ -107,4 +108,5 @@ class Recent {
 
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;
+  final bool canBeViewed;
 }

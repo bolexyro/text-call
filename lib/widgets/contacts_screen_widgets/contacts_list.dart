@@ -202,7 +202,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                             // callbackText: 'Call back',
                           ),
                           duration: 20000,
-                          extra: <String, dynamic>{'userId': '1a2b3c4d'},
+                          extra: <String, dynamic>{'userId': 123},
                           headers: <String, dynamic>{
                             'apiKey': 'Abc@123!',
                             'platform': 'flutter'
@@ -243,9 +243,16 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                             .listen((CallEvent? event) {
                           switch (event!.event) {
                             case Event.actionCallIncoming:
-                              print('this is event body ${event.body}');
-                              print('${event.body.runtimeType}');
-                              // TODO: received an incoming call
+                              final Map<String, dynamic> eventBody = event.body;
+
+                              print(eventBody['number'].runtimeType);
+                              print('event body is ok');
+                              final Map myDataInEventBody = eventBody['extra'];
+                              print(
+                                  myDataInEventBody); // TODO: received an incoming call;
+
+                              final String faf =
+                                  myDataInEventBody['userId'].toString();
                               print('Call incoming');
 
                               break;

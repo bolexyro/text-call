@@ -208,8 +208,8 @@ void registerCallkitIncomingListener() {
       case Event.actionCallAccept:
         final Map<String, dynamic> eventBody = event.body;
         final Map myDataInEventBody = eventBody['extra'];
+        final String callerPhoneNumber = eventBody['number'];
         final String messageJsonString = myDataInEventBody['messageJsonString'];
-        final String callerPhoneNumber = myDataInEventBody['number'];
         final String messageType = myDataInEventBody['messageType'];
         // final String recentId = myDataInEventBody['recentId'];
 
@@ -243,8 +243,8 @@ void registerCallkitIncomingListener() {
       case Event.actionCallDecline:
         final Map<String, dynamic> eventBody = event.body;
         final Map myDataInEventBody = eventBody['extra'];
+        final String callerPhoneNumber = eventBody['number'];
         final String messageJsonString = myDataInEventBody['messageJsonString'];
-        final String callerPhoneNumber = myDataInEventBody['number'];
         final String messageType = myDataInEventBody['messageType'];
         final String recentId = myDataInEventBody['recentId'];
 

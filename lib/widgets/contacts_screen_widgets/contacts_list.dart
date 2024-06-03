@@ -263,6 +263,8 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                             case Event.actionCallAccept:
                               // TODO: accepted an incoming call
                               // TODO: show screen calling in Flutter
+                              print(
+                                  'event body from accepted is ${event.body}');
                               print('Call accepted');
                               break;
                             case Event.actionCallDecline:

@@ -109,7 +109,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       bolexyroJsonWithNetworkUrls =
           await _editBolexyroJsonToContainStorageUrls(upToDateBolexyroJson!);
     }
-
     setState(() {
       _callSending = true;
     });
@@ -155,6 +154,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
     for (final entry in updatedBolexyroJson.entries) {
       final mediaType = entry.value.keys.first;
+      if (mediaType == 'document') {
+        continue;
+      }
       final localPath = entry.value.values.first as String;
       final file = File(localPath);
 
@@ -709,42 +711,39 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             ),
             Positioned(
               bottom: 0,
-              child: Opacity(
-                opacity: 1,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: MediaQuery.sizeOf(context).height * .6,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.sizeOf(context).height * .6,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? makeColorLighter(Theme.of(context).primaryColor, 15)
+                        : const Color.fromARGB(255, 207, 222, 234),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(25),
+                    ),
                   ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? makeColorLighter(Theme.of(context).primaryColor, 15)
-                          : const Color.fromARGB(255, 207, 222, 234),
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(25),
+                  child: Stack(
+                    alignment: Alignment.topCenter,
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.sizeOf(context).width,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(0, 0, 0,
+                              MediaQuery.viewInsetsOf(context).vertical),
+                          child: SingleChildScrollView(
+                              child: messageWriterContent),
+                        ),
                       ),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.topCenter,
-                      children: [
-                        SizedBox(
-                          width: MediaQuery.sizeOf(context).width,
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(0, 0, 0,
-                                MediaQuery.viewInsetsOf(context).vertical),
-                            child: SingleChildScrollView(
-                                child: messageWriterContent),
-                          ),
-                        ),
-                        ConfettiWidget(
-                          confettiController: _confettiController,
-                          shouldLoop: true,
-                          blastDirectionality: BlastDirectionality.explosive,
-                          numberOfParticles: 30,
-                          emissionFrequency: 0.1,
-                        ),
-                      ],
-                    ),
+                      ConfettiWidget(
+                        confettiController: _confettiController,
+                        shouldLoop: true,
+                        blastDirectionality: BlastDirectionality.explosive,
+                        numberOfParticles: 30,
+                        emissionFrequency: 0.1,
+                      ),
+                    ],
                   ),
                 ),
               ),

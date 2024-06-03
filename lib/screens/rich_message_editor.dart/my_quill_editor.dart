@@ -26,35 +26,38 @@ class MyQuillEditor extends StatefulWidget {
 
 class _MyQuillEditorState extends State<MyQuillEditor> {
   late final QuillController _controller;
-  late Color _backgroundColor;
+  late Color? _backgroundColor;
   bool _collapseToolbar = true;
-  Color? lastColorUsedByUser;
 
   @override
   initState() {
     _controller = widget.controller;
-    _backgroundColor = widget.initialBgColor ?? Colors.white;
+    _backgroundColor = widget.initialBgColor;
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         QuillToolbar.simple(
-          configurations: QuillSimpleToolbarConfigurations(            
+          configurations: QuillSimpleToolbarConfigurations(
             multiRowsDisplay: !_collapseToolbar,
             customButtons: [
               QuillToolbarCustomButtonOptions(
                 icon: Row(
                   children: [
-                    const Text('BG'),
+                    Text(
+                      'BG',
+                      style: TextStyle(
+                          color: _backgroundColor ??
+                              Theme.of(context).iconTheme.color!),
+                    ),
                     SvgPicture.asset(
                       'assets/icons/background-color.svg',
                       height: kIconHeight,
                       colorFilter: ColorFilter.mode(
-                        Theme.of(context).iconTheme.color!,
+                        _backgroundColor ?? Theme.of(context).iconTheme.color!,
                         BlendMode.srcIn,
                       ),
                     ),
@@ -67,16 +70,15 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
                     context: context,
                     builder: (context) {
                       return ChooseColorDialog(
-                        initialPickerColor: lastColorUsedByUser ??
-                            const Color.fromARGB(255, 153, 83, 78),
-                      );
+                          initialPickerColor: _backgroundColor ??
+                              const Color.fromARGB(255, 153, 83, 78));
                     },
                   );
                   setState(() {
                     _backgroundColor = selectedColor ?? _backgroundColor;
                   });
                   widget.onBackgroundColorChanged(
-                      widget.keyInMap, _backgroundColor);
+                      widget.keyInMap, _backgroundColor!);
                 },
               ),
               QuillToolbarCustomButtonOptions(
@@ -128,10 +130,11 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
           height: 5,
         ),
         Padding(
-          padding: const EdgeInsets.only(bottom: kSpaceBtwWidgetsInPreviewOrRichTextEditor),
+          padding: const EdgeInsets.only(
+              bottom: kSpaceBtwWidgetsInPreviewOrRichTextEditor),
           child: Container(
             decoration: BoxDecoration(
-              color: _backgroundColor,
+              color: _backgroundColor ?? Colors.white,
               border: Border.all(width: 2),
               borderRadius: BorderRadius.circular(12),
             ),

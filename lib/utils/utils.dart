@@ -220,6 +220,17 @@ bool isPhoneNumberValid(String phoneNumber) {
   return false;
 }
 
+bool checkIfContactIsAlreadyInContactList(
+    String newContactPhoneNumber, WidgetRef ref) {
+  final allContacts = ref.read(contactsProvider);
+  for (final eachContact in allContacts) {
+    if (newContactPhoneNumber == eachContact.phoneNumber) {
+      return true;
+    }
+  }
+  return false;
+}
+
 Future<bool> checkIfNumberExists(String phoneNumber) async {
   final db = FirebaseFirestore.instance;
   final docRef = db.collection("users").doc(phoneNumber);

@@ -54,16 +54,6 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
     super.dispose();
   }
 
-  bool _checkIfContactIsAlreadyInContactList(String newContactPhoneNumber) {
-    final allContacts = ref.read(contactsProvider);
-    for (final eachContact in allContacts) {
-      if (newContactPhoneNumber == eachContact.phoneNumber) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   Future<void> _saveImage(File? imageFile) async {
     if (imageFile == null) {
       return;
@@ -87,7 +77,7 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
       final bool numberExists = await checkIfNumberExists(_enteredPhoneNumber!);
 
       final bool numberIsAlreadyAContact =
-          _checkIfContactIsAlreadyInContactList(_enteredPhoneNumber!);
+          checkIfContactIsAlreadyInContactList(_enteredPhoneNumber!, ref);
       if (numberExists == false ||
           numberIsAlreadyAContact == true && widget.contact == null) {
         String errorMessage = numberExists == false

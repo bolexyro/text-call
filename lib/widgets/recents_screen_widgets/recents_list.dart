@@ -593,8 +593,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                       ),
                                       IconButton(
                                         onPressed: () {
-                                          if (recentN.category !=
-                                              RecentCategory.incomingRejected) {
+                                          if (recentN.canBeViewed) {
                                             widget.onRecentSelected(recentN);
                                             return;
                                           }

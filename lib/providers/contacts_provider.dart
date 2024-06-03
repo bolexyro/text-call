@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/utils/utils.dart';
@@ -39,6 +40,7 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
         'name': newContact.name,
         'imagePath': newContact.imagePath,
       },
+      conflictAlgorithm: ConflictAlgorithm.ignore,
     );
     state = [...state, newContact];
   }

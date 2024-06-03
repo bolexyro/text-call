@@ -47,9 +47,11 @@ class _KeypadState extends ConsumerState<Keypad> {
       return;
     }
     String phoneNumber = changeLocalToIntl(widget.typedInPhoneNumber);
-    final bool numberExists = await checkIfNumberExists(
-      phoneNumber,
-    );
+
+    bool numberExists = checkIfContactIsAlreadyInContactList(phoneNumber, ref)
+        ? true
+        : await checkIfNumberExists(phoneNumber);
+
     if (numberExists == false) {
       showADialog(
           header: 'Error!!',

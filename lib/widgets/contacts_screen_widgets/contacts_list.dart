@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:grouped_list/grouped_list.dart';
+import 'package:http/http.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
@@ -242,6 +243,8 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                             .listen((CallEvent? event) {
                           switch (event!.event) {
                             case Event.actionCallIncoming:
+                              print('this is event body ${event.body}');
+                              print('${event.body.runtimeType}');
                               // TODO: received an incoming call
                               print('Call incoming');
 
@@ -257,6 +260,10 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                               break;
                             case Event.actionCallDecline:
                               // TODO: declined an incoming call
+                              final url = Uri.https(
+                                  'text-call-backend.onrender.com',
+                                  'call/rejected/09000');
+                              get(url);
                               print('call rejected');
                               break;
                             case Event.actionCallEnded:

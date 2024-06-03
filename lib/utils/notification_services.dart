@@ -2,6 +2,12 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_callkit_incoming/entities/android_params.dart';
+import 'package:flutter_callkit_incoming/entities/call_event.dart';
+import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
+import 'package:flutter_callkit_incoming/entities/ios_params.dart';
+import 'package:flutter_callkit_incoming/entities/notification_params.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/complex_message.dart';
@@ -25,6 +31,8 @@ Future<String> _getCallerName(String phoneNumber) async {
 }
 
 Future<void> messageHandler(RemoteMessage message) async {
+  registerCallkitIncomingListener();
+
   final String notificationPurpose = message.data['purpose'];
   if (notificationPurpose == 'access_request') {
     final String recentId = message.data['message_id'];
@@ -111,17 +119,60 @@ Future<void> messageHandler(RemoteMessage message) async {
   final String messageType = message.data['my_message_type'];
   final String callerName = await _getCallerName(callerPhoneNumber);
 
+  // i am still persisting this with sharedprefs because i no one mess with that sms notfrom terminated and terminated code
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString('recentId', recentId);
-  await prefs.setString('messageJsonString', messageJsonString);
   await prefs.setString('callerPhoneNumber', callerPhoneNumber);
-  await prefs.setString('messageType', messageType);
-
-  createAwesomeNotification(
-    title: '$callerName is calling',
-    body: 'Might be urgent. Schrödinger\'s message',
-    notificationPurpose: NotificationPurpose.forCall,
+  CallKitParams callKitParams = CallKitParams(
+    id: DateTime.now().toString(),
+    nameCaller: callerName,
+    appName: 'TextCall',
+    handle: callerPhoneNumber,
+    type: 0,
+    textAccept: 'Accept',
+    textDecline: 'Decline',
+    missedCallNotification: const NotificationParams(
+      showNotification: true,
+      isShowCallback: false,
+      subtitle: 'Missed Text Call',
+      // callbackText: 'Call back',
+    ),
+    duration: 20000,
+    extra: <String, dynamic>{
+      'recentId': recentId,
+      'messageJsonString': messageJsonString,
+      'messageType': messageType,
+    },
+    android: const AndroidParams(
+      isCustomNotification: true,
+      isShowLogo: true,
+      ringtonePath: 'system_ringtone_default',
+      backgroundColor: '#36618e',
+      // backgroundUrl: 'https://i.pravatar.cc/500',
+      actionColor: '#4CAF50',
+      textColor: '#ffffff',
+      incomingCallNotificationChannelName: "Incoming Call",
+      missedCallNotificationChannelName: "Missed Call",
+      isShowCallID: false,
+    ),
+    ios: const IOSParams(
+      iconName: 'CallKitLogo',
+      handleType: 'generic',
+      supportsVideo: true,
+      maximumCallGroups: 2,
+      maximumCallsPerCallGroup: 1,
+      audioSessionMode: 'default',
+      audioSessionActive: true,
+      audioSessionPreferredSampleRate: 44100.0,
+      audioSessionPreferredIOBufferDuration: 0.005,
+      supportsDTMF: true,
+      supportsHolding: true,
+      supportsGrouping: false,
+      supportsUngrouping: false,
+      ringtonePath: 'system_ringtone_default',
+    ),
   );
+  await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
 }
 
 Future<void> fcmSetup() async {
@@ -141,6 +192,114 @@ Future<void> fcmSetup() async {
 @pragma('vm:entry-point')
 Future<void> fcmBackgroundHandler(RemoteMessage message) async {
   await messageHandler(message);
+}
+
+void registerCallkitIncomingListener() {
+  FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
+    switch (event!.event) {
+      case Event.actionCallIncoming:
+        print('this is event body ${event.body}');
+        print('Call incoming');
+        break;
+      case Event.actionCallStart:
+        // TODO: started an outgoing call
+        // TODO: show screen calling in Flutter
+        break;
+      case Event.actionCallAccept:
+        final Map<String, dynamic> eventBody = event.body;
+        final Map<String, dynamic> myDataInEventBody = eventBody['extra'];
+        final String messageJsonString = myDataInEventBody['messageJsonString'];
+        final String callerPhoneNumber = myDataInEventBody['number'];
+        final String messageType = myDataInEventBody['messageType'];
+        // final String recentId = myDataInEventBody['recentId'];
+
+        final url = Uri.https('text-call-backend.onrender.com',
+            'call/accepted/$callerPhoneNumber');
+        http.get(url);
+
+        final prefs = await SharedPreferences.getInstance();
+
+        final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
+        if (isUserLoggedIn != true) {
+          showFlushBar(Colors.blue, 'You have to login to see the message.',
+              FlushbarPosition.TOP, TextCall.navigatorKey.currentContext!);
+          return;
+        }
+
+        Navigator.of(TextCall.navigatorKey.currentContext!).push(
+          MaterialPageRoute(
+            builder: (context) => SmsNotFromTerminated(
+              complexMessage: messageType == 'complex'
+                  ? ComplexMessage(complexMessageJsonString: messageJsonString)
+                  : null,
+              regularMessage: messageType == 'regular'
+                  ? RegularMessage.fromJsonString(messageJsonString)
+                  : null,
+              howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
+            ),
+          ),
+        );
+        break;
+      case Event.actionCallDecline:
+        final Map<String, dynamic> eventBody = event.body;
+        final Map<String, dynamic> myDataInEventBody = eventBody['extra'];
+        final String messageJsonString = myDataInEventBody['messageJsonString'];
+        final String callerPhoneNumber = myDataInEventBody['number'];
+        final String messageType = myDataInEventBody['messageType'];
+        final String recentId = myDataInEventBody['recentId'];
+
+        final url = Uri.https('text-call-backend.onrender.com',
+            'call/rejected/$callerPhoneNumber');
+        http.get(url);
+
+        final db = await getDatabase();
+        final newRecent = Recent.withoutContactObject(
+          category: RecentCategory.incomingRejected,
+          canBeViewed: false,
+          regularMessage: messageType == 'regular'
+              ? RegularMessage.fromJsonString(messageJsonString)
+              : null,
+          complexMessage: messageType == 'complex'
+              ? ComplexMessage(complexMessageJsonString: messageJsonString)
+              : null,
+          id: recentId,
+          phoneNumber: callerPhoneNumber,
+        );
+
+        addRecentToDb(newRecent, db);
+        break;
+      case Event.actionCallEnded:
+        // TODO: ended an incoming/outgoing call
+        break;
+      case Event.actionCallTimeout:
+        // TODO: missed an incoming call
+        break;
+      case Event.actionCallCallback:
+        // TODO: only Android - click action `Call back` from missed call notification
+        break;
+      case Event.actionCallToggleHold:
+        // TODO: only iOS
+        break;
+      case Event.actionCallToggleMute:
+        // TODO: only iOS
+        break;
+      case Event.actionCallToggleDmtf:
+        // TODO: only iOS
+        break;
+      case Event.actionCallToggleGroup:
+        // TODO: only iOS
+        break;
+      case Event.actionCallToggleAudioSession:
+        // TODO: only iOS
+        break;
+      case Event.actionDidUpdateDevicePushTokenVoip:
+        // TODO: only iOS
+        break;
+      case Event.actionCallCustom:
+        // TODO: for custom action
+        break;
+    }
+  });
 }
 
 class NotificationController {
@@ -170,63 +329,63 @@ class NotificationController {
   static Future<void> onActionReceivedMethod(
       ReceivedAction receivedAction) async {
     if (receivedAction.buttonKeyPressed == 'REJECT_CALL') {
-      final prefs = await SharedPreferences.getInstance();
-      // we are reloading because some things might have been changed in the background
-      await prefs.reload();
-      final String? recentId = prefs.getString('recentId');
-      final String? messageJsonString = prefs.getString('messageJsonString');
-      final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
-      final String? messageType = prefs.getString('messageType');
+      // final prefs = await SharedPreferences.getInstance();
+      // // we are reloading because some things might have been changed in the background
+      // await prefs.reload();
+      // final String? recentId = prefs.getString('recentId');
+      // final String? messageJsonString = prefs.getString('messageJsonString');
+      // final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
+      // final String? messageType = prefs.getString('messageType');
 
-      final url = Uri.https(
-          'text-call-backend.onrender.com', 'call/rejected/$callerPhoneNumber');
-      http.get(url);
+      // final url = Uri.https(
+      //     'text-call-backend.onrender.com', 'call/rejected/$callerPhoneNumber');
+      // http.get(url);
 
-      final db = await getDatabase();
-      final newRecent = Recent.withoutContactObject(
-        category: RecentCategory.incomingRejected,
-        canBeViewed: false,
-        regularMessage: messageType == 'regular'
-            ? RegularMessage.fromJsonString(messageJsonString!)
-            : null,
-        complexMessage: messageType == 'complex'
-            ? ComplexMessage(complexMessageJsonString: messageJsonString!)
-            : null,
-        id: recentId!,
-        phoneNumber: callerPhoneNumber!,
-      );
+      // final db = await getDatabase();
+      // final newRecent = Recent.withoutContactObject(
+      //   category: RecentCategory.incomingRejected,
+      //   canBeViewed: false,
+      //   regularMessage: messageType == 'regular'
+      //       ? RegularMessage.fromJsonString(messageJsonString!)
+      //       : null,
+      //   complexMessage: messageType == 'complex'
+      //       ? ComplexMessage(complexMessageJsonString: messageJsonString!)
+      //       : null,
+      //   id: recentId!,
+      //   phoneNumber: callerPhoneNumber!,
+      // );
 
-      addRecentToDb(newRecent, db);
+      // addRecentToDb(newRecent, db);
     } else if (receivedAction.buttonKeyPressed == 'ACCEPT_CALL') {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.reload();
-      final String? messageJsonString = prefs.getString('messageJsonString');
-      final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
-      final String? messageType = prefs.getString('messageType');
-      final url = Uri.https(
-          'text-call-backend.onrender.com', 'call/accepted/$callerPhoneNumber');
-      http.get(url);
+      // final prefs = await SharedPreferences.getInstance();
+      // await prefs.reload();
+      // final String? messageJsonString = prefs.getString('messageJsonString');
+      // final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
+      // final String? messageType = prefs.getString('messageType');
+      // final url = Uri.https(
+      //     'text-call-backend.onrender.com', 'call/accepted/$callerPhoneNumber');
+      // http.get(url);
 
-      final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
-      if (isUserLoggedIn != true) {
-        showFlushBar(Colors.blue, 'You have to login to see the message.',
-            FlushbarPosition.TOP, TextCall.navigatorKey.currentContext!);
-        return;
-      }
+      // final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
+      // if (isUserLoggedIn != true) {
+      //   showFlushBar(Colors.blue, 'You have to login to see the message.',
+      //       FlushbarPosition.TOP, TextCall.navigatorKey.currentContext!);
+      //   return;
+      // }
 
-      Navigator.of(TextCall.navigatorKey.currentContext!).push(
-        MaterialPageRoute(
-          builder: (context) => SmsNotFromTerminated(
-            complexMessage: messageType == 'complex'
-                ? ComplexMessage(complexMessageJsonString: messageJsonString!)
-                : null,
-            regularMessage: messageType == 'regular'
-                ? RegularMessage.fromJsonString(messageJsonString!)
-                : null,
-            howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
-          ),
-        ),
-      );
+      // Navigator.of(TextCall.navigatorKey.currentContext!).push(
+      //   MaterialPageRoute(
+      //     builder: (context) => SmsNotFromTerminated(
+      //       complexMessage: messageType == 'complex'
+      //           ? ComplexMessage(complexMessageJsonString: messageJsonString!)
+      //           : null,
+      //       regularMessage: messageType == 'regular'
+      //           ? RegularMessage.fromJsonString(messageJsonString!)
+      //           : null,
+      //       howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
+      //     ),
+      //   ),
+      // );
     } else if (receivedAction.buttonKeyPressed == 'GRANT_ACCESS') {
       sendAccessRequestStatus(AccessRequestStatus.granted);
     } else if (receivedAction.buttonKeyPressed == 'DENY_ACCESS') {

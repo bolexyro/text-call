@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,7 +10,7 @@ import 'package:text_call/utils/notification_services.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();  
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -83,12 +84,14 @@ Future<Widget> whichTextCall(ReceivedAction? receivedAction) async {
       howAppIsOPened: HowAppIsOPened.appOpenedRegularly,
     );
   }
-  if (receivedAction.buttonKeyPressed == 'ACCEPT_CALL') {
+  final currentCall = await getCurrentCall();
+  if (currentCall != null) {
     return TextCall(
-        themeMode: themeMode,
-        howAppIsOPened: HowAppIsOPened.fromTerminatedForPickedCall);
+      themeMode: themeMode,
+      howAppIsOPened: HowAppIsOPened.fromTerminatedForPickedCall,
+    );
   }
-  // if the request access notification is tapped
+
   if (receivedAction.channelKey == 'access_requests_channel') {
     if (receivedAction.id.toString().startsWith('12')) {
       return TextCall(
@@ -106,4 +109,17 @@ Future<Widget> whichTextCall(ReceivedAction? receivedAction) async {
     themeMode: themeMode,
     howAppIsOPened: HowAppIsOPened.appOpenedRegularly,
   );
+}
+
+Future<dynamic> getCurrentCall() async {
+  var calls = await FlutterCallkitIncoming.activeCalls();
+  if (calls is List) {
+    if (calls.isNotEmpty) {
+      // final _currentUuid = calls[0]['id'];
+      return calls[0];
+    } else {
+      // final _currentUuid = "";
+      return null;
+    }
+  }
 }

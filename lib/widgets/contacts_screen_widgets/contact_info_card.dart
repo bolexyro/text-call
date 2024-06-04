@@ -208,6 +208,7 @@ class _ContactCardWProfilePicStackState extends ConsumerState<ContactInfoCard> {
                                       name: _updatedContact.name,
                                       phoneNumber: _updatedContact.phoneNumber,
                                       imagePath: imageFile.path,
+                                      isMyContact: _updatedContact.isMyContact,
                                     );
                                   },
                                 );

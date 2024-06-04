@@ -1,0 +1,32 @@
+{
+    "id": "2024-06-04 09:23:22.042324",
+    "nameCaller": "Odufuwa Adebola",
+    "avatar": "",
+    "number": "0123456789",
+    "type": 0,
+    "duration": 20000,
+    "textAccept": "Accept",
+    "textDecline": "Decline",
+    "extra": {
+        "userId": 123
+    },
+    "missedCallNotification": {
+        "id": 0,
+        "showNotification": true,
+        "count": 1,
+        "subtitle": "Missed Text Call",
+        "callbackText": null,
+        "isShowCallback": false
+    },
+    "android": {
+        "isCustomNotification": true,
+        "isCustomSmallExNotification": false,
+        "ringtonePath": "system_ringtone_default",
+        "backgroundColor": "#36618e",
+        "backgroundUrl": "",
+        "actionColor": "#4CAF50",
+        "textColor": "#ffffff",
+        "incomingCallNotificationChannelName": "Incoming Call",
+        "missedCallNotificationChannelName": "Missed Call"
+    }
+}

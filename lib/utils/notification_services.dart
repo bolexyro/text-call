@@ -211,34 +211,44 @@ void registerCallkitIncomingListener() {
         final String callerPhoneNumber = eventBody['number'];
         final String messageJsonString = myDataInEventBody['messageJsonString'];
         final String messageType = myDataInEventBody['messageType'];
-        // final String recentId = myDataInEventBody['recentId'];
+        final String recentId = myDataInEventBody['recentId'];
 
         final url = Uri.https('text-call-backend.onrender.com',
             'call/accepted/$callerPhoneNumber');
         http.get(url);
 
         final prefs = await SharedPreferences.getInstance();
-
         final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
-        if (isUserLoggedIn != true) {
-          showFlushBar(Colors.blue, 'You have to login to see the message.',
-              FlushbarPosition.TOP, TextCall.navigatorKey.currentContext!);
-          return;
+
+        if (TextCall.navigatorKey.currentState != null) {
+          if (isUserLoggedIn != true) {
+            showFlushBar(Colors.blue, 'You have to login to see the message.',
+                FlushbarPosition.TOP, TextCall.navigatorKey.currentContext!);
+            return;
+          }
+
+          Navigator.of(TextCall.navigatorKey.currentContext!).push(
+            MaterialPageRoute(
+              builder: (context) => SmsNotFromTerminated(
+                complexMessage: messageType == 'complex'
+                    ? ComplexMessage(
+                        complexMessageJsonString: messageJsonString)
+                    : null,
+                regularMessage: messageType == 'regular'
+                    ? RegularMessage.fromJsonString(messageJsonString)
+                    : null,
+                howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
+              ),
+            ),
+          );
+        } else {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('recentId', recentId);
+          await prefs.setString('messageJsonString', messageJsonString);
+          await prefs.setString('callerPhoneNumber', callerPhoneNumber);
+          await prefs.setString('messageType', messageType);
         }
 
-        Navigator.of(TextCall.navigatorKey.currentContext!).push(
-          MaterialPageRoute(
-            builder: (context) => SmsNotFromTerminated(
-              complexMessage: messageType == 'complex'
-                  ? ComplexMessage(complexMessageJsonString: messageJsonString)
-                  : null,
-              regularMessage: messageType == 'regular'
-                  ? RegularMessage.fromJsonString(messageJsonString)
-                  : null,
-              howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
-            ),
-          ),
-        );
         break;
       case Event.actionCallDecline:
         final Map<String, dynamic> eventBody = event.body;

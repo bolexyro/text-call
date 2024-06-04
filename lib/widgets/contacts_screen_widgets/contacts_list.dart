@@ -244,16 +244,17 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                           switch (event!.event) {
                             case Event.actionCallIncoming:
                               final Map<String, dynamic> eventBody = event.body;
+                              print(eventBody);
 
-                              print(eventBody['number'].runtimeType);
-                              print('event body is ok');
-                              final Map myDataInEventBody = eventBody['extra'];
-                              print(
-                                  myDataInEventBody); // TODO: received an incoming call;
+                              // print(eventBody['number'].runtimeType);
+                              // print('event body is ok');
+                              // final Map myDataInEventBody = eventBody['extra'];
+                              // print(
+                              //     myDataInEventBody); // TODO: received an incoming call;
 
-                              final String faf =
-                                  myDataInEventBody['userId'].toString();
-                              print('Call incoming');
+                              // final String faf =
+                              //     myDataInEventBody['userId'].toString();
+                              // print('Call incoming');
 
                               break;
                             case Event.actionCallStart:

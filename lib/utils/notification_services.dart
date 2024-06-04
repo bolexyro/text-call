@@ -122,7 +122,9 @@ Future<void> messageHandler(RemoteMessage message) async {
   // i am still persisting this with sharedprefs because i no one mess with that sms notfrom terminated and terminated code
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString('recentId', recentId);
+  await prefs.setString('messageJsonString', messageJsonString);
   await prefs.setString('callerPhoneNumber', callerPhoneNumber);
+  await prefs.setString('messageType', messageType);
   CallKitParams callKitParams = CallKitParams(
     id: DateTime.now().toString(),
     nameCaller: callerName,
@@ -198,7 +200,7 @@ void registerCallkitIncomingListener() {
   FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
     switch (event!.event) {
       case Event.actionCallIncoming:
-        print('this is event body ${event.body}');
+        print('this is event bodyf fafaf ${event.body}');
         print('Call incoming');
         break;
       case Event.actionCallStart:
@@ -211,7 +213,7 @@ void registerCallkitIncomingListener() {
         final String callerPhoneNumber = eventBody['number'];
         final String messageJsonString = myDataInEventBody['messageJsonString'];
         final String messageType = myDataInEventBody['messageType'];
-        final String recentId = myDataInEventBody['recentId'];
+        // final String recentId = myDataInEventBody['recentId'];
 
         final url = Uri.https('text-call-backend.onrender.com',
             'call/accepted/$callerPhoneNumber');
@@ -241,13 +243,7 @@ void registerCallkitIncomingListener() {
               ),
             ),
           );
-        } else {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('recentId', recentId);
-          await prefs.setString('messageJsonString', messageJsonString);
-          await prefs.setString('callerPhoneNumber', callerPhoneNumber);
-          await prefs.setString('messageType', messageType);
-        }
+        } else {}
 
         break;
       case Event.actionCallDecline:

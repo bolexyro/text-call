@@ -11,6 +11,8 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final lastCallTime = await getLastCall();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -64,11 +66,14 @@ void main() async {
         NotificationController.onDismissActionReceivedMethod,
   );
   runApp(
-    ProviderScope(child: await whichTextCall(receivedAction)),
+    ProviderScope(
+      child: await whichTextCall(receivedAction, lastCallTime),
+    ),
   );
 }
 
-Future<Widget> whichTextCall(ReceivedAction? receivedAction) async {
+Future<Widget> whichTextCall(
+    ReceivedAction? receivedAction, dynamic lastCallTime) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   final isDarkMode = prefs.getBool('isDarkMode');
 
@@ -78,17 +83,17 @@ Future<Widget> whichTextCall(ReceivedAction? receivedAction) async {
           ? ThemeMode.dark
           : ThemeMode.light;
 
+  if (lastCallTime != null) {
+    return TextCall(
+      howAppIsOPened: HowAppIsOPened.fromTerminatedForPickedCall,
+      themeMode: themeMode,
+    );
+  }
+
   if (receivedAction == null) {
     return TextCall(
       themeMode: themeMode,
       howAppIsOPened: HowAppIsOPened.appOpenedRegularly,
-    );
-  }
-  final currentCall = await getCurrentCall();
-  if (currentCall != null) {
-    return TextCall(
-      themeMode: themeMode,
-      howAppIsOPened: HowAppIsOPened.fromTerminatedForPickedCall,
     );
   }
 
@@ -111,14 +116,23 @@ Future<Widget> whichTextCall(ReceivedAction? receivedAction) async {
   );
 }
 
-Future<dynamic> getCurrentCall() async {
-  var calls = await FlutterCallkitIncoming.activeCalls();
+Future<dynamic> getLastCall() async {
+  final calls = await FlutterCallkitIncoming.activeCalls();
   if (calls is List) {
     if (calls.isNotEmpty) {
-      // final _currentUuid = calls[0]['id'];
-      return calls[0];
+      final lastCall = calls[calls.length - 1];
+
+      // 20 is the number of seconds before a call ends. so if we pick a call before that time ends,
+      // we return a non null object
+      // because activeCAlls gives us a list of all the calls that has been accepted. so we get the last one and check its time which is its id
+
+      //i made the 20 21 because of the await. lets just assume it takes 1 second
+      if (DateTime.now().difference(DateTime.parse(lastCall['id'])).inSeconds <=
+              21 &&
+          lastCall['isAccepted']) {
+        return lastCall['id'];
+      }
     } else {
-      // final _currentUuid = "";
       return null;
     }
   }

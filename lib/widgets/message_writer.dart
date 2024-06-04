@@ -419,7 +419,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     ? null
                     : ComplexMessage(
                         complexMessageJsonString:
-                            jsonEncode(upToDateBolexyroJson),
+                            jsonEncode(bolexyroJsonWithNetworkUrls),
                       ),
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
@@ -480,7 +480,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     ? null
                     : ComplexMessage(
                         complexMessageJsonString:
-                            jsonEncode(upToDateBolexyroJson),
+                            jsonEncode(bolexyroJsonWithNetworkUrls),
                       ),
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
@@ -594,7 +594,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       ? null
                       : ComplexMessage(
                           complexMessageJsonString:
-                              jsonEncode(upToDateBolexyroJson),
+                              jsonEncode(bolexyroJsonWithNetworkUrls),
                         ),
                   id: _recentId,
                   phoneNumber: widget.calleePhoneNumber,

@@ -9,6 +9,7 @@ import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:http/http.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
@@ -239,12 +240,22 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                         );
                         await FlutterCallkitIncoming.showCallkitIncoming(
                             callKitParams);
+
                         FlutterCallkitIncoming.onEvent
-                            .listen((CallEvent? event) {
+                            .listen((CallEvent? event) async {
                           switch (event!.event) {
                             case Event.actionCallIncoming:
                               final Map<String, dynamic> eventBody = event.body;
-                              print(eventBody);
+                              final activeCalls =
+                                  await FlutterCallkitIncoming.activeCalls();
+
+                              debugPrint(
+                                  'active calls ${activeCalls[activeCalls.length - 1]}');
+
+                              print(activeCalls[activeCalls.length - 1]
+                                  ['isAccepted']);
+
+                              // print(eventBody);
 
                               // print(eventBody['number'].runtimeType);
                               // print('event body is ok');
@@ -262,11 +273,20 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                               // TODO: show screen calling in Flutter
                               break;
                             case Event.actionCallAccept:
-                              // TODO: accepted an incoming call
-                              // TODO: show screen calling in Flutter
-                              print(
-                                  'event body from accepted is ${event.body}');
-                              print('Call accepted');
+                              final activeCalls =
+                                  await FlutterCallkitIncoming.activeCalls();
+
+                              debugPrint(
+                                  'active calls ${activeCalls[activeCalls.length - 1]}');
+                              final gin = DateTime.now()
+                                  .difference(DateTime.parse(
+                                      activeCalls[activeCalls.length - 1]
+                                          ['id']))
+                                  .inSeconds;
+                              print('active calls mkbhd $gin');
+                              print(activeCalls[activeCalls.length - 1]
+                                  ['isAccepted']);
+
                               break;
                             case Event.actionCallDecline:
                               // TODO: declined an incoming call

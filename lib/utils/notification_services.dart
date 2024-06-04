@@ -31,8 +31,6 @@ Future<String> _getCallerName(String phoneNumber) async {
 }
 
 Future<void> messageHandler(RemoteMessage message) async {
-  registerCallkitIncomingListener();
-
   final String notificationPurpose = message.data['purpose'];
   if (notificationPurpose == 'access_request') {
     final String recentId = message.data['message_id'];

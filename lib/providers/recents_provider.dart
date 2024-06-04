@@ -103,6 +103,7 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
   void addRecent(Recent newRecent) async {
     final db = await getDatabase();
     addRecentToDb(newRecent, db);
+    print('onjhbjhgugugygygg');
 
     final contactAndContactExistsStatus = await getContactAndExistsStatus(
         db: db, phoneNumber: newRecent.contact.phoneNumber);
@@ -112,7 +113,11 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
       contactName: (contactAndContactExistsStatus[0] as Contact).name,
       contactImagePath: (contactAndContactExistsStatus[0] as Contact).imagePath,
     );
-    state = [...state, newRecent];
+
+    if (state.contains(newRecent)) {
+    } else {
+      state = [...state, newRecent];
+    }
   }
 
   // should only be used when we delete a contact and we want to delete the corresponding

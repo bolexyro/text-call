@@ -368,6 +368,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             final snapshotData = json.decode(snapshot.data);
             print(snapshotData);
             if (snapshotData['call_status'] == 'error') {
+              _channel?.sink.close();
+
               return Padding(
                 padding: const EdgeInsets.only(top: 10.0),
                 child: Stack(
@@ -383,7 +385,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                             IconButton(
                               onPressed: () => setState(() {
                                 _callSending = false;
-                                _channel?.sink.close();
                               }),
                               icon: const Icon(
                                 Icons.arrow_back,
@@ -407,6 +408,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             }
             if (snapshotData['call_status'] == 'rejected') {
               // create a recent in your table
+              _channel?.sink.close();
+
               final recent = Recent.withoutContactObject(
                 category: RecentCategory.outgoingRejected,
                 regularMessage: upToDateBolexyroJson == null
@@ -436,7 +439,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                         IconButton(
                           onPressed: () => setState(() {
                             _callSending = false;
-                            _channel?.sink.close();
                           }),
                           icon: const Icon(
                             Icons.arrow_back,
@@ -460,14 +462,15 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       repeatForever: false,
                       totalRepeatCount: 1,
                     ),
-                    Lottie.asset('assets/animations/call_rejected.json',
-                        height: 300),
+                    // Lottie.asset('assets/animations/call_rejected.json',
+                    //     height: 300),
                   ],
                 ),
               );
             }
             if (snapshotData['call_status'] == 'accepted') {
-              print(upToDateBolexyroJson);
+              _channel?.sink.close();
+
               final recent = Recent.withoutContactObject(
                 category: RecentCategory.outgoingAccepted,
                 regularMessage: upToDateBolexyroJson == null
@@ -494,7 +497,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       IconButton(
                         onPressed: () => setState(() {
                           _callSending = false;
-                          _channel?.sink.close();
                           _confettiController.stop();
                         }),
                         icon: const Icon(
@@ -524,6 +526,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               );
             }
             if (snapshotData['call_status'] == 'callee_busy') {
+              _channel?.sink.close();
               return Padding(
                 padding: const EdgeInsets.only(top: 10.0),
                 child: Column(
@@ -533,7 +536,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                         IconButton(
                           onPressed: () => setState(() {
                             _callSending = false;
-                            _channel?.sink.close();
                           }),
                           icon: const Icon(
                             Icons.arrow_back,
@@ -559,7 +561,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       onFinished: () {
                         Future.delayed(const Duration(seconds: 2), () {
                           if (_callSending) {
-                            _channel?.sink.close();
                             setState(() {
                               _callSending = false;
                             });

@@ -139,7 +139,7 @@ Future<sql.Database> getDatabase() async {
       await db.execute(
           'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT, imagePath TEXT)');
       await db.execute(
-          'CREATE TABLE recents ( id TEXT , callTime TEXT PRIMARY KEY , phoneNumber TEXT, categoryName TEXT, messageJson TEXT, messageType TEXT, canBeViewed INTEGER)');
+          'CREATE TABLE recents ( id TEXT PRIMARY KEY, callTime TEXT, phoneNumber TEXT, categoryName TEXT, messageJson TEXT, messageType TEXT, canBeViewed INTEGER)');
     },
   );
   return db;
@@ -415,7 +415,8 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
     }
     db.collection("users").doc(originalContact.phoneNumber).delete();
   } else {
-    ref.read(contactsProvider.notifier).addContact(ref,
+    ref.read(contactsProvider.notifier).addContact(
+          ref,
           Contact(
             name: "Me",
             phoneNumber: phoneNumber,
@@ -492,5 +493,6 @@ void addRecentToDb(Recent newRecent, Database db) {
       'messageType': newRecent.regularMessage == null ? 'complex' : 'regular',
       'canBeViewed': newRecent.canBeViewed ? 1 : 0,
     },
+    conflictAlgorithm: ConflictAlgorithm.ignore,
   );
 }

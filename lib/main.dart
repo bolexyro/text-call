@@ -51,6 +51,7 @@ void main() async {
   );
 
   await fcmSetup();
+  registerCallkitIncomingListener();
   FirebaseMessaging.onBackgroundMessage(fcmBackgroundHandler);
   ReceivedAction? receivedAction =
       await AwesomeNotifications().getInitialNotificationAction(

@@ -84,11 +84,13 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
               phoneNumber: newContact.phoneNumber,
               imagePath: newContact.imagePath,
             ),
+            callTime: recent.callTime,
             category: recent.category,
             complexMessage: recent.complexMessage,
             regularMessage: recent.regularMessage,
             id: recent.id,
             canBeViewed: recent.canBeViewed,
+            recentIsAContact: true,
           );
         }
         return recent;
@@ -111,6 +113,24 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
       contactImagePath: (contactAndContactExistsStatus[0] as Contact).imagePath,
     );
     state = [...state, newRecent];
+  }
+
+  // should only be used when we delete a contact and we want to delete the corresponding
+  Future<void> removeNamesFromRecents(String phoneNumber) async {
+    final List<Recent> newList = [];
+
+    for (final recent in List.from(state)) {
+      if (recent.contact.phoneNumber == phoneNumber) {
+        newList.add(Recent.fromRecent(
+            recent: recent,
+            recentIsAContact: false,
+            contactName: '0${phoneNumber.substring(4)}',
+            contactImagePath: null));
+      } else {
+        newList.add(recent);
+      }
+    }
+    state = newList;
   }
 }
 

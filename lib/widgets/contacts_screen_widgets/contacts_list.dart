@@ -1,17 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_callkit_incoming/entities/android_params.dart';
-import 'package:flutter_callkit_incoming/entities/call_event.dart';
-import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
-import 'package:flutter_callkit_incoming/entities/ios_params.dart';
-import 'package:flutter_callkit_incoming/entities/notification_params.dart';
-import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
 import 'package:grouped_list/grouped_list.dart';
-import 'package:http/http.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
@@ -28,9 +20,11 @@ class ContactsList extends ConsumerStatefulWidget {
     required this.onContactSelected,
     required this.screen,
     required this.scaffoldKey,
+    required this.onContactDeleted,
   });
 
   final void Function(Contact selectedContact) onContactSelected;
+  final void Function(Contact deletedContact) onContactDeleted;
   final Screen screen;
   final GlobalKey<ScaffoldState> scaffoldKey;
 
@@ -80,7 +74,8 @@ class _ContactsListState extends ConsumerState<ContactsList> {
     if (toDelete != true) {
       return;
     }
-    ref.read(contactsProvider.notifier).deleteContact(contact.phoneNumber);
+    ref.read(contactsProvider.notifier).deleteContact(ref, contact.phoneNumber);
+    widget.onContactDeleted(contact);
   }
 
   Widget withOrWithoutHero(contact) {
@@ -180,154 +175,140 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                       //   );
                       // },
                       onPressed: () async {
-                        //   Navigator.of(context).push(
-                        //     MaterialPageRoute(
-                        //       builder: (context) => const SearchScreen(),
-                        //     ),
-                        //   );
-                        // this._currentUuid = _uuid.v4();
-                        CallKitParams callKitParams = CallKitParams(
-                          id: DateTime.now().toString(),
-                          nameCaller: 'Odufuwa Adebola',
-                          appName: 'TextCall',
-                          // avatar: 'https://i.pravatar.cc/100',
-
-                          handle: '0123456789',
-                          type: 0,
-                          textAccept: 'Accept',
-                          textDecline: 'Decline',
-                          missedCallNotification: const NotificationParams(
-                            showNotification: true,
-                            isShowCallback: false,
-                            subtitle: 'Missed Text Call',
-                            // callbackText: 'Call back',
-                          ),
-                          duration: 20000,
-                          extra: <String, dynamic>{'userId': 123},
-                          headers: <String, dynamic>{
-                            'apiKey': 'Abc@123!',
-                            'platform': 'flutter'
-                          },
-                          android: const AndroidParams(
-                            isCustomNotification: true,
-                            isShowLogo: true,
-                            ringtonePath: 'system_ringtone_default',
-                            backgroundColor: '#36618e',
-                            // backgroundUrl: 'https://i.pravatar.cc/500',
-                            actionColor: '#4CAF50',
-                            textColor: '#ffffff',
-                            incomingCallNotificationChannelName:
-                                "Incoming Call",
-                            missedCallNotificationChannelName: "Missed Call",
-                            isShowCallID: false,
-                          ),
-                          ios: const IOSParams(
-                            iconName: 'CallKitLogo',
-                            handleType: 'generic',
-                            supportsVideo: true,
-                            maximumCallGroups: 2,
-                            maximumCallsPerCallGroup: 1,
-                            audioSessionMode: 'default',
-                            audioSessionActive: true,
-                            audioSessionPreferredSampleRate: 44100.0,
-                            audioSessionPreferredIOBufferDuration: 0.005,
-                            supportsDTMF: true,
-                            supportsHolding: true,
-                            supportsGrouping: false,
-                            supportsUngrouping: false,
-                            ringtonePath: 'system_ringtone_default',
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SearchScreen(),
                           ),
                         );
-                        await FlutterCallkitIncoming.showCallkitIncoming(
-                            callKitParams);
+                        // CallKitParams callKitParams = CallKitParams(
+                        //   id: DateTime.now().toString(),
+                        //   nameCaller: 'Odufuwa Adebola',
+                        //   appName: 'TextCall',
+                        //   // avatar: 'https://i.pravatar.cc/100',
 
-                        FlutterCallkitIncoming.onEvent
-                            .listen((CallEvent? event) async {
-                          switch (event!.event) {
-                            case Event.actionCallIncoming:
-                              final Map<String, dynamic> eventBody = event.body;
-                              final activeCalls =
-                                  await FlutterCallkitIncoming.activeCalls();
+                        //   handle: '0123456789',
+                        //   type: 0,
+                        //   textAccept: 'Accept',
+                        //   textDecline: 'Decline',
+                        //   missedCallNotification: const NotificationParams(
+                        //     showNotification: true,
+                        //     isShowCallback: false,
+                        //     subtitle: 'Missed Text Call',
+                        //     // callbackText: 'Call back',
+                        //   ),
+                        //   duration: 20000,
+                        //   extra: <String, dynamic>{'userId': 123},
+                        //   headers: <String, dynamic>{
+                        //     'apiKey': 'Abc@123!',
+                        //     'platform': 'flutter'
+                        //   },
+                        //   android: const AndroidParams(
+                        //     isCustomNotification: true,
+                        //     isShowLogo: true,
+                        //     ringtonePath: 'system_ringtone_default',
+                        //     backgroundColor: '#36618e',
+                        //     // backgroundUrl: 'https://i.pravatar.cc/500',
+                        //     actionColor: '#4CAF50',
+                        //     textColor: '#ffffff',
+                        //     incomingCallNotificationChannelName:
+                        //         "Incoming Call",
+                        //     missedCallNotificationChannelName: "Missed Call",
+                        //     isShowCallID: false,
+                        //   ),
+                        //   ios: const IOSParams(
+                        //     iconName: 'CallKitLogo',
+                        //     handleType: 'generic',
+                        //     supportsVideo: true,
+                        //     maximumCallGroups: 2,
+                        //     maximumCallsPerCallGroup: 1,
+                        //     audioSessionMode: 'default',
+                        //     audioSessionActive: true,
+                        //     audioSessionPreferredSampleRate: 44100.0,
+                        //     audioSessionPreferredIOBufferDuration: 0.005,
+                        //     supportsDTMF: true,
+                        //     supportsHolding: true,
+                        //     supportsGrouping: false,
+                        //     supportsUngrouping: false,
+                        //     ringtonePath: 'system_ringtone_default',
+                        //   ),
+                        // );
+                        // await FlutterCallkitIncoming.showCallkitIncoming(
+                        //     callKitParams);
 
-                              debugPrint(
-                                  'active calls ${activeCalls[activeCalls.length - 1]}');
+                        // FlutterCallkitIncoming.onEvent
+                        //     .listen((CallEvent? event) async {
+                        //   switch (event!.event) {
+                        //     case Event.actionCallIncoming:
+                        //       final Map<String, dynamic> eventBody = event.body;
+                        //       final activeCalls =
+                        //           await FlutterCallkitIncoming.activeCalls();
 
-                              print(activeCalls[activeCalls.length - 1]
-                                  ['isAccepted']);
+                        //       debugPrint(
+                        //           'active calls ${activeCalls[activeCalls.length - 1]}');
 
-                              // print(eventBody);
+                        //       print(activeCalls[activeCalls.length - 1]
+                        //           ['isAccepted']);
 
-                              // print(eventBody['number'].runtimeType);
-                              // print('event body is ok');
-                              // final Map myDataInEventBody = eventBody['extra'];
-                              // print(
-                              //     myDataInEventBody); // TODO: received an incoming call;
+                        //       // print(eventBody);
 
-                              // final String faf =
-                              //     myDataInEventBody['userId'].toString();
-                              // print('Call incoming');
+                        //       // print(eventBody['number'].runtimeType);
+                        //       // print('event body is ok');
+                        //       // final Map myDataInEventBody = eventBody['extra'];
+                        //       // print(
+                        //       //     myDataInEventBody);
 
-                              break;
-                            case Event.actionCallStart:
-                              // TODO: started an outgoing call
-                              // TODO: show screen calling in Flutter
-                              break;
-                            case Event.actionCallAccept:
-                              final activeCalls =
-                                  await FlutterCallkitIncoming.activeCalls();
+                        //       // final String faf =
+                        //       //     myDataInEventBody['userId'].toString();
+                        //       // print('Call incoming');
 
-                              debugPrint(
-                                  'active calls ${activeCalls[activeCalls.length - 1]}');
-                              final gin = DateTime.now()
-                                  .difference(DateTime.parse(
-                                      activeCalls[activeCalls.length - 1]
-                                          ['id']))
-                                  .inSeconds;
-                              print('active calls mkbhd $gin');
-                              print(activeCalls[activeCalls.length - 1]
-                                  ['isAccepted']);
+                        //       break;
+                        //     case Event.actionCallStart:
+                        //       break;
+                        //     case Event.actionCallAccept:
+                        //       final activeCalls =
+                        //           await FlutterCallkitIncoming.activeCalls();
 
-                              break;
-                            case Event.actionCallDecline:
-                              // TODO: declined an incoming call
-                              final url = Uri.https(
-                                  'text-call-backend.onrender.com',
-                                  'call/rejected/09000');
-                              get(url);
-                              print('call rejected');
-                              break;
-                            case Event.actionCallEnded:
-                              // TODO: ended an incoming/outgoing call
-                              break;
-                            case Event.actionCallTimeout:
-                              // TODO: missed an incoming call
-                              break;
-                            case Event.actionCallCallback:
-                              // TODO: only Android - click action `Call back` from missed call notification
-                              break;
-                            case Event.actionCallToggleHold:
-                              // TODO: only iOS
-                              break;
-                            case Event.actionCallToggleMute:
-                              // TODO: only iOS
-                              break;
-                            case Event.actionCallToggleDmtf:
-                              // TODO: only iOS
-                              break;
-                            case Event.actionCallToggleGroup:
-                              // TODO: only iOS
-                              break;
-                            case Event.actionCallToggleAudioSession:
-                              // TODO: only iOS
-                              break;
-                            case Event.actionDidUpdateDevicePushTokenVoip:
-                              // TODO: only iOS
-                              break;
-                            case Event.actionCallCustom:
-                              // TODO: for custom action
-                              break;
-                          }
-                        });
+                        //       debugPrint(
+                        //           'active calls ${activeCalls[activeCalls.length - 1]}');
+                        //       final gin = DateTime.now()
+                        //           .difference(DateTime.parse(
+                        //               activeCalls[activeCalls.length - 1]
+                        //                   ['id']))
+                        //           .inSeconds;
+                        //       print('active calls mkbhd $gin');
+                        //       print(activeCalls[activeCalls.length - 1]
+                        //           ['isAccepted']);
+
+                        //       break;
+                        //     case Event.actionCallDecline:
+                        //       final url = Uri.https(
+                        //           'text-call-backend.onrender.com',
+                        //           'call/rejected/09000');
+                        //       get(url);
+                        //       print('call rejected');
+                        //       break;
+                        //     case Event.actionCallEnded:
+                        //       break;
+                        //     case Event.actionCallTimeout:
+                        //       break;
+                        //     case Event.actionCallCallback:
+                        //       break;
+                        //     case Event.actionCallToggleHold:
+                        //       break;
+                        //     case Event.actionCallToggleMute:
+                        //       break;
+                        //     case Event.actionCallToggleDmtf:
+                        //       break;
+                        //     case Event.actionCallToggleGroup:
+                        //       break;
+                        //     case Event.actionCallToggleAudioSession:
+                        //       break;
+                        //     case Event.actionDidUpdateDevicePushTokenVoip:
+                        //       break;
+                        //     case Event.actionCallCustom:
+                        //       break;
+                        //   }
+                        // });
                         // final prefs = await SharedPreferences.getInstance();
                         // await prefs.setString('messageJsonString',
                         //     '{"0":{"document":{"backgroundColor":{"alpha":255,"red":255,"blue":255,"green":255},"quillDocJson":"[{\\"insert\\":\\"Fffffffffffffff\\\\n\\"}]"}}}');

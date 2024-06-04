@@ -30,7 +30,7 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
     state = contactsList;
   }
 
-  Future<void> addContact(Contact newContact) async {
+  Future<void> addContact(WidgetRef ref, Contact newContact) async {
     final db = await getDatabase();
 
     db.insert(
@@ -43,6 +43,9 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
       conflictAlgorithm: ConflictAlgorithm.ignore,
     );
     state = [...state, newContact];
+    await ref
+        .read(recentsProvider.notifier)
+        .updateRecentContact(newContact.phoneNumber, newContact);
   }
 
   Future<void> updateContact(
@@ -77,7 +80,7 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
         .updateRecentContact(oldContactPhoneNumber, newContact);
   }
 
-  void deleteContact(String phoneNumber) async {
+  void deleteContact(WidgetRef ref, String phoneNumber) async {
     final db = await getDatabase();
     await db.delete(
       contactsTableName,
@@ -85,15 +88,12 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
       whereArgs: [phoneNumber],
     );
 
-    await db.delete(
-      'recents',
-      where: 'phoneNumber = ?',
-      whereArgs: [phoneNumber],
-    );
     state = List.from(state)
       ..removeWhere(
         (contact) => contact.phoneNumber == phoneNumber,
       );
+
+    ref.read(recentsProvider.notifier).removeNamesFromRecents(phoneNumber);
   }
 }
 

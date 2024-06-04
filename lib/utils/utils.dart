@@ -415,7 +415,7 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
     }
     db.collection("users").doc(originalContact.phoneNumber).delete();
   } else {
-    ref.read(contactsProvider.notifier).addContact(
+    ref.read(contactsProvider.notifier).addContact(ref,
           Contact(
             name: "Me",
             phoneNumber: phoneNumber,

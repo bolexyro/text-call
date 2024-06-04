@@ -48,15 +48,22 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
     });
   }
 
-  void _goToPage({Contact? selectedContact, Recent? selectedRecent}) {
+  void _goToPage({Contact? selectedContact}) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ContactDetailsScreen(
           selectedContact: selectedContact,
-          selectedRecent: selectedRecent,
         ),
       ),
     );
+  }
+
+  void _resetContactDetailsPane(Contact deletedContact) {
+    if (deletedContact.phoneNumber == _currentContact?.phoneNumber) {
+      setState(() {
+        _currentContact = null;
+      });
+    }
   }
 
   @override
@@ -87,6 +94,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
           children: [
             Expanded(
               child: ContactsList(
+                onContactDeleted: _resetContactDetailsPane,
                 scaffoldKey: widget.scaffoldKey,
                 screen: Screen.tablet,
                 onContactSelected: _setCurrentContact,
@@ -110,6 +118,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
       }
 
       return ContactsList(
+        onContactDeleted: _resetContactDetailsPane,
         scaffoldKey: widget.scaffoldKey,
         screen: Screen.phone,
         onContactSelected: (Contact selectedContact) =>

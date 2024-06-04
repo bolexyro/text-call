@@ -98,7 +98,7 @@ class _ContactCardWProfilePicStackState extends ConsumerState<ContactInfoCard> {
     late Contact upToDateContact;
     if (contactsList.isEmpty) {
       upToDateContact = Contact(
-        name: '0${widget.contact.phoneNumber.substring(4)}',
+        name: widget.contact.name,
         phoneNumber: widget.contact.phoneNumber,
         imagePath: widget.contact.imagePath,
         isMyContact: widget.contact.isMyContact,
@@ -108,7 +108,12 @@ class _ContactCardWProfilePicStackState extends ConsumerState<ContactInfoCard> {
           .where((contact) => contact.phoneNumber == widget.contact.phoneNumber)
           .first;
     }
-
+    // print(ref.read(contactsProvider).first.phoneNumber);
+    // print(widget.contact.phoneNumber);
+    // final upToDateContact = ref
+    //     .watch(contactsProvider)
+    //     .where((contact) => contact.phoneNumber == widget.contact.phoneNumber)
+    //     .first;
     bool isDarkTheme =
         Theme.of(context).brightness == Brightness.dark ? true : false;
     return Column(

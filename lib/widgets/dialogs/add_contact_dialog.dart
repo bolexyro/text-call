@@ -113,14 +113,16 @@ class _AddContactState extends ConsumerState<AddContactDialog> {
             );
         Navigator.of(context).pop(newContact);
       } else {
+        final newContact = Contact(
+          name: _enteredName!.trim(),
+          phoneNumber: _enteredPhoneNumber!,
+          imagePath: _imageFile?.path,
+        );
         await ref.read(contactsProvider.notifier).addContact(
-              Contact(
-                name: _enteredName!.trim(),
-                phoneNumber: _enteredPhoneNumber!,
-                imagePath: _imageFile?.path,
-              ),
+              ref,
+              newContact,
             );
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(newContact);
       }
     }
     setState(() {

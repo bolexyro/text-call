@@ -160,269 +160,151 @@ class _RecentsListState extends ConsumerState<RecentsList> {
   @override
   Widget build(BuildContext context) {
     final recentsList = _applyFilter(ref.watch(recentsProvider));
-    // final recentsList = [
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'HeFsinglllo There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    //   Recent(
-    //       contact: const Contact(
-    //           name: "Bolexyro", phoneNumber: '+2349027929326', imagePath: null),
-    //       category: RecentCategory.incomingAccepted,
-    //       message: Message(
-    //           message: 'Hello There', backgroundColor: Colors.red.shade50),
-    //       id: '123'),
-    // ];
 
     final animatedContainerContent = animatedContainerHeight == bigHeight
         // i am using this singlechildScrollView around the column because, if you don't you'd be getting errors.
-        ? SingleChildScrollView(
-            child: Column(
-              children: [
-                 Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        widget.scaffoldKey.currentState!.openDrawer();
-                      },
-                      icon: SvgPicture.asset(
-                        'assets/icons/hamburger-menu.svg',
-                        height: 30,
-                        colorFilter: ColorFilter.mode(
-                            Theme.of(context).iconTheme.color ?? Colors.grey,
-                            BlendMode.srcIn),
+        ? SizedBox(
+            key: const ValueKey(0),
+            height: animatedContainerHeight,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          widget.scaffoldKey.currentState!.openDrawer();
+                        },
+                        icon: SvgPicture.asset(
+                          'assets/icons/hamburger-menu.svg',
+                          height: 30,
+                          colorFilter: ColorFilter.mode(
+                              Theme.of(context).iconTheme.color ?? Colors.grey,
+                              BlendMode.srcIn),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-               
-                Text(
-                  'Recents',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineLarge!
-                      .copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(
-                  height: 50,
-                ),
-                Row(
-                  children: [
-                    const Spacer(),
-                    IconButton(
-                      onPressed: _showFilterDialog,
-                      icon: const Icon(Icons.filter_alt),
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setString('callMessage', 'callMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessage');
-                        await prefs.setString(
-                            'callerPhoneNumber', '+2349027929326');
-                        await prefs.setString(
-                            'callerName', 'callerPhoneNumber');
-                        await prefs.setString(
-                          'backgroundColor',
-                          json.encode(
-                            {
-                              'alpha': 200,
-                              'red': 90,
-                              'green': 90,
-                              'blue': 20,
-                            },
-                          ),
-                        );
-                        createAwesomeNotification(
-                          title: 'Bolexyro',
-                          notificationPurpose: NotificationPurpose.forCall,
-                        );
-                      },
-                      icon: const Icon(Icons.search),
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                  Text(
+                    'Recents',
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineLarge!
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(
+                    height: 50,
+                  ),
+                  Row(
+                    children: [
+                      const Spacer(),
+                      IconButton(
+                        onPressed: _showFilterDialog,
+                        icon: const Icon(Icons.filter_alt),
+                      ),
+                      IconButton(
+                        onPressed: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setString('callMessage',
+                              'callMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessage');
+                          await prefs.setString(
+                              'callerPhoneNumber', '+2349027929326');
+                          await prefs.setString(
+                              'callerName', 'callerPhoneNumber');
+                          await prefs.setString(
+                            'backgroundColor',
+                            json.encode(
+                              {
+                                'alpha': 200,
+                                'red': 90,
+                                'green': 90,
+                                'blue': 20,
+                              },
+                            ),
+                          );
+                          createAwesomeNotification(
+                            title: 'Bolexyro',
+                            notificationPurpose: NotificationPurpose.forCall,
+                          );
+                        },
+                        icon: const Icon(Icons.search),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                  ),
+                ],
+              ),
             ),
           )
-        : Padding(
-            padding: const EdgeInsets.fromLTRB(2.0, 15, 5, 15),
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: () {
-                    widget.scaffoldKey.currentState!.openDrawer();
-                  },
-                  icon: SvgPicture.asset(
-                    'assets/icons/hamburger-menu.svg',
-                    height: 30,
-                    colorFilter: ColorFilter.mode(
-                        Theme.of(context).iconTheme.color ?? Colors.grey,
-                        BlendMode.srcIn),
+        : SizedBox(
+            key: const ValueKey(1),
+            height: animatedContainerHeight,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(2.0, 15, 5, 15),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      widget.scaffoldKey.currentState!.openDrawer();
+                    },
+                    icon: SvgPicture.asset(
+                      'assets/icons/hamburger-menu.svg',
+                      height: 30,
+                      colorFilter: ColorFilter.mode(
+                          Theme.of(context).iconTheme.color ?? Colors.grey,
+                          BlendMode.srcIn),
+                    ),
                   ),
-                ),
-                Text(
-                  'Recents',
-                  // style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineLarge!
-                      .copyWith(fontWeight: FontWeight.bold),
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: _showFilterDialog,
-                  icon: const Icon(Icons.filter_alt),
-                ),
-                IconButton(
-                  onPressed: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString('callMessage', 'callMessage');
-                    await prefs.setString(
-                        'callerPhoneNumber', '+2349027929326');
-                    await prefs.setString('callerName', 'callerPhoneNumber');
-                    await prefs.setString(
-                      'backgroundColor',
-                      json.encode(
-                        {
-                          'alpha': 200,
-                          'red': 90,
-                          'green': 90,
-                          'blue': 20,
-                        },
-                      ),
-                    );
-                    createAwesomeNotification(
-                      title: 'Bolexyro',
-                      notificationPurpose: NotificationPurpose.forCall,
-                    );
-                  },
-                  icon: const Icon(Icons.search),
-                ),
-              ],
+                  Text(
+                    'Recents',
+                    // style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineLarge!
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: _showFilterDialog,
+                    icon: const Icon(Icons.filter_alt),
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('callMessage', 'callMessage');
+                      await prefs.setString(
+                          'callerPhoneNumber', '+2349027929326');
+                      await prefs.setString('callerName', 'callerPhoneNumber');
+                      await prefs.setString(
+                        'backgroundColor',
+                        json.encode(
+                          {
+                            'alpha': 200,
+                            'red': 90,
+                            'green': 90,
+                            'blue': 20,
+                          },
+                        ),
+                      );
+                      createAwesomeNotification(
+                        title: 'Bolexyro',
+                        notificationPurpose: NotificationPurpose.forCall,
+                      );
+                    },
+                    icon: const Icon(Icons.search),
+                  ),
+                ],
+              ),
             ),
           );
 
     return Column(
       children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          height: animatedContainerHeight,
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 500),
+          // transitionBuilder: (Widget child, Animation<double> animation) {
+          //   return ScaleTransition(scale: animation, child: child);
+          // },
           child: animatedContainerContent,
         ),
         if (recentsList.isNotEmpty)
@@ -463,7 +345,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                     }
                   }
                   // Returning null (or false) to
-                // "allow the notification to continue to be dispatched to further ancestors".
+                  // "allow the notification to continue to be dispatched to further ancestors".
                   return false;
                 },
                 child: GroupedListView(

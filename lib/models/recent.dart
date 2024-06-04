@@ -93,7 +93,7 @@ class Recent {
     this.canBeViewed = true,
   })  : callTime = callTime ?? DateTime.now(),
         contact = Contact(
-          name: 'name',
+          name: '0${phoneNumber.substring(4)}',
           phoneNumber: phoneNumber,
           imagePath: null,
         );

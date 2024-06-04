@@ -501,40 +501,47 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
           }
         },
         child: SafeArea(
-          child: Column(
-            children: [
-              if (_displayedWidgetsMap.isEmpty)
-                Expanded(
-                  child: Center(
-                    child: Transform.rotate(
-                      angle: .785,
-                      child: Text(
-                        'Tabula Rasa',
-                        style: GoogleFonts.baskervville(
-                          textStyle: const TextStyle(
-                            fontSize: 60,
-                            fontWeight: FontWeight.bold,
-                          ),
+          child: _displayedWidgetsMap.isEmpty
+              ? Center(
+                  child: Transform.rotate(
+                    angle: .785,
+                    child: Text(
+                      'Tabula Rasa',
+                      style: GoogleFonts.baskervville(
+                        textStyle: const TextStyle(
+                          fontSize: 60,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
+                )
+              : ReorderableListView(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10.0, vertical: 10),
+                  scrollController: _scrollController,
+                  onReorder: (int oldIndex, int newIndex) {
+                    setState(() {
+                      if (oldIndex < newIndex) {
+                        newIndex -= 1;
+                      }
+                      List<MapEntry<int, Widget>> entries =
+                          _displayedWidgetsMap.entries.toList();
+
+                      // Remove the item at the old index
+                      final entry = entries.removeAt(oldIndex);
+
+                      // Insert the item at the new index
+                      entries.insert(newIndex, entry);
+
+                      // Clear the original map and add the reordered entries
+                      _displayedWidgetsMap
+                        ..clear()
+                        ..addEntries(entries);
+                    });
+                  },
+                  children: _displayedWidgetsMap.values.toList(),
                 ),
-              if (_displayedWidgetsMap.isNotEmpty)
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 10),
-                      child: Column(
-                        children: _displayedWidgetsMap.values.toList(),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
         ),
       ),
     );

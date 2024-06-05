@@ -46,10 +46,12 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
 
   void _initialiseControllers() {
     recorderController = RecorderController()
-      ..androidEncoder = AndroidEncoder.aac
-      ..androidOutputFormat = AndroidOutputFormat.mpeg4
-      ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
-      ..sampleRate = 44100;
+    ..androidEncoder = AndroidEncoder.aac
+    ..androidOutputFormat = AndroidOutputFormat.mpeg4
+    ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
+    ..sampleRate = 44100
+    ..bitRate = 48000;
+
   }
 
   void _stopRecording() async {

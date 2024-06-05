@@ -40,91 +40,111 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        QuillToolbar.simple(
-          configurations: QuillSimpleToolbarConfigurations(
-            multiRowsDisplay: !_collapseToolbar,
-            customButtons: [
-              QuillToolbarCustomButtonOptions(
-                icon: Row(
-                  children: [
-                    Text(
-                      'BG',
-                      style: TextStyle(
-                          color: _backgroundColor ??
-                              Theme.of(context).iconTheme.color!),
-                    ),
-                    SvgPicture.asset(
-                      'assets/icons/background-color.svg',
-                      height: kIconHeight,
-                      colorFilter: ColorFilter.mode(
-                        _backgroundColor ?? Theme.of(context).iconTheme.color!,
-                        BlendMode.srcIn,
+        Row(
+          children: [
+            if (_collapseToolbar)
+              SvgPicture.asset(
+                'assets/icons/move.svg',
+                height: 20,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).iconTheme.color!,
+                  BlendMode.srcIn,
+                ),
+              ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: QuillToolbar.simple(
+                configurations: QuillSimpleToolbarConfigurations(
+                  multiRowsDisplay: !_collapseToolbar,
+                  customButtons: [
+                    QuillToolbarCustomButtonOptions(
+                      icon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          
+                          Text(
+                            'BG',
+                            style: TextStyle(
+                                color: _backgroundColor ??
+                                    Theme.of(context).iconTheme.color!),
+                          ),
+                          SvgPicture.asset(
+                            'assets/icons/background-color.svg',
+                            height: kIconHeight,
+                            colorFilter: ColorFilter.mode(
+                              _backgroundColor ??
+                                  Theme.of(context).iconTheme.color!,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ],
                       ),
+                      onPressed: () async {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        Color? selectedColor = _backgroundColor;
+                        selectedColor = await showAdaptiveDialog(
+                          context: context,
+                          builder: (context) {
+                            return ChooseColorDialog(
+                              initialPickerColor: _backgroundColor ??
+                                  const Color.fromARGB(255, 153, 83, 78),
+                            );
+                          },
+                        );
+                        setState(() {
+                          _backgroundColor = selectedColor ?? _backgroundColor;
+                        });
+                        widget.onBackgroundColorChanged(
+                            widget.keyInMap, _backgroundColor!);
+                      },
+                    ),
+                    QuillToolbarCustomButtonOptions(
+                      icon: RotatedBox(
+                        quarterTurns: _collapseToolbar ? 2 : 0,
+                        child: SvgPicture.asset(
+                          'assets/icons/collapse.svg',
+                          height: kIconHeight,
+                          colorFilter: ColorFilter.mode(
+                            Theme.of(context).iconTheme.color!,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      ),
+                      onPressed: () => setState(() {
+                        _collapseToolbar = !_collapseToolbar;
+                      }),
+                    ),
+                    QuillToolbarCustomButtonOptions(
+                      icon: SvgPicture.asset(
+                        'assets/icons/delete.svg',
+                        colorFilter: const ColorFilter.mode(
+                          Color.fromARGB(255, 255, 57, 43),
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      onPressed: () => widget.onDelete(widget.keyInMap),
                     ),
                   ],
-                ),
-                onPressed: () async {
-                  FocusManager.instance.primaryFocus?.unfocus();
-                  Color? selectedColor = _backgroundColor;
-                  selectedColor = await showAdaptiveDialog(
-                    context: context,
-                    builder: (context) {
-                      return ChooseColorDialog(
-                          initialPickerColor: _backgroundColor ??
-                              const Color.fromARGB(255, 153, 83, 78));
-                    },
-                  );
-                  setState(() {
-                    _backgroundColor = selectedColor ?? _backgroundColor;
-                  });
-                  widget.onBackgroundColorChanged(
-                      widget.keyInMap, _backgroundColor!);
-                },
-              ),
-              QuillToolbarCustomButtonOptions(
-                icon: RotatedBox(
-                  quarterTurns: _collapseToolbar ? 2 : 0,
-                  child: SvgPicture.asset(
-                    'assets/icons/collapse.svg',
-                    height: kIconHeight,
-                    colorFilter: ColorFilter.mode(
-                      Theme.of(context).iconTheme.color!,
-                      BlendMode.srcIn,
-                    ),
+                  controller: _controller,
+                  toolbarIconAlignment: WrapAlignment.end,
+                  showSmallButton: false,
+                  showSuperscript: false,
+                  showSubscript: false,
+                  showClipboardCopy: false,
+                  showClipboardCut: false,
+                  showClipboardPaste: false,
+                  showLink: false,
+                  showSearchButton: false,
+                  showFontSize: false,
+                  showCodeBlock: false,
+                  showInlineCode: false,
+                  sharedConfigurations: const QuillSharedConfigurations(
+                    locale: Locale('de'),
                   ),
                 ),
-                onPressed: () => setState(() {
-                  _collapseToolbar = !_collapseToolbar;
-                }),
               ),
-              QuillToolbarCustomButtonOptions(
-                icon: SvgPicture.asset(
-                  'assets/icons/delete.svg',
-                  colorFilter: const ColorFilter.mode(
-                    Color.fromARGB(255, 255, 57, 43),
-                    BlendMode.srcIn,
-                  ),
-                ),
-                onPressed: () => widget.onDelete(widget.keyInMap),
-              ),
-            ],
-            controller: _controller,
-            toolbarIconAlignment: WrapAlignment.end,
-            showSmallButton: false,
-            showSuperscript: false,
-            showSubscript: false,
-            showClipboardCopy: false,
-            showClipboardCut: false,
-            showClipboardPaste: false,
-            showLink: false,
-            showSearchButton: false,
-            showFontSize: false,
-            showCodeBlock: false,
-            showInlineCode: false,
-            sharedConfigurations: const QuillSharedConfigurations(
-              locale: Locale('de'),
             ),
-          ),
+          ],
         ),
         const SizedBox(
           height: 5,

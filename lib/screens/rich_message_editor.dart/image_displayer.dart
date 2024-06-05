@@ -55,7 +55,14 @@ class ImageDisplayer extends StatelessWidget {
               child:
                   CircularProgressIndicator(value: downloadProgress.progress),
             ),
-            errorWidget: (context, url, error) => const Icon(Icons.error),
+            errorWidget: (context, url, error) => SvgPicture.asset(
+              'assets/icons/offline.svg',
+              height: kIconHeight,
+              colorFilter: ColorFilter.mode(
+                Theme.of(context).iconTheme.color!,
+                BlendMode.srcIn,
+              ),
+            ),
             fit: BoxFit.contain,
           )
         : Image.file(

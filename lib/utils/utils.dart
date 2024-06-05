@@ -138,8 +138,15 @@ Future<sql.Database> getDatabase() async {
     onCreate: (db, version) async {
       await db.execute(
           'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT, imagePath TEXT)');
+
+      // if you make id primary key, it makes sense but the only thing different between it and making calltime primary key
+      // is that for id as primary key, when you call yourself, both the incoming and outgoing calls will have the same recentid
+      // so you can't insert both into the db, it would ignore the second insert.
+      // but with datetime, you can insert  both since the time you called ain't the same time you picked up.
+      // but the pick up time would be earlier than the outgoing since the user has t o first pick up or decline
+      // before we know what category of recents to insert in the db.
       await db.execute(
-          'CREATE TABLE recents ( id TEXT PRIMARY KEY, callTime TEXT, phoneNumber TEXT, categoryName TEXT, messageJson TEXT, messageType TEXT, canBeViewed INTEGER)');
+          'CREATE TABLE recents ( id TEXT, callTime TEXT PRIMARY KEY, phoneNumber TEXT, categoryName TEXT, messageJson TEXT, messageType TEXT, canBeViewed INTEGER)');
     },
   );
   return db;

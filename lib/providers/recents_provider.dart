@@ -103,7 +103,6 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
   void addRecent(Recent newRecent) async {
     final db = await getDatabase();
     addRecentToDb(newRecent, db);
-    print('onjhbjhgugugygygg');
 
     final contactAndContactExistsStatus = await getContactAndExistsStatus(
         db: db, phoneNumber: newRecent.contact.phoneNumber);

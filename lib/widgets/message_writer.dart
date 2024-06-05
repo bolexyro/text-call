@@ -60,6 +60,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   Map<String, dynamic>? upToDateBolexyroJson;
   Map<String, dynamic>? bolexyroJsonWithNetworkUrls;
 
+  double _fileUploadProgress = 0;
+  String _fileUploadText = '';
+
   @override
   void initState() {
     messageWriterMessageBox = TextField(
@@ -144,51 +147,74 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     setState(() {
       _filesUploading = true;
     });
+    try {
+      final storageRef = FirebaseStorage.instance.ref();
+      final imagesRef = storageRef.child('images');
+      final audioRef = storageRef.child('audio');
+      final videosRef = storageRef.child('videos');
 
-    final storageRef = FirebaseStorage.instance.ref();
-    final imagesRef = storageRef.child('images');
-    final audioRef = storageRef.child('audio');
-    final videosRef = storageRef.child('videos');
+      int currentImageIndex = 0;
+      int currentVideoIndex = 0;
+      int currentAudioIndex = 0;
 
-    final updatedBolexyroJson = jsonDecode(jsonEncode(upToDateBolexyroJson));
+      final updatedBolexyroJson = jsonDecode(jsonEncode(upToDateBolexyroJson));
 
-    for (final entry in updatedBolexyroJson.entries) {
-      final mediaType = entry.value.keys.first;
-      if (mediaType == 'document') {
-        continue;
+      for (final entry in updatedBolexyroJson.entries) {
+        final mediaType = entry.value.keys.first;
+        if (mediaType == 'document') {
+          continue;
+        }
+        final localPath = entry.value.values.first as String;
+        final file = File(localPath);
+
+        Reference mediaRef;
+
+        switch (mediaType) {
+          case 'image':
+            mediaRef = imagesRef.child(
+                '${DateTime.now()}-$_callerPhoneNumber-${path.basename(file.path)}');
+            _fileUploadText = 'Uploading image ${++currentImageIndex}';
+
+            break;
+          case 'video':
+            mediaRef = videosRef.child(
+                '${DateTime.now()}-$_callerPhoneNumber-${path.basename(file.path)}');
+            _fileUploadText = 'Uploading video ${++currentVideoIndex}';
+
+            break;
+          case 'audio':
+            mediaRef = audioRef.child(
+                '${DateTime.now()}-$_callerPhoneNumber-${path.basename(file.path)}');
+            _fileUploadText = 'Uploading audio ${++currentAudioIndex}';
+
+            break;
+          default:
+            continue;
+        }
+
+        UploadTask uploadTask = mediaRef.putFile(file);
+        uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+          double progress = (snapshot.bytesTransferred.toDouble() /
+                  snapshot.totalBytes.toDouble()) *
+              100;
+          setState(() {
+            _fileUploadProgress = progress;
+          });
+        }, onError: (e) {
+          print(e);
+        });
+
+        await uploadTask;
+        final downloadUrl = await mediaRef.getDownloadURL();
+        updatedBolexyroJson[entry.key][mediaType] = downloadUrl;
       }
-      final localPath = entry.value.values.first as String;
-      final file = File(localPath);
-
-      Reference mediaRef;
-
-      switch (mediaType) {
-        case 'image':
-          mediaRef = imagesRef.child(
-              '${DateTime.now()}-$_callerPhoneNumber-${path.basename(file.path)}');
-          break;
-        case 'video':
-          mediaRef = videosRef.child(
-              '${DateTime.now()}-$_callerPhoneNumber-${path.basename(file.path)}');
-          break;
-        case 'audio':
-          mediaRef = audioRef.child(
-              '${DateTime.now()}-$_callerPhoneNumber-${path.basename(file.path)}');
-          break;
-        default:
-          continue; // Skip if it's not one of the expected media types
-      }
-
-      await mediaRef.putFile(file);
-      final downloadUrl = await mediaRef.getDownloadURL();
-      updatedBolexyroJson[entry.key][mediaType] = downloadUrl;
+      setState(() {
+        _filesUploading = false;
+      });
+      return updatedBolexyroJson;
+    } catch (e) {
+      throw 'File uplod Error';
     }
-
-    setState(() {
-      _filesUploading = false;
-    });
-
-    return updatedBolexyroJson;
   }
 
   void _showColorPicker() async {
@@ -361,12 +387,13 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     );
 
     if (_callSending) {
+      int index = 0;
       messageWriterContent = StreamBuilder(
         stream: _channel!.stream,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
+            index++;
             final snapshotData = json.decode(snapshot.data);
-            print(snapshotData);
             if (snapshotData['call_status'] == 'error') {
               _channel?.sink.close();
 
@@ -407,7 +434,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               );
             }
             if (snapshotData['call_status'] == 'rejected') {
-              // create a recent in your table
               _channel?.sink.close();
 
               final recent = Recent.withoutContactObject(
@@ -428,15 +454,17 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 phoneNumber: widget.calleePhoneNumber,
                 callTime: DateTime.parse(_recentId),
               );
-
-              ref.read(recentsProvider.notifier).addRecent(recent);
-              return Padding(
-                padding: const EdgeInsets.only(top: 10.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
+              if (index == 1) {
+                ref.read(recentsProvider.notifier).addRecent(recent);
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0, left: 5),
+                        child: IconButton(
                           onPressed: () => setState(() {
                             _callSending = false;
                           }),
@@ -445,27 +473,27 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                             size: 30,
                           ),
                         ),
-                      ],
-                    ),
-                    AnimatedTextKit(
-                      animatedTexts: [
-                        TyperAnimatedText(
-                          'Thy call hath been declined, leaving silence to linger in the void.',
-                          textAlign: TextAlign.center,
-                          textStyle: GoogleFonts.pacifico(
-                              fontSize: 32,
-                              color: const Color.fromARGB(255, 199, 32, 76)),
-                          speed: const Duration(milliseconds: 100),
-                        ),
-                      ],
-                      displayFullTextOnTap: true,
-                      repeatForever: false,
-                      totalRepeatCount: 1,
-                    ),
-                    // Lottie.asset('assets/animations/call_rejected.json',
-                    //     height: 300),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                  AnimatedTextKit(
+                    animatedTexts: [
+                      TyperAnimatedText(
+                        'Thy call hath been declined, leaving silence to linger in the void.',
+                        textAlign: TextAlign.center,
+                        textStyle: GoogleFonts.pacifico(
+                            fontSize: 32,
+                            color: const Color.fromARGB(255, 199, 32, 76)),
+                        speed: const Duration(milliseconds: 100),
+                      ),
+                    ],
+                    displayFullTextOnTap: true,
+                    repeatForever: false,
+                    totalRepeatCount: 1,
+                  ),
+                  Lottie.asset('assets/animations/call_rejected.json',
+                      height: 300),
+                ],
               );
             }
             if (snapshotData['call_status'] == 'accepted') {
@@ -488,20 +516,25 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
               );
-              ref.read(recentsProvider.notifier).addRecent(recent);
+              if (index == 1) {
+                ref.read(recentsProvider.notifier).addRecent(recent);
+              }
               _confettiController.play();
               return Column(
                 children: [
                   Row(
                     children: [
-                      IconButton(
-                        onPressed: () => setState(() {
-                          _callSending = false;
-                          _confettiController.stop();
-                        }),
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          size: 30,
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0, left: 5),
+                        child: IconButton(
+                          onPressed: () => setState(() {
+                            _callSending = false;
+                            _confettiController.stop();
+                          }),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            size: 30,
+                          ),
                         ),
                       ),
                     ],
@@ -527,13 +560,13 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             }
             if (snapshotData['call_status'] == 'callee_busy') {
               _channel?.sink.close();
-              return Padding(
-                padding: const EdgeInsets.only(top: 10.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
+              return Column(
+                children: [
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0, left: 5),
+                        child: IconButton(
                           onPressed: () => setState(() {
                             _callSending = false;
                           }),
@@ -542,35 +575,35 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                             size: 30,
                           ),
                         ),
-                      ],
-                    ),
-                    AnimatedTextKit(
-                      animatedTexts: [
-                        TyperAnimatedText(
-                          'The number you are calling is receiving another call rn. Try again in less than 20 seconds',
-                          textAlign: TextAlign.center,
-                          textStyle: GoogleFonts.pacifico(
-                              fontSize: 32,
-                              color: const Color.fromARGB(255, 139, 105, 2)),
-                          speed: const Duration(milliseconds: 100),
-                        ),
-                      ],
-                      displayFullTextOnTap: true,
-                      repeatForever: false,
-                      totalRepeatCount: 1,
-                      onFinished: () {
-                        Future.delayed(const Duration(seconds: 2), () {
-                          if (_callSending) {
-                            setState(() {
-                              _callSending = false;
-                            });
-                          }
-                        });
-                      },
-                    ),
-                    Lottie.asset('assets/animations/call_missed.json'),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                  AnimatedTextKit(
+                    animatedTexts: [
+                      TyperAnimatedText(
+                        'The number you are calling is receiving another call rn. Try again in less than 20 seconds',
+                        textAlign: TextAlign.center,
+                        textStyle: GoogleFonts.pacifico(
+                            fontSize: 32,
+                            color: const Color.fromARGB(255, 139, 105, 2)),
+                        speed: const Duration(milliseconds: 100),
+                      ),
+                    ],
+                    displayFullTextOnTap: true,
+                    repeatForever: false,
+                    totalRepeatCount: 1,
+                    onFinished: () {
+                      Future.delayed(const Duration(seconds: 2), () {
+                        if (_callSending) {
+                          setState(() {
+                            _callSending = false;
+                          });
+                        }
+                      });
+                    },
+                  ),
+                  Lottie.asset('assets/animations/call_missed.json'),
+                ],
               );
             }
             return const Text(
@@ -600,15 +633,16 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   id: _recentId,
                   phoneNumber: widget.calleePhoneNumber,
                 );
-
-                ref.read(recentsProvider.notifier).addRecent(recent);
-                return Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          IconButton(
+                if (index == 1) {
+                  ref.read(recentsProvider.notifier).addRecent(recent);
+                }
+                return Column(
+                  children: [
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0, left: 5),
+                          child: IconButton(
                             onPressed: () => setState(() {
                               _callSending = false;
                               _channel?.sink.close();
@@ -618,26 +652,26 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                               size: 30,
                             ),
                           ),
-                        ],
-                      ),
-                      AnimatedTextKit(
-                        animatedTexts: [
-                          TyperAnimatedText(
-                            'Alas, the call remained unanswered.',
-                            textAlign: TextAlign.center,
-                            textStyle: GoogleFonts.pacifico(
-                                fontSize: 32,
-                                color: const Color.fromARGB(255, 139, 105, 2)),
-                            speed: const Duration(milliseconds: 100),
-                          ),
-                        ],
-                        displayFullTextOnTap: true,
-                        repeatForever: false,
-                        totalRepeatCount: 1,
-                      ),
-                      Lottie.asset('assets/animations/call_missed.json'),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                    AnimatedTextKit(
+                      animatedTexts: [
+                        TyperAnimatedText(
+                          'Alas, the call remained unanswered.',
+                          textAlign: TextAlign.center,
+                          textStyle: GoogleFonts.pacifico(
+                              fontSize: 32,
+                              color: const Color.fromARGB(255, 139, 105, 2)),
+                          speed: const Duration(milliseconds: 100),
+                        ),
+                      ],
+                      displayFullTextOnTap: true,
+                      repeatForever: false,
+                      totalRepeatCount: 1,
+                    ),
+                    Lottie.asset('assets/animations/call_missed.json'),
+                  ],
                 );
               },
             );
@@ -768,10 +802,15 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const CircularProgressIndicator(),
+                          SizedBox(
+                            width: MediaQuery.sizeOf(context).width * .8,
+                            child: LinearProgressIndicator(
+                              value: _fileUploadProgress / 100,
+                            ),
+                          ),
                           const SizedBox(height: 20),
                           Text(
-                            'Uploading files, please wait...',
+                            _fileUploadText,
                             style: Theme.of(context)
                                 .textTheme
                                 .headlineMedium!

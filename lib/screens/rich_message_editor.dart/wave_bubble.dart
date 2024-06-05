@@ -92,7 +92,6 @@ class _WaveBubbleState extends State<WaveBubble> {
                   waveformType: WaveformType.fitWidth,
                   playerWaveStyle: playerWaveStyle,
                 ),
-                Text(widget.audioPath),
               ],
             ),
           ),

@@ -79,7 +79,7 @@ Future<Widget> whichTextCall(
   final isDarkMode = prefs.getBool('isDarkMode');
 
   final ThemeMode themeMode = isDarkMode == null
-      ? ThemeMode.system
+      ? ThemeMode.dark
       : isDarkMode == true
           ? ThemeMode.dark
           : ThemeMode.light;

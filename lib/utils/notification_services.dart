@@ -31,6 +31,10 @@ Future<String> _getCallerName(String phoneNumber) async {
 }
 
 Future<void> messageHandler(RemoteMessage message) async {
+  // wsince this message handler is registered by bothe the foreground and background fcm listeners, we would have 2 listeners
+  // for the call kit. so for the http requests,
+  registerCallkitIncomingListener();
+
   final String notificationPurpose = message.data['purpose'];
   if (notificationPurpose == 'access_request') {
     final String recentId = message.data['message_id'];

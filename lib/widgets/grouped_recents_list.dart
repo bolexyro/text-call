@@ -99,7 +99,7 @@ class _GroupedRecentsListState extends State<GroupedRecentsList> {
                   Text(recntCategoryStringMap[recentN.category]!),
                 ],
               ),
-              expandedContent: !recentN.canBeViewed
+              expandedContent: recentN.canBeViewed
                   ? ElevatedButton(
                       onPressed: () {
                         _goToSentMessageScreen(

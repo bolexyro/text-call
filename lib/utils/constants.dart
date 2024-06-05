@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const double kTabletWidth = 520;
+const double kTabletWidth = 300;
 const double kIconHeight = 24;
 final kLightTheme = ThemeData.from(
   colorScheme: ColorScheme.fromSeed(

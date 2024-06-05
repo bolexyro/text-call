@@ -3,8 +3,10 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:lottie/lottie.dart';
@@ -23,6 +25,7 @@ import 'package:text_call/widgets/dialogs/confirm_dialog.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter_svg_provider/flutter_svg_provider.dart' as svgProvider;
 
 class MessageWriter extends ConsumerStatefulWidget {
   const MessageWriter({
@@ -31,6 +34,10 @@ class MessageWriter extends ConsumerStatefulWidget {
   });
 
   final String calleePhoneNumber;
+
+  // these variables are going to be used when we want to recall a user via a recent message we already called them with before.
+  // final String regularMessageForRecall;
+  // final String complexMessageForRecall;
 
   @override
   ConsumerState<MessageWriter> createState() => _MessageWriterState();
@@ -56,16 +63,17 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     Colors.red,
   ];
 
-  late Widget messageWriterMessageBox;
-  Map<String, dynamic>? upToDateBolexyroJson;
-  Map<String, dynamic>? bolexyroJsonWithNetworkUrls;
+  late Widget _messageWriterMessageBox;
+  Map<String, dynamic>? _upToDateBolexyroJson;
+  Map<String, dynamic>? _bolexyroJsonWithNetworkUrls;
+  bool _isMadeAvailableOffline = false;
 
   double _fileUploadProgress = 0;
   String _fileUploadText = '';
 
   @override
   void initState() {
-    messageWriterMessageBox = TextField(
+    _messageWriterMessageBox = TextField(
       controller: _messageController,
       minLines: 4,
       maxLines: null,
@@ -108,9 +116,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     // final xyz = jsonEncode(upToDateBolexyroJson!);
     // print(xyz);
 
-    if (messageWriterMessageBox.runtimeType == FileUiPlaceHolder) {
-      bolexyroJsonWithNetworkUrls =
-          await _editBolexyroJsonToContainStorageUrls(upToDateBolexyroJson!);
+    if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder) {
+      _bolexyroJsonWithNetworkUrls =
+          await _editBolexyroJsonToContainStorageUrls(_upToDateBolexyroJson!);
     }
     setState(() {
       _callSending = true;
@@ -122,14 +130,14 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           'caller_phone_number': _callerPhoneNumber,
           'callee_phone_number': widget.calleePhoneNumber,
           'message_json_string':
-              messageWriterMessageBox.runtimeType == FileUiPlaceHolder
-                  ? jsonEncode(bolexyroJsonWithNetworkUrls!)
+              _messageWriterMessageBox.runtimeType == FileUiPlaceHolder
+                  ? jsonEncode(_bolexyroJsonWithNetworkUrls!)
                   : RegularMessage(
                       messageString: _messageController.text,
                       backgroundColor: _selectedColor,
                     ).toJsonString,
           'my_message_type':
-              messageWriterMessageBox.runtimeType == FileUiPlaceHolder
+              _messageWriterMessageBox.runtimeType == FileUiPlaceHolder
                   ? 'complex'
                   : 'regular',
           'message_id': _recentId,
@@ -236,9 +244,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   }
 
   void _updateMyOwnDocumentJson(Map<String, dynamic> newBolexyroJson) {
-    upToDateBolexyroJson = newBolexyroJson;
+    _upToDateBolexyroJson = newBolexyroJson;
     setState(() {
-      messageWriterMessageBox = FileUiPlaceHolder(
+      _messageWriterMessageBox = FileUiPlaceHolder(
         onBolexroJsonUpdated: _updateMyOwnDocumentJson,
         onDelete: _resetMessageWriterMessageBox,
         bolexyroJson: newBolexyroJson,
@@ -247,9 +255,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   }
 
   void _resetMessageWriterMessageBox() {
-    upToDateBolexyroJson = null;
+    _upToDateBolexyroJson = null;
     setState(() {
-      messageWriterMessageBox = TextField(
+      _messageWriterMessageBox = TextField(
         controller: _messageController,
         minLines: 4,
         maxLines: null,
@@ -268,8 +276,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
   bool _showDiscardDialog(Widget messageWriterContent) {
     return messageWriterContent.runtimeType != StreamBuilder &&
-        (messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
-            (messageWriterMessageBox.runtimeType == TextField &&
+        (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
+            (_messageWriterMessageBox.runtimeType == TextField &&
                 _messageController.text.isNotEmpty));
   }
 
@@ -282,7 +290,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
           child: Column(
             children: [
-              messageWriterMessageBox,
+              _messageWriterMessageBox,
               const SizedBox(
                 height: 30,
               ),
@@ -315,70 +323,117 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     ),
                   ),
                   const Spacer(),
-                  ElevatedButton(
-                    onPressed: () async {
-                      FocusManager.instance.primaryFocus?.unfocus();
+                  Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () async {
+                          FocusManager.instance.primaryFocus?.unfocus();
 
-                      final Map<String, dynamic>? myOwnCustomDocumemntJson =
-                          await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const RichMessageEditorScreen(),
-                        ),
-                      );
+                          final Map<String, dynamic>? myOwnCustomDocumemntJson =
+                              await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const RichMessageEditorScreen(),
+                            ),
+                          );
 
-                      if (myOwnCustomDocumemntJson != null) {
-                        _updateMyOwnDocumentJson(myOwnCustomDocumemntJson);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        SvgPicture.asset(
-                          'assets/icons/editor.svg',
-                          height: kIconHeight,
-                          colorFilter:
-                              ColorFilter.mode(_selectedColor, BlendMode.srcIn),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Complex Editor?',
-                          style: TextStyle(
-                            color: _selectedColor, // Text color
-                            fontWeight: FontWeight.bold,
+                          if (myOwnCustomDocumemntJson != null) {
+                            _updateMyOwnDocumentJson(myOwnCustomDocumemntJson);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                      ],
-                    ),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/icons/editor.svg',
+                              height: kIconHeight,
+                              colorFilter: ColorFilter.mode(
+                                  _selectedColor, BlendMode.srcIn),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Complex Editor?',
+                              style: TextStyle(
+                                color: _selectedColor, // Text color
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
               const SizedBox(
                 height: 20,
               ),
-              IconButton(
-                onPressed: () async {
-                  // if (await checkForInternetConnection(context)) {
-                  _callSomeone(context);
-                  // }
-                },
-                icon: const Padding(
-                  padding: EdgeInsets.all(5),
-                  child: Icon(
-                    Icons.phone,
-                    size: 35,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: (MediaQuery.sizeOf(context).width - 30) / 3,
+                    child: Center(child: Container()),
                   ),
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                ),
+                  SizedBox(
+                    width: (MediaQuery.sizeOf(context).width - 30) / 3,
+                    child: Center(
+                      child: IconButton(
+                        onPressed: () async {
+                          // if (await checkForInternetConnection(context)) {
+                          _callSomeone(context);
+                          // }
+                        },
+                        icon: const Padding(
+                          padding: EdgeInsets.all(5),
+                          child: Icon(
+                            Icons.phone,
+                            size: 35,
+                          ),
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: (MediaQuery.sizeOf(context).width - 30) / 3,
+                    child: Center(
+                      child: Switch.adaptive(
+                        activeColor: _selectedColor,
+                        activeTrackColor: Theme.of(context).primaryColor,
+                        inactiveTrackColor: Theme.of(context).primaryColor,
+                        activeThumbImage: const svgProvider.Svg(
+                          'assets/icons/make-available-offline.svg',
+                          color: Colors.white,
+                        ),
+                        value: _isMadeAvailableOffline,
+                        onChanged: (value) {
+                          if (value) {
+                            showFlushBar(
+                              Colors.blue,
+                              'Message is now available offline',
+                              FlushbarPosition.TOP,
+                              context,
+                            );
+                          }
+                          setState(() {
+                            _isMadeAvailableOffline = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -421,7 +476,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                           ],
                         ),
                         Text(
-                          'The number you are trying to call doesn\'t exist. Are you sure you are not trying to call a previos version of your number.',
+                          'The recipient\'s device could not be reached because the person was most likely a user of Text Call but is no longer a user of Text Call. Your message has been saved offline. Please verify the recipient\'s contact details or try again later.',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.pacifico(
                             fontSize: 32,
@@ -438,17 +493,17 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
               final recent = Recent.withoutContactObject(
                 category: RecentCategory.outgoingRejected,
-                regularMessage: upToDateBolexyroJson == null
+                regularMessage: _upToDateBolexyroJson == null
                     ? RegularMessage(
                         messageString: _messageController.text,
                         backgroundColor: _selectedColor,
                       )
                     : null,
-                complexMessage: upToDateBolexyroJson == null
+                complexMessage: _upToDateBolexyroJson == null
                     ? null
                     : ComplexMessage(
                         complexMessageJsonString:
-                            jsonEncode(bolexyroJsonWithNetworkUrls),
+                            jsonEncode(_bolexyroJsonWithNetworkUrls),
                       ),
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
@@ -501,17 +556,17 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
               final recent = Recent.withoutContactObject(
                 category: RecentCategory.outgoingAccepted,
-                regularMessage: upToDateBolexyroJson == null
+                regularMessage: _upToDateBolexyroJson == null
                     ? RegularMessage(
                         messageString: _messageController.text,
                         backgroundColor: _selectedColor,
                       )
                     : null,
-                complexMessage: upToDateBolexyroJson == null
+                complexMessage: _upToDateBolexyroJson == null
                     ? null
                     : ComplexMessage(
                         complexMessageJsonString:
-                            jsonEncode(bolexyroJsonWithNetworkUrls),
+                            jsonEncode(_bolexyroJsonWithNetworkUrls),
                       ),
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
@@ -618,17 +673,17 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 }
                 final recent = Recent.withoutContactObject(
                   category: RecentCategory.outgoingUnanswered,
-                  regularMessage: upToDateBolexyroJson == null
+                  regularMessage: _upToDateBolexyroJson == null
                       ? RegularMessage(
                           messageString: _messageController.text,
                           backgroundColor: _selectedColor,
                         )
                       : null,
-                  complexMessage: upToDateBolexyroJson == null
+                  complexMessage: _upToDateBolexyroJson == null
                       ? null
                       : ComplexMessage(
                           complexMessageJsonString:
-                              jsonEncode(bolexyroJsonWithNetworkUrls),
+                              jsonEncode(_bolexyroJsonWithNetworkUrls),
                         ),
                   id: _recentId,
                   phoneNumber: widget.calleePhoneNumber,
@@ -680,150 +735,151 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       );
     }
     return PopScope(
-        canPop: false,
-        onPopInvoked: (didPop) async {
-          if (didPop) {
-            return;
-          }
-          if (_showDiscardDialog(messageWriterContent)) {
-            final bool? toDiscard = await showAdaptiveDialog(
-              context: context,
-              builder: (context) => const ConfirmDialog(
-                title: 'Discard changes',
-                subtitle:
-                    'Are you sure you want to discard your changes? This action cannot be undone.',
-                mainButtonText: 'Discard',
-              ),
-            );
-            if (toDiscard == true) {
-              Navigator.of(context).pop();
-              messageWriterDirectoryPath(specificDirectory: null).then(
-                (messageWriterDirectoryPath) =>
-                    deleteDirectory(messageWriterDirectoryPath),
-              );
-            }
-          } else {
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) {
+          return;
+        }
+        if (_showDiscardDialog(messageWriterContent)) {
+          final bool? toDiscard = await showAdaptiveDialog(
+            context: context,
+            builder: (context) => const ConfirmDialog(
+              title: 'Discard changes',
+              subtitle:
+                  'Are you sure you want to discard your changes? This action cannot be undone.',
+              mainButtonText: 'Discard',
+            ),
+          );
+          if (toDiscard == true) {
             Navigator.of(context).pop();
+            messageWriterDirectoryPath(specificDirectory: null).then(
+              (messageWriterDirectoryPath) =>
+                  deleteDirectory(messageWriterDirectoryPath),
+            );
           }
-        },
-        child: Stack(
-          children: [
-            GestureDetector(
-              onTap: () async {
-                FocusManager.instance.primaryFocus?.unfocus();
-                if (_showDiscardDialog(messageWriterContent)) {
-                  final bool? toDiscard = await showAdaptiveDialog(
-                    context: context,
-                    builder: (context) => const ConfirmDialog(
-                      title: 'Discard changes',
-                      subtitle:
-                          'Are you sure you want to discard your changes? This action cannot be undone.',
-                      mainButtonText: 'Discard',
-                    ),
-                  );
-
-                  if (toDiscard == true) {
-                    Navigator.of(context).pop();
-                    messageWriterDirectoryPath(specificDirectory: null).then(
-                      (messageWriterDirectoryPath) =>
-                          deleteDirectory(messageWriterDirectoryPath),
-                    );
-                  } else {}
-                } else {
-                  Navigator.of(context).pop();
-                }
-              },
-              child: Container(
-                color: Colors.transparent,
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
-                  child: Container(
-                    decoration:
-                        BoxDecoration(color: Colors.white.withOpacity(0.0)),
+        } else {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Stack(
+        children: [
+          GestureDetector(
+            onTap: () async {
+              FocusManager.instance.primaryFocus?.unfocus();
+              if (_showDiscardDialog(messageWriterContent)) {
+                final bool? toDiscard = await showAdaptiveDialog(
+                  context: context,
+                  builder: (context) => const ConfirmDialog(
+                    title: 'Discard changes',
+                    subtitle:
+                        'Are you sure you want to discard your changes? This action cannot be undone.',
+                    mainButtonText: 'Discard',
                   ),
+                );
+
+                if (toDiscard == true) {
+                  Navigator.of(context).pop();
+                  messageWriterDirectoryPath(specificDirectory: null).then(
+                    (messageWriterDirectoryPath) =>
+                        deleteDirectory(messageWriterDirectoryPath),
+                  );
+                } else {}
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
+            child: Container(
+              color: Colors.transparent,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+                child: Container(
+                  decoration:
+                      BoxDecoration(color: Colors.white.withOpacity(0.0)),
                 ),
               ),
             ),
+          ),
+          Positioned(
+            bottom: 0,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.sizeOf(context).height * .6,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? makeColorLighter(Theme.of(context).primaryColor, 15)
+                      : const Color.fromARGB(255, 207, 222, 234),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(25),
+                  ),
+                ),
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                            0, 0, 0, MediaQuery.viewInsetsOf(context).vertical),
+                        child:
+                            SingleChildScrollView(child: messageWriterContent),
+                      ),
+                    ),
+                    ConfettiWidget(
+                      confettiController: _confettiController,
+                      shouldLoop: true,
+                      blastDirectionality: BlastDirectionality.explosive,
+                      numberOfParticles: 30,
+                      emissionFrequency: 0.1,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (_filesUploading)
             Positioned(
               bottom: 0,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: MediaQuery.sizeOf(context).height * .6,
+                  minWidth: MediaQuery.sizeOf(context).width,
                 ),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? makeColorLighter(Theme.of(context).primaryColor, 15)
-                        : const Color.fromARGB(255, 207, 222, 234),
+                    color: Colors.black.withOpacity(0.5),
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(25),
                     ),
                   ),
-                  child: Stack(
-                    alignment: Alignment.topCenter,
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.sizeOf(context).width,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 0,
-                              MediaQuery.viewInsetsOf(context).vertical),
-                          child: SingleChildScrollView(
-                              child: messageWriterContent),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.sizeOf(context).width * .8,
+                          child: LinearProgressIndicator(
+                            value: _fileUploadProgress / 100,
+                          ),
                         ),
-                      ),
-                      ConfettiWidget(
-                        confettiController: _confettiController,
-                        shouldLoop: true,
-                        blastDirectionality: BlastDirectionality.explosive,
-                        numberOfParticles: 30,
-                        emissionFrequency: 0.1,
-                      ),
-                    ],
+                        const SizedBox(height: 20),
+                        Text(
+                          _fileUploadText,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium!
+                              .copyWith(color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-            if (_filesUploading)
-              Positioned(
-                bottom: 0,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: MediaQuery.sizeOf(context).height * .6,
-                    minWidth: MediaQuery.sizeOf(context).width,
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(25),
-                      ),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.sizeOf(context).width * .8,
-                            child: LinearProgressIndicator(
-                              value: _fileUploadProgress / 100,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            _fileUploadText,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium!
-                                .copyWith(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ));
+        ],
+      ),
+    );
   }
 }
 

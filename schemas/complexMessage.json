@@ -1,6 +1,11 @@
 {
     "1": {
-        "audio": "audioPath"
+        "audio": {
+            "audioPaths": {
+                "online": null,
+                "local": "audioPath"
+            }
+        }
     },
     "2": {
         "document": {
@@ -14,9 +19,19 @@
         }
     },
     "3": {
-        "video": "videoPath"
+        "video": {
+            "videoPaths": {
+                "online": null,
+                "local": "videoPath"
+            }
+        }
     },
     "4": {
-        "image": "imagePath"
+        "image": {
+            "imagePaths": {
+                "online": null,
+                "local": "imagePath"
+            }
+        }
     }
 }

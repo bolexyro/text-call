@@ -257,102 +257,104 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             : Theme.of(context).colorScheme.primary.withBlue(200);
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedTextKit(
-              animatedTexts: [
-                TyperAnimatedText(
-                  'TEXT CALL',
-                  textStyle: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 55,
-                    color: textAndButtonColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedTextKit(
+                animatedTexts: [
+                  TyperAnimatedText(
+                    'TEXT CALL',
+                    textStyle: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 55,
+                      color: textAndButtonColor,
+                    ),
+                    speed: const Duration(milliseconds: 100),
                   ),
-                  speed: const Duration(milliseconds: 100),
+                ],
+                displayFullTextOnTap: true,
+                repeatForever: false,
+                totalRepeatCount: 1,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Form(
+                key: _formKey,
+                child: TextFormField(
+                  controller: _textController,
+                  validator: (value) {
+                    if (value == null ||
+                        int.tryParse(value) == null ||
+                        value.length != 10) {
+                      return 'Your number should have 10 all digits';
+                    }
+                    return null;
+                  },
+                  onChanged: (value) {
+                    if (value.length == 1 && value == '0') {
+                      _textController.text = '';
+                    }
+                  },
+                  onSaved: (newValue) => _enteredPhoneNumber = newValue!,
+                  keyboardType: TextInputType.phone,
+                  maxLength: 10,
+                  decoration: InputDecoration(
+                    counterText: '',
+                    filled: Theme.of(context).brightness == Brightness.dark
+                        ? null
+                        : true,
+                    labelText: 'Phone No',
+                    prefixIcon: const Icon(Icons.call),
+                    prefixText: '+234 - ',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.black),
+                    ),
+                  ),
                 ),
-              ],
-              displayFullTextOnTap: true,
-              repeatForever: false,
-              totalRepeatCount: 1,
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Form(
-              key: _formKey,
-              child: TextFormField(
-                controller: _textController,
-                validator: (value) {
-                  if (value == null ||
-                      int.tryParse(value) == null ||
-                      value.length != 10) {
-                    return 'Your number should have 10 all digits';
-                  }
-                  return null;
-                },
-                onChanged: (value) {
-                  if (value.length == 1 && value == '0') {
-                    _textController.text = '';
-                  }
-                },
-                onSaved: (newValue) => _enteredPhoneNumber = newValue!,
-                keyboardType: TextInputType.phone,
-                maxLength: 10,
-                decoration: InputDecoration(
-                  counterText: '',
-                  filled: Theme.of(context).brightness == Brightness.dark
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              SizedBox(
+                width: double.infinity,
+                height: 60,
+                child: ElevatedButton(
+                  onPressed: _isAuthenticating == true
                       ? null
-                      : true,
-                  labelText: 'Phone No',
-                  prefixIcon: const Icon(Icons.call),
-                  prefixText: '+234 - ',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                      : () {
+                          _validateForm();
+                        },
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    backgroundColor: textAndButtonColor,
+                    foregroundColor: Colors.white,
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Colors.black),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            SizedBox(
-              width: double.infinity,
-              height: 60,
-              child: ElevatedButton(
-                onPressed: _isAuthenticating == true
-                    ? null
-                    : () {
-                        _validateForm();
-                      },
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  backgroundColor: textAndButtonColor,
-                  foregroundColor: Colors.white,
-                ),
-                child: _isAuthenticating == false
-                    ? const Text(
-                        'GET CODE',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
+                  child: _isAuthenticating == false
+                      ? const Text(
+                          'GET CODE',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        )
+                      : const CircularProgressIndicator(
+                          color: Colors.white,
                         ),
-                      )
-                    : const CircularProgressIndicator(
-                        color: Colors.white,
-                      ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

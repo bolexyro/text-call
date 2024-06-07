@@ -116,6 +116,7 @@ Future<void> showMessageWriterModalSheet(
     required String calleePhoneNumber}) async {
   // if (!await checkForInternetConnection(context)) {
   showModalBottomSheet(
+    useSafeArea: true,
     enableDrag: false,
     isDismissible: false,
     isScrollControlled: true,
@@ -445,12 +446,16 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
   );
 }
 
-Future<String> messageWriterDirectoryPath(
-    {required String? specificDirectory}) async {
+Future<String> messagesDirectoryPath({
+  required bool isTemporary,
+  required String? specificDirectory,
+}) async {
   final directory = await getApplicationDocumentsDirectory();
-  String path = '${directory.path}/messageWriter';
+  String path =
+      '${directory.path}/${isTemporary ? 'temporary' : 'permanent'}/messages';
   if (specificDirectory != null) {
-    path = '${directory.path}/messageWriter/$specificDirectory';
+    path =
+        '${directory.path}/${isTemporary ? 'temporary' : 'permanent'}/messages/$specificDirectory';
   }
 
   final dir = Directory(path);

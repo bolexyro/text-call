@@ -51,156 +51,154 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        key: _scaffoldKey,
-        drawer: Drawer(
-          child: Column(
-            children: [
-              SizedBox(
-                height: 210,
-                child: DrawerHeader(
-                  padding: const EdgeInsets.only(top: 30),
-                  child: FutureBuilder(
-                    future: _futureToWaitFor,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                      if (snapshot.hasError) {
-                        return const Center(
-                          child: Text(
-                              'Please close and reopen the drawer. Sorry for the inconvenience'),
-                        );
-                      }
-                      final String myPhoneNumber = snapshot.data!;
-                      final myContact = ref
-                          .watch(contactsProvider)
-                          .where(
-                              (contact) => contact.phoneNumber == myPhoneNumber)
-                          .first;
-                      return Column(
-                        children: [
-                          ContactAvatarCircle(
-                            avatarRadius: 45,
-                            imagePath: myContact.imagePath,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                              '${myContact.name} @${changeIntlToLocal(myContact.phoneNumber)}'),
-                        ],
+    return Scaffold(
+      key: _scaffoldKey,
+      drawer: Drawer(
+        child: Column(
+          children: [
+            SizedBox(
+              height: 210,
+              child: DrawerHeader(
+                padding: const EdgeInsets.only(top: 30),
+                child: FutureBuilder(
+                  future: _futureToWaitFor,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
                       );
-                    },
-                  ),
+                    }
+                    if (snapshot.hasError) {
+                      return const Center(
+                        child: Text(
+                            'Please close and reopen the drawer. Sorry for the inconvenience'),
+                      );
+                    }
+                    final String myPhoneNumber = snapshot.data!;
+                    final myContact = ref
+                        .watch(contactsProvider)
+                        .where(
+                            (contact) => contact.phoneNumber == myPhoneNumber)
+                        .first;
+                    return Column(
+                      children: [
+                        ContactAvatarCircle(
+                          avatarRadius: 45,
+                          imagePath: myContact.imagePath,
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                            '${myContact.name} @${changeIntlToLocal(myContact.phoneNumber)}'),
+                      ],
+                    );
+                  },
                 ),
               ),
-              SwitchListTile.adaptive(
-                activeColor: const Color.fromARGB(255, 57, 69, 83),
-                value: _isDarkMode,
-                onChanged: (newValue) async {
-                  setState(() {
-                    _isDarkMode = newValue;
-                  });
-                  Get.changeThemeMode(
-                      Get.isDarkMode ? ThemeMode.light : ThemeMode.dark);
-                  // for some reason when it is on dark mode, Get.isDarkMode would give false and true otherwise
-                  Get.isDarkMode;
-                  (await SharedPreferences.getInstance())
-                      .setBool('isDarkMode', !Get.isDarkMode);
-                },
-                title: const Text('Dark Mode'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text('Settings'),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const SettingsScreen(),
-                  ),
+            ),
+            SwitchListTile.adaptive(
+              activeColor: const Color.fromARGB(255, 57, 69, 83),
+              value: _isDarkMode,
+              onChanged: (newValue) async {
+                setState(() {
+                  _isDarkMode = newValue;
+                });
+                Get.changeThemeMode(
+                    Get.isDarkMode ? ThemeMode.light : ThemeMode.dark);
+                // for some reason when it is on dark mode, Get.isDarkMode would give false and true otherwise
+                Get.isDarkMode;
+                (await SharedPreferences.getInstance())
+                    .setBool('isDarkMode', !Get.isDarkMode);
+              },
+              title: const Text('Dark Mode'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
                 ),
               ),
-              ListTile(
-                leading: const Icon(Icons.close),
-                title: const Text('Cancel'),
-                onTap: () => Navigator.of(context).pop(),
-              ),
-              ListTile(
-                leading: SvgPicture.asset(
-                  'assets/icons/draft.svg',
-                  height: 24,
-                  colorFilter: ColorFilter.mode(
-                    Theme.of(context).iconTheme.color!,
-                    BlendMode.srcIn,
-                  ),),
-                title: const Text('Draft'),
-                onTap: () {},
-              ),
-              const Spacer(),
-              ListTile(
-                leading: SvgPicture.asset(
-                  'assets/icons/logout.svg',
-                  height: 24,
-                  colorFilter: ColorFilter.mode(
-                    Theme.of(context).iconTheme.color!,
-                    BlendMode.srcIn,
-                  ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.close),
+              title: const Text('Cancel'),
+              onTap: () => Navigator.of(context).pop(),
+            ),
+            ListTile(
+              leading: SvgPicture.asset(
+                'assets/icons/draft.svg',
+                height: 24,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).iconTheme.color!,
+                  BlendMode.srcIn,
+                ),),
+              title: const Text('Draft'),
+              onTap: () {},
+            ),
+            const Spacer(),
+            ListTile(
+              leading: SvgPicture.asset(
+                'assets/icons/logout.svg',
+                height: 24,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).iconTheme.color!,
+                  BlendMode.srcIn,
                 ),
-                title: const Text('Log Out'),
-                onTap: () => _logout(),
               ),
-              const SizedBox(
-                height: 30,
-              )
-            ],
-          ),
+              title: const Text('Log Out'),
+              onTap: () => _logout(),
+            ),
+            const SizedBox(
+              height: 30,
+            )
+          ],
         ),
-        resizeToAvoidBottomInset: false,
-        bottomNavigationBar: SizedBox(
-          child: NavigationBar(
-            selectedIndex: _currentPageIndex,
-            indicatorColor: Colors.blue,
-            onDestinationSelected: (int index) {
-              setState(() {
-                _currentPageIndex = index;
-              });
-            },
-            height: 60,
-            destinations: const <Widget>[
-              NavigationDestination(
-                icon: Icon(Icons.drag_indicator_sharp),
-                label: 'keypad',
-              ),
-              NavigationDestination(
-                icon: Icon(
-                  Icons.recent_actors,
-                ),
-                label: 'Recents',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.contacts),
-                label: 'Contacts',
-              ),
-            ],
-          ),
-        ),
-        body: [
-          KeypadScreen(
-            scaffoldKey: _scaffoldKey,
-          ),
-          ContactsRecentsScreen(
-            scaffoldKey: _scaffoldKey,
-            whichScreen: WhichScreen.recent,
-          ),
-          ContactsRecentsScreen(
-            scaffoldKey: _scaffoldKey,
-            whichScreen: WhichScreen.contact,
-          ),
-        ][_currentPageIndex],
       ),
+      resizeToAvoidBottomInset: false,
+      bottomNavigationBar: SizedBox(
+        child: NavigationBar(
+          selectedIndex: _currentPageIndex,
+          indicatorColor: Colors.blue,
+          onDestinationSelected: (int index) {
+            setState(() {
+              _currentPageIndex = index;
+            });
+          },
+          height: 60,
+          destinations: const <Widget>[
+            NavigationDestination(
+              icon: Icon(Icons.drag_indicator_sharp),
+              label: 'keypad',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.recent_actors,
+              ),
+              label: 'Recents',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.contacts),
+              label: 'Contacts',
+            ),
+          ],
+        ),
+      ),
+      body: SafeArea(child:[
+        KeypadScreen(
+          scaffoldKey: _scaffoldKey,
+        ),
+        ContactsRecentsScreen(
+          scaffoldKey: _scaffoldKey,
+          whichScreen: WhichScreen.recent,
+        ),
+        ContactsRecentsScreen(
+          scaffoldKey: _scaffoldKey,
+          whichScreen: WhichScreen.contact,
+        ),
+      ][_currentPageIndex]),
     );
   }
 }

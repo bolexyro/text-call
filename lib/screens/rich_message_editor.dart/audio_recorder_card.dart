@@ -38,20 +38,18 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
       _recordingStarted = true;
       _path = widget.initialAudioPath!;
     }
-    _recordingDirectory =
-        messageWriterDirectoryPath(specificDirectory: 'audio');
+    _recordingDirectory = messagesDirectoryPath(isTemporary: true,specificDirectory: 'audio');
     _initialiseControllers();
     super.initState();
   }
 
   void _initialiseControllers() {
     recorderController = RecorderController()
-    ..androidEncoder = AndroidEncoder.aac
-    ..androidOutputFormat = AndroidOutputFormat.mpeg4
-    ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
-    ..sampleRate = 44100
-    ..bitRate = 48000;
-
+      ..androidEncoder = AndroidEncoder.aac
+      ..androidOutputFormat = AndroidOutputFormat.mpeg4
+      ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
+      ..sampleRate = 44100
+      ..bitRate = 48000;
   }
 
   void _stopRecording() async {

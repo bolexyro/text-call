@@ -12,14 +12,14 @@ class MyVideoPlayer extends StatefulWidget {
     this.keyInMap,
     this.onDelete,
     this.forPreview = false,
-    required this.networkVideo,
+    required this.isNetworkVideo,
   });
 
   final String videoPath;
   final int? keyInMap;
   final void Function(int key)? onDelete;
   final bool forPreview;
-  final bool networkVideo;
+  final bool isNetworkVideo;
 
   @override
   State<MyVideoPlayer> createState() => _MyVideoPlayerState();
@@ -32,7 +32,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   void initState() {
     super.initState();
 
-    if (widget.networkVideo) {
+    if (widget.isNetworkVideo) {
       _controller = CachedVideoPlayerPlusController.networkUrl(
         Uri.parse(widget.videoPath),
       )
@@ -133,7 +133,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                               height: _controller.value.size.height,
                               child: Hero(
                                 tag: widget.videoPath,
-                                child: widget.networkVideo
+                                child: widget.isNetworkVideo
                                     ? CachedVideoPlayerPlus(_controller)
                                     : VideoPlayer(_controller),
                               ),

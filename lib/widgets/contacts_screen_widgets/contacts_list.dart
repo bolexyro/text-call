@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/search_screen.dart';
@@ -309,18 +312,38 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                         //       break;
                         //   }
                         // });
-                        // final prefs = await SharedPreferences.getInstance();
-                        // await prefs.setString('messageJsonString',
-                        //     '{"0":{"document":{"backgroundColor":{"alpha":255,"red":255,"blue":255,"green":255},"quillDocJson":"[{\\"insert\\":\\"Fffffffffffffff\\\\n\\"}]"}}}');
-                        // await prefs.setString(
-                        //     'callerPhoneNumber', '+2349098875567');
-                        // await prefs.setString('messageType', 'complex');
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString(
+                            'messageJsonString',
+                            jsonEncode({
+                              0: {
+                                'image': {
+                                  'imagePaths': {
+                                    'online': null,
+                                    'local':
+                                        '/data/user/0/com.example.text_call/app_flutter/messageWriter/images/42988be5-6046-45c8-b4b8-d83da587a84b6938616458256137263.jpg'
+                                  }
+                                }
+                              },
+                              1: {
+                                'video': {
+                                  'videoPaths': {
+                                    'online': null,
+                                    'local':
+                                        '/data/user/0/com.example.text_call/app_flutter/messageWriter/videos/ba5cf4aa-5a6b-4245-b295-19800a51fecf4423616779087903428.mp4'
+                                  }
+                                }
+                              }
+                            }));
+                        await prefs.setString(
+                            'callerPhoneNumber', '+2349098875567');
+                        await prefs.setString('messageType', 'complex');
 
-                        // createAwesomeNotification(
-                        //   title: 'debugging skills is calling',
-                        //   body: 'Might be urgent. Schrödinger\'s message',
-                        //   notificationPurpose: NotificationPurpose.forCall,
-                        // );
+                        createAwesomeNotification(
+                          title: 'debugging skills is calling',
+                          body: 'Might be urgent. Schrödinger\'s message',
+                          notificationPurpose: NotificationPurpose.forCall,
+                        );
                       },
                       icon: const Icon(Icons.search),
                     ),

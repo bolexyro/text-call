@@ -13,14 +13,14 @@ class ImageDisplayer extends StatelessWidget {
     this.onDelete,
     this.keyInMap,
     this.forPreview = false,
-    required this.networkImage,
+    required this.isNetworkImage,
   });
 
   final String imagePath;
   final int? keyInMap;
   final void Function(int key)? onDelete;
   final bool forPreview;
-  final bool networkImage;
+  final bool isNetworkImage;
 
   void _goFullScreen(BuildContext context, Widget imageWidget) {
     Navigator.of(context).push(
@@ -47,7 +47,7 @@ class ImageDisplayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageWidget = networkImage
+    final imageWidget = isNetworkImage
         ? CachedNetworkImage(
             imageUrl: imagePath,
             progressIndicatorBuilder: (context, url, downloadProgress) =>

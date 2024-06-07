@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:text_call/screens/rich_message_editor.dart/preview_screen_content.dart';
 import 'package:text_call/utils/constants.dart';
@@ -55,7 +54,6 @@ class PreviewScreen extends StatelessWidget {
         ],
       ),
       body: PreviewScreenContent(
-        networkContent: false,
         bolexyroJson: bolexyroJson,
       ),
     );

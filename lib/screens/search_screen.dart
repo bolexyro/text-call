@@ -89,32 +89,34 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         title: const Text('Search'),
       ),
-      body: isPhone
-          ? MainSearchWidget(
-              onContactSelected: _goToPage,
-            )
-          : Row(
-              children: [
-                Expanded(
-                  child: MainSearchWidget(
-                    onContactSelected: _setCurrentContact,
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 10),
-                    padding: const EdgeInsets.only(top: 40),
-                    decoration: BoxDecoration(
-                      color: isDarkMode
-                          ? makeColorLighter(Theme.of(context).primaryColor, 15)
-                          : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(15),
+      body: SafeArea(
+        child: isPhone
+            ? MainSearchWidget(
+                onContactSelected: _goToPage,
+              )
+            : Row(
+                children: [
+                  Expanded(
+                    child: MainSearchWidget(
+                      onContactSelected: _setCurrentContact,
                     ),
-                    child: activeContent,
                   ),
-                ),
-              ],
-            ),
+                  Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.only(top: 40),
+                      decoration: BoxDecoration(
+                        color: isDarkMode
+                            ? makeColorLighter(Theme.of(context).primaryColor, 15)
+                            : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: activeContent,
+                    ),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }

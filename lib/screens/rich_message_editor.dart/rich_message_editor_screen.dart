@@ -44,11 +44,8 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
 
   @override
   void initState() {
-    _imageDirectoryPath =
-        messageWriterDirectoryPath(specificDirectory: 'images');
-
-    _videoDirectoryPath =
-        messageWriterDirectoryPath(specificDirectory: 'videos');
+    _imageDirectoryPath = messagesDirectoryPath(isTemporary:true, specificDirectory: 'images');
+    _videoDirectoryPath = messagesDirectoryPath(isTemporary:true, specificDirectory: 'videos');
 
     if (widget.bolexyroJson != null) {
       //indexMainMediaMapPair =
@@ -57,49 +54,55 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
       // }
       for (final indexMainMediaMapPair in widget.bolexyroJson!.entries) {
         final mapMedia = indexMainMediaMapPair.value;
+
         if (mapMedia.keys.first == 'document') {
           _addTextEditor(
             initialBgColor: deJsonifyColorMapToColor(
-                mapMedia['document']['backgroundColor']),
+              mapMedia['document']['backgroundColor'],
+            ),
             withoutSetState: true,
             contollerParam: QuillController(
               document: Document.fromJson(
-                jsonDecode(
-                  mapMedia['document']['quillDocJson'],
-                ),
+                jsonDecode(mapMedia['document']['quillDocJson']),
               ),
               selection: const TextSelection.collapsed(offset: 0),
             ),
           );
-        }
+        }        
 
         if (mapMedia.keys.first == 'image') {
           final newIndex = ++index;
-          _imagePathsMap[newIndex] = mapMedia['image'];
+          final imagePath = mapMedia['image']['imagePaths']['local'] ??
+              mapMedia['image']['imagePaths']['online'];
+          _imagePathsMap[newIndex] = imagePath;
           _displayedWidgetsMap[newIndex] = ImageDisplayer(
             key: ValueKey(newIndex),
             keyInMap: newIndex,
             onDelete: _removeMediaWidget,
-            imagePath: mapMedia['image'],
-            networkImage: false,
+            imagePath: imagePath,
+            isNetworkImage: mapMedia['image']['imagePaths']['local'] == null,
           );
         }
 
         if (mapMedia.keys.first == 'video') {
           final newIndex = ++index;
-          _videoPathsMap[newIndex] = mapMedia['video'];
+          final videoPath = mapMedia['video']['videoPaths']['local'] ??
+              mapMedia['video']['videoPaths']['online'];
+          _videoPathsMap[newIndex] = videoPath;
           _displayedWidgetsMap[newIndex] = MyVideoPlayer(
             key: ValueKey(newIndex),
             keyInMap: newIndex,
             onDelete: _removeMediaWidget,
-            videoPath: mapMedia['video'],
-            networkVideo: false,
+            videoPath: videoPath,
+            isNetworkVideo: mapMedia['video']['videoPaths']['local'] == null,
           );
         }
 
         if (mapMedia.keys.first == 'audio') {
-          _addAudio(initialAudioPath: mapMedia['audio'], withoutSetState: true);
-          _getAudioPath(mapMedia['audio'], index);
+          final audioPath = mapMedia['audio']['audioPaths']['local'] ??
+              mapMedia['audio']['audioPaths']['online'];
+          _addAudio(initialAudioPath: audioPath, withoutSetState: true);
+          _getAudioPath(audioPath, index);
         }
       }
     }
@@ -148,15 +151,36 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
       }
       if (kvPair.value.runtimeType == AudioRecorderCard &&
           _audioPathsMap[kvPair.key] != null) {
-        bolexyroJson[index.toString()] = {'audio': _audioPathsMap[kvPair.key]!};
+        bolexyroJson[index.toString()] = {
+          'audio': {
+            'audioPaths': {
+              'online': null,
+              'local': _audioPathsMap[kvPair.key]!
+            },
+          },
+        };
       }
 
       if (kvPair.value.runtimeType == MyVideoPlayer) {
-        bolexyroJson[index.toString()] = {'video': _videoPathsMap[kvPair.key]!};
+        bolexyroJson[index.toString()] = {
+          'video': {
+            'videoPaths': {
+              'online': null,
+              'local': _videoPathsMap[kvPair.key]!
+            },
+          },
+        };
       }
 
       if (kvPair.value.runtimeType == ImageDisplayer) {
-        bolexyroJson[index.toString()] = {'image': _imagePathsMap[kvPair.key]!};
+        bolexyroJson[index.toString()] = {
+          'image': {
+            'imagePaths': {
+              'online': null,
+              'local': _imagePathsMap[kvPair.key]!
+            },
+          },
+        };
       }
       index++;
     }
@@ -258,7 +282,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
         keyInMap: newIndex,
         onDelete: _removeMediaWidget,
         imagePath: filePath,
-        networkImage: false,
+        isNetworkImage: false,
       );
     });
 
@@ -336,7 +360,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
         keyInMap: newIndex,
         onDelete: _removeMediaWidget,
         videoPath: filePath,
-        networkVideo: false,
+        isNetworkVideo: false,
       );
     });
 

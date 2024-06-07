@@ -56,7 +56,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   bool _callSending = false;
   bool _filesUploading = false;
   Color _selectedColor = const Color.fromARGB(255, 13, 214, 214);
-  final _colorizeColors = [
+  final _animatedAcceptedTextColors = [
     Colors.purple,
     Colors.blue,
     Colors.yellow,
@@ -65,14 +65,19 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
   late Widget _messageWriterMessageBox;
   Map<String, dynamic>? _upToDateBolexyroJson;
-  Map<String, dynamic>? _bolexyroJsonWithNetworkUrls;
-  bool _isMadeAvailableOffline = false;
 
+  bool _isMadeAvailableOffline = false;
   double _fileUploadProgress = 0;
   String _fileUploadText = '';
+  late Future<String> _imageDirectoryPath;
+  late Future<String> _videoDirectoryPath;
+
 
   @override
   void initState() {
+     _imageDirectoryPath = messagesDirectoryPath(isTemporary:false, specificDirectory: 'images');
+    _videoDirectoryPath = messagesDirectoryPath(isTemporary:false, specificDirectory: 'videos');
+
     _messageWriterMessageBox = TextField(
       controller: _messageController,
       minLines: 4,
@@ -117,41 +122,46 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     // print(xyz);
 
     if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder) {
-      _bolexyroJsonWithNetworkUrls =
-          await _editBolexyroJsonToContainStorageUrls(_upToDateBolexyroJson!);
+      _upToDateBolexyroJson =
+          await _saveFilesLocallyAndRemoteAndEditBolexyroJsonToContainTheStorageUrls(
+              _upToDateBolexyroJson!);
     }
-    setState(() {
-      _callSending = true;
-    });
 
-    _channel!.sink.add(
-      json.encode(
-        {
-          'caller_phone_number': _callerPhoneNumber,
-          'callee_phone_number': widget.calleePhoneNumber,
-          'message_json_string':
-              _messageWriterMessageBox.runtimeType == FileUiPlaceHolder
-                  ? jsonEncode(_bolexyroJsonWithNetworkUrls!)
-                  : RegularMessage(
-                      messageString: _messageController.text,
-                      backgroundColor: _selectedColor,
-                    ).toJsonString,
-          'my_message_type':
-              _messageWriterMessageBox.runtimeType == FileUiPlaceHolder
-                  ? 'complex'
-                  : 'regular',
-          'message_id': _recentId,
-        },
-      ),
-    );
+    print('updated is $_upToDateBolexyroJson');
+    // setState(() {
+    //   _callSending = true;
+    // });
+
+    // make sure the bolexyro json you are sending has local paths to be null for the medias
+    // _channel!.sink.add(
+    //   json.encode(
+    //     {
+    //       'caller_phone_number': _callerPhoneNumber,
+    //       'callee_phone_number': widget.calleePhoneNumber,
+    //       'message_json_string':
+    //           _messageWriterMessageBox.runtimeType == FileUiPlaceHolder
+    //               ? jsonEncode(_upToDateBolexyroJson!)
+    //               : RegularMessage(
+    //                   messageString: _messageController.text,
+    //                   backgroundColor: _selectedColor,
+    //                 ).toJsonString,
+    //       'my_message_type':
+    //           _messageWriterMessageBox.runtimeType == FileUiPlaceHolder
+    //               ? 'complex'
+    //               : 'regular',
+    //       'message_id': _recentId,
+    //     },
+    //   ),
+    // );
   }
 
   void _deleteRemoteFilesNotNeeded() {
     // we are going to use the bolexyroJsonWithNetworkUrls to delete the ones not needed.
   }
 
-  Future<Map<String, dynamic>> _editBolexyroJsonToContainStorageUrls(
-      Map<String, dynamic> upToDateBolexyroJson) async {
+  Future<Map<String, dynamic>>
+      _saveFilesLocallyAndRemoteAndEditBolexyroJsonToContainTheStorageUrls(
+          Map<String, dynamic> upToDateBolexyroJson) async {
     setState(() {
       _filesUploading = true;
     });
@@ -172,16 +182,23 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         if (mediaType == 'document') {
           continue;
         }
-        final localPath = entry.value.values.first as String;
+
+        // mediatypepathstring would be imagepaths, videopaths, audiopaths
+        final String mediaTypePathString = entry.value.values.first.keys.first;
+        final paths = entry.value.values.first.values.first;
+        final localPath = paths['local'] as String;
+
         final file = File(localPath);
 
-        Reference mediaRef;
+        late Reference mediaRef;
 
         switch (mediaType) {
           case 'image':
+          // File('')
             mediaRef = imagesRef.child(
                 '${DateTime.now()}-$_callerPhoneNumber-${path.basename(file.path)}');
             _fileUploadText = 'Uploading image ${++currentImageIndex}';
+            print('mkbhd');
 
             break;
           case 'video':
@@ -209,18 +226,23 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             _fileUploadProgress = progress;
           });
         }, onError: (e) {
-          print(e);
+          print('Error is $e');
         });
 
         await uploadTask;
         final downloadUrl = await mediaRef.getDownloadURL();
-        updatedBolexyroJson[entry.key][mediaType] = downloadUrl;
+        updatedBolexyroJson[entry.key][mediaType][mediaTypePathString]
+            ['online'] = downloadUrl;
       }
       setState(() {
         _filesUploading = false;
       });
       return updatedBolexyroJson;
     } catch (e) {
+      setState(() {
+        _filesUploading = false;
+      });
+      print(e);
       throw 'File uplod Error';
     }
   }
@@ -375,65 +397,23 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               const SizedBox(
                 height: 20,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                    width: (MediaQuery.sizeOf(context).width - 30) / 3,
-                    child: Center(child: Container()),
+              IconButton(
+                onPressed: () async {
+                  // if (await checkForInternetConnection(context)) {
+                  _callSomeone(context);
+                  // }
+                },
+                icon: const Padding(
+                  padding: EdgeInsets.all(5),
+                  child: Icon(
+                    Icons.phone,
+                    size: 35,
                   ),
-                  SizedBox(
-                    width: (MediaQuery.sizeOf(context).width - 30) / 3,
-                    child: Center(
-                      child: IconButton(
-                        onPressed: () async {
-                          // if (await checkForInternetConnection(context)) {
-                          _callSomeone(context);
-                          // }
-                        },
-                        icon: const Padding(
-                          padding: EdgeInsets.all(5),
-                          child: Icon(
-                            Icons.phone,
-                            size: 35,
-                          ),
-                        ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: (MediaQuery.sizeOf(context).width - 30) / 3,
-                    child: Center(
-                      child: Switch.adaptive(
-                        activeColor: _selectedColor,
-                        activeTrackColor: Theme.of(context).primaryColor,
-                        inactiveTrackColor: Theme.of(context).primaryColor,
-                        activeThumbImage: const svgProvider.Svg(
-                          'assets/icons/make-available-offline.svg',
-                          color: Colors.white,
-                        ),
-                        value: _isMadeAvailableOffline,
-                        onChanged: (value) {
-                          if (value) {
-                            showFlushBar(
-                              Colors.blue,
-                              'Message is now available offline',
-                              FlushbarPosition.TOP,
-                              context,
-                            );
-                          }
-                          setState(() {
-                            _isMadeAvailableOffline = value;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
+                ),
+                style: IconButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                ),
               ),
             ],
           ),
@@ -503,7 +483,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     ? null
                     : ComplexMessage(
                         complexMessageJsonString:
-                            jsonEncode(_bolexyroJsonWithNetworkUrls),
+                            jsonEncode(_upToDateBolexyroJson),
                       ),
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
@@ -566,7 +546,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     ? null
                     : ComplexMessage(
                         complexMessageJsonString:
-                            jsonEncode(_bolexyroJsonWithNetworkUrls),
+                            jsonEncode(_upToDateBolexyroJson),
                       ),
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
@@ -604,7 +584,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                           fontSize: 50,
                           fontFamily: 'Horizon',
                         ),
-                        colors: _colorizeColors,
+                        colors: _animatedAcceptedTextColors,
                       )
                     ],
                     displayFullTextOnTap: true,
@@ -683,7 +663,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       ? null
                       : ComplexMessage(
                           complexMessageJsonString:
-                              jsonEncode(_bolexyroJsonWithNetworkUrls),
+                              jsonEncode(_upToDateBolexyroJson),
                         ),
                   id: _recentId,
                   phoneNumber: widget.calleePhoneNumber,
@@ -752,10 +732,10 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           );
           if (toDiscard == true) {
             Navigator.of(context).pop();
-            messageWriterDirectoryPath(specificDirectory: null).then(
-              (messageWriterDirectoryPath) =>
-                  deleteDirectory(messageWriterDirectoryPath),
-            );
+            // messageWriterDirectoryPath(specificDirectory: null).then(
+            //   (messageWriterDirectoryPath) =>
+            //       deleteDirectory(messageWriterDirectoryPath),
+            // );
           }
         } else {
           Navigator.of(context).pop();
@@ -779,9 +759,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
                 if (toDiscard == true) {
                   Navigator.of(context).pop();
-                  messageWriterDirectoryPath(specificDirectory: null).then(
-                    (messageWriterDirectoryPath) =>
-                        deleteDirectory(messageWriterDirectoryPath),
+                  messagesDirectoryPath(isTemporary: true,specificDirectory: null).then(
+                    (tempMessagesDirectoryPath) =>
+                        deleteDirectory(tempMessagesDirectoryPath),
                   );
                 } else {}
               } else {
@@ -793,49 +773,82 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
                 child: Container(
-                  decoration:
-                      BoxDecoration(color: Colors.white.withOpacity(0.0)),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.0),
+                  ),
                 ),
               ),
             ),
           ),
           Positioned(
             bottom: 0,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: MediaQuery.sizeOf(context).height * .6,
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? makeColorLighter(Theme.of(context).primaryColor, 15)
-                      : const Color.fromARGB(255, 207, 222, 234),
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(25),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder)
+                Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: Switch.adaptive(
+                    activeColor: _selectedColor,
+                    activeTrackColor: Theme.of(context).primaryColor,
+                    inactiveTrackColor: Theme.of(context).primaryColor,
+                    activeThumbImage: const svgProvider.Svg(
+                      'assets/icons/make-available-offline.svg',
+                      color: Colors.white,
+                    ),
+                    value: _isMadeAvailableOffline,
+                    onChanged: (value) {
+                      if (value) {
+                        showFlushBar(
+                          Colors.blue,
+                          'Message is now available offline',
+                          FlushbarPosition.TOP,
+                          context,
+                        );
+                      }
+                      setState(() {
+                        _isMadeAvailableOffline = value;
+                      });
+                    },
                   ),
                 ),
-                child: Stack(
-                  alignment: Alignment.topCenter,
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.sizeOf(context).width,
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                            0, 0, 0, MediaQuery.viewInsetsOf(context).vertical),
-                        child:
-                            SingleChildScrollView(child: messageWriterContent),
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.sizeOf(context).height * .6,
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? makeColorLighter(Theme.of(context).primaryColor, 15)
+                          : const Color.fromARGB(255, 207, 222, 234),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(25),
                       ),
                     ),
-                    ConfettiWidget(
-                      confettiController: _confettiController,
-                      shouldLoop: true,
-                      blastDirectionality: BlastDirectionality.explosive,
-                      numberOfParticles: 30,
-                      emissionFrequency: 0.1,
+                    child: Stack(
+                      alignment: Alignment.topCenter,
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.sizeOf(context).width,
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(0, 0, 0,
+                                MediaQuery.viewInsetsOf(context).vertical),
+                            child: SingleChildScrollView(
+                                child: messageWriterContent),
+                          ),
+                        ),
+                        ConfettiWidget(
+                          confettiController: _confettiController,
+                          shouldLoop: true,
+                          blastDirectionality: BlastDirectionality.explosive,
+                          numberOfParticles: 30,
+                          emissionFrequency: 0.1,
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
           if (_filesUploading)

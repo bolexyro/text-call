@@ -14,33 +14,34 @@ class ContactDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     const stackPadding = EdgeInsets.symmetric(horizontal: 10);
 
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? null
+          : Colors.grey[200],
+      appBar: AppBar(
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? null
             : Colors.grey[200],
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).brightness == Brightness.dark
-                  ? null
-                  : Colors.grey[200],
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-            ),
-            onPressed: () => Navigator.of(context).pop(),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      resizeToAvoidBottomInset: false,
+      body: SafeArea(
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: ContactDetailsPane(
+            contact: selectedContact,
+            stackContainerWidths:
+                MediaQuery.sizeOf(context).width - stackPadding.horizontal,
           ),
         ),
-        resizeToAvoidBottomInset: false,
-        body: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: ContactDetailsPane(
-              contact: selectedContact,
-              stackContainerWidths:
-                  MediaQuery.sizeOf(context).width - stackPadding.horizontal,
-            )),
       ),
     );
   }

@@ -179,8 +179,9 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => SmsNotFromTerminated(
-              howSmsIsOpened: HowSmsIsOpened
-                  .notFromTerminatedToShowMessageAfterAccessRequestGranted,
+              recentCallTime: selectedRecent.callTime,
+              howSmsIsOpened:
+                  HowSmsIsOpened.notFromTerminatedToJustDisplayMessage,
               regularMessage: selectedRecent.regularMessage,
               complexMessage: selectedRecent.complexMessage,
             ),

@@ -234,6 +234,7 @@ void registerCallkitIncomingListener() {
           Navigator.of(TextCall.navigatorKey.currentContext!).push(
             MaterialPageRoute(
               builder: (context) => SmsNotFromTerminated(
+                recentCallTime: null,
                 complexMessage: messageType == 'complex'
                     ? ComplexMessage(
                         complexMessageJsonString: messageJsonString)
@@ -423,10 +424,10 @@ class NotificationController {
         Navigator.of(TextCall.navigatorKey.currentContext!).push(
           MaterialPageRoute(
             builder: (context) => SmsNotFromTerminated(
+              recentCallTime: DateTime.parse(data[0]['id'] as String),
               howSmsIsOpened: receivedAction.id!.toString().startsWith('10')
                   ? HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess
-                  : HowSmsIsOpened
-                      .notFromTerminatedToShowMessageAfterAccessRequestGranted,
+                  : HowSmsIsOpened.notFromTerminatedToJustDisplayMessage,
               regularMessage: data[0]['messageType'] == 'regular'
                   ? RegularMessage.fromJsonString(
                       data[0]['messageJson'] as String,

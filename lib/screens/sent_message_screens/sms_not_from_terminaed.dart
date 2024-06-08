@@ -1,6 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/regular_message.dart';
@@ -10,7 +15,10 @@ import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/rich_message_editor.dart/preview_screen_content.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
+import 'package:uuid/uuid.dart';
+import 'package:http/http.dart' as http;
 
 class SmsNotFromTerminated extends ConsumerWidget {
   const SmsNotFromTerminated({
@@ -18,22 +26,23 @@ class SmsNotFromTerminated extends ConsumerWidget {
     required this.howSmsIsOpened,
     required this.regularMessage,
     required this.complexMessage,
+    required this.recentCallTime,
   });
 
   // this messages should not be null if howsmsisopened == notFromTerminatedToShowMessageAfterAccessRequestGranted
   final HowSmsIsOpened howSmsIsOpened;
+  final DateTime? recentCallTime;
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
-      child: widgetToRenderBasedOnHowAppIsOpened(
+      child: WidgetToRenderBasedOnHowAppIsOpened(
+        recentCallTime: recentCallTime,
         howSmsIsOpened: howSmsIsOpened,
         regularMessage: regularMessage,
         complexMessage: complexMessage,
-        ref: ref,
-        context: context,
       ),
     );
   }
@@ -162,21 +171,52 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
   }
 }
 
-Widget widgetToRenderBasedOnHowAppIsOpened(
-    {required HowSmsIsOpened howSmsIsOpened,
-    required RegularMessage? regularMessage,
-    required ComplexMessage? complexMessage,
-    required WidgetRef ref,
-    required BuildContext context}) {
-  // if (howSmsIsOpened ==
-  //         HowSmsIsOpened
-  //             .notFromTerminatedToShowMessageAfterAccessRequestGranted ||
-  //     howSmsIsOpened ==
-  //         HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess ||
-  //     howSmsIsOpened == HowSmsIsOpened.notFromTerminatedForPickedCall) {
-  if (howSmsIsOpened == HowSmsIsOpened.notFromTerminatedForPickedCall) {
-    final prefsFuture = SharedPreferences.getInstance();
-    prefsFuture.then((prefs) {
+class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerStatefulWidget {
+  const WidgetToRenderBasedOnHowAppIsOpened({
+    super.key,
+    required this.howSmsIsOpened,
+    required this.regularMessage,
+    required this.complexMessage,
+    required this.recentCallTime,
+  });
+
+  final RegularMessage? regularMessage;
+  final ComplexMessage? complexMessage;
+  final DateTime? recentCallTime;
+  final HowSmsIsOpened howSmsIsOpened;
+
+  @override
+  ConsumerState<WidgetToRenderBasedOnHowAppIsOpened> createState() =>
+      _WidgetToRenderBasedOnHowAppIsOpenedState();
+}
+
+class _WidgetToRenderBasedOnHowAppIsOpenedState
+    extends ConsumerState<WidgetToRenderBasedOnHowAppIsOpened> {
+  bool _isBeingRemovedFromOffline = false;
+  bool _isBeingMadeAvailableOffline = false;
+  // this _isMessageAvailableOffline is going to be null if we are dealing with a regular message rather than a complex message
+  bool? _isMessageAvailableOffline;
+
+  // this would be non null only if (widget.howSmsIsOpened ==  HowSmsIsOpened.notFromTerminatedForPickedCall)
+  late Future<Recent?> newRecentAddedToState;
+  late ComplexMessage? complexMessage;
+
+  @override
+  initState() {
+    newRecentAddedToState = _addRecentToState();
+    if (widget.complexMessage != null) {
+      _isMessageAvailableOffline =
+          isMessageAvailableOffline(widget.complexMessage!.bolexyroJson);
+    }
+    print(widget.complexMessage?.bolexyroJson);
+    complexMessage = widget.complexMessage;
+    super.initState();
+  }
+
+  Future<Recent?> _addRecentToState() async {
+    if (widget.howSmsIsOpened ==
+        HowSmsIsOpened.notFromTerminatedForPickedCall) {
+      final prefs = await SharedPreferences.getInstance();
       prefs.reload();
 
       final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
@@ -184,39 +224,189 @@ Widget widgetToRenderBasedOnHowAppIsOpened(
 
       final newRecent = Recent.withoutContactObject(
         category: RecentCategory.incomingAccepted,
-        regularMessage: regularMessage,
-        complexMessage: complexMessage,
+        regularMessage: widget.regularMessage,
+        complexMessage: widget.complexMessage,
         id: recentId!,
         phoneNumber: callerPhoneNumber!,
       );
       ref.read(recentsProvider.notifier).addRecent(newRecent);
+      return newRecent;
+    }
+    return null;
+  }
+
+  Future<void> _removeFilesFromOffline(
+      Map<String, dynamic> bolexyroJson) async {
+    setState(() {
+      _isBeingRemovedFromOffline = true;
+    });
+    final updatedBolexyroJson = jsonDecode(jsonEncode(bolexyroJson));
+
+    for (final entry in updatedBolexyroJson.entries) {
+      final mediaType = entry.value.keys.first;
+      if (mediaType == 'document') {
+        continue;
+      }
+
+      final paths = entry.value.values.first.values.first;
+      print('paths is $paths');
+      final localPath = paths['local'] as String;
+      final String mediaTypePathString = entry.value.values.first.keys.first;
+
+      await deleteFile(localPath);
+      updatedBolexyroJson[entry.key][mediaType][mediaTypePathString]['local'] =
+          null;
+    }
+
+    if (widget.howSmsIsOpened == HowSmsIsOpened.fromTerminatedForPickCall) {
+      ref.read(recentsProvider.notifier).updateRecent(
+            recentCallTime: (await newRecentAddedToState)!.callTime,
+            complexMessageJsonString: jsonEncode(updatedBolexyroJson),
+          );
+    } else {
+      ref.read(recentsProvider.notifier).updateRecent(
+            recentCallTime: widget.recentCallTime!,
+            complexMessageJsonString: jsonEncode(updatedBolexyroJson),
+          );
+    }
+    setState(() {
+      _isBeingRemovedFromOffline = false;
+      _isMessageAvailableOffline = false;
+      complexMessage = ComplexMessage(
+          complexMessageJsonString: jsonEncode(updatedBolexyroJson));
     });
   }
 
-  return Scaffold(
-    appBar: AppBar(
-      leading: IconButton(
-        onPressed: () => Navigator.of(context).pop(),
-        icon: const Icon(Icons.arrow_back_ios_new),
+  Future<void> _makeAvailableOffline(Map<String, dynamic> bolexyroJson) async {
+    setState(() {
+      _isBeingMadeAvailableOffline = true;
+    });
+    const uuid = Uuid();
+
+    final updatedBolexyroJson = jsonDecode(jsonEncode(bolexyroJson));
+
+    final imageDirectoryPath = await messagesDirectoryPath(
+        isTemporary: false, specificDirectory: 'images');
+    final videoDirectoryPath = await messagesDirectoryPath(
+        isTemporary: false, specificDirectory: 'videos');
+    final audioDirectoryPath = await messagesDirectoryPath(
+        isTemporary: false, specificDirectory: 'audio');
+    final tempDirectoryPath = (await getTemporaryDirectory()).path;
+    for (final entry in updatedBolexyroJson.entries) {
+      final mediaType = entry.value.keys.first;
+      if (mediaType == 'document') {
+        continue;
+      }
+
+      final paths = entry.value.values.first.values.first;
+      final remotePath = paths['online'] as String;
+      final String mediaTypePathString = entry.value.values.first.keys.first;
+
+      http.Response response = await http.get(Uri.parse(remotePath));
+      final String fileExtension = mediaType == 'image'
+          ? '.jpg'
+          : mediaType == 'video'
+              ? '.mp4'
+              : '.m4a';
+      // Extracts file type from the URL
+      String newFileName = '${uuid.v4()}$fileExtension';
+      String tempFilePath = '$tempDirectoryPath/$newFileName';
+      print('newFilename is $newFileName');
+
+      File mediaFile = File(tempFilePath);
+      await mediaFile.writeAsBytes(response.bodyBytes);
+
+      updatedBolexyroJson[entry.key][mediaType][mediaTypePathString]['local'] =
+          await storeFileInPermanentDirectory(
+        sourceFile: mediaFile,
+        fileName: newFileName,
+        fileType: mediaType,
+        imageDirectoryPath: imageDirectoryPath,
+        videoDirectoryPath: videoDirectoryPath,
+        audioDirectoryPath: audioDirectoryPath,
+      );
+    }
+
+    if (widget.howSmsIsOpened == HowSmsIsOpened.fromTerminatedForPickCall) {
+      ref.read(recentsProvider.notifier).updateRecent(
+            recentCallTime: (await newRecentAddedToState)!.callTime,
+            complexMessageJsonString: jsonEncode(updatedBolexyroJson),
+          );
+    } else {
+      ref.read(recentsProvider.notifier).updateRecent(
+            recentCallTime: widget.recentCallTime!,
+            complexMessageJsonString: jsonEncode(updatedBolexyroJson),
+          );
+    }
+    setState(() {
+      _isBeingMadeAvailableOffline = false;
+      _isMessageAvailableOffline = true;
+      complexMessage = ComplexMessage(
+          complexMessageJsonString: jsonEncode(updatedBolexyroJson));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios_new),
+        ),
+        iconTheme: widget.regularMessage != null
+            ? IconThemeData(
+                color:
+                    widget.regularMessage!.backgroundColor.computeLuminance() >
+                            0.5
+                        ? Colors.black
+                        : Colors.white,
+              )
+            : null,
+        forceMaterialTransparency: true,
+        actions: [
+          if (_isMessageAvailableOffline == false)
+            _isBeingMadeAvailableOffline
+                ? const CircularProgressIndicator()
+                : IconButton(
+                    onPressed: () =>
+                        _makeAvailableOffline(complexMessage!.bolexyroJson),
+                    icon: SvgPicture.asset(
+                      'assets/icons/download.svg',
+                      height: kIconHeight,
+                      colorFilter: ColorFilter.mode(
+                        Theme.of(context).iconTheme.color!,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+          if (_isMessageAvailableOffline == true)
+            _isBeingRemovedFromOffline
+                ? const CircularProgressIndicator()
+                : IconButton(
+                    onPressed: () =>
+                        _removeFilesFromOffline(complexMessage!.bolexyroJson),
+                    icon: SvgPicture.asset(
+                      'assets/icons/delete.svg',
+                      height: kIconHeight,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.red,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+        ],
+        title: widget.regularMessage == null
+            ? null
+            : ScaffoldTitle(color: widget.regularMessage!.backgroundColor),
       ),
-      iconTheme: regularMessage != null
-          ? IconThemeData(
-              color: regularMessage.backgroundColor.computeLuminance() > 0.5
-                  ? Colors.black
-                  : Colors.white,
-            )
-          : null,
-      forceMaterialTransparency: true,
-      title: regularMessage == null
-          ? null
-          : ScaffoldTitle(color: regularMessage.backgroundColor),
-    ),
-    body: TheStackWidget(
-      howSmsIsOpened: howSmsIsOpened,
-      regularMessage: regularMessage,
-      complexMessage: complexMessage,
-    ),
-    backgroundColor: regularMessage?.backgroundColor,
-  );
-  // }
+      body: TheStackWidget(
+        howSmsIsOpened: widget.howSmsIsOpened,
+        regularMessage: widget.regularMessage,
+        complexMessage: widget.complexMessage,
+      ),
+      backgroundColor: widget.regularMessage?.backgroundColor,
+    );
+    // }
+  }
 }

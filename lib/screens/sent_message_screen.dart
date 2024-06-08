@@ -18,7 +18,7 @@ enum HowSmsIsOpened {
   notFromTerminatedForPickedCall,
   // the belows 🤣 is the same thing as not from terminated to show message normally. Check contacts_or_recents_screen
   fromTerminatedToShowMessageAfterAccessRequestGranted,
-  notFromTerminatedToShowMessageAfterAccessRequestGranted,
+  notFromTerminatedToJustDisplayMessage,
 }
 
 // class SentMessageScreen extends StatelessWidget {

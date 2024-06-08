@@ -50,12 +50,13 @@ class _GroupedRecentsListState extends State<GroupedRecentsList> {
   }
 
   void _goToSentMessageScreen(
-      {required RegularMessage? regularMessage,
+      {required DateTime recentCallTime, required RegularMessage? regularMessage,
       required ComplexMessage? complexMessage}) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => SmsNotFromTerminated(
-        howSmsIsOpened: HowSmsIsOpened
-            .notFromTerminatedToShowMessageAfterAccessRequestGranted,
+        recentCallTime: recentCallTime,
+
+        howSmsIsOpened: HowSmsIsOpened.notFromTerminatedToJustDisplayMessage,
         complexMessage: complexMessage,
         regularMessage: regularMessage,
       ),
@@ -103,6 +104,7 @@ class _GroupedRecentsListState extends State<GroupedRecentsList> {
                   ? ElevatedButton(
                       onPressed: () {
                         _goToSentMessageScreen(
+                          recentCallTime: recentN.callTime,
                           regularMessage: recentN.regularMessage,
                           complexMessage: recentN.complexMessage,
                         );

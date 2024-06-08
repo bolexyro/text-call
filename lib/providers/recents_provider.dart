@@ -119,6 +119,45 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
     }
   }
 
+  void updateRecent(
+      {required DateTime recentCallTime,
+      required String complexMessageJsonString}) async {
+    final db = await getDatabase();
+    db.update(
+      'recents',
+      {
+        'messageJson': complexMessageJsonString,
+      },
+      where: 'callTime = ?',
+      whereArgs: [recentCallTime.toString()],
+    );
+
+    late Recent recentToBeRemoved;
+    final List<Recent> newState = List.from(state)
+      ..removeWhere((recent) {
+        if (recent.callTime == recentCallTime) {
+          recentToBeRemoved = recent;
+          print(recent);
+          return true;
+        }
+        return false;
+      });
+    newState.add(
+      Recent(
+        contact: recentToBeRemoved.contact,
+        category: recentToBeRemoved.category,
+        callTime: recentToBeRemoved.callTime,
+        regularMessage: null,
+        complexMessage:
+            ComplexMessage(complexMessageJsonString: complexMessageJsonString),
+        id: recentToBeRemoved.id,
+        canBeViewed: recentToBeRemoved.canBeViewed,
+        recentIsAContact: recentToBeRemoved.recentIsAContact,
+      ),
+    );
+    state = newState;
+  }
+
   // should only be used when we delete a contact and we want to delete the corresponding
   Future<void> removeNamesFromRecents(String phoneNumber) async {
     final List<Recent> newList = [];

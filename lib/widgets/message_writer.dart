@@ -165,30 +165,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     // we are going to use the bolexyroJsonWithNetworkUrls to delete the ones not needed.
   }
 
-  Future<String?> _storeFileInPermanentDirectory(
-      {required File sourceFile,
-      required String fileName,
-      required String fileType}) async {
-    late String destinationPath;
-    if (fileType == 'image') {
-      destinationPath = '${await _imageDirectoryPath}/$fileName';
-    } else if (fileType == 'video') {
-      destinationPath = '${await _videoDirectoryPath}/$fileName';
-    } else {
-      destinationPath = '${await _audioDirectoryPath}/$fileName';
-    }
-
-    if (await sourceFile.exists()) {
-      print(destinationPath);
-      await sourceFile.copy(destinationPath);
-      print('File copied.');
-      return destinationPath;
-    } else {
-      print('Source file does not exist.');
-      return null;
-    }
-  }
-
 // this function would be used to set the local urls for the files to null. When we want to send the bolexyroJson to the callee
 // through the websocket. Reason why is because we don't want the callee to access those paths on their device because it might not exist.
 
@@ -217,6 +193,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       _filesUploading = true;
     });
     try {
+      final imageDirectoryPath = await _imageDirectoryPath;
+      final videoDirectoryPath = await _videoDirectoryPath;
+      final audioDirectoryPath = await _audioDirectoryPath;
       final storageRef = FirebaseStorage.instance.ref();
       final imagesRef = storageRef.child('images');
       final audioRef = storageRef.child('audio');
@@ -266,10 +245,13 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         }
 
         if (_isMadeAvailableOffline) {
-          _storeFileInPermanentDirectory(
+          storeFileInPermanentDirectory(
             sourceFile: localFile,
             fileName: newFileName,
             fileType: mediaType,
+            imageDirectoryPath: imageDirectoryPath,
+            videoDirectoryPath: videoDirectoryPath,
+            audioDirectoryPath: audioDirectoryPath,
           ).then((permanentLocalFilePath) => updatedBolexyroJson[entry.key]
                   [mediaType][mediaTypePathString]['local'] =
               permanentLocalFilePath!);

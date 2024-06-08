@@ -26,12 +26,13 @@ class ContactDetailsPane extends ConsumerWidget {
 
   void _goToSentMessageScreen(
       {required BuildContext context,
+      required DateTime recentCallTime,
       required RegularMessage? regularMessage,
       required ComplexMessage? complexMessage}) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => SmsNotFromTerminated(
-        howSmsIsOpened: HowSmsIsOpened
-            .notFromTerminatedToShowMessageAfterAccessRequestGranted,
+        recentCallTime: recentCallTime,
+        howSmsIsOpened: HowSmsIsOpened.notFromTerminatedToJustDisplayMessage,
         regularMessage: regularMessage,
         complexMessage: complexMessage,
       ),
@@ -83,6 +84,7 @@ class ContactDetailsPane extends ConsumerWidget {
               ? ElevatedButton(
                   onPressed: () {
                     _goToSentMessageScreen(
+                        recentCallTime: recent!.callTime,
                         context: context,
                         regularMessage: recent!.regularMessage,
                         complexMessage: recent!.complexMessage);

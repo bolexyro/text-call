@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:text_call/screens/rich_message_editor.dart/preview_screen_content.dart';
-import 'package:text_call/utils/constants.dart';
 
 class PreviewScreen extends StatelessWidget {
   const PreviewScreen({
@@ -26,18 +25,7 @@ class PreviewScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new),
         ),
         actions: [
-          // Switch(value: true, onChanged: (f) {}),
-          IconButton(
-            onPressed: () {},
-            icon: SvgPicture.asset(
-              'assets/icons/download.svg',
-              height: kIconHeight,
-              colorFilter: ColorFilter.mode(
-                Theme.of(context).iconTheme.color!,
-                BlendMode.srcIn,
-              ),
-            ),
-          ),
+          
           if (!forExtremePreview)
             IconButton(
               onPressed: () {

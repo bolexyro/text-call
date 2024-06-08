@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:another_flushbar/flushbar.dart';
@@ -468,6 +469,7 @@ Future<String> messagesDirectoryPath({
 
 Future<void> deleteFile(String filePath) async {
   final file = File(filePath);
+  print('file exsts ${await file.exists()}');
   try {
     if (await file.exists()) {
       await file.delete();
@@ -507,4 +509,55 @@ void addRecentToDb(Recent newRecent, Database db) {
     },
     conflictAlgorithm: ConflictAlgorithm.ignore,
   );
+}
+
+// since the user cannot really choose which medias in a message to keep available offline and so when they
+// save a message offline, the audio, video, image would be made available offline.
+// so we can say if the localPath of maybe the audio is not null, then the message is available offline.
+bool isMessageAvailableOffline(Map<String, dynamic> bolexyroJson) {
+  for (final indexMainMediaMapPair in bolexyroJson.entries) {
+    // Skip 'document' entries
+    if (indexMainMediaMapPair.value.keys.first != 'document') {
+      // Get the media map (audio, video, image)
+      final mediaMap = indexMainMediaMapPair.value.values.first;
+
+      // Iterate through media map entries
+      for (final mediaEntry in mediaMap.entries) {
+        // Check if the 'local' path is not null
+        if (mediaEntry.value['local'] != null) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+Future<String?> storeFileInPermanentDirectory({
+  required File sourceFile,
+  required String fileName,
+  required String fileType,
+  required String imageDirectoryPath,
+  required String audioDirectoryPath,
+  required String videoDirectoryPath,
+}) async {
+  late String destinationPath;
+  if (fileType == 'image') {
+    destinationPath = '$imageDirectoryPath/$fileName';
+  } else if (fileType == 'video') {
+    destinationPath = '$videoDirectoryPath/$fileName';
+  } else {
+    destinationPath = '$audioDirectoryPath/$fileName';
+  }
+
+  if (await sourceFile.exists()) {
+    print(destinationPath);
+    await sourceFile.copy(destinationPath);
+    print('File copied.');
+    return destinationPath;
+  } else {
+    print('Source file does not exist.');
+    return null;
+  }
 }

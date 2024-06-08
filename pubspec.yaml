@@ -75,6 +75,7 @@ dependencies:
   cached_video_player_plus: ^2.0.0
   flutter_callkit_incoming: ^2.0.4+1
   flutter_svg_provider: ^1.0.7
+  uuid: ^4.4.0
 
 dev_dependencies:
   flutter_test:

@@ -6,7 +6,6 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:lottie/lottie.dart';
@@ -22,6 +21,7 @@ import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/dialogs/choose_color_dialog.dart';
 import 'package:text_call/widgets/dialogs/confirm_dialog.dart';
+import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as path;
@@ -65,18 +65,23 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
   late Widget _messageWriterMessageBox;
   Map<String, dynamic>? _upToDateBolexyroJson;
+  Map<String, dynamic>? _bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls;
 
   bool _isMadeAvailableOffline = false;
   double _fileUploadProgress = 0;
   String _fileUploadText = '';
   late Future<String> _imageDirectoryPath;
   late Future<String> _videoDirectoryPath;
-
+  late Future<String> _audioDirectoryPath;
 
   @override
   void initState() {
-     _imageDirectoryPath = messagesDirectoryPath(isTemporary:false, specificDirectory: 'images');
-    _videoDirectoryPath = messagesDirectoryPath(isTemporary:false, specificDirectory: 'videos');
+    _imageDirectoryPath =
+        messagesDirectoryPath(isTemporary: false, specificDirectory: 'images');
+    _videoDirectoryPath =
+        messagesDirectoryPath(isTemporary: false, specificDirectory: 'videos');
+    _audioDirectoryPath =
+        messagesDirectoryPath(isTemporary: false, specificDirectory: 'audio');
 
     _messageWriterMessageBox = TextField(
       controller: _messageController,
@@ -122,41 +127,65 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     // print(xyz);
 
     if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder) {
-      _upToDateBolexyroJson =
+      _bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls =
           await _saveFilesLocallyAndRemoteAndEditBolexyroJsonToContainTheStorageUrls(
               _upToDateBolexyroJson!);
+      print('updated is $_bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls');
     }
 
-    print('updated is $_upToDateBolexyroJson');
-    // setState(() {
-    //   _callSending = true;
-    // });
+    setState(() {
+      _callSending = true;
+    });
 
     // make sure the bolexyro json you are sending has local paths to be null for the medias
-    // _channel!.sink.add(
-    //   json.encode(
-    //     {
-    //       'caller_phone_number': _callerPhoneNumber,
-    //       'callee_phone_number': widget.calleePhoneNumber,
-    //       'message_json_string':
-    //           _messageWriterMessageBox.runtimeType == FileUiPlaceHolder
-    //               ? jsonEncode(_upToDateBolexyroJson!)
-    //               : RegularMessage(
-    //                   messageString: _messageController.text,
-    //                   backgroundColor: _selectedColor,
-    //                 ).toJsonString,
-    //       'my_message_type':
-    //           _messageWriterMessageBox.runtimeType == FileUiPlaceHolder
-    //               ? 'complex'
-    //               : 'regular',
-    //       'message_id': _recentId,
-    //     },
-    //   ),
-    // );
+    _channel!.sink.add(
+      json.encode(
+        {
+          'caller_phone_number': _callerPhoneNumber,
+          'callee_phone_number': widget.calleePhoneNumber,
+          'message_json_string': _messageWriterMessageBox.runtimeType ==
+                  FileUiPlaceHolder
+              ? jsonEncode(_bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls!)
+              : RegularMessage(
+                  messageString: _messageController.text,
+                  backgroundColor: _selectedColor,
+                ).toJsonString,
+          'my_message_type':
+              _messageWriterMessageBox.runtimeType == FileUiPlaceHolder
+                  ? 'complex'
+                  : 'regular',
+          'message_id': _recentId,
+        },
+      ),
+    );
   }
 
   void _deleteRemoteFilesNotNeeded() {
     // we are going to use the bolexyroJsonWithNetworkUrls to delete the ones not needed.
+  }
+
+  Future<String?> _storeFileInPermanentDirectory(
+      {required File sourceFile,
+      required String fileName,
+      required String fileType}) async {
+    late String destinationPath;
+    if (fileType == 'image') {
+      destinationPath = '${await _imageDirectoryPath}/$fileName';
+    } else if (fileType == 'video') {
+      destinationPath = '${await _videoDirectoryPath}/$fileName';
+    } else {
+      destinationPath = '${await _audioDirectoryPath}/$fileName';
+    }
+
+    if (await sourceFile.exists()) {
+      print(destinationPath);
+      await sourceFile.copy(destinationPath);
+      print('File copied.');
+      return destinationPath;
+    } else {
+      print('Source file does not exist.');
+      return null;
+    }
   }
 
   Future<Map<String, dynamic>>
@@ -177,6 +206,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
       final updatedBolexyroJson = jsonDecode(jsonEncode(upToDateBolexyroJson));
 
+      const uuid = Uuid();
       for (final entry in updatedBolexyroJson.entries) {
         final mediaType = entry.value.keys.first;
         if (mediaType == 'document') {
@@ -188,28 +218,24 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         final paths = entry.value.values.first.values.first;
         final localPath = paths['local'] as String;
 
-        final file = File(localPath);
+        final localFile = File(localPath);
+        String newFileName = '${uuid.v4()}${path.extension(localFile.path)}';
 
         late Reference mediaRef;
 
         switch (mediaType) {
           case 'image':
-          // File('')
-            mediaRef = imagesRef.child(
-                '${DateTime.now()}-$_callerPhoneNumber-${path.basename(file.path)}');
+            mediaRef = imagesRef.child(newFileName);
             _fileUploadText = 'Uploading image ${++currentImageIndex}';
-            print('mkbhd');
 
             break;
           case 'video':
-            mediaRef = videosRef.child(
-                '${DateTime.now()}-$_callerPhoneNumber-${path.basename(file.path)}');
+            mediaRef = videosRef.child(newFileName);
             _fileUploadText = 'Uploading video ${++currentVideoIndex}';
 
             break;
           case 'audio':
-            mediaRef = audioRef.child(
-                '${DateTime.now()}-$_callerPhoneNumber-${path.basename(file.path)}');
+            mediaRef = audioRef.child(newFileName);
             _fileUploadText = 'Uploading audio ${++currentAudioIndex}';
 
             break;
@@ -217,7 +243,20 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             continue;
         }
 
-        UploadTask uploadTask = mediaRef.putFile(file);
+        if (_isMadeAvailableOffline) {
+          _storeFileInPermanentDirectory(
+            sourceFile: localFile,
+            fileName: newFileName,
+            fileType: mediaType,
+          ).then((permanentLocalFilePath) => updatedBolexyroJson[entry.key]
+                  [mediaType][mediaTypePathString]['local'] =
+              permanentLocalFilePath!);
+        } else {
+          updatedBolexyroJson[entry.key][mediaType][mediaTypePathString]
+              ['local'] = null;
+        }
+
+        UploadTask uploadTask = mediaRef.putFile(localFile);
         uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
           double progress = (snapshot.bytesTransferred.toDouble() /
                   snapshot.totalBytes.toDouble()) *
@@ -482,8 +521,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 complexMessage: _upToDateBolexyroJson == null
                     ? null
                     : ComplexMessage(
-                        complexMessageJsonString:
-                            jsonEncode(_upToDateBolexyroJson),
+                        complexMessageJsonString: jsonEncode(
+                            _bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls!),
                       ),
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
@@ -545,8 +584,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                 complexMessage: _upToDateBolexyroJson == null
                     ? null
                     : ComplexMessage(
-                        complexMessageJsonString:
-                            jsonEncode(_upToDateBolexyroJson),
+                        complexMessageJsonString: jsonEncode(
+                            _bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls!),
                       ),
                 id: _recentId,
                 phoneNumber: widget.calleePhoneNumber,
@@ -662,8 +701,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   complexMessage: _upToDateBolexyroJson == null
                       ? null
                       : ComplexMessage(
-                          complexMessageJsonString:
-                              jsonEncode(_upToDateBolexyroJson),
+                          complexMessageJsonString: jsonEncode(
+                              _bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls!),
                         ),
                   id: _recentId,
                   phoneNumber: widget.calleePhoneNumber,
@@ -759,7 +798,10 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
                 if (toDiscard == true) {
                   Navigator.of(context).pop();
-                  messagesDirectoryPath(isTemporary: true,specificDirectory: null).then(
+
+                  messagesDirectoryPath(
+                          isTemporary: true, specificDirectory: null)
+                      .then(
                     (tempMessagesDirectoryPath) =>
                         deleteDirectory(tempMessagesDirectoryPath),
                   );
@@ -785,33 +827,33 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder)
-                Padding(
-                  padding: const EdgeInsets.only(right: 10.0),
-                  child: Switch.adaptive(
-                    activeColor: _selectedColor,
-                    activeTrackColor: Theme.of(context).primaryColor,
-                    inactiveTrackColor: Theme.of(context).primaryColor,
-                    activeThumbImage: const svgProvider.Svg(
-                      'assets/icons/make-available-offline.svg',
-                      color: Colors.white,
+                if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder && !_callSending)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: Switch.adaptive(
+                      activeColor: _selectedColor,
+                      activeTrackColor: Theme.of(context).primaryColor,
+                      inactiveTrackColor: Theme.of(context).primaryColor,
+                      activeThumbImage: const svgProvider.Svg(
+                        'assets/icons/make-available-offline.svg',
+                        color: Colors.white,
+                      ),
+                      value: _isMadeAvailableOffline,
+                      onChanged: (value) {
+                        if (value) {
+                          showFlushBar(
+                            Colors.blue,
+                            'Message is now available offline',
+                            FlushbarPosition.TOP,
+                            context,
+                          );
+                        }
+                        setState(() {
+                          _isMadeAvailableOffline = value;
+                        });
+                      },
                     ),
-                    value: _isMadeAvailableOffline,
-                    onChanged: (value) {
-                      if (value) {
-                        showFlushBar(
-                          Colors.blue,
-                          'Message is now available offline',
-                          FlushbarPosition.TOP,
-                          context,
-                        );
-                      }
-                      setState(() {
-                        _isMadeAvailableOffline = value;
-                      });
-                    },
                   ),
-                ),
                 ConstrainedBox(
                   constraints: BoxConstraints(
                     minHeight: MediaQuery.sizeOf(context).height * .6,

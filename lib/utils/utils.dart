@@ -452,10 +452,10 @@ Future<String> messagesDirectoryPath({
 }) async {
   final directory = await getApplicationDocumentsDirectory();
   String path =
-      '${directory.path}/${isTemporary ? 'temporary' : 'permanent'}/messages';
+      '${directory.path}/messages/${isTemporary ? 'temporary' : 'permanent'}';
   if (specificDirectory != null) {
     path =
-        '${directory.path}/${isTemporary ? 'temporary' : 'permanent'}/messages/$specificDirectory';
+        '${directory.path}/messages/${isTemporary ? 'temporary' : 'permanent'}/$specificDirectory';
   }
 
   final dir = Directory(path);

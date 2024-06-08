@@ -143,13 +143,14 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         {
           'caller_phone_number': _callerPhoneNumber,
           'callee_phone_number': widget.calleePhoneNumber,
-          'message_json_string': _messageWriterMessageBox.runtimeType ==
-                  FileUiPlaceHolder
-              ? jsonEncode(_bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls!)
-              : RegularMessage(
-                  messageString: _messageController.text,
-                  backgroundColor: _selectedColor,
-                ).toJsonString,
+          'message_json_string':
+              _messageWriterMessageBox.runtimeType == FileUiPlaceHolder
+                  ? jsonEncode(_removeLocalUrlsFromBolexyroJson(
+                      _bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls!))
+                  : RegularMessage(
+                      messageString: _messageController.text,
+                      backgroundColor: _selectedColor,
+                    ).toJsonString,
           'my_message_type':
               _messageWriterMessageBox.runtimeType == FileUiPlaceHolder
                   ? 'complex'
@@ -186,6 +187,27 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       print('Source file does not exist.');
       return null;
     }
+  }
+
+// this function would be used to set the local urls for the files to null. When we want to send the bolexyroJson to the callee
+// through the websocket. Reason why is because we don't want the callee to access those paths on their device because it might not exist.
+
+  Map<String, dynamic> _removeLocalUrlsFromBolexyroJson(
+      final Map<String, dynamic> upToDateBolexyroJson) {
+    final updatedBolexyroJson = jsonDecode(jsonEncode(upToDateBolexyroJson));
+
+    for (final entry in updatedBolexyroJson.entries) {
+      final mediaType = entry.value.keys.first;
+      if (mediaType == 'document') {
+        continue;
+      }
+      // mediatypepathstring would be imagepaths, videopaths, audiopaths
+      final String mediaTypePathString = entry.value.values.first.keys.first;
+      updatedBolexyroJson[entry.key][mediaType][mediaTypePathString]['local'] =
+          null;
+    }
+
+    return updatedBolexyroJson;
   }
 
   Future<Map<String, dynamic>>
@@ -707,9 +729,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                   id: _recentId,
                   phoneNumber: widget.calleePhoneNumber,
                 );
-                if (index == 1) {
-                  ref.read(recentsProvider.notifier).addRecent(recent);
-                }
+
+                ref.read(recentsProvider.notifier).addRecent(recent);
+
                 return Column(
                   children: [
                     Row(
@@ -827,7 +849,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder && !_callSending)
+                if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder &&
+                    !_callSending)
                   Padding(
                     padding: const EdgeInsets.only(right: 10.0),
                     child: Switch.adaptive(

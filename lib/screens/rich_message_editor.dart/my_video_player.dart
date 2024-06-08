@@ -243,19 +243,19 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return InteractiveViewer(
-      child: GestureDetector(
-        onDoubleTap: () => Navigator.of(context).pop(),
-        onTap: () {
-          setState(() {
-            widget.videoController.value.isPlaying
-                ? widget.videoController.pause()
-                : widget.videoController.play();
-          });
-        },
-        child: Scaffold(
-          backgroundColor: Colors.black,
-          body: SafeArea(
+    return GestureDetector(
+      onDoubleTap: () => Navigator.of(context).pop(),
+      onTap: () {
+        setState(() {
+          widget.videoController.value.isPlaying
+              ? widget.videoController.pause()
+              : widget.videoController.play();
+        });
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: InteractiveViewer(
+          child: SafeArea(
             child: Center(
               child: Stack(
                 children: [

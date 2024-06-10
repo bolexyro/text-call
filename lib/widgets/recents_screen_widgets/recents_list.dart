@@ -7,8 +7,6 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:text_call/models/contact.dart';
-// import 'package:text_call/models/message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/utils/utils.dart';
@@ -103,40 +101,50 @@ class _RecentsListState extends ConsumerState<RecentsList> {
           .where(
             (element) => [
               RecentCategory.incomingAccepted,
-              RecentCategory.incomingMissed,
+              RecentCategory.incomingIgnored,
               RecentCategory.incomingRejected
             ].contains(element.category),
           )
           .toList();
     }
-    if (_selectedFilter == CallFilters.unansweredCalls) {
-      return allRecents
-          .where(
-            (element) => [
-              RecentCategory.outgoingUnanswered,
-            ].contains(element.category),
-          )
-          .toList();
-    }
-
     if (_selectedFilter == CallFilters.outgoingCalls) {
       return allRecents
           .where(
             (element) => [
               RecentCategory.outgoingAccepted,
-              RecentCategory.outgoingUnanswered,
+              RecentCategory.outgoingIgnored,
+              RecentCategory.outgoingUnreachable,
               RecentCategory.outgoingRejected
             ].contains(element.category),
           )
           .toList();
     }
-
-    if (_selectedFilter == CallFilters.missedCalls) {
+    if (_selectedFilter == CallFilters.ignoredCalls) {
       return allRecents
           .where(
             (element) => [
-              RecentCategory.outgoingUnanswered,
-              RecentCategory.incomingMissed
+              RecentCategory.outgoingIgnored,
+              RecentCategory.incomingIgnored,
+            ].contains(element.category),
+          )
+          .toList();
+    }
+
+    if (_selectedFilter == CallFilters.acceptedCalls) {
+      return allRecents
+          .where(
+            (element) => [
+              RecentCategory.outgoingAccepted,
+              RecentCategory.incomingAccepted
+            ].contains(element.category),
+          )
+          .toList();
+    }
+    if (_selectedFilter == CallFilters.unreachableCalls) {
+      return allRecents
+          .where(
+            (element) => [
+              RecentCategory.outgoingUnreachable,
             ].contains(element.category),
           )
           .toList();

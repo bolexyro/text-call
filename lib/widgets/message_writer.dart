@@ -472,6 +472,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           if (snapshot.hasData) {
             index++;
             final snapshotData = json.decode(snapshot.data);
+            print(snapshotData);
             if (snapshotData['call_status'] == 'error') {
               _channel?.sink.close();
 
@@ -509,6 +510,67 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     ),
                   ],
                 ),
+              );
+            }
+
+            if (snapshotData['call_status'] == 'ignored') {
+              final recent = Recent.withoutContactObject(
+                category: RecentCategory.outgoingIgnored,
+                regularMessage: _upToDateBolexyroJson == null
+                    ? RegularMessage(
+                        messageString: _messageController.text,
+                        backgroundColor: _selectedColor,
+                      )
+                    : null,
+                complexMessage: _upToDateBolexyroJson == null
+                    ? null
+                    : ComplexMessage(
+                        complexMessageJsonString: jsonEncode(
+                            _bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls!),
+                      ),
+                id: _recentId,
+                phoneNumber: widget.calleePhoneNumber,
+                callTime: DateTime.parse(_recentId),
+              );
+              if (index == 1) {
+                ref.read(recentsProvider.notifier).addRecent(recent);
+              }
+              return Column(
+                children: [
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0, left: 5),
+                        child: IconButton(
+                          onPressed: () => setState(() {
+                            _callSending = false;
+                            _channel?.sink.close();
+                          }),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            size: 30,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  AnimatedTextKit(
+                    animatedTexts: [
+                      TyperAnimatedText(
+                        'Alas, thy call was ignored.',
+                        textAlign: TextAlign.center,
+                        textStyle: GoogleFonts.pacifico(
+                            fontSize: 32,
+                            color: const Color.fromARGB(255, 139, 105, 2)),
+                        speed: const Duration(milliseconds: 100),
+                      ),
+                    ],
+                    displayFullTextOnTap: true,
+                    repeatForever: false,
+                    totalRepeatCount: 1,
+                  ),
+                  Lottie.asset('assets/animations/call_missed.json'),
+                ],
               );
             }
             if (snapshotData['call_status'] == 'rejected') {
@@ -569,8 +631,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     repeatForever: false,
                     totalRepeatCount: 1,
                   ),
-                  Lottie.asset('assets/animations/call_rejected.json',
-                      height: 300),
+                  // Lottie.asset('assets/animations/call_rejected.json',
+                  //     height: 300),
                 ],
               );
             }
@@ -695,7 +757,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       'assets/animations/telephone_ringing_3d.json');
                 }
                 final recent = Recent.withoutContactObject(
-                  category: RecentCategory.outgoingUnanswered,
+                  category: RecentCategory.outgoingUnreachable,
                   regularMessage: _upToDateBolexyroJson == null
                       ? RegularMessage(
                           messageString: _messageController.text,

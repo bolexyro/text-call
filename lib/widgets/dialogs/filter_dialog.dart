@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 
 enum CallFilters {
   allCalls,
-  missedCalls,
-  rejectedCalls,
-  outgoingCalls,
   incomingCalls,
-  unansweredCalls,
+  outgoingCalls,
+  ignoredCalls,
+  rejectedCalls,
+  acceptedCalls,
+  unreachableCalls,
 }
 
 class FilterDialog extends StatefulWidget {
@@ -54,19 +55,8 @@ class _FilterDialogState extends State<FilterDialog> {
             },
           ),
           RadioListTile(
-            title: const Text('Missed calls'),
-            value: CallFilters.missedCalls,
-            groupValue: _selectedFilter,
-            onChanged: (CallFilters? value) {
-              setState(() {
-                _selectedFilter = value!;
-                Navigator.of(context).pop(_selectedFilter);
-              });
-            },
-          ),
-          RadioListTile(
-            title: const Text('Rejected calls'),
-            value: CallFilters.rejectedCalls,
+            title: const Text('Incoming calls'),
+            value: CallFilters.incomingCalls,
             groupValue: _selectedFilter,
             onChanged: (CallFilters? value) {
               setState(() {
@@ -87,8 +77,8 @@ class _FilterDialogState extends State<FilterDialog> {
             },
           ),
           RadioListTile(
-            title: const Text('Incoming calls'),
-            value: CallFilters.incomingCalls,
+            title: const Text('Accepted calls'),
+            value: CallFilters.acceptedCalls,
             groupValue: _selectedFilter,
             onChanged: (CallFilters? value) {
               setState(() {
@@ -96,9 +86,32 @@ class _FilterDialogState extends State<FilterDialog> {
                 Navigator.of(context).pop(_selectedFilter);
               });
             },
-          ),RadioListTile(
+          ),
+          RadioListTile(
+            title: const Text('Rejected calls'),
+            value: CallFilters.rejectedCalls,
+            groupValue: _selectedFilter,
+            onChanged: (CallFilters? value) {
+              setState(() {
+                _selectedFilter = value!;
+                Navigator.of(context).pop(_selectedFilter);
+              });
+            },
+          ),
+          RadioListTile(
+            title: const Text('Ignored calls'),
+            value: CallFilters.ignoredCalls,
+            groupValue: _selectedFilter,
+            onChanged: (CallFilters? value) {
+              setState(() {
+                _selectedFilter = value!;
+                Navigator.of(context).pop(_selectedFilter);
+              });
+            },
+          ),
+          RadioListTile(
             title: const Text('Unanswered calls'),
-            value: CallFilters.unansweredCalls,
+            value: CallFilters.unreachableCalls,
             groupValue: _selectedFilter,
             onChanged: (CallFilters? value) {
               setState(() {

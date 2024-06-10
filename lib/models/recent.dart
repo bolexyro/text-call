@@ -8,10 +8,11 @@ import 'package:text_call/utils/constants.dart';
 enum RecentCategory {
   outgoingAccepted,
   outgoingRejected,
-  outgoingUnanswered,
+  outgoingIgnored,
+  outgoingUnreachable,
   incomingAccepted,
   incomingRejected,
-  incomingMissed,
+  incomingIgnored,
 }
 
 Map<RecentCategory, Widget> recentCategoryIconMap = {
@@ -20,7 +21,12 @@ Map<RecentCategory, Widget> recentCategoryIconMap = {
     height: kIconHeight,
     colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
   ),
-  RecentCategory.outgoingUnanswered: SvgPicture.asset(
+  RecentCategory.outgoingUnreachable: SvgPicture.asset(
+    'assets/icons/outgoing-call.svg',
+    height: kIconHeight,
+    colorFilter: const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+  ),
+  RecentCategory.outgoingIgnored: SvgPicture.asset(
     'assets/icons/outgoing-call.svg',
     height: kIconHeight,
     colorFilter: const ColorFilter.mode(
@@ -36,8 +42,10 @@ Map<RecentCategory, Widget> recentCategoryIconMap = {
     height: kIconHeight,
     colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
   ),
-  RecentCategory.incomingMissed:
-      const Icon(Icons.phone_missed, color: Colors.blue),
+  RecentCategory.incomingIgnored: const Icon(
+    Icons.phone_missed,
+    color: Color.fromARGB(255, 185, 112, 2),
+  ),
   RecentCategory.incomingRejected: SvgPicture.asset(
     'assets/icons/incoming-call.svg',
     height: kIconHeight,
@@ -47,10 +55,11 @@ Map<RecentCategory, Widget> recentCategoryIconMap = {
 
 const Map<RecentCategory, String> recntCategoryStringMap = {
   RecentCategory.outgoingAccepted: 'Outgoing Accepted',
-  RecentCategory.outgoingUnanswered: 'Outgoing Unanswered',
   RecentCategory.outgoingRejected: 'Outgoing Rejected',
+  RecentCategory.outgoingIgnored: 'Outgoing Ignored',
+  RecentCategory.incomingIgnored: 'Incoming Ignored',
+  RecentCategory.outgoingUnreachable: 'Outgoing unreachable',
   RecentCategory.incomingAccepted: 'Incoming Accepted',
-  RecentCategory.incomingMissed: 'Incoming Missed',
   RecentCategory.incomingRejected: 'Incoming Rejected',
 };
 

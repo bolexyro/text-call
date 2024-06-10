@@ -199,116 +199,137 @@ Future<void> fcmBackgroundHandler(RemoteMessage message) async {
 }
 
 void registerCallkitIncomingListener() {
-  FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
-    switch (event!.event) {
-      case Event.actionCallIncoming:
-        print('this is event bodyf fafaf ${event.body}');
-        print('Call incoming');
-        break;
-      case Event.actionCallStart:
-        // TODO: started an outgoing call
-        // TODO: show screen calling in Flutter
-        break;
-      case Event.actionCallAccept:
-        final Map<String, dynamic> eventBody = event.body;
-        final Map myDataInEventBody = eventBody['extra'];
-        final String callerPhoneNumber = eventBody['number'];
-        final String messageJsonString = myDataInEventBody['messageJsonString'];
-        final String messageType = myDataInEventBody['messageType'];
-        // final String recentId = myDataInEventBody['recentId'];
+  FlutterCallkitIncoming.onEvent.listen(
+    (CallEvent? event) async {
+      switch (event!.event) {
+        case Event.actionCallIncoming:
+          print('this is event bodyf fafaf ${event.body}');
+          print('Call incoming');
+          break;
+        case Event.actionCallStart:
+          // TODO: started an outgoing call
+          // TODO: show screen calling in Flutter
+          break;
+        case Event.actionCallAccept:
+          final Map<String, dynamic> eventBody = event.body;
+          final Map myDataInEventBody = eventBody['extra'];
+          final String callerPhoneNumber = eventBody['number'];
+          final String messageJsonString =
+              myDataInEventBody['messageJsonString'];
+          final String messageType = myDataInEventBody['messageType'];
+          // final String recentId = myDataInEventBody['recentId'];
 
-        final url = Uri.https('text-call-backend.onrender.com',
-            'call/accepted/$callerPhoneNumber');
-        http.get(url);
+          final url = Uri.https('text-call-backend.onrender.com',
+              'call/accepted/$callerPhoneNumber');
+          http.get(url);
 
-        final prefs = await SharedPreferences.getInstance();
-        final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
+          final prefs = await SharedPreferences.getInstance();
+          final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
 
-        if (TextCall.navigatorKey.currentState != null) {
-          if (isUserLoggedIn != true) {
-            showFlushBar(Colors.blue, 'You have to login to see the message.',
-                FlushbarPosition.TOP, TextCall.navigatorKey.currentContext!);
-            return;
-          }
+          if (TextCall.navigatorKey.currentState != null) {
+            if (isUserLoggedIn != true) {
+              showFlushBar(Colors.blue, 'You have to login to see the message.',
+                  FlushbarPosition.TOP, TextCall.navigatorKey.currentContext!);
+              return;
+            }
 
-          Navigator.of(TextCall.navigatorKey.currentContext!).push(
-            MaterialPageRoute(
-              builder: (context) => SmsNotFromTerminated(
-                recentCallTime: null,
-                complexMessage: messageType == 'complex'
-                    ? ComplexMessage(
-                        complexMessageJsonString: messageJsonString)
-                    : null,
-                regularMessage: messageType == 'regular'
-                    ? RegularMessage.fromJsonString(messageJsonString)
-                    : null,
-                howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
+            Navigator.of(TextCall.navigatorKey.currentContext!).push(
+              MaterialPageRoute(
+                builder: (context) => SmsNotFromTerminated(
+                  recentCallTime: null,
+                  complexMessage: messageType == 'complex'
+                      ? ComplexMessage(
+                          complexMessageJsonString: messageJsonString)
+                      : null,
+                  regularMessage: messageType == 'regular'
+                      ? RegularMessage.fromJsonString(messageJsonString)
+                      : null,
+                  howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
+                ),
               ),
-            ),
+            );
+          } else {}
+
+          break;
+        case Event.actionCallDecline:
+          final Map<String, dynamic> eventBody = event.body;
+          final Map myDataInEventBody = eventBody['extra'];
+          final String callerPhoneNumber = eventBody['number'];
+          final String messageJsonString =
+              myDataInEventBody['messageJsonString'];
+          final String messageType = myDataInEventBody['messageType'];
+          final String recentId = myDataInEventBody['recentId'];
+
+          final url = Uri.https('text-call-backend.onrender.com',
+              'call/rejected/$callerPhoneNumber');
+          http.get(url);
+
+          final db = await getDatabase();
+          final newRecent = Recent.withoutContactObject(
+            category: RecentCategory.incomingRejected,
+            canBeViewed: false,
+            regularMessage: messageType == 'regular'
+                ? RegularMessage.fromJsonString(messageJsonString)
+                : null,
+            complexMessage: messageType == 'complex'
+                ? ComplexMessage(complexMessageJsonString: messageJsonString)
+                : null,
+            id: recentId,
+            phoneNumber: callerPhoneNumber,
           );
-        } else {}
 
-        break;
-      case Event.actionCallDecline:
-        final Map<String, dynamic> eventBody = event.body;
-        final Map myDataInEventBody = eventBody['extra'];
-        final String callerPhoneNumber = eventBody['number'];
-        final String messageJsonString = myDataInEventBody['messageJsonString'];
-        final String messageType = myDataInEventBody['messageType'];
-        final String recentId = myDataInEventBody['recentId'];
+          addRecentToDb(newRecent, db);
+          break;
+        case Event.actionCallEnded:
+          break;
+        case Event.actionCallTimeout:
+          final Map<String, dynamic> eventBody = event.body;
+          final Map myDataInEventBody = eventBody['extra'];
+          final String callerPhoneNumber = eventBody['number'];
+          final String messageJsonString =
+              myDataInEventBody['messageJsonString'];
+          final String messageType = myDataInEventBody['messageType'];
+          final String recentId = myDataInEventBody['recentId'];
 
-        final url = Uri.https('text-call-backend.onrender.com',
-            'call/rejected/$callerPhoneNumber');
-        http.get(url);
+          final url = Uri.https('text-call-backend.onrender.com',
+              'call/ignored/$callerPhoneNumber');
+          http.get(url);
 
-        final db = await getDatabase();
-        final newRecent = Recent.withoutContactObject(
-          category: RecentCategory.incomingRejected,
-          canBeViewed: false,
-          regularMessage: messageType == 'regular'
-              ? RegularMessage.fromJsonString(messageJsonString)
-              : null,
-          complexMessage: messageType == 'complex'
-              ? ComplexMessage(complexMessageJsonString: messageJsonString)
-              : null,
-          id: recentId,
-          phoneNumber: callerPhoneNumber,
-        );
+          final db = await getDatabase();
+          final newRecent = Recent.withoutContactObject(
+            category: RecentCategory.incomingIgnored,
+            canBeViewed: false,
+            regularMessage: messageType == 'regular'
+                ? RegularMessage.fromJsonString(messageJsonString)
+                : null,
+            complexMessage: messageType == 'complex'
+                ? ComplexMessage(complexMessageJsonString: messageJsonString)
+                : null,
+            id: recentId,
+            phoneNumber: callerPhoneNumber,
+          );
 
-        addRecentToDb(newRecent, db);
-        break;
-      case Event.actionCallEnded:
-        // TODO: ended an incoming/outgoing call
-        break;
-      case Event.actionCallTimeout:
-        // TODO: missed an incoming call
-        break;
-      case Event.actionCallCallback:
-        // TODO: only Android - click action `Call back` from missed call notification
-        break;
-      case Event.actionCallToggleHold:
-        // TODO: only iOS
-        break;
-      case Event.actionCallToggleMute:
-        // TODO: only iOS
-        break;
-      case Event.actionCallToggleDmtf:
-        // TODO: only iOS
-        break;
-      case Event.actionCallToggleGroup:
-        // TODO: only iOS
-        break;
-      case Event.actionCallToggleAudioSession:
-        // TODO: only iOS
-        break;
-      case Event.actionDidUpdateDevicePushTokenVoip:
-        // TODO: only iOS
-        break;
-      case Event.actionCallCustom:
-        // TODO: for custom action
-        break;
-    }
-  });
+          addRecentToDb(newRecent, db);
+          break;
+        case Event.actionCallCallback:
+          break;
+        case Event.actionCallToggleHold:
+          break;
+        case Event.actionCallToggleMute:
+          break;
+        case Event.actionCallToggleDmtf:
+          break;
+        case Event.actionCallToggleGroup:
+          break;
+        case Event.actionCallToggleAudioSession:
+          break;
+        case Event.actionDidUpdateDevicePushTokenVoip:
+          break;
+        case Event.actionCallCustom:
+          break;
+      }
+    },
+  );
 }
 
 class NotificationController {

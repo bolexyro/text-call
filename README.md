@@ -42,8 +42,8 @@ To install Text Call on your device, follow these steps:
 
 Here are some planned features and enhancements for Text Call:
 
-- [ ] Video and audio messages.
-- [ ] Message previews.
-- [ ] Customization options for messages like background color, font etc.
+- [x] Video and audio messages.
+- [x] Message previews.
+- [x] Customization options for messages like background color, font etc.
 - [ ] Improved user interface and user experience.
 - [ ] Deploy app on play store and app store. Hopefully.

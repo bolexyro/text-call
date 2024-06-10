@@ -341,7 +341,6 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     }
     final XFile? pickedVideo = await picker.pickVideo(
       source: source,
-      maxDuration: const Duration(minutes: 1),
     );
     if (pickedVideo == null) {
       return null;

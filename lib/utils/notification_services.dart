@@ -348,75 +348,15 @@ class NotificationController {
   static Future<void> onDismissActionReceivedMethod(
       ReceivedAction receivedAction) async {
     if (receivedAction.channelKey == 'calls_channel') {
-      print('call ended');
       return;
     }
-    print('notification dismissed');
   }
 
   /// Use this method to detect when the user taps on a notification or action button
   @pragma("vm:entry-point")
   static Future<void> onActionReceivedMethod(
       ReceivedAction receivedAction) async {
-    if (receivedAction.buttonKeyPressed == 'REJECT_CALL') {
-      // final prefs = await SharedPreferences.getInstance();
-      // // we are reloading because some things might have been changed in the background
-      // await prefs.reload();
-      // final String? recentId = prefs.getString('recentId');
-      // final String? messageJsonString = prefs.getString('messageJsonString');
-      // final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
-      // final String? messageType = prefs.getString('messageType');
-
-      // final url = Uri.https(
-      //     'text-call-backend.onrender.com', 'call/rejected/$callerPhoneNumber');
-      // http.get(url);
-
-      // final db = await getDatabase();
-      // final newRecent = Recent.withoutContactObject(
-      //   category: RecentCategory.incomingRejected,
-      //   canBeViewed: false,
-      //   regularMessage: messageType == 'regular'
-      //       ? RegularMessage.fromJsonString(messageJsonString!)
-      //       : null,
-      //   complexMessage: messageType == 'complex'
-      //       ? ComplexMessage(complexMessageJsonString: messageJsonString!)
-      //       : null,
-      //   id: recentId!,
-      //   phoneNumber: callerPhoneNumber!,
-      // );
-
-      // addRecentToDb(newRecent, db);
-    } else if (receivedAction.buttonKeyPressed == 'ACCEPT_CALL') {
-      // final prefs = await SharedPreferences.getInstance();
-      // await prefs.reload();
-      // final String? messageJsonString = prefs.getString('messageJsonString');
-      // final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
-      // final String? messageType = prefs.getString('messageType');
-      // final url = Uri.https(
-      //     'text-call-backend.onrender.com', 'call/accepted/$callerPhoneNumber');
-      // http.get(url);
-
-      // final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
-      // if (isUserLoggedIn != true) {
-      //   showFlushBar(Colors.blue, 'You have to login to see the message.',
-      //       FlushbarPosition.TOP, TextCall.navigatorKey.currentContext!);
-      //   return;
-      // }
-
-      // Navigator.of(TextCall.navigatorKey.currentContext!).push(
-      //   MaterialPageRoute(
-      //     builder: (context) => SmsNotFromTerminated(
-      //       complexMessage: messageType == 'complex'
-      //           ? ComplexMessage(complexMessageJsonString: messageJsonString!)
-      //           : null,
-      //       regularMessage: messageType == 'regular'
-      //           ? RegularMessage.fromJsonString(messageJsonString!)
-      //           : null,
-      //       howSmsIsOpened: HowSmsIsOpened.notFromTerminatedForPickedCall,
-      //     ),
-      //   ),
-      // );
-    } else if (receivedAction.buttonKeyPressed == 'GRANT_ACCESS') {
+    if (receivedAction.buttonKeyPressed == 'GRANT_ACCESS') {
       sendAccessRequestStatus(AccessRequestStatus.granted);
     } else if (receivedAction.buttonKeyPressed == 'DENY_ACCESS') {
       sendAccessRequestStatus(AccessRequestStatus.denied);

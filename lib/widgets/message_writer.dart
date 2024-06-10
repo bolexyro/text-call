@@ -25,7 +25,7 @@ import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as path;
-import 'package:flutter_svg_provider/flutter_svg_provider.dart' as svgProvider;
+import 'package:flutter_svg_provider/flutter_svg_provider.dart' as svg_provider;
 
 class MessageWriter extends ConsumerStatefulWidget {
   const MessageWriter({
@@ -66,6 +66,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   late Widget _messageWriterMessageBox;
   Map<String, dynamic>? _upToDateBolexyroJson;
   Map<String, dynamic>? _bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls;
+  final List<String> _lastCallMediaRemoteReferencesPath = [];
 
   bool _isMadeAvailableOffline = false;
   double _fileUploadProgress = 0;
@@ -161,8 +162,15 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     );
   }
 
-  void _deleteRemoteFilesNotNeeded() {
-    // we are going to use the bolexyroJsonWithNetworkUrls to delete the ones not needed.
+  void _deleteRemoteFilesNotNeeded() async {
+    // so the only time we want to delete remote files is if the callee, is not using text call.
+    // Or sha when the server returns call_status: error. But if later you decide to put those calls in recents db, make sure to remove this delete function
+    // to prevent problems.
+    final storageRef = FirebaseStorage.instance.ref();
+    for (final refPath in _lastCallMediaRemoteReferencesPath) {
+      await storageRef.child(refPath).delete();
+    }
+    print('All unused remote files have been deleted');
   }
 
 // this function would be used to set the local urls for the files to null. When we want to send the bolexyroJson to the callee
@@ -192,6 +200,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     setState(() {
       _filesUploading = true;
     });
+    _lastCallMediaRemoteReferencesPath.clear();
     try {
       final imageDirectoryPath = await _imageDirectoryPath;
       final videoDirectoryPath = await _videoDirectoryPath;
@@ -273,6 +282,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         });
 
         await uploadTask;
+        _lastCallMediaRemoteReferencesPath.add(mediaRef.fullPath);
         final downloadUrl = await mediaRef.getDownloadURL();
         updatedBolexyroJson[entry.key][mediaType][mediaTypePathString]
             ['online'] = downloadUrl;
@@ -475,6 +485,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             print(snapshotData);
             if (snapshotData['call_status'] == 'error') {
               _channel?.sink.close();
+              if (index == 1) {
+                _deleteRemoteFilesNotNeeded();
+              }
 
               return Padding(
                 padding: const EdgeInsets.only(top: 10.0),
@@ -837,10 +850,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           );
           if (toDiscard == true) {
             Navigator.of(context).pop();
-            // messageWriterDirectoryPath(specificDirectory: null).then(
-            //   (messageWriterDirectoryPath) =>
-            //       deleteDirectory(messageWriterDirectoryPath),
-            // );
+            messagesDirectoryPath(isTemporary: true, specificDirectory: null)
+                .then(
+              (tempMessagesDirectoryPath) =>
+                  deleteDirectory(tempMessagesDirectoryPath),
+            );
           }
         } else {
           Navigator.of(context).pop();
@@ -901,7 +915,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       activeColor: _selectedColor,
                       activeTrackColor: Theme.of(context).primaryColor,
                       inactiveTrackColor: Theme.of(context).primaryColor,
-                      activeThumbImage: const svgProvider.Svg(
+                      activeThumbImage: const svg_provider.Svg(
                         'assets/icons/make-available-offline.svg',
                         color: Colors.white,
                       ),

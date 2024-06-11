@@ -49,7 +49,7 @@ class _ImageDisplayerState extends State<ImageDisplayer> {
     setState(() {
       _currentScale = scale;
       _transformationController.value = Matrix4.identity()
-        ..translate(-position.dx * (scale - 1), -position.dy * (scale - 1))
+        ..translate(-position.dx * (scale - 1), - position.dy * (scale - 1))
         ..scale(scale);
     });
   }

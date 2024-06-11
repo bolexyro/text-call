@@ -1105,13 +1105,24 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (!_callSending && !_filesUploading)
+                if (!_callSending &&
+                    !_filesUploading &&
+                    (_messageWriterMessageBox.runtimeType ==
+                            FileUiPlaceHolder ||
+                        _messageWriterMessageBox.runtimeType ==
+                            FutureBuilder<Map<String, dynamic>>))
                   Padding(
                     padding: const EdgeInsets.only(right: 10.0),
                     child: Switch.adaptive(
                       activeColor: _selectedColor,
-                      activeTrackColor: Theme.of(context).primaryColor,
-                      inactiveTrackColor: Theme.of(context).primaryColor,
+                      activeTrackColor:
+                          Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(context).primaryColor
+                              : const Color(0x52000000),
+                      inactiveTrackColor:
+                          Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(context).primaryColor
+                              : null,
                       activeThumbImage: const svg_provider.Svg(
                         'assets/icons/make-available-offline.svg',
                         color: Colors.white,

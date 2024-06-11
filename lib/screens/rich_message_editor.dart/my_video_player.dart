@@ -220,10 +220,21 @@ class FullScreenVideoPlayer extends StatefulWidget {
 }
 
 class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
+  late TransformationController _transformationController;
+  double _currentScale = 1.0;
+
   @override
   void initState() {
-    super.initState();
     widget.videoController.addListener(_checkVideoCompletion);
+    _transformationController = TransformationController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.videoController.removeListener(_checkVideoCompletion);
+    _transformationController.dispose();
+    super.dispose();
   }
 
   void _checkVideoCompletion() {
@@ -235,16 +246,21 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
     }
   }
 
-  @override
-  void dispose() {
-    widget.videoController.removeListener(_checkVideoCompletion);
-    super.dispose();
+  void _handleDoubleTap(TapDownDetails details) {
+    final position = details.localPosition;
+    final scale = _currentScale > 1.0 ? 1.0 : 2.0;
+    setState(() {
+      _currentScale = scale;
+      _transformationController.value = Matrix4.identity()
+        ..translate(-position.dx * (scale - 1), -position.dy * (scale - 1))
+        ..scale(scale);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onDoubleTap: () => Navigator.of(context).pop(),
+      onDoubleTapDown: _handleDoubleTap,
       onTap: () {
         setState(() {
           widget.videoController.value.isPlaying
@@ -254,8 +270,9 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: InteractiveViewer(
-          child: SafeArea(
+        body: SafeArea(
+          child: InteractiveViewer(
+            transformationController: _transformationController,
             child: Center(
               child: Stack(
                 children: [

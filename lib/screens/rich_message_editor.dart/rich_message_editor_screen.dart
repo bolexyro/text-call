@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:another_flushbar/flushbar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -31,6 +32,7 @@ class RichMessageEditorScreen extends StatefulWidget {
 class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   // this index would be the keys for the widgets in the list
   int index = -1;
+  bool _shownAudioInconsistentMessage = false;
   late final Map<int, Widget> _displayedWidgetsMap = {};
   late final Map<int, QuillController> _controllersMap = {};
   late final Map<int, String> _audioPathsMap = {};
@@ -44,8 +46,10 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
 
   @override
   void initState() {
-    _imageDirectoryPath = messagesDirectoryPath(isTemporary:true, specificDirectory: 'images');
-    _videoDirectoryPath = messagesDirectoryPath(isTemporary:true, specificDirectory: 'videos');
+    _imageDirectoryPath =
+        messagesDirectoryPath(isTemporary: true, specificDirectory: 'images');
+    _videoDirectoryPath =
+        messagesDirectoryPath(isTemporary: true, specificDirectory: 'videos');
 
     if (widget.bolexyroJson != null) {
       //indexMainMediaMapPair =
@@ -68,7 +72,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
               selection: const TextSelection.collapsed(offset: 0),
             ),
           );
-        }        
+        }
 
         if (mapMedia.keys.first == 'image') {
           final newIndex = ++index;
@@ -291,6 +295,16 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
 
   void _addAudio({bool withoutSetState = false, String? initialAudioPath}) {
     FocusManager.instance.primaryFocus?.unfocus();
+
+    if (!_shownAudioInconsistentMessage) {
+      showFlushBar(
+        const Color.fromARGB(255, 0, 63, 114),
+        'Audio is currently in alpha and might not work properly',
+        FlushbarPosition.TOP,
+        context,
+      );
+    }
+    _shownAudioInconsistentMessage = true;
 
     if (withoutSetState) {
       final newIndex = ++index;

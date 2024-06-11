@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:text_call/utils/constants.dart';
 
-class ImageDisplayer extends StatelessWidget {
+class ImageDisplayer extends StatefulWidget {
   // if not for preview, keyInMp and onDelete should be non null
   const ImageDisplayer({
     super.key,
@@ -22,18 +22,51 @@ class ImageDisplayer extends StatelessWidget {
   final bool forPreview;
   final bool isNetworkImage;
 
+  @override
+  State<ImageDisplayer> createState() => _ImageDisplayerState();
+}
+
+class _ImageDisplayerState extends State<ImageDisplayer> {
+  late TransformationController _transformationController;
+  double _currentScale = 1.0;
+
+  @override
+  void initState() {
+    _transformationController = TransformationController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
+
+  void _handleDoubleTap(TapDownDetails details) {
+    final position = details.localPosition;
+    final scale = _currentScale > 1.0 ? 1.0 : 2.0; // Toggle between 1.0 and 2.0
+
+    setState(() {
+      _currentScale = scale;
+      _transformationController.value = Matrix4.identity()
+        ..translate(-position.dx * (scale - 1), -position.dy * (scale - 1))
+        ..scale(scale);
+    });
+  }
+
   void _goFullScreen(BuildContext context, Widget imageWidget) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => GestureDetector(
-          onDoubleTap: () => Navigator.of(context).pop(),
+          onDoubleTapDown: _handleDoubleTap,
           child: Scaffold(
             backgroundColor: Colors.black,
             body: InteractiveViewer(
+              transformationController: _transformationController,
               child: SafeArea(
                 child: Center(
                   child: Hero(
-                    tag: imagePath,
+                    tag: widget.imagePath,
                     child: imageWidget,
                   ),
                 ),
@@ -47,9 +80,9 @@ class ImageDisplayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageWidget = isNetworkImage
+    final imageWidget = widget.isNetworkImage
         ? CachedNetworkImage(
-            imageUrl: imagePath,
+            imageUrl: widget.imagePath,
             progressIndicatorBuilder: (context, url, downloadProgress) =>
                 Center(
               child:
@@ -66,7 +99,7 @@ class ImageDisplayer extends StatelessWidget {
             fit: BoxFit.contain,
           )
         : Image.file(
-            File(imagePath),
+            File(widget.imagePath),
             fit: BoxFit.contain,
           );
     return SizedBox(
@@ -90,19 +123,19 @@ class ImageDisplayer extends StatelessWidget {
                 ),
                 child: Center(
                   child: Hero(
-                    tag: imagePath,
+                    tag: widget.imagePath,
                     child: imageWidget,
                   ),
                 ),
               ),
             ),
           ),
-          if (!forPreview)
+          if (!widget.forPreview)
             Positioned(
               right: -10,
               top: -10,
               child: GestureDetector(
-                onTap: () => onDelete!(keyInMap!),
+                onTap: () => widget.onDelete!(widget.keyInMap!),
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(

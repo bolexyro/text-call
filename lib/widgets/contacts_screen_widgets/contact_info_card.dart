@@ -174,9 +174,12 @@ class _ContactCardWProfilePicStackState extends ConsumerState<ContactInfoCard> {
                       child: IconButton(
                         onPressed: () {
                           showMessageWriterModalSheet(
-                              context: context,
-                              calleeName: widget.contact.name,
-                              calleePhoneNumber: widget.contact.phoneNumber);
+                            context: context,
+                            calleeName: widget.contact.name,
+                            calleePhoneNumber: widget.contact.phoneNumber,
+                            regularMessage: widget.recent?.regularMessage,
+                            complexMessage: widget.recent?.complexMessage,
+                          );
                         },
                         icon: SvgPicture.asset(
                           'assets/icons/message-ring.svg',

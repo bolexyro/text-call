@@ -77,6 +77,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   late Future<String> _videoDirectoryPath;
   late Future<String> _audioDirectoryPath;
   GlobalKey? _lastFlushBarKey;
+  bool _filesSavingInTempLocationForRecall = false;
 
   @override
   void initState() {
@@ -121,6 +122,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       // in that case we'd have to download it,
       // and if it is available locally, we would have to transfer it to temporary storage, to prevent messing with the original stuff.
       // print(widget.complexMessageForRecall!.bolexyroJson);
+
+      _filesSavingInTempLocationForRecall = true;
       _messageWriterMessageBox = FutureBuilder(
         future: _storeFilesInTempDirOnCompexMessageRecall(
             widget.complexMessageForRecall!),
@@ -172,6 +175,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             );
           }
           _upToDateBolexyroJson = snapshot.data;
+          _filesSavingInTempLocationForRecall = false;
+
           return FileUiPlaceHolder(
             onBolexroJsonUpdated: _updateMyOwnDocumentJson,
             onDelete: _resetMessageWriterMessageBox,
@@ -282,6 +287,15 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   }
 
   void _callSomeone(context) async {
+    if (_filesSavingInTempLocationForRecall) {
+      showFlushBar(
+        _selectedColor,
+        'Hold on a bit while we are loading your files please',
+        FlushbarPosition.TOP,
+        context,
+      );
+      return;
+    }
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     _callerPhoneNumber = prefs.getString('myPhoneNumber')!;
     _channel = WebSocketChannel.connect(
@@ -532,8 +546,10 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         // so if we have not edited it, we would be able to leave message writer without showing discard dialog.
         (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
             (_messageWriterMessageBox.runtimeType == TextField &&
-                _messageController.text !=
-                    widget.regularMessageForRecall?.messageString));
+                (_messageController.text.isNotEmpty ||
+                    (widget.regularMessageForRecall != null &&
+                        _messageController.text !=
+                            widget.regularMessageForRecall?.messageString))));
   }
 
   @override
@@ -1089,11 +1105,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
-                    (_messageWriterMessageBox.runtimeType ==
-                            FutureBuilder<Map<String, dynamic>>) &&
-                        !_callSending &&
-                        !_filesUploading)
+                if (!_callSending && !_filesUploading)
                   Padding(
                     padding: const EdgeInsets.only(right: 10.0),
                     child: Switch.adaptive(

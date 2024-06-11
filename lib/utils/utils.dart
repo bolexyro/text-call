@@ -5,14 +5,17 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqlite_api.dart';
+import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
+import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/widgets/camera_or_gallery.dart';
@@ -114,7 +117,9 @@ String changeIntlToLocal(String intlPhoneNumber) =>
 Future<void> showMessageWriterModalSheet(
     {required BuildContext context,
     required String calleeName,
-    required String calleePhoneNumber}) async {
+    required String calleePhoneNumber,
+    RegularMessage? regularMessage,
+    ComplexMessage? complexMessage}) async {
   // if (!await checkForInternetConnection(context)) {
   showModalBottomSheet(
     useSafeArea: true,
@@ -125,6 +130,8 @@ Future<void> showMessageWriterModalSheet(
     context: context,
     builder: (ctx) => MessageWriter(
       calleePhoneNumber: calleePhoneNumber,
+      regularMessageForRecall: regularMessage,
+      complexMessageForRecall: complexMessage,
     ),
   );
 
@@ -560,4 +567,28 @@ Future<String?> storeFileInPermanentDirectory({
     print('Source file does not exist.');
     return null;
   }
+}
+
+Future<File> downloadFileFromUrl(String url, String tempPath) async {
+  final mediaRef = FirebaseStorage.instance.refFromURL(url);
+  final file = File(tempPath);
+  final downloadTask = mediaRef.writeToFile(file);
+
+  downloadTask.snapshotEvents.listen((taskSnapshot) {
+    switch (taskSnapshot.state) {
+      case TaskState.running:
+        break;
+      case TaskState.paused:
+        break;
+      case TaskState.success:
+        break;
+      case TaskState.canceled:
+        break;
+      case TaskState.error:
+        break;
+    }
+  });
+
+  await downloadTask;
+  return file;
 }

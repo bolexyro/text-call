@@ -31,20 +31,22 @@ class MessageWriter extends ConsumerStatefulWidget {
   const MessageWriter({
     super.key,
     required this.calleePhoneNumber,
+    this.complexMessageForRecall,
+    this.regularMessageForRecall,
   });
 
   final String calleePhoneNumber;
 
   // these variables are going to be used when we want to recall a user via a recent message we already called them with before.
-  // final String regularMessageForRecall;
-  // final String complexMessageForRecall;
+  final RegularMessage? regularMessageForRecall;
+  final ComplexMessage? complexMessageForRecall;
 
   @override
   ConsumerState<MessageWriter> createState() => _MessageWriterState();
 }
 
 class _MessageWriterState extends ConsumerState<MessageWriter> {
-  final TextEditingController _messageController = TextEditingController();
+  late TextEditingController _messageController;
   final ConfettiController _confettiController = ConfettiController(
     duration: const Duration(milliseconds: 800),
   );
@@ -55,7 +57,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   WebSocketChannel? _channel;
   bool _callSending = false;
   bool _filesUploading = false;
-  Color _selectedColor = const Color.fromARGB(255, 13, 214, 214);
+  late Color _selectedColor;
   final _animatedAcceptedTextColors = [
     Colors.purple,
     Colors.blue,
@@ -74,6 +76,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   late Future<String> _imageDirectoryPath;
   late Future<String> _videoDirectoryPath;
   late Future<String> _audioDirectoryPath;
+  GlobalKey? _lastFlushBarKey;
 
   @override
   void initState() {
@@ -84,20 +87,100 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     _audioDirectoryPath =
         messagesDirectoryPath(isTemporary: false, specificDirectory: 'audio');
 
-    _messageWriterMessageBox = TextField(
-      controller: _messageController,
-      minLines: 4,
-      maxLines: null,
-      keyboardType: TextInputType.multiline,
-      textCapitalization: TextCapitalization.sentences,
-      decoration: InputDecoration(
-        hintText: 'Enter the message you want to call them with',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+    _messageController = TextEditingController();
+    _selectedColor = const Color.fromARGB(255, 13, 214, 214);
+    _messageController = TextEditingController();
+
+    if (widget.regularMessageForRecall != null) {
+      _messageController = TextEditingController(
+          text: widget.regularMessageForRecall?.messageString);
+      _selectedColor = widget.regularMessageForRecall!.backgroundColor;
+    }
+
+    if (widget.regularMessageForRecall == null &&
+            widget.complexMessageForRecall == null ||
+        widget.regularMessageForRecall != null) {
+      _messageWriterMessageBox = TextField(
+        controller: _messageController,
+        minLines: 4,
+        maxLines: null,
+        keyboardType: TextInputType.multiline,
+        textCapitalization: TextCapitalization.sentences,
+        decoration: InputDecoration(
+          hintText: 'Enter the message you want to call them with',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          labelText: 'Message',
         ),
-        labelText: 'Message',
-      ),
-    );
+      );
+    }
+
+    if (widget.complexMessageForRecall != null) {
+      // first, NB: the media in this bolexyrojson might be in remote storage and not stored locally.
+      // in that case we'd have to download it,
+      // and if it is available locally, we would have to transfer it to temporary storage, to prevent messing with the original stuff.
+      // print(widget.complexMessageForRecall!.bolexyroJson);
+      _messageWriterMessageBox = FutureBuilder(
+        future: _storeFilesInTempDirOnCompexMessageRecall(
+            widget.complexMessageForRecall!),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Container(
+              width: double.infinity,
+              height: 90,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? makeColorLighter(Theme.of(context).primaryColor, 20)
+                    : const Color.fromARGB(255, 176, 208, 235),
+                border: Border.all(width: 1),
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Center(
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: constraints.maxWidth / 3,
+                          child: Center(
+                            child: SvgPicture.asset(
+                              'assets/icons/regular-file.svg',
+                              height: 40,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: constraints.maxWidth / 3,
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                        SizedBox(
+                          width: constraints.maxWidth / 3,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(snapshot.error.toString()),
+            );
+          }
+          _upToDateBolexyroJson = snapshot.data;
+          return FileUiPlaceHolder(
+            onBolexroJsonUpdated: _updateMyOwnDocumentJson,
+            onDelete: _resetMessageWriterMessageBox,
+            bolexyroJson: _upToDateBolexyroJson!,
+          );
+        },
+      );
+    }
+
     super.initState();
   }
 
@@ -107,6 +190,95 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     _confettiController.dispose();
     _messageController.dispose();
     super.dispose();
+  }
+
+  Future<Map<String, dynamic>> _storeFilesInTempDirOnCompexMessageRecall(
+      ComplexMessage recallComplexMessage) async {
+    final recallBolexyroJson =
+        jsonDecode(jsonEncode(recallComplexMessage.bolexyroJson));
+    final tempImageDirectoryPath = await messagesDirectoryPath(
+        isTemporary: true, specificDirectory: 'images');
+    final tempVideoDirectoryPath = await messagesDirectoryPath(
+        isTemporary: true, specificDirectory: 'videos');
+    final tempAudioDirectoryPath = await messagesDirectoryPath(
+        isTemporary: true, specificDirectory: 'audio');
+
+    final Map<String, dynamic> newBolexyroJsonWithTempLocations = {};
+    const uuid = Uuid();
+
+    for (final entry in recallBolexyroJson.entries) {
+      final mediaType = entry.value.keys.first;
+      if (mediaType == 'document') {
+        newBolexyroJsonWithTempLocations[entry.key] =
+            recallBolexyroJson[entry.key];
+      }
+
+      // mediatypepathstring would be imagepaths, videopaths, audiopaths
+      final String mediaTypePathString = entry.value.values.first.keys.first;
+      final paths = entry.value.values.first.values.first;
+      final permanentLocalPath = paths['local'];
+
+      if (permanentLocalPath == null) {
+        final String newFileName =
+            FirebaseStorage.instance.refFromURL(paths['online']).name;
+        late final String temporaryLocalPath;
+        switch (mediaType) {
+          case 'image':
+            temporaryLocalPath = '$tempImageDirectoryPath/$newFileName';
+            break;
+          case 'video':
+            temporaryLocalPath = '$tempVideoDirectoryPath/$newFileName';
+            break;
+          case 'audio':
+            temporaryLocalPath = '$tempAudioDirectoryPath/$newFileName';
+
+            break;
+          default:
+            continue;
+        }
+        await downloadFileFromUrl(paths['online'], temporaryLocalPath);
+
+        newBolexyroJsonWithTempLocations[entry.key] = {};
+        newBolexyroJsonWithTempLocations[entry.key][mediaType] = {};
+        newBolexyroJsonWithTempLocations[entry.key][mediaType]
+            [mediaTypePathString] = {};
+        newBolexyroJsonWithTempLocations[entry.key][mediaType]
+            [mediaTypePathString]['local'] = temporaryLocalPath;
+      } else {
+        late String temporaryLocalPath;
+        final permanentLocalFile = File(permanentLocalPath);
+
+        String newFileName =
+            '${uuid.v4()}${path.extension(permanentLocalPath)}';
+
+        switch (mediaType) {
+          case 'image':
+            temporaryLocalPath = '$tempImageDirectoryPath/$newFileName';
+
+            break;
+          case 'video':
+            temporaryLocalPath = '$tempVideoDirectoryPath/$newFileName';
+
+            break;
+          case 'audio':
+            temporaryLocalPath = '$tempAudioDirectoryPath/$newFileName';
+
+            break;
+          default:
+            continue;
+        }
+        if (await permanentLocalFile.exists()) {
+          await permanentLocalFile.copy(temporaryLocalPath);
+          newBolexyroJsonWithTempLocations[entry.key] = {};
+          newBolexyroJsonWithTempLocations[entry.key][mediaType] = {};
+          newBolexyroJsonWithTempLocations[entry.key][mediaType]
+              [mediaTypePathString] = {};
+          newBolexyroJsonWithTempLocations[entry.key][mediaType]
+              [mediaTypePathString]['local'] = temporaryLocalPath;
+        }
+      }
+    }
+    return newBolexyroJsonWithTempLocations;
   }
 
   void _callSomeone(context) async {
@@ -127,7 +299,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     // final xyz = jsonEncode(upToDateBolexyroJson!);
     // print(xyz);
 
-    if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder) {
+    if ((_messageWriterMessageBox.runtimeType ==
+            FutureBuilder<Map<String, dynamic>>) ||
+        _messageWriterMessageBox.runtimeType == FileUiPlaceHolder) {
       _bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls =
           await _saveFilesLocallyAndRemoteAndEditBolexyroJsonToContainTheStorageUrls(
               _upToDateBolexyroJson!);
@@ -145,7 +319,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           'caller_phone_number': _callerPhoneNumber,
           'callee_phone_number': widget.calleePhoneNumber,
           'message_json_string':
-              _messageWriterMessageBox.runtimeType == FileUiPlaceHolder
+              _messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
+                      (_messageWriterMessageBox.runtimeType ==
+                          FutureBuilder<Map<String, dynamic>>)
                   ? jsonEncode(_removeLocalUrlsFromBolexyroJson(
                       _bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls!))
                   : RegularMessage(
@@ -153,7 +329,9 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       backgroundColor: _selectedColor,
                     ).toJsonString,
           'my_message_type':
-              _messageWriterMessageBox.runtimeType == FileUiPlaceHolder
+              _messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
+                      (_messageWriterMessageBox.runtimeType ==
+                          FutureBuilder<Map<String, dynamic>>)
                   ? 'complex'
                   : 'regular',
           'message_id': _recentId,
@@ -170,7 +348,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     for (final refPath in _lastCallMediaRemoteReferencesPath) {
       await storageRef.child(refPath).delete();
     }
-    print('All unused remote files have been deleted');
   }
 
 // this function would be used to set the local urls for the files to null. When we want to send the bolexyroJson to the callee
@@ -349,11 +526,14 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     });
   }
 
-  bool _showDiscardDialog(Widget messageWriterContent) {
+  bool _shouldShowDiscardDialog(Widget messageWriterContent) {
     return messageWriterContent.runtimeType != StreamBuilder &&
+        // when the message writer is opened for recall, the runtimetype of _messageWriterMessageBox would be FutureBuilder<Map<String, dynamic>>
+        // so if we have not edited it, we would be able to leave message writer without showing discard dialog.
         (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
             (_messageWriterMessageBox.runtimeType == TextField &&
-                _messageController.text.isNotEmpty));
+                _messageController.text !=
+                    widget.regularMessageForRecall?.messageString));
   }
 
   @override
@@ -404,7 +584,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                         onPressed: () async {
                           FocusManager.instance.primaryFocus?.unfocus();
 
-                          final Map<String, dynamic>? myOwnCustomDocumemntJson =
+                          final Map<String, dynamic>? newBolexyroJson =
                               await Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) =>
@@ -412,8 +592,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                             ),
                           );
 
-                          if (myOwnCustomDocumemntJson != null) {
-                            _updateMyOwnDocumentJson(myOwnCustomDocumemntJson);
+                          if (newBolexyroJson != null) {
+                            _updateMyOwnDocumentJson(newBolexyroJson);
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -644,8 +824,10 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     repeatForever: false,
                     totalRepeatCount: 1,
                   ),
-                  // Lottie.asset('assets/animations/call_rejected.json',
-                  //     height: 300),
+                  Lottie.asset(
+                    'assets/animations/call_rejected.json',
+                    height: 300,
+                  ),
                 ],
               );
             }
@@ -838,7 +1020,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         if (didPop) {
           return;
         }
-        if (_showDiscardDialog(messageWriterContent)) {
+        if (_shouldShowDiscardDialog(messageWriterContent)) {
           final bool? toDiscard = await showAdaptiveDialog(
             context: context,
             builder: (context) => const ConfirmDialog(
@@ -865,7 +1047,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           GestureDetector(
             onTap: () async {
               FocusManager.instance.primaryFocus?.unfocus();
-              if (_showDiscardDialog(messageWriterContent)) {
+              if (_shouldShowDiscardDialog(messageWriterContent)) {
                 final bool? toDiscard = await showAdaptiveDialog(
                   context: context,
                   builder: (context) => const ConfirmDialog(
@@ -907,8 +1089,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder &&
-                    !_callSending)
+                if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
+                    (_messageWriterMessageBox.runtimeType ==
+                            FutureBuilder<Map<String, dynamic>>) &&
+                        !_callSending &&
+                        !_filesUploading)
                   Padding(
                     padding: const EdgeInsets.only(right: 10.0),
                     child: Switch.adaptive(
@@ -922,8 +1107,12 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                       value: _isMadeAvailableOffline,
                       onChanged: (value) {
                         if (value) {
-                          showFlushBar(
-                            Colors.blue,
+                          if (_lastFlushBarKey != null) {
+                            (_lastFlushBarKey!.currentWidget as Flushbar)
+                                .dismiss();
+                          }
+                          _lastFlushBarKey = showFlushBar(
+                            _selectedColor,
                             'Message is now available offline',
                             FlushbarPosition.TOP,
                             context,
@@ -1087,7 +1276,6 @@ class FileUiPlaceHolder extends StatelessWidget {
                           ),
                         ),
                       );
-
                       if (newBolexyroJson != null) {
                         onBolexroJsonUpdated(newBolexyroJson);
                       }

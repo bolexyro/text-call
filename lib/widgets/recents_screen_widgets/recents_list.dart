@@ -379,10 +379,12 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                           CustomSlidableAction(
                             onPressed: (context) {
                               showMessageWriterModalSheet(
-                                  context: context,
-                                  calleePhoneNumber:
-                                      recentN.contact.phoneNumber,
-                                  calleeName: recentN.contact.name);
+                                context: context,
+                                calleePhoneNumber: recentN.contact.phoneNumber,
+                                calleeName: recentN.contact.name,
+                                complexMessage: recentN.complexMessage,
+                                regularMessage: recentN.regularMessage,
+                              );
                             },
                             backgroundColor: const Color(0xFF21B7CA),
                             foregroundColor: Colors.white,
@@ -456,10 +458,14 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                       IconButton(
                                         onPressed: () {
                                           showMessageWriterModalSheet(
+                                            context: context,
                                             calleeName: recentN.contact.name,
                                             calleePhoneNumber:
                                                 recentN.contact.phoneNumber,
-                                            context: context,
+                                            complexMessage:
+                                                recentN.complexMessage,
+                                            regularMessage:
+                                                recentN.regularMessage,
                                           );
                                         },
                                         icon: SvgPicture.asset(

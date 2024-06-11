@@ -18,7 +18,6 @@ import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:uuid/uuid.dart';
-import 'package:http/http.dart' as http;
 
 class SmsNotFromTerminated extends ConsumerWidget {
   const SmsNotFromTerminated({
@@ -302,7 +301,6 @@ class _WidgetToRenderBasedOnHowAppIsOpenedState
       final remotePath = paths['online'] as String;
       final String mediaTypePathString = entry.value.values.first.keys.first;
 
-      http.Response response = await http.get(Uri.parse(remotePath));
       final String fileExtension = mediaType == 'image'
           ? '.jpg'
           : mediaType == 'video'
@@ -311,10 +309,8 @@ class _WidgetToRenderBasedOnHowAppIsOpenedState
       // Extracts file type from the URL
       String newFileName = '${uuid.v4()}$fileExtension';
       String tempFilePath = '$tempDirectoryPath/$newFileName';
-      print('newFilename is $newFileName');
 
-      File mediaFile = File(tempFilePath);
-      await mediaFile.writeAsBytes(response.bodyBytes);
+      File mediaFile = await downloadFileFromUrl(remotePath, tempFilePath);
 
       updatedBolexyroJson[entry.key][mediaType][mediaTypePathString]['local'] =
           await storeFileInPermanentDirectory(
@@ -367,7 +363,14 @@ class _WidgetToRenderBasedOnHowAppIsOpenedState
         actions: [
           if (_isMessageAvailableOffline == false)
             _isBeingMadeAvailableOffline
-                ? const CircularProgressIndicator()
+                ? const Padding(
+                    padding: EdgeInsets.only(right: 15.0),
+                    child: SizedBox(
+                      height: kIconHeight,
+                      width: kIconHeight,
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
                 : IconButton(
                     onPressed: () =>
                         _makeAvailableOffline(complexMessage!.bolexyroJson),

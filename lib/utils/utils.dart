@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:another_flushbar/flushbar.dart';
@@ -591,4 +592,18 @@ Future<File> downloadFileFromUrl(String url, String tempPath) async {
 
   await downloadTask;
   return file;
+}
+
+bool bolexyroJsonContainsOnlyRichText(
+    Map<String, dynamic> bolexyroJsonToCheck) {
+  final bolexyroJson = jsonDecode(jsonEncode(bolexyroJsonToCheck));
+
+  for (final entry in bolexyroJson.entries) {
+    final mediaType = entry.value.keys.first;
+    print(mediaType);
+    if (mediaType != 'document') {
+      return false;
+    }
+  }
+  return true;
 }

@@ -393,12 +393,12 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
   }
 
   bool _changesHaveBeenMade() {
-    if (_createMyOwnCustomDocumentJson().isEmpty ||
-        const DeepCollectionEquality()
-            .equals(widget.bolexyroJson, _createMyOwnCustomDocumentJson())) {
-      return false;
+    if (widget.bolexyroJson != null) {
+      return !(const DeepCollectionEquality()
+          .equals(widget.bolexyroJson, _createMyOwnCustomDocumentJson()));
+    } else {
+      return _createMyOwnCustomDocumentJson().isEmpty ? false : true;
     }
-    return true;
   }
 
   @override
@@ -413,7 +413,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
             IconButton(
               onPressed: () async {
                 if (!_changesHaveBeenMade()) {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(widget.bolexyroJson);
                   return;
                 }
                 final bool? toDiscard = await showAdaptiveDialog(
@@ -426,7 +426,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
                   ),
                 );
                 if (toDiscard == true) {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(widget.bolexyroJson);
                 }
               },
               icon: const Icon(Icons.arrow_back_ios_new),
@@ -500,10 +500,13 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
             IconButton(
               onPressed: () {
                 if (!_changesHaveBeenMade()) {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(widget.bolexyroJson);
                   return;
                 }
-                Navigator.of(context).pop(_createMyOwnCustomDocumentJson());
+                Navigator.of(context).pop(
+                    _createMyOwnCustomDocumentJson().isEmpty
+                        ? null
+                        : _createMyOwnCustomDocumentJson());
               },
               icon: SvgPicture.asset(
                 'assets/icons/file-done.svg',

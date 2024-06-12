@@ -43,12 +43,15 @@ class _MyQuillEditorState extends State<MyQuillEditor> {
         Row(
           children: [
             if (_collapseToolbar)
-              SvgPicture.asset(
-                'assets/icons/move.svg',
-                height: 20,
-                colorFilter: ColorFilter.mode(
-                  Theme.of(context).iconTheme.color!,
-                  BlendMode.srcIn,
+              Padding(
+                padding: const EdgeInsets.only(left: 5.0),
+                child: SvgPicture.asset(
+                  'assets/icons/move.svg',
+                  height: 20,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).iconTheme.color!,
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             const SizedBox(width: 8),

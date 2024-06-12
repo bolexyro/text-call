@@ -36,13 +36,11 @@ class SmsNotFromTerminated extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return SafeArea(
-      child: WidgetToRenderBasedOnHowAppIsOpened(
-        recentCallTime: recentCallTime,
-        howSmsIsOpened: howSmsIsOpened,
-        regularMessage: regularMessage,
-        complexMessage: complexMessage,
-      ),
+    return WidgetToRenderBasedOnHowAppIsOpened(
+      recentCallTime: recentCallTime,
+      howSmsIsOpened: howSmsIsOpened,
+      regularMessage: regularMessage,
+      complexMessage: complexMessage,
     );
   }
 }
@@ -344,6 +342,10 @@ class _WidgetToRenderBasedOnHowAppIsOpenedState
 
   @override
   Widget build(BuildContext context) {
+    print(
+        'hi there ${bolexyroJsonContainsOnlyRichText(complexMessage!.bolexyroJson)}');
+    print(complexMessage!.bolexyroJson);
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -361,52 +363,56 @@ class _WidgetToRenderBasedOnHowAppIsOpenedState
             : null,
         forceMaterialTransparency: true,
         actions: [
-          if (_isMessageAvailableOffline == false)
-            _isBeingMadeAvailableOffline
-                ? const Padding(
-                    padding: EdgeInsets.only(right: 15.0),
-                    child: SizedBox(
-                      height: kIconHeight,
-                      width: kIconHeight,
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                : IconButton(
-                    onPressed: () =>
-                        _makeAvailableOffline(complexMessage!.bolexyroJson),
-                    icon: SvgPicture.asset(
-                      'assets/icons/download.svg',
-                      height: kIconHeight,
-                      colorFilter: ColorFilter.mode(
-                        Theme.of(context).iconTheme.color!,
-                        BlendMode.srcIn,
+          if (!bolexyroJsonContainsOnlyRichText(complexMessage!.bolexyroJson))
+            if (_isMessageAvailableOffline == false)
+              _isBeingMadeAvailableOffline
+                  ? const Padding(
+                      padding: EdgeInsets.only(right: 15.0),
+                      child: SizedBox(
+                        height: kIconHeight,
+                        width: kIconHeight,
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : IconButton(
+                      onPressed: () =>
+                          _makeAvailableOffline(complexMessage!.bolexyroJson),
+                      icon: SvgPicture.asset(
+                        'assets/icons/download.svg',
+                        height: kIconHeight,
+                        colorFilter: ColorFilter.mode(
+                          Theme.of(context).iconTheme.color!,
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
-                  ),
-          if (_isMessageAvailableOffline == true)
-            _isBeingRemovedFromOffline
-                ? const CircularProgressIndicator()
-                : IconButton(
-                    onPressed: () =>
-                        _removeFilesFromOffline(complexMessage!.bolexyroJson),
-                    icon: SvgPicture.asset(
-                      'assets/icons/delete.svg',
-                      height: kIconHeight,
-                      colorFilter: const ColorFilter.mode(
-                        Colors.red,
-                        BlendMode.srcIn,
+          if (!bolexyroJsonContainsOnlyRichText(complexMessage!.bolexyroJson))
+            if (_isMessageAvailableOffline == true)
+              _isBeingRemovedFromOffline
+                  ? const CircularProgressIndicator()
+                  : IconButton(
+                      onPressed: () =>
+                          _removeFilesFromOffline(complexMessage!.bolexyroJson),
+                      icon: SvgPicture.asset(
+                        'assets/icons/delete.svg',
+                        height: kIconHeight,
+                        colorFilter: const ColorFilter.mode(
+                          Colors.red,
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
-                  ),
         ],
         title: widget.regularMessage == null
             ? null
             : ScaffoldTitle(color: widget.regularMessage!.backgroundColor),
       ),
-      body: TheStackWidget(
-        howSmsIsOpened: widget.howSmsIsOpened,
-        regularMessage: widget.regularMessage,
-        complexMessage: widget.complexMessage,
+      body: SafeArea(
+        child: TheStackWidget(
+          howSmsIsOpened: widget.howSmsIsOpened,
+          regularMessage: widget.regularMessage,
+          complexMessage: widget.complexMessage,
+        ),
       ),
       backgroundColor: widget.regularMessage?.backgroundColor,
     );

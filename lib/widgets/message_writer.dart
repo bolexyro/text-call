@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:another_flushbar/flushbar.dart';
+import 'package:collection/collection.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -78,6 +79,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   late Future<String> _audioDirectoryPath;
   GlobalKey? _lastFlushBarKey;
   bool _filesSavingInTempLocationForRecall = false;
+  bool _bolexyroJsonContainsOnlyRichText = false;
 
   @override
   void initState() {
@@ -121,69 +123,80 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       // first, NB: the media in this bolexyrojson might be in remote storage and not stored locally.
       // in that case we'd have to download it,
       // and if it is available locally, we would have to transfer it to temporary storage, to prevent messing with the original stuff.
-      // print(widget.complexMessageForRecall!.bolexyroJson);
 
-      _filesSavingInTempLocationForRecall = true;
-      _messageWriterMessageBox = FutureBuilder(
-        future: _storeFilesInTempDirOnCompexMessageRecall(
-            widget.complexMessageForRecall!),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Container(
-              width: double.infinity,
-              height: 90,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? makeColorLighter(Theme.of(context).primaryColor, 20)
-                    : const Color.fromARGB(255, 176, 208, 235),
-                border: Border.all(width: 1),
-              ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return Center(
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: constraints.maxWidth / 3,
-                          child: Center(
-                            child: SvgPicture.asset(
-                              'assets/icons/regular-file.svg',
-                              height: 40,
+      if (bolexyroJsonContainsOnlyRichText(
+          widget.complexMessageForRecall!.bolexyroJson)) {
+        _bolexyroJsonContainsOnlyRichText = true;
+        _upToDateBolexyroJson = widget.complexMessageForRecall!.bolexyroJson;
+
+        _messageWriterMessageBox = FileUiPlaceHolder(
+          onBolexroJsonUpdated: _updateMyOwnDocumentJson,
+          onDelete: _resetMessageWriterMessageBox,
+          bolexyroJson: _upToDateBolexyroJson!,
+        );
+      } else {
+        _filesSavingInTempLocationForRecall = true;
+        _messageWriterMessageBox = FutureBuilder(
+          future: _storeFilesInTempDirOnCompexMessageRecall(
+              widget.complexMessageForRecall!),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Container(
+                width: double.infinity,
+                height: 90,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? makeColorLighter(Theme.of(context).primaryColor, 20)
+                      : const Color.fromARGB(255, 176, 208, 235),
+                  border: Border.all(width: 1),
+                ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Center(
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: constraints.maxWidth / 3,
+                            child: Center(
+                              child: SvgPicture.asset(
+                                'assets/icons/regular-file.svg',
+                                height: 40,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          width: constraints.maxWidth / 3,
-                          child: const Center(
-                            child: CircularProgressIndicator(),
+                          SizedBox(
+                            width: constraints.maxWidth / 3,
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          width: constraints.maxWidth / 3,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            );
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(snapshot.error.toString()),
-            );
-          }
-          _upToDateBolexyroJson = snapshot.data;
-          _filesSavingInTempLocationForRecall = false;
+                          SizedBox(
+                            width: constraints.maxWidth / 3,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              );
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(snapshot.error.toString()),
+              );
+            }
+            _upToDateBolexyroJson = snapshot.data;
+            _filesSavingInTempLocationForRecall = false;
 
-          return FileUiPlaceHolder(
-            onBolexroJsonUpdated: _updateMyOwnDocumentJson,
-            onDelete: _resetMessageWriterMessageBox,
-            bolexyroJson: _upToDateBolexyroJson!,
-          );
-        },
-      );
+            return FileUiPlaceHolder(
+              onBolexroJsonUpdated: _updateMyOwnDocumentJson,
+              onDelete: _resetMessageWriterMessageBox,
+              bolexyroJson: _upToDateBolexyroJson!,
+            );
+          },
+        );
+      }
     }
 
     super.initState();
@@ -249,6 +262,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             [mediaTypePathString] = {};
         newBolexyroJsonWithTempLocations[entry.key][mediaType]
             [mediaTypePathString]['local'] = temporaryLocalPath;
+        newBolexyroJsonWithTempLocations[entry.key][mediaType]
+            [mediaTypePathString]['online'] = null;
       } else {
         late String temporaryLocalPath;
         final permanentLocalFile = File(permanentLocalPath);
@@ -280,6 +295,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               [mediaTypePathString] = {};
           newBolexyroJsonWithTempLocations[entry.key][mediaType]
               [mediaTypePathString]['local'] = temporaryLocalPath;
+          newBolexyroJsonWithTempLocations[entry.key][mediaType]
+              [mediaTypePathString]['online'] = null;
         }
       }
     }
@@ -309,9 +326,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
     _recentId = DateTime.now().toString();
     prefs.setString('recentId', _recentId);
-
-    // final xyz = jsonEncode(upToDateBolexyroJson!);
-    // print(xyz);
 
     if ((_messageWriterMessageBox.runtimeType ==
             FutureBuilder<Map<String, dynamic>>) ||
@@ -509,14 +523,34 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     });
   }
 
-  void _updateMyOwnDocumentJson(Map<String, dynamic> newBolexyroJson) {
+  void _updateMyOwnDocumentJson(Map<String, dynamic>? newBolexyroJson) {
     _upToDateBolexyroJson = newBolexyroJson;
+
     setState(() {
-      _messageWriterMessageBox = FileUiPlaceHolder(
-        onBolexroJsonUpdated: _updateMyOwnDocumentJson,
-        onDelete: _resetMessageWriterMessageBox,
-        bolexyroJson: newBolexyroJson,
-      );
+      if (_upToDateBolexyroJson != null) {
+        _bolexyroJsonContainsOnlyRichText =
+            bolexyroJsonContainsOnlyRichText(_upToDateBolexyroJson!);
+        _messageWriterMessageBox = FileUiPlaceHolder(
+          onBolexroJsonUpdated: _updateMyOwnDocumentJson,
+          onDelete: _resetMessageWriterMessageBox,
+          bolexyroJson: _upToDateBolexyroJson!,
+        );
+      } else {
+        _messageWriterMessageBox = TextField(
+          controller: _messageController,
+          minLines: 4,
+          maxLines: null,
+          keyboardType: TextInputType.multiline,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(
+            hintText: 'Enter the message you want to call them with',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            labelText: 'Message',
+          ),
+        );
+      }
     });
   }
 
@@ -541,12 +575,17 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   }
 
   bool _shouldShowDiscardDialog(Widget messageWriterContent) {
+    // print(widget.complexMessageForRecall?.bolexyroJson);
+    // print(_upToDateBolexyroJson);
     return messageWriterContent.runtimeType != StreamBuilder &&
         // when the message writer is opened for recall, the runtimetype of _messageWriterMessageBox would be FutureBuilder<Map<String, dynamic>>
         // so if we have not edited it, we would be able to leave message writer without showing discard dialog.
-        (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder ||
+        ((_messageWriterMessageBox.runtimeType == FileUiPlaceHolder &&
+                !(const DeepCollectionEquality().equals(
+                    widget.complexMessageForRecall?.bolexyroJson,
+                    _upToDateBolexyroJson))) ||
             (_messageWriterMessageBox.runtimeType == TextField &&
-                (_messageController.text.isNotEmpty ||
+                (_messageController.text.isNotEmpty &&
                     (widget.regularMessageForRecall != null &&
                         _messageController.text !=
                             widget.regularMessageForRecall?.messageString))));
@@ -610,7 +649,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
 
                           if (newBolexyroJson != null) {
                             _updateMyOwnDocumentJson(newBolexyroJson);
-                          }
+                          } else {}
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -1107,10 +1146,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               children: [
                 if (!_callSending &&
                     !_filesUploading &&
-                    (_messageWriterMessageBox.runtimeType ==
-                            FileUiPlaceHolder ||
-                        _messageWriterMessageBox.runtimeType ==
-                            FutureBuilder<Map<String, dynamic>>))
+                    (((_messageWriterMessageBox.runtimeType ==
+                                FileUiPlaceHolder ||
+                            _messageWriterMessageBox.runtimeType ==
+                                FutureBuilder<Map<String, dynamic>>) &&
+                        !_bolexyroJsonContainsOnlyRichText)))
                   Padding(
                     padding: const EdgeInsets.only(right: 10.0),
                     child: Switch.adaptive(
@@ -1240,7 +1280,7 @@ class FileUiPlaceHolder extends StatelessWidget {
   });
   final Map<String, dynamic> bolexyroJson;
   final void Function() onDelete;
-  final void Function(Map<String, dynamic> newBolexyroJson)
+  final void Function(Map<String, dynamic>? newBolexyroJson)
       onBolexroJsonUpdated;
 
   @override
@@ -1299,9 +1339,8 @@ class FileUiPlaceHolder extends StatelessWidget {
                           ),
                         ),
                       );
-                      if (newBolexyroJson != null) {
-                        onBolexroJsonUpdated(newBolexyroJson);
-                      }
+
+                      onBolexroJsonUpdated(newBolexyroJson);
                     },
                     icon: const Icon(Icons.edit),
                   ),

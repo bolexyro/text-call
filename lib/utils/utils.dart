@@ -597,10 +597,8 @@ Future<File> downloadFileFromUrl(String url, String tempPath) async {
 bool bolexyroJsonContainsOnlyRichText(
     Map<String, dynamic> bolexyroJsonToCheck) {
   final bolexyroJson = jsonDecode(jsonEncode(bolexyroJsonToCheck));
-
   for (final entry in bolexyroJson.entries) {
     final mediaType = entry.value.keys.first;
-    print(mediaType);
     if (mediaType != 'document') {
       return false;
     }

@@ -524,7 +524,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
             return;
           }
           if (!_changesHaveBeenMade()) {
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(widget.bolexyroJson);
             return;
           }
           final bool? toDiscard = await showAdaptiveDialog(
@@ -537,7 +537,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
             ),
           );
           if (toDiscard == true) {
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(widget.bolexyroJson);
           }
         },
         child: SafeArea(

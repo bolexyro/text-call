@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -123,20 +124,20 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.close),
-              title: const Text('Cancel'),
-              onTap: () => Navigator.of(context).pop(),
-            ),
-            ListTile(
               leading: SvgPicture.asset(
                 'assets/icons/draft.svg',
                 height: 24,
                 colorFilter: ColorFilter.mode(
                   Theme.of(context).iconTheme.color!,
                   BlendMode.srcIn,
-                ),),
+                ),
+              ),
               title: const Text('Draft'),
-              onTap: () {},
+              onTap: () => showFlushBar(
+                  const Color.fromARGB(255, 0, 63, 114),
+                  'Drafts are currently unavailable.',
+                  FlushbarPosition.TOP,
+                  context),
             ),
             const Spacer(),
             ListTile(
@@ -186,7 +187,8 @@ class _PhonePageScreenState extends ConsumerState<PhonePageScreen> {
           ],
         ),
       ),
-      body: SafeArea(child:[
+      body: SafeArea(
+          child: [
         KeypadScreen(
           scaffoldKey: _scaffoldKey,
         ),

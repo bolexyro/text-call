@@ -1,13 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:grouped_list/sliver_grouped_list.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/utils/utils.dart';
@@ -170,277 +165,312 @@ class _RecentsListState extends ConsumerState<RecentsList> {
   Widget build(BuildContext context) {
     final recentsList = _applyFilter(ref.watch(recentsProvider));
 
-
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: MySliverAppBar(expandedHeight: 200.0),
-        ),
-        LiquidPullToRefresh(
-          onRefresh: _refreshRecents,
-          child: SliverGroupedListView(
-            elements: recentsList,
-            groupBy: (recentN) => DateTime(recentN.callTime.year,
-                recentN.callTime.month, recentN.callTime.day),
-            groupSeparatorBuilder: (DateTime groupHeaderDateTime) => Container(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  _groupHeaderText(groupHeaderDateTime),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+    return Column(
+      children: [
+        Stack(
+          children: [
+            Container(
+              alignment: Alignment.topLeft,
+              child: IconButton(
+                onPressed: () {
+                  widget.scaffoldKey.currentState!.openDrawer();
+                },
+                icon: SvgPicture.asset(
+                  'assets/icons/hamburger-menu.svg',
+                  height: 30,
+                  colorFilter: ColorFilter.mode(
+                      Theme.of(context).iconTheme.color ?? Colors.grey,
+                      BlendMode.srcIn),
                 ),
               ),
             ),
-            order: GroupedListOrder.DESC,
-            itemComparator: (element1, element2) =>
-                element1.callTime.compareTo(element2.callTime),
-            itemBuilder: (context, recentN) {
-              _expandedBoolsMap[recentN] = _expandedBoolsMap.containsKey(recentN)
-                  ? _expandedBoolsMap[recentN]!
-                  : false;
-          
-              return Slidable(
-                startActionPane: ActionPane(
-                  motion: const BehindMotion(),
+            Column(
+              children: [
+                const SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  'Recents',
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineLarge!
+                      .copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(
+                  height: 50,
+                ),
+                Row(
                   children: [
-                    CustomSlidableAction(
-                      onPressed: (context) {
-                        showMessageWriterModalSheet(
-                          context: context,
-                          calleePhoneNumber: recentN.contact.phoneNumber,
-                          calleeName: recentN.contact.name,
-                          complexMessage: recentN.complexMessage,
-                          regularMessage: recentN.regularMessage,
-                        );
-                      },
-                      backgroundColor: const Color(0xFF21B7CA),
-                      foregroundColor: Colors.white,
-                      child: SvgPicture.asset(
-                        'assets/icons/message-ring.svg',
-                        height: 30,
-                        colorFilter:
-                            const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                      ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: _showFilterDialog,
+                      icon: const Icon(Icons.filter_alt),
                     ),
+                    // IconButton(
+                    //   onPressed: () async {
+                    // final prefs = await SharedPreferences.getInstance();
+                    // await prefs.setString('callMessage',
+                    //     'callMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessagecallMessage');
+                    // await prefs.setString(
+                    //     'callerPhoneNumber', '+2349027929326');
+                    // await prefs.setString(
+                    //     'callerName', 'callerPhoneNumber');
+                    // await prefs.setString(
+                    //   'backgroundColor',
+                    //   json.encode(
+                    //     {
+                    //       'alpha': 200,
+                    //       'red': 90,
+                    //       'green': 90,
+                    //       'blue': 20,
+                    //     },
+                    //   ),
+                    // );
+                    // createAwesomeNotification(
+                    //   title: 'Bolexyro',
+                    //   notificationPurpose: NotificationPurpose.forCall,
+                    // );
+                    // },
+                    //   icon: const Icon(Icons.search),
+                    // ),
+                    const SizedBox(width: 10),
                   ],
                 ),
-                endActionPane: recentN.recentIsAContact
-                    ? null
-                    : ActionPane(
-                        motion: const BehindMotion(),
-                        children: [
-                          CustomSlidableAction(
-                            onPressed: (context) {
-                              showAddContactDialog(context,
-                                  phoneNumber: recentN.contact.phoneNumber);
-                            },
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                            child: const Icon(Icons.person_add),
-                          ),
-                        ],
+                const SizedBox(height: 10)
+              ],
+            )
+          ],
+        ),
+        if (recentsList.isEmpty)
+          Expanded(
+            child: LiquidPullToRefresh(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              backgroundColor: Colors.white,
+              showChildOpacityTransition: false,
+              onRefresh: _refreshRecents,
+              height: MediaQuery.sizeOf(context).width < 520 ? 120 : 80,
+              animSpeedFactor: 2.3,
+              springAnimationDurationInMilliseconds: 600,
+              child: ListView(
+                children: const [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        height: 60,
                       ),
-                child: widget.screen == Screen.phone
-                    ? ExpandableListTile(
-                        justARegularListTile: false,
-                        tileOnTapped: () {
-                          _changeTileExpandedStatus(recentN);
-                        },
-                        isExpanded: _expandedBoolsMap[recentN]!,
-                        leading: recentCategoryIconMap[recentN.category]!,
-                        trailing: Text(
-                          DateFormat.Hm().format(recentN.callTime),
+                      Text(
+                        'Start calling to see your history.',
+                        textAlign: TextAlign.center,
+                      ),
+                      Icon(
+                        Icons.history,
+                        size: 110,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(
+                        height: 100,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        if (recentsList.isNotEmpty)
+          Expanded(
+            child: LiquidPullToRefresh(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              backgroundColor: Colors.white,
+              showChildOpacityTransition: false,
+              onRefresh: _refreshRecents,
+              height: MediaQuery.sizeOf(context).width < 520 ? 120 : 80,
+              animSpeedFactor: 2.3,
+              springAnimationDurationInMilliseconds: 600,
+              child: GroupedListView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                useStickyGroupSeparators: true,
+                stickyHeaderBackgroundColor:
+                    Theme.of(context).colorScheme.primaryContainer,
+                elements: recentsList,
+                groupBy: (recentN) => DateTime(recentN.callTime.year,
+                    recentN.callTime.month, recentN.callTime.day),
+                groupSeparatorBuilder: (DateTime groupHeaderDateTime) =>
+                    Container(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      _groupHeaderText(groupHeaderDateTime),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                order: GroupedListOrder.DESC,
+                itemComparator: (element1, element2) =>
+                    element1.callTime.compareTo(element2.callTime),
+                itemBuilder: (context, recentN) {
+                  _expandedBoolsMap[recentN] =
+                      _expandedBoolsMap.containsKey(recentN)
+                          ? _expandedBoolsMap[recentN]!
+                          : false;
+
+                  return Slidable(
+                    startActionPane: ActionPane(
+                      motion: const BehindMotion(),
+                      children: [
+                        CustomSlidableAction(
+                          onPressed: (context) {
+                            showMessageWriterModalSheet(
+                              context: context,
+                              calleePhoneNumber: recentN.contact.phoneNumber,
+                              calleeName: recentN.contact.name,
+                              complexMessage: recentN.complexMessage,
+                              regularMessage: recentN.regularMessage,
+                            );
+                          },
+                          backgroundColor: const Color(0xFF21B7CA),
+                          foregroundColor: Colors.white,
+                          child: SvgPicture.asset(
+                            'assets/icons/message-ring.svg',
+                            height: 30,
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.srcIn),
+                          ),
                         ),
-                        title: Text(recentN.contact.name),
-                        expandedContent: Column(
-                          children: [
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            if (recentN.recentIsAContact)
-                              Text(
-                                'Mobile ${recentN.contact.localPhoneNumber}',
-                                style:
-                                    const TextStyle(fontWeight: FontWeight.bold),
+                      ],
+                    ),
+                    endActionPane: recentN.recentIsAContact
+                        ? null
+                        : ActionPane(
+                            motion: const BehindMotion(),
+                            children: [
+                              CustomSlidableAction(
+                                onPressed: (context) {
+                                  showAddContactDialog(context,
+                                      phoneNumber: recentN.contact.phoneNumber);
+                                },
+                                backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white,
+                                child: const Icon(Icons.person_add),
                               ),
-                            Text(recntCategoryStringMap[recentN.category]!),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                if (!recentN.recentIsAContact)
-                                  IconButton(
-                                    onPressed: () {
-                                      showAddContactDialog(context,
-                                          phoneNumber:
-                                              recentN.contact.phoneNumber);
-                                    },
-                                    icon: const Icon(Icons.person_add),
-                                  ),
-                                IconButton(
-                                  onPressed: () {
-                                    showMessageWriterModalSheet(
-                                      context: context,
-                                      calleeName: recentN.contact.name,
-                                      calleePhoneNumber:
-                                          recentN.contact.phoneNumber,
-                                      complexMessage: recentN.complexMessage,
-                                      regularMessage: recentN.regularMessage,
-                                    );
-                                  },
-                                  icon: SvgPicture.asset(
-                                    'assets/icons/message-ring.svg',
-                                    height: 24,
-                                    colorFilter: ColorFilter.mode(
-                                      Theme.of(context).iconTheme.color!,
-                                      BlendMode.srcIn,
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    if (recentN.canBeViewed) {
-                                      widget.onRecentSelected(recentN);
-                                      return;
-                                    }
-                                    showADialog(
-                                      header: 'Alert!!',
-                                      body:
-                                          "you have to ask ${recentN.contact.name} for permission to see this message since you rejected the call.",
-                                      context: context,
-                                      buttonText: 'Send  access request',
-                                      onPressed: () {
-                                        sendAccessRequest(recentN);
-                                        Navigator.of(context).pop();
-                                      },
-                                    );
-                                  },
-                                  icon: Icon(
-                                    Icons.info_outlined,
-                                    color: Theme.of(context).iconTheme.color!,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    : Column(
-                        children: [
-                          ListTile(
+                            ],
+                          ),
+                    child: widget.screen == Screen.phone
+                        ? ExpandableListTile(
+                            justARegularListTile: false,
+                            tileOnTapped: () {
+                              _changeTileExpandedStatus(recentN);
+                            },
+                            isExpanded: _expandedBoolsMap[recentN]!,
                             leading: recentCategoryIconMap[recentN.category]!,
                             trailing: Text(
                               DateFormat.Hm().format(recentN.callTime),
                             ),
                             title: Text(recentN.contact.name),
-                            onTap: () => widget.onRecentSelected(recentN),
+                            expandedContent: Column(
+                              children: [
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                if (recentN.recentIsAContact)
+                                  Text(
+                                    'Mobile ${recentN.contact.localPhoneNumber}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                Text(recntCategoryStringMap[recentN.category]!),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    if (!recentN.recentIsAContact)
+                                      IconButton(
+                                        onPressed: () {
+                                          showAddContactDialog(context,
+                                              phoneNumber:
+                                                  recentN.contact.phoneNumber);
+                                        },
+                                        icon: const Icon(Icons.person_add),
+                                      ),
+                                    IconButton(
+                                      onPressed: () {
+                                        showMessageWriterModalSheet(
+                                          context: context,
+                                          calleeName: recentN.contact.name,
+                                          calleePhoneNumber:
+                                              recentN.contact.phoneNumber,
+                                          complexMessage:
+                                              recentN.complexMessage,
+                                          regularMessage:
+                                              recentN.regularMessage,
+                                        );
+                                      },
+                                      icon: SvgPicture.asset(
+                                        'assets/icons/message-ring.svg',
+                                        height: 24,
+                                        colorFilter: ColorFilter.mode(
+                                          Theme.of(context).iconTheme.color!,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        if (recentN.canBeViewed) {
+                                          widget.onRecentSelected(recentN);
+                                          return;
+                                        }
+                                        showADialog(
+                                          header: 'Alert!!',
+                                          body:
+                                              "you have to ask ${recentN.contact.name} for permission to see this message since you rejected the call.",
+                                          context: context,
+                                          buttonText: 'Send  access request',
+                                          onPressed: () {
+                                            sendAccessRequest(recentN);
+                                            Navigator.of(context).pop();
+                                          },
+                                        );
+                                      },
+                                      icon: Icon(
+                                        Icons.info_outlined,
+                                        color:
+                                            Theme.of(context).iconTheme.color!,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        : Column(
+                            children: [
+                              ListTile(
+                                leading:
+                                    recentCategoryIconMap[recentN.category]!,
+                                trailing: Text(
+                                  DateFormat.Hm().format(recentN.callTime),
+                                ),
+                                title: Text(recentN.contact.name),
+                                onTap: () => widget.onRecentSelected(recentN),
+                              ),
+                              const Divider(
+                                indent: 45,
+                                endIndent: 15,
+                              ),
+                            ],
                           ),
-                          const Divider(
-                            indent: 45,
-                            endIndent: 15,
-                          ),
-                        ],
-                      ),
-              );
-            },
-          ),
-        )
-      ],
-    );
-  }
-}
-
-class MySliverAppBar extends SliverPersistentHeaderDelegate {
-  final double expandedHeight;
-
-  MySliverAppBar({required this.expandedHeight});
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Stack(
-      clipBehavior: Clip.none,
-      fit: StackFit.expand,
-      children: [
-        Container(
-          alignment: Alignment.bottomRight,
-          color:Theme.of(context).scaffoldBackgroundColor,
-          child: Row(
-            children: [
-              const Spacer(),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.filter_alt),
-              ),
-              IconButton(
-                onPressed: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setString('callMessage', 'callMessage');
-                  await prefs.setString('callerPhoneNumber', '+2349027929326');
-                  await prefs.setString('callerName', 'callerPhoneNumber');
-                  await prefs.setString(
-                    'backgroundColor',
-                    json.encode(
-                      {
-                        'alpha': 200,
-                        'red': 90,
-                        'green': 90,
-                        'blue': 20,
-                      },
-                    ),
-                  );
-                  createAwesomeNotification(
-                    title: 'Bolexyro',
-                    notificationPurpose: NotificationPurpose.forCall,
                   );
                 },
-                icon: const Icon(Icons.search),
               ),
-            ],
-          ),
-        ),
-        Container(
-          alignment: Alignment.centerLeft,
-          child: Opacity(
-            opacity: shrinkOffset / expandedHeight,
-            child: Text(
-              'Recents',
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineLarge!
-                  .copyWith(fontWeight: FontWeight.bold),
             ),
-          ),
-        ),
-        Container(
-          // top: expandedHeight / 4 - shrinkOffset,
-          // left: MediaQuery.of(context).size.width / 4,
-          alignment: Alignment.center,
-          child: Opacity(
-            opacity: (1 - shrinkOffset / expandedHeight),
-            child: Text(
-              'Recents',
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineLarge!
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
+          )
       ],
     );
   }
-
-  @override
-  double get maxExtent => expandedHeight;
-
-  @override
-  double get minExtent => kToolbarHeight;
-
-  @override
-  bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) => true;
 }

@@ -342,10 +342,6 @@ class _WidgetToRenderBasedOnHowAppIsOpenedState
 
   @override
   Widget build(BuildContext context) {
-    print(
-        'hi there ${bolexyroJsonContainsOnlyRichText(complexMessage!.bolexyroJson)}');
-    print(complexMessage!.bolexyroJson);
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -363,7 +359,8 @@ class _WidgetToRenderBasedOnHowAppIsOpenedState
             : null,
         forceMaterialTransparency: true,
         actions: [
-          if (!bolexyroJsonContainsOnlyRichText(complexMessage!.bolexyroJson))
+          if (_isMessageAvailableOffline != null &&
+              !bolexyroJsonContainsOnlyRichText(complexMessage!.bolexyroJson))
             if (_isMessageAvailableOffline == false)
               _isBeingMadeAvailableOffline
                   ? const Padding(
@@ -386,7 +383,7 @@ class _WidgetToRenderBasedOnHowAppIsOpenedState
                         ),
                       ),
                     ),
-          if (!bolexyroJsonContainsOnlyRichText(complexMessage!.bolexyroJson))
+          if (_isMessageAvailableOffline != null && !bolexyroJsonContainsOnlyRichText(complexMessage!.bolexyroJson))
             if (_isMessageAvailableOffline == true)
               _isBeingRemovedFromOffline
                   ? const CircularProgressIndicator()

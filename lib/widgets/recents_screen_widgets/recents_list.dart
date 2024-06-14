@@ -296,16 +296,9 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                 elements: recentsList,
                 groupBy: (recentN) => DateTime(recentN.callTime.year,
                     recentN.callTime.month, recentN.callTime.day),
-                groupSeparatorBuilder: (DateTime groupHeaderDateTime) =>
-                    Container(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      _groupHeaderText(groupHeaderDateTime),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                groupSeparatorBuilder: (DateTime groupHeaderDateTime) => Text(
+                  _groupHeaderText(groupHeaderDateTime),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 order: GroupedListOrder.DESC,
                 itemComparator: (element1, element2) =>
@@ -428,7 +421,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                         showADialog(
                                           header: 'Alert!!',
                                           body:
-                                              "you have to ask ${recentN.contact.name} for permission to see this message since you rejected the call.",
+                                              "you have to ask ${recentN.contact.name} for permission to see this message since you ${recentN.category == RecentCategory.incomingRejected ? 'rejected' : 'ignored'} the call.",
                                           context: context,
                                           buttonText: 'Send  access request',
                                           onPressed: () {

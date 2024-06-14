@@ -575,20 +575,51 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
   }
 
   bool _shouldShowDiscardDialog(Widget messageWriterContent) {
-    // print(widget.complexMessageForRecall?.bolexyroJson);
-    // print(_upToDateBolexyroJson);
-    return messageWriterContent.runtimeType != StreamBuilder &&
-        // when the message writer is opened for recall, the runtimetype of _messageWriterMessageBox would be FutureBuilder<Map<String, dynamic>>
-        // so if we have not edited it, we would be able to leave message writer without showing discard dialog.
-        ((_messageWriterMessageBox.runtimeType == FileUiPlaceHolder &&
-                !(const DeepCollectionEquality().equals(
-                    widget.complexMessageForRecall?.bolexyroJson,
-                    _upToDateBolexyroJson))) ||
-            (_messageWriterMessageBox.runtimeType == TextField &&
-                (_messageController.text.isNotEmpty &&
-                    (widget.regularMessageForRecall != null &&
-                        _messageController.text !=
-                            widget.regularMessageForRecall?.messageString))));
+    if (messageWriterContent.runtimeType == StreamBuilder) {
+      return false;
+    }
+
+    if (_messageWriterMessageBox.runtimeType ==
+        FutureBuilder<Map<String, dynamic>>) {
+      return false;
+    }
+
+    if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder &&
+        widget.complexMessageForRecall == null) {
+      return true;
+    }
+
+    if (_messageWriterMessageBox.runtimeType == FileUiPlaceHolder &&
+        !(const DeepCollectionEquality()
+            .equals(widget.complexMessageForRecall, _upToDateBolexyroJson))) {
+      return true;
+    }
+
+    if (_messageController.text.isEmpty &&
+        widget.regularMessageForRecall == null) {
+      return false;
+    }
+    if (widget.regularMessageForRecall != null &&
+        _messageController.text ==
+            widget.regularMessageForRecall!.messageString) {
+      return false;
+    }
+
+    return true;
+    // if (widget.regularMessageForRecall == null) {
+    //   return messageWriterContent.runtimeType != StreamBuilder &&
+    //       // when the message writer is opened for recall, the runtimetype of _messageWriterMessageBox would be FutureBuilder<Map<String, dynamic>>
+    //       // so if   we have not edited it, we would be able to leave message writer without showing discard dialog.
+    //       ((_messageWriterMessageBox.runtimeType == FileUiPlaceHolder &&
+    //               !(const DeepCollectionEquality().equals(
+    //                   widget.complexMessageForRecall?.bolexyroJson,
+    //                   _upToDateBolexyroJson))) ||
+    //           (_messageWriterMessageBox.runtimeType == TextField &&
+    //               (_messageController.text.isNotEmpty &&
+    //                   (widget.regularMessageForRecall != null &&
+    //                       _messageController.text !=
+    //                           widget.regularMessageForRecall?.messageString))));
+    // }
   }
 
   @override

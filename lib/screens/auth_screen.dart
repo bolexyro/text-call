@@ -75,6 +75,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           context,
           mainButton: ElevatedButton(
             onPressed: () async {
+              
               (_flushBarKey!.currentWidget as Flushbar).dismiss();
               _flushBarKey = showFlushBar(
                 const Color.fromARGB(255, 0, 63, 114),

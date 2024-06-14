@@ -211,7 +211,7 @@ class _FullScreenImageDisplayerState extends State<FullScreenImageDisplayer>
 
     if (scaleEndDetails != null) {
       if (dragOffset.dy.abs() >= screenSize.height / 3) {
-        Navigator.of(context, rootNavigator: true).pop();
+        Navigator.of(context).pop();
         return;
       }
       final velocity = scaleEndDetails.velocity.pixelsPerSecond;
@@ -222,7 +222,7 @@ class _FullScreenImageDisplayerState extends State<FullScreenImageDisplayer>
       if (velocityY.abs() > thresholdOffsetYToEnablePop &&
           dragOffset.dy.abs() > thresholdVelocityYToEnablePop &&
           _enableDrag) {
-        Navigator.of(context, rootNavigator: true).pop();
+        Navigator.of(context).pop();
         return;
       }
     }
@@ -286,10 +286,8 @@ class _FullScreenImageDisplayerState extends State<FullScreenImageDisplayer>
           onInteractionUpdate: (details) {
             _onDragUpdate(details);
             if (_scale == 1.0) {
-              // _enablePageView = true;
               _enableDrag = true;
             } else {
-              // _enablePageView = false;
               _enableDrag = false;
             }
             setState(() {});

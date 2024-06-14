@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 import 'package:text_call/models/complex_message.dart';
@@ -6,6 +7,7 @@ import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
+import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';
 
@@ -50,12 +52,12 @@ class _GroupedRecentsListState extends State<GroupedRecentsList> {
   }
 
   void _goToSentMessageScreen(
-      {required DateTime recentCallTime, required RegularMessage? regularMessage,
+      {required DateTime recentCallTime,
+      required RegularMessage? regularMessage,
       required ComplexMessage? complexMessage}) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => SmsNotFromTerminated(
         recentCallTime: recentCallTime,
-
         howSmsIsOpened: HowSmsIsOpened.notFromTerminatedToJustDisplayMessage,
         complexMessage: complexMessage,
         regularMessage: regularMessage,
@@ -91,13 +93,20 @@ class _GroupedRecentsListState extends State<GroupedRecentsList> {
           children: [
             ExpandableListTile(
               justARegularListTile: false,
-              leading: recentCategoryIconMap[recentN.category]!,
+              leading: recentN.category.iconPath == null
+                  ? recentN.category.icon!
+                  : SvgPicture.asset(
+                      recentN.category.iconPath!,
+                      height: kIconHeight,
+                      colorFilter: ColorFilter.mode(
+                          recentN.category.iconColor, BlendMode.srcIn),
+                    ),
               title: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(DateFormat.Hm().format(recentN.callTime)),
-                  Text(recntCategoryStringMap[recentN.category]!),
+                  Text(recentN.category.label),
                 ],
               ),
               expandedContent: recentN.canBeViewed

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_details_pane.dart';
+import 'package:text_call/widgets/options_menu_anchor.dart';
 
 class ContactDetailsScreen extends StatelessWidget {
   const ContactDetailsScreen({
@@ -8,12 +9,11 @@ class ContactDetailsScreen extends StatelessWidget {
     required this.selectedContact,
   });
 
-  final Contact? selectedContact;
+  final Contact selectedContact;
 
   @override
   Widget build(BuildContext context) {
     const stackPadding = EdgeInsets.symmetric(horizontal: 10);
-
     return Scaffold(
       backgroundColor: Theme.of(context).brightness == Brightness.dark
           ? null
@@ -28,6 +28,9 @@ class ContactDetailsScreen extends StatelessWidget {
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          OptionsMenuAnchor(contact: selectedContact)
+        ],
       ),
       resizeToAvoidBottomInset: false,
       body: SafeArea(

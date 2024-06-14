@@ -76,7 +76,7 @@ class ContactDetailsPane extends ConsumerWidget {
           const SizedBox(
             height: 7,
           ),
-          Text(recntCategoryStringMap[recent!.category]!),
+          Text(recent!.category.label),
           const SizedBox(
             height: 7,
           ),

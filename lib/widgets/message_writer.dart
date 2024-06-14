@@ -761,6 +761,51 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               );
             }
 
+            if (snapshotData['call_status'] == 'blocked') {
+              Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0, left: 5),
+                          child: IconButton(
+                            onPressed: () => setState(() {
+                              _callSending = false;
+                            }),
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              size: 30,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    AnimatedTextKit(
+                      animatedTexts: [
+                        TyperAnimatedText(
+                          'You have been blocked by this user. So your text call didn\'t go through',
+                          textAlign: TextAlign.center,
+                          textStyle: GoogleFonts.pacifico(
+                              fontSize: 32,
+                              color: const Color.fromARGB(255, 199, 32, 76)),
+                          speed: const Duration(milliseconds: 100),
+                        ),
+                      ],
+                      displayFullTextOnTap: true,
+                      repeatForever: false,
+                      totalRepeatCount: 1,
+                    ),
+                    Lottie.asset(
+                      'assets/animations/call_rejected.json',
+                      height: 300,
+                    ),
+                  ],
+                ),
+              );
+            }
+
             if (snapshotData['call_status'] == 'ignored') {
               final recent = Recent.withoutContactObject(
                 category: RecentCategory.outgoingIgnored,
@@ -845,45 +890,47 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               if (index == 1) {
                 ref.read(recentsProvider.notifier).addRecent(recent);
               }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10.0, left: 5),
-                        child: IconButton(
-                          onPressed: () => setState(() {
-                            _callSending = false;
-                          }),
-                          icon: const Icon(
-                            Icons.arrow_back,
-                            size: 30,
+              return Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0, left: 5),
+                          child: IconButton(
+                            onPressed: () => setState(() {
+                              _callSending = false;
+                            }),
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              size: 30,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  AnimatedTextKit(
-                    animatedTexts: [
-                      TyperAnimatedText(
-                        'Thy call hath been declined, leaving silence to linger in the void.',
-                        textAlign: TextAlign.center,
-                        textStyle: GoogleFonts.pacifico(
-                            fontSize: 32,
-                            color: const Color.fromARGB(255, 199, 32, 76)),
-                        speed: const Duration(milliseconds: 100),
-                      ),
-                    ],
-                    displayFullTextOnTap: true,
-                    repeatForever: false,
-                    totalRepeatCount: 1,
-                  ),
-                  Lottie.asset(
-                    'assets/animations/call_rejected.json',
-                    height: 300,
-                  ),
-                ],
+                      ],
+                    ),
+                    AnimatedTextKit(
+                      animatedTexts: [
+                        TyperAnimatedText(
+                          'Thy call hath been declined, leaving silence to linger in the void.',
+                          textAlign: TextAlign.center,
+                          textStyle: GoogleFonts.pacifico(
+                              fontSize: 32,
+                              color: const Color.fromARGB(255, 199, 32, 76)),
+                          speed: const Duration(milliseconds: 100),
+                        ),
+                      ],
+                      displayFullTextOnTap: true,
+                      repeatForever: false,
+                      totalRepeatCount: 1,
+                    ),
+                    Lottie.asset(
+                      'assets/animations/call_rejected.json',
+                      height: 300,
+                    ),
+                  ],
+                ),
               );
             }
             if (snapshotData['call_status'] == 'accepted') {

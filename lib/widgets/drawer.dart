@@ -12,18 +12,17 @@ import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 
 class AppDrawer extends ConsumerStatefulWidget {
-  const AppDrawer({super.key});
+  const AppDrawer({super.key, required this.thingsNeeded,});
+
+  final Future<String> thingsNeeded;
 
   @override
   ConsumerState<AppDrawer> createState() => _AppDrawerState();
 }
 
 class _AppDrawerState extends ConsumerState<AppDrawer> {
-  Future<String> _loadThingsNeeded() async {
-    await ref.read(contactsProvider.notifier).loadContacts();
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('myPhoneNumber')!;
-  }
+ 
+
 
   void _logout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -47,7 +46,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             child: DrawerHeader(
               padding: const EdgeInsets.only(top: 30),
               child: FutureBuilder(
-                future: _loadThingsNeeded(),
+                future: widget.thingsNeeded,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(

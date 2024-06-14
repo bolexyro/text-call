@@ -48,7 +48,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
     });
   }
 
-  void _goToPage({Contact? selectedContact}) {
+  void _goToPage({required Contact selectedContact}) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ContactDetailsScreen(

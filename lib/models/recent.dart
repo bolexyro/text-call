@@ -1,67 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/regular_message.dart';
-import 'package:text_call/utils/constants.dart';
 
 enum RecentCategory {
-  outgoingAccepted,
-  outgoingRejected,
-  outgoingIgnored,
-  outgoingUnreachable,
-  incomingAccepted,
-  incomingRejected,
-  incomingIgnored,
+  outgoingAccepted(
+    'Outgoing Accepted',
+    Colors.green,
+    iconPath: 'assets/icons/outgoing-call.svg',
+  ),
+  outgoingRejected(
+    'Outgoing Rejected',
+    Colors.red,
+    iconPath: 'assets/icons/outgoing-call.svg',
+  ),
+  outgoingIgnored(
+    'Outgoing Ignored',
+    Color.fromARGB(255, 185, 112, 2),
+    iconPath: 'assets/icons/outgoing-call.svg',
+  ),
+  outgoingUnreachable(
+    'Outgoing Unreachable',
+    Colors.grey,
+    iconPath: 'assets/icons/outgoing-call.svg',
+  ),
+  incomingAccepted(
+    'Incoming Accepted',
+    Colors.green,
+    iconPath: 'assets/icons/incoming-call.svg',
+  ),
+  incomingRejected(
+    'Incoming Rejected',
+    Colors.red,
+    iconPath: 'assets/icons/incoming-call.svg',
+  ),
+  incomingIgnored(
+    'Incoming Ignored',
+    Color.fromARGB(255, 185, 112, 2),
+    icon: Icon(Icons.phone_missed),
+  );
+
+  const RecentCategory(this.label, this.iconColor, {this.iconPath, this.icon});
+  final String label;
+  final Color iconColor;
+  final String? iconPath;
+  final Widget? icon;
 }
-
-Map<RecentCategory, Widget> recentCategoryIconMap = {
-  RecentCategory.outgoingAccepted: SvgPicture.asset(
-    'assets/icons/outgoing-call.svg',
-    height: kIconHeight,
-    colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
-  ),
-  RecentCategory.outgoingUnreachable: SvgPicture.asset(
-    'assets/icons/outgoing-call.svg',
-    height: kIconHeight,
-    colorFilter: const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
-  ),
-  RecentCategory.outgoingIgnored: SvgPicture.asset(
-    'assets/icons/outgoing-call.svg',
-    height: kIconHeight,
-    colorFilter: const ColorFilter.mode(
-        Color.fromARGB(255, 185, 112, 2), BlendMode.srcIn),
-  ),
-  RecentCategory.outgoingRejected: SvgPicture.asset(
-    'assets/icons/outgoing-call.svg',
-    height: kIconHeight,
-    colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn),
-  ),
-  RecentCategory.incomingAccepted: SvgPicture.asset(
-    'assets/icons/incoming-call.svg',
-    height: kIconHeight,
-    colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
-  ),
-  RecentCategory.incomingIgnored: const Icon(
-    Icons.phone_missed,
-    color: Color.fromARGB(255, 185, 112, 2),
-  ),
-  RecentCategory.incomingRejected: SvgPicture.asset(
-    'assets/icons/incoming-call.svg',
-    height: kIconHeight,
-    colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn),
-  ),
-};
-
-const Map<RecentCategory, String> recntCategoryStringMap = {
-  RecentCategory.outgoingAccepted: 'Outgoing Accepted',
-  RecentCategory.outgoingRejected: 'Outgoing Rejected',
-  RecentCategory.outgoingIgnored: 'Outgoing Ignored',
-  RecentCategory.incomingIgnored: 'Incoming Ignored',
-  RecentCategory.outgoingUnreachable: 'Outgoing unreachable',
-  RecentCategory.incomingAccepted: 'Incoming Accepted',
-  RecentCategory.incomingRejected: 'Incoming Rejected',
-};
 
 class Recent {
   Recent({

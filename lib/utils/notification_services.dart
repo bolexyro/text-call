@@ -123,6 +123,14 @@ Future<void> messageHandler(RemoteMessage message) async {
 
   // i am still persisting this with sharedprefs because i no one mess with that sms notfrom terminated and terminated code
   final prefs = await SharedPreferences.getInstance();
+  final List<String> blockedContacts =
+      prefs.getStringList('blockedPhoneNumbers') ?? [];
+  if (blockedContacts.contains(callerPhoneNumber)) {
+    final url = Uri.https(
+        'text-call-backend.onrender.com', 'call/blocked/$callerPhoneNumber');
+    await http.get(url);
+    return;
+  }
   await prefs.setString('recentId', recentId);
   await prefs.setString('messageJsonString', messageJsonString);
   await prefs.setString('callerPhoneNumber', callerPhoneNumber);

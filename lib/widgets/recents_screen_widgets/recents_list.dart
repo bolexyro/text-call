@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
+import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';
 import 'package:intl/intl.dart';
@@ -296,9 +297,12 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                 elements: recentsList,
                 groupBy: (recentN) => DateTime(recentN.callTime.year,
                     recentN.callTime.month, recentN.callTime.day),
-                groupSeparatorBuilder: (DateTime groupHeaderDateTime) => Text(
-                  _groupHeaderText(groupHeaderDateTime),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                groupSeparatorBuilder: (DateTime groupHeaderDateTime) => Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    _groupHeaderText(groupHeaderDateTime),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 order: GroupedListOrder.DESC,
                 itemComparator: (element1, element2) =>
@@ -357,7 +361,15 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                               _changeTileExpandedStatus(recentN);
                             },
                             isExpanded: _expandedBoolsMap[recentN]!,
-                            leading: recentCategoryIconMap[recentN.category]!,
+                            leading: recentN.category.iconPath == null
+                                ? recentN.category.icon!
+                                : SvgPicture.asset(
+                                    recentN.category.iconPath!,
+                                    height: kIconHeight,
+                                    colorFilter: ColorFilter.mode(
+                                        recentN.category.iconColor,
+                                        BlendMode.srcIn),
+                                  ),
                             trailing: Text(
                               DateFormat.Hm().format(recentN.callTime),
                             ),
@@ -373,7 +385,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold),
                                   ),
-                                Text(recntCategoryStringMap[recentN.category]!),
+                                Text(recentN.category.label),
                                 const SizedBox(
                                   height: 10,
                                 ),
@@ -444,8 +456,15 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                         : Column(
                             children: [
                               ListTile(
-                                leading:
-                                    recentCategoryIconMap[recentN.category]!,
+                                leading: recentN.category.iconPath == null
+                                    ? recentN.category.icon!
+                                    : SvgPicture.asset(
+                                        recentN.category.iconPath!,
+                                        height: kIconHeight,
+                                        colorFilter: ColorFilter.mode(
+                                            recentN.category.iconColor,
+                                            BlendMode.srcIn),
+                                      ),
                                 trailing: Text(
                                   DateFormat.Hm().format(recentN.callTime),
                                 ),

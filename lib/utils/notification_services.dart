@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:another_flushbar/flushbar.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -125,9 +127,16 @@ Future<void> messageHandler(RemoteMessage message) async {
   final prefs = await SharedPreferences.getInstance();
   final List<String> blockedContacts =
       prefs.getStringList('blockedPhoneNumbers') ?? [];
-  if (blockedContacts.contains(callerPhoneNumber)) {
-    final url = Uri.https(
-        'text-call-backend.onrender.com', 'call/blocked/$callerPhoneNumber');
+  String? blockMessage;
+  if (blockedContacts.map((eachJsonString) {
+    final eachJsonMap = jsonDecode(eachJsonString);
+    if (eachJsonMap['phoneNumber'] == callerPhoneNumber) {
+      blockMessage = eachJsonMap['blockMessage'];
+    }
+    return eachJsonMap['phoneNumber'];
+  }).contains(callerPhoneNumber)) {
+    final url = Uri.https('text-call-backend.onrender.com',
+        'call/blocked/$callerPhoneNumber/$blockMessage');
     await http.get(url);
     return;
   }

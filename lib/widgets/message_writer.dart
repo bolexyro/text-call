@@ -816,7 +816,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                     AnimatedTextKit(
                       animatedTexts: [
                         TyperAnimatedText(
-                          'You have been blocked by this user. So your text call didn\'t go through',
+                          snapshotData['block_message'] ??
+                              'You have been blocked by this user. So your text call didn\'t go through',
                           textAlign: TextAlign.center,
                           textStyle: GoogleFonts.pacifico(
                               fontSize: 32,

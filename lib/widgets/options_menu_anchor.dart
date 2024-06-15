@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,8 +50,11 @@ class _OptionsMenuAnchorState extends ConsumerState<OptionsMenuAnchor> {
         onPressed: () async {
           (_flushBarKey!.currentWidget as Flushbar).dismiss();
           showDialog(
-              context: context,
-              builder: (context) => const BlockMessageDialog());
+            context: context,
+            builder: (context) => BlockMessageDialog(
+              phoneNumber: widget.contact.phoneNumber,
+            ),
+          );
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black,
@@ -68,9 +73,11 @@ class _OptionsMenuAnchorState extends ConsumerState<OptionsMenuAnchor> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    bool thisContactIsBlocked =
-        ref.watch(blockedContactsProvider).contains(widget.contact.phoneNumber);
+  Widget build(BuildContext contextp) {
+    bool thisContactIsBlocked = ref
+        .watch(blockedContactsProvider)
+        .map((eachJsonString) => jsonDecode(eachJsonString)['phoneNumber'])
+        .contains(widget.contact.phoneNumber);
     return MenuAnchor(
       menuChildren: <Widget>[
         if (!widget.contact.isMyContact)
@@ -143,14 +150,18 @@ class _OptionsMenuAnchorState extends ConsumerState<OptionsMenuAnchor> {
   }
 }
 
-class BlockMessageDialog extends StatelessWidget {
-  const BlockMessageDialog({super.key});
+class BlockMessageDialog extends ConsumerWidget {
+  const BlockMessageDialog({
+    super.key,
+    required this.phoneNumber,
+  });
+
+  final String phoneNumber;
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController blockMessageController = TextEditingController(
-        text:
-            'SIKEEE!! It ain\'t working yet. I\'m sure you were about to write some mean message. 🤣');
+  Widget build(BuildContext context, WidgetRef ref) {
+    final TextEditingController blockMessageController =
+        TextEditingController(text: 'You suck.');
 
     return AlertDialog.adaptive(
       content: Column(
@@ -166,7 +177,13 @@ class BlockMessageDialog extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  ref
+                      .read(blockedContactsProvider.notifier)
+                      .updateContactBlockMessage(
+                          phoneNumber, blockMessageController.text);
+                  Navigator.of(context).pop();
+                },
                 child: const Text('OK'),
               ),
             ],

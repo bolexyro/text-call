@@ -9,6 +9,7 @@ import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_details_pane.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contacts_list.dart';
+import 'package:text_call/widgets/options_menu_anchor.dart';
 import 'package:text_call/widgets/recents_screen_widgets/recents_list.dart';
 
 enum WhichScreen { contact, recent }
@@ -85,10 +86,26 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
                   ),
                 ),
               )
-            : ContactDetailsPane(
-                key: ObjectKey(_currentContact),
-                contact: _currentContact,
-                stackContainerWidths: MediaQuery.sizeOf(context).width * .425,
+            : Column(
+                children: [
+                  Row(
+                    children: [
+                      const Spacer(),
+                      OptionsMenuAnchor(
+                        contact: _currentContact!,
+                        onContactDeleted: _resetContactDetailsPane,
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: ContactDetailsPane(
+                      key: ObjectKey(_currentContact),
+                      contact: _currentContact,
+                      stackContainerWidths:
+                          MediaQuery.sizeOf(context).width * .425,
+                    ),
+                  ),
+                ],
               );
         return Row(
           children: [
@@ -103,7 +120,6 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
             Expanded(
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 10),
-                padding: const EdgeInsets.only(top: 40),
                 decoration: BoxDecoration(
                   color: isDarkMode
                       ? makeColorLighter(Theme.of(context).primaryColor, 15)

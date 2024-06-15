@@ -17,7 +17,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await AwesomeNotifications().initialize(
-    // set the icon to null if you want to use the default app icon
+    // set the icon to null if you want to use the default app ic on
     null,
     [
       NotificationChannel(

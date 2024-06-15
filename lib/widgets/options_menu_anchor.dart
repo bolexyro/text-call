@@ -14,9 +14,11 @@ class OptionsMenuAnchor extends ConsumerStatefulWidget {
   const OptionsMenuAnchor({
     super.key,
     required this.contact,
+    this.onContactDeleted,
   });
 
   final Contact contact;
+  final void Function(Contact deletedContact)? onContactDeleted;
 
   @override
   ConsumerState<OptionsMenuAnchor> createState() => _OptionsMenuAnchorState();
@@ -40,7 +42,11 @@ class _OptionsMenuAnchorState extends ConsumerState<OptionsMenuAnchor> {
     ref
         .read(contactsProvider.notifier)
         .deleteContact(ref, widget.contact.phoneNumber);
-    Navigator.of(context).pop();
+    if (widget.onContactDeleted != null) {
+      widget.onContactDeleted!(widget.contact);
+    } else {
+      Navigator.of(context).pop();
+    }
   }
 
   void _showBlockMessageFlushBar(BuildContext context, WidgetRef ref) {

@@ -134,9 +134,22 @@ class MainSearchWidget extends ConsumerStatefulWidget {
 }
 
 class _MainSearchWidgetState extends ConsumerState<MainSearchWidget> {
-  String currentSeachText = '';
-
   final List<bool> _expandedBoolsList = [];
+  String currentSeachText = '';
+  List<Contact> contacts = [];
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    _searchController = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _changeTileExpandedStatus(int index) {
     setState(() {
@@ -149,7 +162,6 @@ class _MainSearchWidgetState extends ConsumerState<MainSearchWidget> {
     });
   }
 
-  List<Contact> contacts = [];
   void updateContacts() {
     setState(
       () {
@@ -193,6 +205,7 @@ class _MainSearchWidgetState extends ConsumerState<MainSearchWidget> {
                         ),
                         Expanded(
                           child: TextField(
+                            controller: _searchController,
                             autofocus: true,
                             decoration:
                                 const InputDecoration(border: InputBorder.none),
@@ -208,7 +221,10 @@ class _MainSearchWidgetState extends ConsumerState<MainSearchWidget> {
                             },
                           ),
                         ),
-                        const Icon(Icons.close),
+                        GestureDetector(
+                          onTap: () => _searchController.text = '',
+                          child: const Icon(Icons.close),
+                        ),
                       ],
                     ),
                   ),

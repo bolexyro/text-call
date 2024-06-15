@@ -187,9 +187,6 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                                   child: Row(
                                     children: [
                                       Icon(Icons.search),
-                                      SizedBox(
-                                        width: 15,
-                                      ),
                                       Spacer(),
                                       Icon(Icons.close),
                                     ],
@@ -264,7 +261,7 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                 stickyHeaderBackgroundColor:
                     Theme.of(context).colorScheme.secondary,
                 elements: contactsList,
-                groupBy: (contactN) => contactN.name[0],
+                groupBy: (contactN) => contactN.name.toUpperCase()[0],
                 groupSeparatorBuilder: (String groupHeader) => Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(

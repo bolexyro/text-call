@@ -113,6 +113,7 @@ class ContactDetailsPane extends ConsumerWidget {
         getRecentsForAContact(allRecents, contact!.phoneNumber);
     return Column(
       children: [
+        
         ContactInfoCard(
           contact: contact!,
           width: stackContainerWidths,

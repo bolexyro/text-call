@@ -16,4 +16,4 @@ final kDarkTheme = ThemeData.from(
 
 const double kSpaceBtwWidgetsInPreviewOrRichTextEditor = 10;
 
-const String backendUrl = '';
+const String backendRootUrl = 'text-call-backend.onrender.com';

@@ -19,6 +19,7 @@ import 'package:text_call/models/recent.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
 import 'package:text_call/text_call.dart';
+import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 
 Future<String> _getCallerName(String phoneNumber) async {
@@ -166,7 +167,7 @@ Future<void> messageHandler(RemoteMessage message) async {
     }
     return eachJsonMap['phoneNumber'];
   }).contains(callerPhoneNumber)) {
-    final url = Uri.https('text-call-backend.onrender.com',
+    final url = Uri.https(backendRootUrl,
         'call/blocked/$callerPhoneNumber/$blockMessage');
     await http.get(url);
     return;
@@ -269,7 +270,7 @@ void registerCallkitIncomingListener() {
           final String messageType = myDataInEventBody['messageType'];
           // final String recentId = myDataInEventBody['recentId'];
 
-          final url = Uri.https('text-call-backend.onrender.com',
+          final url = Uri.https(backendRootUrl,
               'call/accepted/$callerPhoneNumber');
           http.get(url);
 
@@ -310,7 +311,7 @@ void registerCallkitIncomingListener() {
           final String messageType = myDataInEventBody['messageType'];
           final String recentId = myDataInEventBody['recentId'];
 
-          final url = Uri.https('text-call-backend.onrender.com',
+          final url = Uri.https(backendRootUrl,
               'call/rejected/$callerPhoneNumber');
           http.get(url);
 
@@ -341,7 +342,7 @@ void registerCallkitIncomingListener() {
           final String messageType = myDataInEventBody['messageType'];
           final String recentId = myDataInEventBody['recentId'];
 
-          final url = Uri.https('text-call-backend.onrender.com',
+          final url = Uri.https(backendRootUrl,
               'call/ignored/$callerPhoneNumber');
           http.get(url);
 

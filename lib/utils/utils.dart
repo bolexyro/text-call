@@ -19,6 +19,7 @@ import 'package:text_call/models/recent.dart';
 import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
+import 'package:text_call/utils/constants.dart';
 import 'package:text_call/widgets/camera_or_gallery.dart';
 import 'package:text_call/widgets/dialogs/add_contact_dialog.dart';
 import 'package:text_call/widgets/message_writer.dart';
@@ -91,6 +92,8 @@ Future<sql.Database> getDatabase() async {
       // before we know what category of recents to insert in the db.
       await db.execute(
           'CREATE TABLE recents ( id TEXT, callTime TEXT PRIMARY KEY, phoneNumber TEXT, categoryName TEXT, messageJson TEXT, messageType TEXT, canBeViewed INTEGER)');
+    await db.execute(
+          'CREATE TABLE access_requests ( recentId TEXT PRIMARY KEY, time TEXT, isSent INTEGER, status TEXT)');
     },
   );
   return db;
@@ -267,12 +270,12 @@ Future<void> sendAccessRequestStatus(
   final requesteePhoneNumber = prefs.getString('myPhoneNumber');
 
   if (accessRequestStatus == AccessRequestStatus.granted) {
-    final url = Uri.https('text-call-backend.onrender.com',
+    final url = Uri.https(backendRootUrl,
         'request_status/granted/${notificationPayload['requesterPhoneNumber']}/$requesteePhoneNumber/${notificationPayload['recentId']}');
     http.get(url);
     return;
   }
-  final url = Uri.https('text-call-backend.onrender.com',
+  final url = Uri.https(backendRootUrl,
       'request_status/denied/${notificationPayload['requesterPhoneNumber']}/$requesteePhoneNumber/${notificationPayload['recentId']}');
   http.get(url);
 }
@@ -280,7 +283,7 @@ Future<void> sendAccessRequestStatus(
 void sendAccessRequest(Recent recent) async {
   final prefs = await SharedPreferences.getInstance();
   final String? requesterPhoneNumber = prefs.getString('myPhoneNumber');
-  final url = Uri.https('text-call-backend.onrender.com',
+  final url = Uri.https(backendRootUrl,
       'send-access-request/$requesterPhoneNumber/${recent.contact.phoneNumber}/${recent.id}');
   http.get(url);
 }

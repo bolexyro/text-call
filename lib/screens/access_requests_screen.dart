@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
+import 'package:text_call/widgets/access_requests_sceen_widgets/access_requests_received_tab.dart';
+import 'package:text_call/widgets/access_requests_sceen_widgets/access_requests_sent_tab.dart';
 
 class AccessRequestsScreen extends StatefulWidget {
   const AccessRequestsScreen({super.key});
@@ -137,16 +139,13 @@ class _AccessRequestsScreenState extends State<AccessRequestsScreen> {
                 }),
               ),
             ),
+            const SizedBox(height: 20),
             Expanded(
               child: PageView(
                 controller: _pageController,
                 children: const [
-                  Center(
-                    child: Text('Received'),
-                  ),
-                  Center(
-                    child: Text('Sent'),
-                  ),
+                  AccessRequestsReceivedTab(),
+                  AccessRequestsSentTab(),
                 ],
               ),
             ),

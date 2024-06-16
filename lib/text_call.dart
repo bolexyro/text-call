@@ -80,7 +80,7 @@ class _TextCallState extends State<TextCall> {
             final userInfo = snapshot.data!;
             if (widget.howAppIsOPened ==
                 HowAppIsOPened.fromTerminatedForPickedCall) {
-              final url = Uri.https('text-call-backend.onrender.com',
+              final url = Uri.https(backendRootUrl,
                   'call/accepted/${userInfo['callerPhoneNumber']}');
               http.get(url);
 

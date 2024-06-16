@@ -317,7 +317,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     _callerPhoneNumber = prefs.getString('myPhoneNumber')!;
     _channel = WebSocketChannel.connect(
-      Uri.parse('wss://text-call-backend.onrender.com/ws/$_callerPhoneNumber'),
+      Uri.parse('wss://$backendRootUrl/ws/$_callerPhoneNumber'),
     );
 
     // the delay before we assume call was not picked

@@ -59,14 +59,9 @@ Future<void> messageHandler(RemoteMessage message) async {
           fullScreenIntent: true,
           wakeUpScreen: true,
           backgroundColor: Colors.green,
-          locked:
-              notificationPurpose == NotificationPurpose.forCall ? true : false,
-          chronometer: notificationPurpose == NotificationPurpose.forCall
-              ? Duration.zero
-              : null, // Chronometer starts to count at 0 seconds
-          timeoutAfter: notificationPurpose == NotificationPurpose.forCall
-              ? const Duration(seconds: 20)
-              : null,
+          locked: false,
+          chronometer: null, // Chronometer starts to count at 0 seconds
+          timeoutAfter: null,
           payload: {
             'recentId': recentId,
             'requesterPhoneNumber': requesterPhoneNumber,
@@ -177,7 +172,7 @@ Future<void> messageHandler(RemoteMessage message) async {
     return;
   }
 
-  // NB to future self. This is not useless code, it is useful for when user is called in terminated state, since they won't have 
+  // NB to future self. This is not useless code, it is useful for when user is called in terminated state, since they won't have
   // access to the event body. Sha don't delete it
   await prefs.setString('recentId', recentId);
   await prefs.setString('messageJsonString', messageJsonString);
@@ -431,8 +426,8 @@ class NotificationController {
         if (receivedAction.id!.toString().startsWith('11')) {
           return;
         }
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        final String? recentId = prefs.getString('recentId');
+        final notificationPayload = receivedAction.payload!;
+        final String? recentId = notificationPayload['recentId'];
 
         final db = await getDatabase();
         final data =

@@ -31,6 +31,7 @@ class SmsFromTerminated extends ConsumerWidget {
     return SafeArea(
       child: WidgetToRenderBasedOnHowAppIsOpened(
         howSmsIsOpened: howSmsIsOpened,
+        notificationPayload: notificationPayload,
       ),
     );
   }

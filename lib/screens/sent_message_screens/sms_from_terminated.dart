@@ -20,11 +20,12 @@ class SmsFromTerminated extends ConsumerWidget {
   const SmsFromTerminated({
     super.key,
     required this.howSmsIsOpened,
+    this.notificationPayload,
   });
 
   // this message should not be null if howsmsisopened == notfromterminatedtoshow message
   final HowSmsIsOpened howSmsIsOpened;
-
+  final Map<String, dynamic>? notificationPayload;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
@@ -41,11 +42,13 @@ class TheStackWidget extends ConsumerStatefulWidget {
     required this.howSmsIsOpened,
     required this.regularMessage,
     required this.complexMessage,
+    this.notificationPayload,
   });
 
   final HowSmsIsOpened howSmsIsOpened;
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;
+  final Map<String, dynamic>? notificationPayload;
 
   @override
   ConsumerState<TheStackWidget> createState() => _TheStackWidgetState();
@@ -106,7 +109,9 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    sendAccessRequestStatus(AccessRequestStatus.granted);
+                    sendAccessRequestStatus(
+                        accessRequestStatus: AccessRequestStatus.granted,
+                        notificationPayload: widget.notificationPayload!);
 
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -130,7 +135,9 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    sendAccessRequestStatus(AccessRequestStatus.denied);
+                    sendAccessRequestStatus(
+                        accessRequestStatus: AccessRequestStatus.denied,
+                        notificationPayload: widget.notificationPayload!);
 
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -189,7 +196,10 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
   const WidgetToRenderBasedOnHowAppIsOpened({
     super.key,
     required this.howSmsIsOpened,
+    this.notificationPayload,
   });
+
+  final Map<String, dynamic>? notificationPayload;
 
   final HowSmsIsOpened howSmsIsOpened;
   @override
@@ -201,103 +211,84 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
                 .fromTerminatedToShowMessageAfterAccessRequestGranted ||
         howSmsIsOpened ==
             HowSmsIsOpened.fromTerminatedToGrantOrDeyRequestAccess) {
-      final prefsFuture = SharedPreferences.getInstance();
-
+      final db = getDatabase();
       return FutureBuilder(
-        future: prefsFuture,
+        future: db,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
-
           if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           }
-          final prefs = snapshot.data;
-          final String? recentId = prefs!.getString('recentId');
 
-          final db = getDatabase();
+          final data = snapshot.data!.query('recents',
+              where: 'id = ?', whereArgs: [notificationPayload!['recentId']]);
           return FutureBuilder(
-            future: db,
+            future: data,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
               }
+
               if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
+                return Center(
+                  child: Text('Error: ${snapshot.error}'),
+                );
               }
+              final data = snapshot.data!;
 
-              final data = snapshot.data!
-                  .query('recents', where: 'id = ?', whereArgs: [recentId]);
-              return FutureBuilder(
-                future: data,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text('Error: ${snapshot.error}'),
-                    );
-                  }
-                  final data = snapshot.data!;
-
-                  final regularMessage = data[0]['messageType'] == 'regular'
-                      ? RegularMessage.fromJsonString(
+              final regularMessage = data[0]['messageType'] == 'regular'
+                  ? RegularMessage.fromJsonString(
+                      data[0]['messageJson'] as String,
+                    )
+                  : null;
+              final complexMessage = data[0]['messageType'] == 'complex'
+                  ? ComplexMessage(
+                      complexMessageJsonString:
                           data[0]['messageJson'] as String,
-                        )
-                      : null;
-                  final complexMessage = data[0]['messageType'] == 'complex'
-                      ? ComplexMessage(
-                          complexMessageJsonString:
-                              data[0]['messageJson'] as String,
-                        )
-                      : null;
+                    )
+                  : null;
 
-                  return Scaffold(
-                    floatingActionButton: howSmsIsOpened ==
-                                HowSmsIsOpened
-                                    .fromTerminatedToShowMessageAfterAccessRequestGranted &&
-                            floatingButtonsVisible
-                        ? FloatingActionButton(
-                            onPressed: () =>
-                                Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (context) => const PhonePageScreen(),
-                              ),
-                            ),
-                            shape: const CircleBorder(),
-                            backgroundColor: regularMessage == null
-                                ? Colors.black
-                                : makeColorLighter(
-                                    regularMessage.backgroundColor, 5),
-                            child: Icon(
-                              Icons.home,
-                              color: regularMessage == null
-                                  ? Colors.white
-                                  : regularMessage.backgroundColor
-                                              .computeLuminance() >
-                                          0.5
-                                      ? Colors.black
-                                      : Colors.white,
-                            ),
-                          )
-                        : null,
-                    body: TheStackWidget(
-                      howSmsIsOpened: howSmsIsOpened,
-                      regularMessage: regularMessage,
-                      complexMessage: complexMessage,
-                    ),
-                    backgroundColor: regularMessage?.backgroundColor,
-                  );
-                },
+              return Scaffold(
+                floatingActionButton: howSmsIsOpened ==
+                            HowSmsIsOpened
+                                .fromTerminatedToShowMessageAfterAccessRequestGranted &&
+                        floatingButtonsVisible
+                    ? FloatingActionButton(
+                        onPressed: () => Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const PhonePageScreen(),
+                          ),
+                        ),
+                        shape: const CircleBorder(),
+                        backgroundColor: regularMessage == null
+                            ? Colors.black
+                            : makeColorLighter(
+                                regularMessage.backgroundColor, 5),
+                        child: Icon(
+                          Icons.home,
+                          color: regularMessage == null
+                              ? Colors.white
+                              : regularMessage.backgroundColor
+                                          .computeLuminance() >
+                                      0.5
+                                  ? Colors.black
+                                  : Colors.white,
+                        ),
+                      )
+                    : null,
+                body: TheStackWidget(
+                  howSmsIsOpened: howSmsIsOpened,
+                  regularMessage: regularMessage,
+                  complexMessage: complexMessage,
+                  notificationPayload: notificationPayload,
+                ),
+                backgroundColor: regularMessage?.backgroundColor,
               );
             },
           );
@@ -381,6 +372,7 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
                     : null,
             backgroundColor: newRecent.regularMessage?.backgroundColor,
             body: TheStackWidget(
+              notificationPayload: notificationPayload,
               howSmsIsOpened: howSmsIsOpened,
               regularMessage: newRecent.regularMessage,
               complexMessage: newRecent.complexMessage,

@@ -16,7 +16,8 @@ enum HowAppIsOPened {
   notFromTerminatedForPickedCall,
   appOpenedRegularly,
   // this one would be used when access has been granted and we only want to show
-  fromTerminatedToShowMessage,
+  fromTerminatedToShowMessageAfterAccessRequestGranted
+,
 }
 
 class TextCall extends StatefulWidget {
@@ -24,9 +25,11 @@ class TextCall extends StatefulWidget {
     super.key,
     required this.howAppIsOPened,
     required this.themeMode,
+    this.notificationPayload,
   });
   final HowAppIsOPened howAppIsOPened;
   final ThemeMode themeMode;
+  final Map<String, dynamic>? notificationPayload;
 
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
@@ -98,15 +101,17 @@ class _TextCallState extends State<TextCall> {
                   appOpenedFromPickedCall: true,
                 );
               }
-              return const SmsFromTerminated(
+              return SmsFromTerminated(
+                notificationPayload: widget.notificationPayload,
                 howSmsIsOpened:
                     HowSmsIsOpened.fromTerminatedToGrantOrDeyRequestAccess,
               );
             }
 
             if (widget.howAppIsOPened ==
-                HowAppIsOPened.fromTerminatedToShowMessage) {
-              return const SmsFromTerminated(
+                HowAppIsOPened.fromTerminatedToShowMessageAfterAccessRequestGranted) {
+              return  SmsFromTerminated(
+                notificationPayload: widget.notificationPayload,
                 howSmsIsOpened: HowSmsIsOpened
                     .fromTerminatedToShowMessageAfterAccessRequestGranted,
               );

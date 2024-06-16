@@ -229,6 +229,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       if (mediaType == 'document') {
         newBolexyroJsonWithTempLocations[entry.key] =
             recallBolexyroJson[entry.key];
+        continue;
       }
 
       // mediatypepathstring would be imagepaths, videopaths, audiopaths
@@ -427,7 +428,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         if (mediaType == 'document') {
           continue;
         }
-
         // mediatypepathstring would be imagepaths, videopaths, audiopaths
         final String mediaTypePathString = entry.value.values.first.keys.first;
         final paths = entry.value.values.first.values.first;

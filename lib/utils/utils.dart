@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:another_flushbar/flushbar.dart';
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -29,72 +29,6 @@ import 'package:http/http.dart' as http;
 enum Screen { phone, tablet }
 
 enum NotificationPurpose { forCall, forAccessRequest }
-
-void createAwesomeNotification(
-    {String? title,
-    String? body,
-    required NotificationPurpose notificationPurpose}) {
-  final DateTime currentDate = DateTime.now();
-
-  AwesomeNotifications().createNotification(
-    content: NotificationContent(
-      // the id is used to identify each notification. So if you have a static id like 123, when a new notification comes in, the old one goes out.
-      id: int.parse(
-          '10${currentDate.day}${currentDate.hour}${currentDate.minute}${currentDate.second}'),
-      channelKey: notificationPurpose == NotificationPurpose.forCall
-          ? 'calls_channel'
-          : 'access_requests_channel',
-      color: Colors.black,
-      title: title,
-      body: body,
-      autoDismissible:
-          notificationPurpose == NotificationPurpose.forCall ? false : true,
-      category: NotificationCategory.Call,
-      fullScreenIntent: true,
-      wakeUpScreen: true,
-      backgroundColor: Colors.green,
-      locked: notificationPurpose == NotificationPurpose.forCall ? true : false,
-      chronometer: notificationPurpose == NotificationPurpose.forCall
-          ? Duration.zero
-          : null, // Chronometer starts to count at 0 seconds
-      timeoutAfter: notificationPurpose == NotificationPurpose.forCall
-          ? const Duration(seconds: 20)
-          : null,
-    ),
-    actionButtons: notificationPurpose == NotificationPurpose.forCall
-        ? [
-            NotificationActionButton(
-              key: 'ACCEPT_CALL',
-              label: 'Accept Call',
-              color: Colors.green,
-              autoDismissible: true,
-            ),
-            NotificationActionButton(
-              key: 'REJECT_CALL',
-              label: 'Reject Call',
-              color: Colors.red,
-              autoDismissible: true,
-              actionType: ActionType.SilentAction,
-            ),
-          ]
-        : [
-            NotificationActionButton(
-              key: 'GRANT_ACCESS',
-              label: 'Grant Access',
-              color: Colors.green,
-              autoDismissible: true,
-              actionType: ActionType.SilentAction,
-            ),
-            NotificationActionButton(
-              key: 'DENY_ACCESS',
-              label: 'Deny Access',
-              color: Colors.red,
-              autoDismissible: true,
-              actionType: ActionType.SilentAction,
-            ),
-          ],
-  );
-}
 
 String changeLocalToIntl(String localPhoneNumber) =>
     '+234${localPhoneNumber.substring(1)}';
@@ -326,21 +260,20 @@ enum AccessRequestStatus {
 }
 
 Future<void> sendAccessRequestStatus(
-    AccessRequestStatus accessRequestStatus) async {
+    {required AccessRequestStatus accessRequestStatus,
+    required Map<String, dynamic> notificationPayload}) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.reload();
-  final recentId = prefs.getString('recentId');
-  final requesterPhoneNumber = prefs.getString('requesterPhoneNumber');
   final requesteePhoneNumber = prefs.getString('myPhoneNumber');
 
   if (accessRequestStatus == AccessRequestStatus.granted) {
     final url = Uri.https('text-call-backend.onrender.com',
-        'request_status/granted/$requesterPhoneNumber/$requesteePhoneNumber/$recentId');
+        'request_status/granted/${notificationPayload['requesterPhoneNumber']}/$requesteePhoneNumber/${notificationPayload['recentId']}');
     http.get(url);
     return;
   }
   final url = Uri.https('text-call-backend.onrender.com',
-      'request_status/denied/$requesterPhoneNumber/$requesteePhoneNumber/$recentId');
+      'request_status/denied/${notificationPayload['requesterPhoneNumber']}/$requesteePhoneNumber/${notificationPayload['recentId']}');
   http.get(url);
 }
 
@@ -604,4 +537,16 @@ bool bolexyroJsonContainsOnlyRichText(
     }
   }
   return true;
+}
+
+String groupHeaderText(DateTime headerDateTime) {
+  if (DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day) ==
+      DateTime(headerDateTime.year, headerDateTime.month, headerDateTime.day)) {
+    return "Today";
+  } else if (DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day - 1) ==
+      DateTime(headerDateTime.year, headerDateTime.month, headerDateTime.day)) {
+    return 'Yesterday';
+  }
+  return DateFormat('EEEE, d MMMM').format(headerDateTime);
 }

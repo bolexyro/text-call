@@ -60,21 +60,6 @@ class _RecentsListState extends ConsumerState<RecentsList> {
     });
   }
 
-  String _groupHeaderText(DateTime headerDateTime) {
-    if (DateTime(
-            DateTime.now().year, DateTime.now().month, DateTime.now().day) ==
-        DateTime(
-            headerDateTime.year, headerDateTime.month, headerDateTime.day)) {
-      return "Today";
-    } else if (DateTime(DateTime.now().year, DateTime.now().month,
-            DateTime.now().day - 1) ==
-        DateTime(
-            headerDateTime.year, headerDateTime.month, headerDateTime.day)) {
-      return 'Yesterday';
-    }
-    return DateFormat('d MMMM').format(headerDateTime);
-  }
-
   void _showFilterDialog() async {
     final selectedFilter = await showAdaptiveDialog<CallFilters?>(
       context: context,
@@ -300,7 +285,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                 groupSeparatorBuilder: (DateTime groupHeaderDateTime) => Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    _groupHeaderText(groupHeaderDateTime),
+                    groupHeaderText(groupHeaderDateTime),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),

@@ -188,7 +188,7 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
                     ),
                   ),
                   Text(
-                    'Enter the 6 digit code sent to you at ${changeIntlToLocal(_phoneNumber)}',
+                    'Enter the 6 digit code sent to you @${changeIntlToLocal(_phoneNumber)}',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),

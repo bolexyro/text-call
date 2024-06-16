@@ -26,6 +26,7 @@ class SmsNotFromTerminated extends ConsumerWidget {
     required this.regularMessage,
     required this.complexMessage,
     required this.recentCallTime,
+    this.notificationPayload,
   });
 
   // this messages should not be null if howsmsisopened == notFromTerminatedToShowMessageAfterAccessRequestGranted
@@ -33,10 +34,12 @@ class SmsNotFromTerminated extends ConsumerWidget {
   final DateTime? recentCallTime;
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;
+  final Map<String, dynamic>? notificationPayload;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return WidgetToRenderBasedOnHowAppIsOpened(
+      notificationPayload: notificationPayload,
       recentCallTime: recentCallTime,
       howSmsIsOpened: howSmsIsOpened,
       regularMessage: regularMessage,
@@ -51,11 +54,13 @@ class TheStackWidget extends ConsumerStatefulWidget {
     required this.howSmsIsOpened,
     required this.regularMessage,
     required this.complexMessage,
+    required this.notificationPayload,
   });
 
   final HowSmsIsOpened howSmsIsOpened;
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;
+  final Map<String, dynamic>? notificationPayload;
 
   @override
   ConsumerState<TheStackWidget> createState() => _TheStackWidgetState();
@@ -113,7 +118,9 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    sendAccessRequestStatus(AccessRequestStatus.granted);
+                    sendAccessRequestStatus(
+                        accessRequestStatus: AccessRequestStatus.granted,
+                        notificationPayload: widget.notificationPayload!);
                     if (widget.howSmsIsOpened ==
                         HowSmsIsOpened
                             .notFromTerminatedToGrantOrDeyRequestAccess) {
@@ -143,7 +150,9 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    sendAccessRequestStatus(AccessRequestStatus.denied);
+                    sendAccessRequestStatus(
+                        accessRequestStatus: AccessRequestStatus.denied,
+                        notificationPayload: widget.notificationPayload!);
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
@@ -175,12 +184,14 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerStatefulWidget {
     required this.regularMessage,
     required this.complexMessage,
     required this.recentCallTime,
+    required this.notificationPayload,
   });
 
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;
   final DateTime? recentCallTime;
   final HowSmsIsOpened howSmsIsOpened;
+  final Map<String, dynamic>? notificationPayload;
 
   @override
   ConsumerState<WidgetToRenderBasedOnHowAppIsOpened> createState() =>
@@ -383,7 +394,8 @@ class _WidgetToRenderBasedOnHowAppIsOpenedState
                         ),
                       ),
                     ),
-          if (_isMessageAvailableOffline != null && !bolexyroJsonContainsOnlyRichText(complexMessage!.bolexyroJson))
+          if (_isMessageAvailableOffline != null &&
+              !bolexyroJsonContainsOnlyRichText(complexMessage!.bolexyroJson))
             if (_isMessageAvailableOffline == true)
               _isBeingRemovedFromOffline
                   ? const CircularProgressIndicator()
@@ -406,6 +418,7 @@ class _WidgetToRenderBasedOnHowAppIsOpenedState
       ),
       body: SafeArea(
         child: TheStackWidget(
+          notificationPayload: widget.notificationPayload,
           howSmsIsOpened: widget.howSmsIsOpened,
           regularMessage: widget.regularMessage,
           complexMessage: widget.complexMessage,

@@ -44,15 +44,51 @@ Future<void> messageHandler(RemoteMessage message) async {
 
     final String requesterName = await _getCallerName(requesterPhoneNumber);
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('recentId', recentId);
-    await prefs.setString('requesterPhoneNumber', requesterPhoneNumber);
-
-    createAwesomeNotification(
-      title: '$requesterName is Requesting access to see a message',
-      body: 'Click on this notification to see this message',
-      notificationPurpose: NotificationPurpose.forAccessRequest,
+    final currentDate = DateTime.now();
+    AwesomeNotifications().createNotification(
+      content: NotificationContent(
+          // the id is used to identify each notification. So if you have a static id like 123, when a new notification comes in, the old one goes out.
+          id: int.parse(
+              '10${currentDate.day}${currentDate.hour}${currentDate.minute}${currentDate.second}'),
+          channelKey: 'access_requests_channel',
+          color: Colors.black,
+          title: '$requesterName is Requesting access to see a message',
+          body: 'Click on this notification to see this message',
+          autoDismissible: true,
+          category: NotificationCategory.Call,
+          fullScreenIntent: true,
+          wakeUpScreen: true,
+          backgroundColor: Colors.green,
+          locked:
+              notificationPurpose == NotificationPurpose.forCall ? true : false,
+          chronometer: notificationPurpose == NotificationPurpose.forCall
+              ? Duration.zero
+              : null, // Chronometer starts to count at 0 seconds
+          timeoutAfter: notificationPurpose == NotificationPurpose.forCall
+              ? const Duration(seconds: 20)
+              : null,
+          payload: {
+            'recentId': recentId,
+            'requesterPhoneNumber': requesterPhoneNumber,
+          }),
+      actionButtons: [
+        NotificationActionButton(
+          key: 'GRANT_ACCESS',
+          label: 'Grant Access',
+          color: Colors.green,
+          autoDismissible: true,
+          actionType: ActionType.SilentAction,
+        ),
+        NotificationActionButton(
+          key: 'DENY_ACCESS',
+          label: 'Deny Access',
+          color: Colors.red,
+          autoDismissible: true,
+          actionType: ActionType.SilentAction,
+        ),
+      ],
     );
+
     return;
   }
 
@@ -64,7 +100,6 @@ Future<void> messageHandler(RemoteMessage message) async {
 
     if (accessRequestStatus == 'granted') {
       final DateTime currentDate = DateTime.now();
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
       final db = await getDatabase();
 
       await db.update(
@@ -76,7 +111,6 @@ Future<void> messageHandler(RemoteMessage message) async {
         whereArgs: [recentId],
       );
 
-      await prefs.setString('recentId', recentId);
       AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: int.parse(
@@ -91,6 +125,7 @@ Future<void> messageHandler(RemoteMessage message) async {
           wakeUpScreen: true,
           backgroundColor: Colors.green,
           locked: false,
+          payload: {'recentId': recentId},
         ),
       );
     }
@@ -111,6 +146,7 @@ Future<void> messageHandler(RemoteMessage message) async {
           wakeUpScreen: true,
           backgroundColor: Colors.green,
           locked: false,
+          payload: {'recentId': recentId},
         ),
       );
     }
@@ -140,10 +176,14 @@ Future<void> messageHandler(RemoteMessage message) async {
     await http.get(url);
     return;
   }
+
+  // NB to future self. This is not useless code, it is useful for when user is called in terminated state, since they won't have 
+  // access to the event body. Sha don't delete it
   await prefs.setString('recentId', recentId);
   await prefs.setString('messageJsonString', messageJsonString);
   await prefs.setString('callerPhoneNumber', callerPhoneNumber);
   await prefs.setString('messageType', messageType);
+
   CallKitParams callKitParams = CallKitParams(
     id: DateTime.now().toString(),
     nameCaller: callerName,
@@ -220,8 +260,6 @@ void registerCallkitIncomingListener() {
     (CallEvent? event) async {
       switch (event!.event) {
         case Event.actionCallIncoming:
-          print('this is event bodyf fafaf ${event.body}');
-          print('Call incoming');
           break;
         case Event.actionCallStart:
           // TODO: started an outgoing call
@@ -374,9 +412,13 @@ class NotificationController {
   static Future<void> onActionReceivedMethod(
       ReceivedAction receivedAction) async {
     if (receivedAction.buttonKeyPressed == 'GRANT_ACCESS') {
-      sendAccessRequestStatus(AccessRequestStatus.granted);
+      sendAccessRequestStatus(
+          accessRequestStatus: AccessRequestStatus.granted,
+          notificationPayload: receivedAction.payload!);
     } else if (receivedAction.buttonKeyPressed == 'DENY_ACCESS') {
-      sendAccessRequestStatus(AccessRequestStatus.denied);
+      sendAccessRequestStatus(
+          accessRequestStatus: AccessRequestStatus.denied,
+          notificationPayload: receivedAction.payload!);
     }
 
     // for when the notification is tapped and not any buttons
@@ -402,6 +444,7 @@ class NotificationController {
         Navigator.of(TextCall.navigatorKey.currentContext!).push(
           MaterialPageRoute(
             builder: (context) => SmsNotFromTerminated(
+              notificationPayload: receivedAction.payload!,
               recentCallTime: DateTime.parse(data[0]['id'] as String),
               howSmsIsOpened: receivedAction.id!.toString().startsWith('10')
                   ? HowSmsIsOpened.notFromTerminatedToGrantOrDeyRequestAccess

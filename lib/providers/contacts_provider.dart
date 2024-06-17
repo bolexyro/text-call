@@ -10,7 +10,7 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
 
   Future<void> loadContacts() async {
     final prefs = await SharedPreferences.getInstance();
-    final String myPhoneNumber = prefs.getString('myPhoneNumber')!;
+    final String? myPhoneNumber = prefs.getString('myPhoneNumber');
     final data = await readContactsFromDb();
     final contactsList = data
         .map(

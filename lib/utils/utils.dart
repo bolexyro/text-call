@@ -355,6 +355,7 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
   db.collection("users").doc(phoneNumber).set(
     {'fcmToken': fcmToken},
   );
+  await ref.read(contactsProvider.notifier).loadContacts();
 
   Navigator.of(context).pushReplacement(
     MaterialPageRoute(
@@ -408,7 +409,6 @@ Future<void> deleteDirectory(String dirPath) async {
     print('Error bro $e');
   }
 }
-
 
 // since the user cannot really choose which medias in a message to keep available offline and so when they
 // save a message offline, the audio, video, image would be made available offline.

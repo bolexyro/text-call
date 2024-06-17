@@ -41,8 +41,6 @@ class TextCall extends ConsumerStatefulWidget {
 }
 
 class _TextCallState extends ConsumerState<TextCall> {
-  late Future<Map<String, dynamic>> _userInfo;
-
   Future<Map<String, dynamic>> getUserInfoAndLoadImportantStuff() async {
     await ref.read(contactsProvider.notifier).loadContacts();
     await ref.read(recentsProvider.notifier).loadRecents();
@@ -54,7 +52,7 @@ class _TextCallState extends ConsumerState<TextCall> {
     await prefs.reload();
     final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
     final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
-    final String myPhoneNumber = prefs.getString('myPhoneNumber')!;
+    final String? myPhoneNumber = prefs.getString('myPhoneNumber');
     return {
       'isUserLoggedIn': isUserLoggedIn,
       'callerPhoneNumber': callerPhoneNumber,
@@ -63,13 +61,8 @@ class _TextCallState extends ConsumerState<TextCall> {
   }
 
   @override
-  void initState() {
-    _userInfo = getUserInfoAndLoadImportantStuff();
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    print('mkbhd');
     return GetMaterialApp(
       themeMode: widget.themeMode,
       theme: kLightTheme,
@@ -77,16 +70,17 @@ class _TextCallState extends ConsumerState<TextCall> {
       navigatorKey: TextCall.navigatorKey,
       debugShowCheckedModeBanner: false,
       home: FutureBuilder(
-        future: _userInfo,
+        future: getUserInfoAndLoadImportantStuff(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const SplashScreen();
           }
           if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
+            return Text('Errordd: ${snapshot.error}');
           }
           if (snapshot.hasData) {
-            final userInfo = snapshot.data!;
+            final userInfo = snapshot.data ?? {};
+            print(userInfo);
             if (widget.howAppIsOPened ==
                 HowAppIsOPened.fromTerminatedForPickedCall) {
               final url = Uri.https(backendRootUrl,

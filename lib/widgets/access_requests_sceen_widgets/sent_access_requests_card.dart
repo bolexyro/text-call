@@ -9,7 +9,7 @@ class SentAccessRequestsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(5),
+      margin: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: Theme.of(context).brightness == Brightness.dark
@@ -17,7 +17,7 @@ class SentAccessRequestsCard extends StatelessWidget {
             : const Color.fromARGB(255, 176, 208, 235),
         border: Border.all(width: 1),
       ),
-      height: 60,
+      height: 70,
       child: const Row(
         children: [
           SizedBox(

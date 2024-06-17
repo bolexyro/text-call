@@ -22,15 +22,19 @@ class SmsFromTerminated extends ConsumerWidget {
     super.key,
     required this.howSmsIsOpened,
     this.notificationPayload,
+    required this.myPhoneNumber,
   });
 
   // this message should not be null if howsmsisopened == notfromterminatedtoshow message
   final HowSmsIsOpened howSmsIsOpened;
   final Map<String, dynamic>? notificationPayload;
+  final String myPhoneNumber;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
       child: WidgetToRenderBasedOnHowAppIsOpened(
+        myPhoneNumber: myPhoneNumber,
         howSmsIsOpened: howSmsIsOpened,
         notificationPayload: notificationPayload,
       ),
@@ -44,6 +48,7 @@ class TheStackWidget extends ConsumerStatefulWidget {
     required this.howSmsIsOpened,
     required this.regularMessage,
     required this.complexMessage,
+    required this.myPhoneNumber,
     this.notificationPayload,
   });
 
@@ -51,6 +56,7 @@ class TheStackWidget extends ConsumerStatefulWidget {
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;
   final Map<String, dynamic>? notificationPayload;
+  final String myPhoneNumber;
 
   @override
   ConsumerState<TheStackWidget> createState() => _TheStackWidgetState();
@@ -116,11 +122,13 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
 
                     sendAccessRequestStatus(
                         accessRequestStatus: AccessRequestStatus.granted,
-                        notificationPayload: widget.notificationPayload!);
+                        payload: widget.notificationPayload!);
 
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const PhonePageScreen(),
+                        builder: (context) => PhonePageScreen(
+                          myPhoneNumber: widget.myPhoneNumber,
+                        ),
                       ),
                     );
                   },
@@ -145,11 +153,12 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
 
                     sendAccessRequestStatus(
                         accessRequestStatus: AccessRequestStatus.denied,
-                        notificationPayload: widget.notificationPayload!);
+                        payload: widget.notificationPayload!);
 
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const PhonePageScreen(),
+                        builder: (context) => PhonePageScreen(
+                            myPhoneNumber: widget.myPhoneNumber),
                       ),
                     );
                   },
@@ -170,7 +179,8 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
                 ElevatedButton(
                   onPressed: () => Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (context) => const PhonePageScreen(),
+                      builder: (context) =>
+                          PhonePageScreen(myPhoneNumber: widget.myPhoneNumber),
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -205,9 +215,11 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
     super.key,
     required this.howSmsIsOpened,
     this.notificationPayload,
+    required this.myPhoneNumber,
   });
 
   final Map<String, dynamic>? notificationPayload;
+  final String myPhoneNumber;
 
   final HowSmsIsOpened howSmsIsOpened;
   @override
@@ -255,7 +267,8 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
                 ? FloatingActionButton(
                     onPressed: () => Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
-                        builder: (context) => const PhonePageScreen(),
+                        builder: (context) =>
+                            PhonePageScreen(myPhoneNumber: myPhoneNumber),
                       ),
                     ),
                     shape: const CircleBorder(),
@@ -274,6 +287,7 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
                   )
                 : null,
             body: TheStackWidget(
+              myPhoneNumber: myPhoneNumber,
               howSmsIsOpened: howSmsIsOpened,
               regularMessage: regularMessage,
               complexMessage: complexMessage,
@@ -337,7 +351,8 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
                     ? FloatingActionButton(
                         onPressed: () => Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
-                            builder: (context) => const PhonePageScreen(),
+                            builder: (context) =>
+                                PhonePageScreen(myPhoneNumber: myPhoneNumber),
                           ),
                         ),
                         shape: const CircleBorder(),
@@ -361,6 +376,7 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
                     : null,
             backgroundColor: newRecent.regularMessage?.backgroundColor,
             body: TheStackWidget(
+              myPhoneNumber: myPhoneNumber,
               notificationPayload: notificationPayload,
               howSmsIsOpened: howSmsIsOpened,
               regularMessage: newRecent.regularMessage,

@@ -12,7 +12,6 @@ import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/floating_buttons_visible_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
-import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/rich_message_editor.dart/preview_screen_content.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/utils/constants.dart';
@@ -120,19 +119,10 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
                   onPressed: () {
                     sendAccessRequestStatus(
                         accessRequestStatus: AccessRequestStatus.granted,
-                        notificationPayload: widget.notificationPayload!);
-                    if (widget.howSmsIsOpened ==
-                        HowSmsIsOpened
-                            .notFromTerminatedToGrantOrDeyRequestAccess) {
-                      Navigator.of(context).pop();
-                      return;
-                    }
+                        payload: widget.notificationPayload!);
 
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const PhonePageScreen(),
-                      ),
-                    );
+                    Navigator.of(context).pop();
+                    return;
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(20),
@@ -152,7 +142,7 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
                   onPressed: () {
                     sendAccessRequestStatus(
                         accessRequestStatus: AccessRequestStatus.denied,
-                        notificationPayload: widget.notificationPayload!);
+                        payload: widget.notificationPayload!);
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(

@@ -407,12 +407,12 @@ class NotificationController {
     if (receivedAction.buttonKeyPressed == 'GRANT_ACCESS') {
       sendAccessRequestStatus(
           accessRequestStatus: AccessRequestStatus.granted,
-          notificationPayload: receivedAction.payload!);
+          payload: receivedAction.payload!);
       deleteAccessRequestFromDb(recentId: receivedAction.payload!['recentId']!);
     } else if (receivedAction.buttonKeyPressed == 'DENY_ACCESS') {
       sendAccessRequestStatus(
           accessRequestStatus: AccessRequestStatus.denied,
-          notificationPayload: receivedAction.payload!);
+          payload: receivedAction.payload!);
       deleteAccessRequestFromDb(recentId: receivedAction.payload!['recentId']!);
     }
 

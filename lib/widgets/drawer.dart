@@ -11,20 +11,15 @@ import 'package:text_call/screens/settings_screen.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 
-class AppDrawer extends ConsumerStatefulWidget {
-  const AppDrawer({super.key, required this.thingsNeeded,});
+class AppDrawer extends ConsumerWidget {
+  const AppDrawer({
+    super.key,
+    required this.myPhoneNumber,
+  });
 
-  final Future<String> thingsNeeded;
+  final String myPhoneNumber;
 
-  @override
-  ConsumerState<AppDrawer> createState() => _AppDrawerState();
-}
-
-class _AppDrawerState extends ConsumerState<AppDrawer> {
- 
-
-
-  void _logout() async {
+  void _logout(BuildContext context) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isUserLoggedIn', false);
     Navigator.of(context).pushReplacement(
@@ -35,8 +30,11 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    bool isDarkMode = Get.isDarkMode;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final myContact = ref
+        .watch(contactsProvider)
+        .where((contact) => contact.phoneNumber == myPhoneNumber)
+        .first;
 
     return Drawer(
       child: Column(
@@ -45,57 +43,22 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
             height: 210,
             child: DrawerHeader(
               padding: const EdgeInsets.only(top: 30),
-              child: FutureBuilder(
-                future: widget.thingsNeeded,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  if (snapshot.hasError) {
-                    return const Center(
-                      child: Text(
-                          'Please close and reopen the drawer. Sorry for the inconvenience'),
-                    );
-                  }
-                  final String myPhoneNumber = snapshot.data!;
-                  final myContact = ref
-                      .watch(contactsProvider)
-                      .where((contact) => contact.phoneNumber == myPhoneNumber)
-                      .first;
-                  return Column(
-                    children: [
-                      ContactAvatarCircle(
-                        avatarRadius: 45,
-                        imagePath: myContact.imagePath,
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                          '${myContact.name} @${changeIntlToLocal(myContact.phoneNumber)}'),
-                    ],
-                  );
-                },
+              child: Column(
+                children: [
+                  ContactAvatarCircle(
+                    avatarRadius: 45,
+                    imagePath: myContact.imagePath,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                      '${myContact.name} @${changeIntlToLocal(myContact.phoneNumber)}'),
+                ],
               ),
             ),
           ),
-          SwitchListTile.adaptive(
-            activeColor: const Color.fromARGB(255, 57, 69, 83),
-            value: isDarkMode,
-            onChanged: (newValue) async {
-              setState(() {
-                isDarkMode = newValue;
-              });
-              Get.changeThemeMode(
-                  Get.isDarkMode ? ThemeMode.light : ThemeMode.dark);
-              // for some reason when it is on dark mode, Get.isDarkMode would give false and true otherwise
-              Get.isDarkMode;
-              (await SharedPreferences.getInstance())
-                  .setBool('isDarkMode', !Get.isDarkMode);
-            },
-            title: const Text('Dark Mode'),
+          const ThemeSwitchListTile(
           ),
           ListTile(
             leading: const Icon(Icons.settings),
@@ -150,13 +113,43 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
               ),
             ),
             title: const Text('Log Out'),
-            onTap: () => _logout(),
+            onTap: () => _logout(context),
           ),
           const SizedBox(
             height: 30,
           )
         ],
       ),
+    );
+  }
+}
+
+class ThemeSwitchListTile extends StatefulWidget {
+  const ThemeSwitchListTile({super.key});
+
+  @override
+  State<ThemeSwitchListTile> createState() => _ThemeSwitchListTileState();
+}
+
+class _ThemeSwitchListTileState extends State<ThemeSwitchListTile> {
+  @override
+  Widget build(BuildContext context) {
+    bool isDarkMode = Get.isDarkMode;
+
+    return SwitchListTile.adaptive(
+      activeColor: const Color.fromARGB(255, 57, 69, 83),
+      value: isDarkMode,
+      onChanged: (newValue) async {
+        setState(() {
+          isDarkMode = newValue;
+        });
+        Get.changeThemeMode(Get.isDarkMode ? ThemeMode.light : ThemeMode.dark);
+        // for some reason when it is on dark mode, Get.isDarkMode would give false and true otherwise
+        Get.isDarkMode;
+        (await SharedPreferences.getInstance())
+            .setBool('isDarkMode', !Get.isDarkMode);
+      },
+      title: const Text('Dark Mode'),
     );
   }
 }

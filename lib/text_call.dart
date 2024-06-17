@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:text_call/providers/blocked_contacts_provider.dart';
+import 'package:text_call/providers/contacts_provider.dart';
+import 'package:text_call/providers/received_access_requests_provider.dart';
+import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/auth_screen.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
@@ -17,7 +22,7 @@ enum HowAppIsOPened {
   fromTerminatedToShowMessageAfterAccessRequestGranted,
 }
 
-class TextCall extends StatefulWidget {
+class TextCall extends ConsumerStatefulWidget {
   const TextCall({
     super.key,
     required this.howAppIsOPened,
@@ -32,27 +37,34 @@ class TextCall extends StatefulWidget {
       GlobalKey<NavigatorState>();
 
   @override
-  State<TextCall> createState() => _TextCallState();
+  ConsumerState<TextCall> createState() => _TextCallState();
 }
 
-class _TextCallState extends State<TextCall> {
+class _TextCallState extends ConsumerState<TextCall> {
   late Future<Map<String, dynamic>> _userInfo;
 
-  Future<Map<String, dynamic>> userInfo() async {
+  Future<Map<String, dynamic>> getUserInfoAndLoadImportantStuff() async {
+    await ref.read(contactsProvider.notifier).loadContacts();
+    await ref.read(recentsProvider.notifier).loadRecents();
+    await ref.read(blockedContactsProvider.notifier).loadBlockedContacts();
+    await ref
+        .read(receivedAccessRequestsProvider.notifier)
+        .loadPendingReceivedAccessRequests(ref);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.reload();
     final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
     final String? callerPhoneNumber = prefs.getString('callerPhoneNumber');
-
+    final String myPhoneNumber = prefs.getString('myPhoneNumber')!;
     return {
       'isUserLoggedIn': isUserLoggedIn,
       'callerPhoneNumber': callerPhoneNumber,
+      'myPhoneNumber': myPhoneNumber,
     };
   }
 
   @override
   void initState() {
-    _userInfo = userInfo();
+    _userInfo = getUserInfoAndLoadImportantStuff();
     super.initState();
   }
 
@@ -86,7 +98,8 @@ class _TextCallState extends State<TextCall> {
                   appOpenedFromPickedCall: true,
                 );
               }
-              return const SmsFromTerminated(
+              return SmsFromTerminated(
+                myPhoneNumber: userInfo['myPhoneNumber'],
                 howSmsIsOpened: HowSmsIsOpened.fromTerminatedForPickCall,
               );
             }
@@ -99,6 +112,7 @@ class _TextCallState extends State<TextCall> {
                 );
               }
               return SmsFromTerminated(
+                myPhoneNumber: userInfo['myPhoneNumber'],
                 notificationPayload: widget.notificationPayload,
                 howSmsIsOpened:
                     HowSmsIsOpened.fromTerminatedToGrantOrDeyRequestAccess,
@@ -109,6 +123,7 @@ class _TextCallState extends State<TextCall> {
                 HowAppIsOPened
                     .fromTerminatedToShowMessageAfterAccessRequestGranted) {
               return SmsFromTerminated(
+                myPhoneNumber: userInfo['myPhoneNumber'],
                 notificationPayload: widget.notificationPayload,
                 howSmsIsOpened: HowSmsIsOpened
                     .fromTerminatedToShowMessageAfterAccessRequestGranted,
@@ -118,7 +133,9 @@ class _TextCallState extends State<TextCall> {
             if (userInfo['isUserLoggedIn'] != true) {
               return const AuthScreen();
             }
-            return const PhonePageScreen();
+            return PhonePageScreen(
+              myPhoneNumber: userInfo['myPhoneNumber'],
+            );
           }
           return const AuthScreen();
         },

@@ -236,19 +236,19 @@ enum AccessRequestStatus {
 
 Future<void> sendAccessRequestStatus(
     {required AccessRequestStatus accessRequestStatus,
-    required Map<String, dynamic> notificationPayload}) async {
+    required Map<String, dynamic> payload}) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.reload();
   final requesteePhoneNumber = prefs.getString('myPhoneNumber');
 
   if (accessRequestStatus == AccessRequestStatus.granted) {
     final url = Uri.https(backendRootUrl,
-        'request_status/granted/${notificationPayload['requesterPhoneNumber']}/$requesteePhoneNumber/${notificationPayload['recentId']}');
+        'request_status/granted/${payload['requesterPhoneNumber']}/$requesteePhoneNumber/${payload['recentId']}');
     http.get(url);
     return;
   }
   final url = Uri.https(backendRootUrl,
-      'request_status/denied/${notificationPayload['requesterPhoneNumber']}/$requesteePhoneNumber/${notificationPayload['recentId']}');
+      'request_status/denied/${payload['requesterPhoneNumber']}/$requesteePhoneNumber/${payload['recentId']}');
   http.get(url);
 }
 
@@ -358,7 +358,7 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
 
   Navigator.of(context).pushReplacement(
     MaterialPageRoute(
-      builder: (context) => const PhonePageScreen(),
+      builder: (context) => PhonePageScreen(myPhoneNumber: phoneNumber),
     ),
   );
 }

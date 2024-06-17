@@ -1,22 +1,26 @@
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:text_call/providers/received_access_requests_provider.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
-import 'package:text_call/widgets/access_requests_sceen_widgets/access_requests_received_tab.dart';
-import 'package:text_call/widgets/access_requests_sceen_widgets/access_requests_sent_tab.dart';
+import 'package:text_call/widgets/access_requests_sceen_widgets/received_access_requests_tab.dart';
+import 'package:text_call/widgets/access_requests_sceen_widgets/sent_access_requests_tab.dart';
 
-class AccessRequestsScreen extends StatefulWidget {
+class AccessRequestsScreen extends ConsumerStatefulWidget {
   const AccessRequestsScreen({super.key});
 
   @override
-  State<AccessRequestsScreen> createState() => _AccessRequestsScreenState();
+  ConsumerState<AccessRequestsScreen> createState() =>
+      _AccessRequestsScreenState();
 }
 
-class _AccessRequestsScreenState extends State<AccessRequestsScreen> {
+class _AccessRequestsScreenState extends ConsumerState<AccessRequestsScreen> {
   late final PageController _pageController;
 
   int _currentPage = 0;
+  final bool _isRefreshing = false;
 
   @override
   void initState() {
@@ -47,16 +51,13 @@ class _AccessRequestsScreenState extends State<AccessRequestsScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(
-              height: 20,
-            ),
             Center(
               child: CustomSlidingSegmentedControl(
                 innerPadding: const EdgeInsets.all(10),
                 fixedWidth: MediaQuery.sizeOf(context).width * .4,
                 decoration: BoxDecoration(
                   color: Theme.of(context).brightness == Brightness.light
-                      ? const Color.fromARGB(255, 171, 193, 196)
+                      ? const Color.fromARGB(255, 176, 208, 235)
                       : makeColorLighter(
                           Theme.of(context).colorScheme.surfaceContainer, 10),
                   borderRadius: BorderRadius.circular(30),
@@ -66,17 +67,6 @@ class _AccessRequestsScreenState extends State<AccessRequestsScreen> {
                       ? Theme.of(context).colorScheme.surfaceContainer
                       : Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: Theme.of(context).brightness == Brightness.light
-                      ? [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 5,
-                            blurRadius: 7,
-                            offset: const Offset(
-                                0, 3), // changes position of shadow
-                          ),
-                        ]
-                      : null,
                 ),
                 initialValue: _currentPage,
                 children: {
@@ -139,7 +129,22 @@ class _AccessRequestsScreenState extends State<AccessRequestsScreen> {
                 }),
               ),
             ),
-            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Spacer(),
+                _isRefreshing
+                    ? SizedBox(
+                        height: Theme.of(context).iconTheme.size,
+                        child: const CircularProgressIndicator(),
+                      )
+                    : IconButton(
+                        onPressed: () => ref
+                            .read(receivedAccessRequestsProvider.notifier)
+                            .loadPendingReceivedAccessRequests(ref),
+                        icon: const Icon(Icons.refresh),
+                      ),
+              ],
+            ),
             Expanded(
               child: PageView(
                 controller: _pageController,

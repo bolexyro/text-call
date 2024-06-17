@@ -31,23 +31,6 @@ class RecentsList extends ConsumerStatefulWidget {
 class _RecentsListState extends ConsumerState<RecentsList> {
   final Map<Recent, bool> _expandedBoolsMap = {};
   CallFilters _selectedFilter = CallFilters.allCalls;
-  double bigHeight = 185;
-  double smallHeight = 70;
-  late double animatedContainerHeight;
-
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    animatedContainerHeight = bigHeight;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
 
   void _changeTileExpandedStatus(Recent recent) {
     setState(() {
@@ -274,7 +257,6 @@ class _RecentsListState extends ConsumerState<RecentsList> {
               animSpeedFactor: 2.3,
               springAnimationDurationInMilliseconds: 600,
               child: GroupedListView(
-                controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 useStickyGroupSeparators: true,
                 stickyHeaderBackgroundColor:

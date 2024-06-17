@@ -33,17 +33,6 @@ class ContactsList extends ConsumerStatefulWidget {
 
 class _ContactsListState extends ConsumerState<ContactsList> {
   final Map<Contact, bool> _expandedBoolsMap = {};
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   void _changeTileExpandedStatus(Contact contact) {
     setState(() {
@@ -254,7 +243,6 @@ class _ContactsListState extends ConsumerState<ContactsList> {
               animSpeedFactor: 2.3,
               springAnimationDurationInMilliseconds: 600,
               child: GroupedListView(
-                controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 useStickyGroupSeparators: true,
                 floatingHeader: true,

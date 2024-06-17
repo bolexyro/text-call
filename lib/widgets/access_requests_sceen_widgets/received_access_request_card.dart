@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:text_call/models/recent.dart';
+import 'package:text_call/providers/received_access_requests_provider.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_letter_avatar.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ReceivedAccessRequestCard extends StatelessWidget {
+class ReceivedAccessRequestCard extends ConsumerWidget {
   const ReceivedAccessRequestCard({
     super.key,
     required this.recent,
@@ -15,20 +17,21 @@ class ReceivedAccessRequestCard extends StatelessWidget {
   final Recent recent;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => SmsNotFromTerminated(
-              howSmsIsOpened:
-                  HowSmsIsOpened.notFromTerminatedToJustDisplayMessage,
-              regularMessage: recent.regularMessage,
-              complexMessage: recent.complexMessage,
-              recentCallTime: null),
+            howSmsIsOpened:
+                HowSmsIsOpened.notFromTerminatedToJustDisplayMessage,
+            regularMessage: recent.regularMessage,
+            complexMessage: recent.complexMessage,
+            recentCallTime: recent.callTime,
+          ),
         ),
       ),
       child: Container(
-        margin: const EdgeInsets.all(5),
+        margin: const EdgeInsets.only(left: 10, bottom: 10, right: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: Theme.of(context).brightness == Brightness.dark
@@ -64,7 +67,19 @@ class ReceivedAccessRequestCard extends StatelessWidget {
             ),
             const Spacer(),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                ref
+                    .read(receivedAccessRequestsProvider.notifier)
+                    .removeReceivedAccessRequest(recent.id);
+
+                sendAccessRequestStatus(
+                  accessRequestStatus: AccessRequestStatus.granted,
+                  payload: {
+                    'requesterPhoneNumber': recent.contact.phoneNumber,
+                    'recentId': recent.id,
+                  },
+                );
+              },
               child: Container(
                 decoration: const ShapeDecoration(
                   shape: CircleBorder(
@@ -83,7 +98,18 @@ class ReceivedAccessRequestCard extends StatelessWidget {
               width: 10,
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                sendAccessRequestStatus(
+                  accessRequestStatus: AccessRequestStatus.denied,
+                  payload: {
+                    'requesterPhoneNumber': recent.contact.phoneNumber,
+                    'recentId': recent.id,
+                  },
+                );
+                ref
+                    .read(receivedAccessRequestsProvider.notifier)
+                    .removeReceivedAccessRequest(recent.id);
+              },
               child: Container(
                 decoration: const ShapeDecoration(
                   shape: CircleBorder(

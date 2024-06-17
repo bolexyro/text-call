@@ -157,14 +157,15 @@ Future<void> insertRecentIntoDb({required Recent newRecent}) async {
   );
 }
 
-Future<void> insertAccessRequestIntoDb({required String recentId}) async {
+Future<void> insertAccessRequestIntoDb(
+    {required String recentId, required bool isSent}) async {
   final db = await getDatabase();
   await db.insert(
     accessRequestsTableName,
     {
       'recentId': recentId,
       'time': DateTime.now().toString(),
-      'isSent': 0,
+      'isSent': isSent ? 1 : 0,
     },
   );
 }
@@ -178,3 +179,9 @@ Future<void> deleteAccessRequestFromDb({required String recentId}) async {
   );
 }
 
+Future<List<Map<String, Object?>>> readAccessRequestsFromDb(
+    {required bool isSent}) async {
+  final db = await getDatabase();
+  return db.query(accessRequestsTableName,
+      where: 'isSent = ?', whereArgs: [isSent ? 1 : 0]);
+}

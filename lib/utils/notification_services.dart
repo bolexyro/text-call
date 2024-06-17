@@ -48,7 +48,7 @@ Future<void> messageHandler(RemoteMessage message) async {
 
     final currentDate = DateTime.now();
 
-    await insertAccessRequestIntoDb(recentId: recentId);
+    await insertAccessRequestIntoDb(recentId: recentId, isSent: false);
     AwesomeNotifications().createNotification(
       content: NotificationContent(
           // the id is used to identify each notification. So if you have a static id like 123, when a new notification comes in, the old one goes out.

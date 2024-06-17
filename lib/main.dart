@@ -102,13 +102,14 @@ Future<Widget> whichTextCall(
     if (receivedAction.id.toString().startsWith('12')) {
       return TextCall(
         themeMode: themeMode,
-        howAppIsOPened: HowAppIsOPened.fromTerminatedToShowMessageAfterAccessRequestGranted,
+        howAppIsOPened:
+            HowAppIsOPened.fromTerminatedToShowMessageAfterAccessRequestGranted,
         notificationPayload: receivedAction.payload,
       );
     }
     return TextCall(
       themeMode: themeMode,
-      howAppIsOPened: HowAppIsOPened.fromTerminatedForRequestAccess,
+      howAppIsOPened: HowAppIsOPened.fromTerminatedToGrantOrDeyRequestAccess,
       notificationPayload: receivedAction.payload,
     );
   }

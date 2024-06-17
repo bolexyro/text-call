@@ -10,14 +10,11 @@ import 'package:text_call/screens/splash_screen.dart';
 import 'package:text_call/utils/constants.dart';
 
 enum HowAppIsOPened {
-  fromTerminatedForRequestAccess,
+  fromTerminatedToGrantOrDeyRequestAccess,
   fromTerminatedForPickedCall,
-  notfromTerminatedForRequestAccess,
-  notFromTerminatedForPickedCall,
   appOpenedRegularly,
   // this one would be used when access has been granted and we only want to show
-  fromTerminatedToShowMessageAfterAccessRequestGranted
-,
+  fromTerminatedToShowMessageAfterAccessRequestGranted,
 }
 
 class TextCall extends StatefulWidget {
@@ -95,7 +92,7 @@ class _TextCallState extends State<TextCall> {
             }
 
             if (widget.howAppIsOPened ==
-                HowAppIsOPened.fromTerminatedForRequestAccess) {
+                HowAppIsOPened.fromTerminatedToGrantOrDeyRequestAccess) {
               if (userInfo['isUserLoggedIn'] != true) {
                 return const AuthScreen(
                   appOpenedFromPickedCall: true,
@@ -109,8 +106,9 @@ class _TextCallState extends State<TextCall> {
             }
 
             if (widget.howAppIsOPened ==
-                HowAppIsOPened.fromTerminatedToShowMessageAfterAccessRequestGranted) {
-              return  SmsFromTerminated(
+                HowAppIsOPened
+                    .fromTerminatedToShowMessageAfterAccessRequestGranted) {
+              return SmsFromTerminated(
                 notificationPayload: widget.notificationPayload,
                 howSmsIsOpened: HowSmsIsOpened
                     .fromTerminatedToShowMessageAfterAccessRequestGranted,

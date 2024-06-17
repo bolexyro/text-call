@@ -6,6 +6,7 @@ import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/utils/crud.dart';
+import 'package:text_call/utils/db_schema.dart';
 
 RecentCategory? _getCategoryEnumFromText({required String recentCategoryText}) {
   for (final recentCategoryEnum in RecentCategory.values) {

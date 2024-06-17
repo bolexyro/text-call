@@ -15,18 +15,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
-
 import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
 import 'package:text_call/text_call.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/crud.dart';
+import 'package:text_call/utils/db_schema.dart';
 import 'package:text_call/utils/utils.dart';
 
 Future<String> _getCallerName(String phoneNumber) async {
-  final db = await getDatabase();
-  final data = await db
-      .query('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
+  final data = await readContactsFromDb(wherePhoneNumber: phoneNumber);
   if (data.isEmpty) {
     return changeIntlToLocal(phoneNumber);
   } else {

@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
-import 'package:text_call/utils/utils.dart';
+import 'package:text_call/utils/crud.dart';
 
 RecentCategory? _getCategoryEnumFromText({required String recentCategoryText}) {
   for (final recentCategoryEnum in RecentCategory.values) {
@@ -18,32 +17,15 @@ RecentCategory? _getCategoryEnumFromText({required String recentCategoryText}) {
   return null;
 }
 
-Future<List> getContactAndExistsStatus({
-  required String phoneNumber,
-  required Database db,
-}) async {
-  final data = await db
-      .query('contacts', where: 'phoneNumber = ?', whereArgs: [phoneNumber]);
-  final contactExists = data.isNotEmpty;
-
-  return [
-    Contact(
-      name: contactExists
-          ? data[0]['name'] as String
-          : '0${phoneNumber.substring(4)}',
-      phoneNumber: phoneNumber,
-      imagePath: contactExists ? data[0]['imagePath'] as String? : null,
-    ),
-    contactExists
-  ];
-}
-
 class RecentsNotifier extends StateNotifier<List<Recent>> {
   RecentsNotifier() : super([]);
 
   Future<void> loadRecents() async {
+    // the reason why I am creating a database object here is that I will be using it more than once
+    // so rather than let them be created everytime in all the functions they will normally be created in,
+    // I will just pass in this one I created. It would also save time, since getDatabase returns a future we would have to wait for
     final db = await getDatabase();
-    final data = await db.query('recents');
+    final data = await readRecentsFromDb(db: db);
     final recentsList = data
         .map(
           (row) async => Recent(
@@ -102,7 +84,7 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
 
   void addRecent(Recent newRecent) async {
     final db = await getDatabase();
-    addRecentToDb(newRecent, db);
+    insertRecentIntoDb(newRecent: newRecent);
 
     final contactAndContactExistsStatus = await getContactAndExistsStatus(
         db: db, phoneNumber: newRecent.contact.phoneNumber);
@@ -122,22 +104,15 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
   void updateRecent(
       {required DateTime recentCallTime,
       required String complexMessageJsonString}) async {
-    final db = await getDatabase();
-    db.update(
-      'recents',
-      {
-        'messageJson': complexMessageJsonString,
-      },
-      where: 'callTime = ?',
-      whereArgs: [recentCallTime.toString()],
-    );
+    updateRecentInDb(
+        complexMessageJsonString: complexMessageJsonString,
+        recentCallTime: recentCallTime);
 
     late Recent recentToBeRemoved;
     final List<Recent> newState = List.from(state)
       ..removeWhere((recent) {
         if (recent.callTime == recentCallTime) {
           recentToBeRemoved = recent;
-          print(recent);
           return true;
         }
         return false;

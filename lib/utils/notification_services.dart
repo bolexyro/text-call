@@ -20,6 +20,7 @@ import 'package:text_call/screens/sent_message_screen.dart';
 import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
 import 'package:text_call/text_call.dart';
 import 'package:text_call/utils/constants.dart';
+import 'package:text_call/utils/crud.dart';
 import 'package:text_call/utils/utils.dart';
 
 Future<String> _getCallerName(String phoneNumber) async {
@@ -46,6 +47,8 @@ Future<void> messageHandler(RemoteMessage message) async {
     final String requesterName = await _getCallerName(requesterPhoneNumber);
 
     final currentDate = DateTime.now();
+
+    await insertAccessRequestIntoDb(recentId: recentId);
     AwesomeNotifications().createNotification(
       content: NotificationContent(
           // the id is used to identify each notification. So if you have a static id like 123, when a new notification comes in, the old one goes out.
@@ -155,7 +158,6 @@ Future<void> messageHandler(RemoteMessage message) async {
   final String messageType = message.data['my_message_type'];
   final String callerName = await _getCallerName(callerPhoneNumber);
 
-  // i am still persisting this with sharedprefs because i no one mess with that sms notfrom terminated and terminated code
   final prefs = await SharedPreferences.getInstance();
   final List<String> blockedContacts =
       prefs.getStringList('blockedPhoneNumbers') ?? [];
@@ -167,8 +169,8 @@ Future<void> messageHandler(RemoteMessage message) async {
     }
     return eachJsonMap['phoneNumber'];
   }).contains(callerPhoneNumber)) {
-    final url = Uri.https(backendRootUrl,
-        'call/blocked/$callerPhoneNumber/$blockMessage');
+    final url = Uri.https(
+        backendRootUrl, 'call/blocked/$callerPhoneNumber/$blockMessage');
     await http.get(url);
     return;
   }
@@ -270,8 +272,8 @@ void registerCallkitIncomingListener() {
           final String messageType = myDataInEventBody['messageType'];
           // final String recentId = myDataInEventBody['recentId'];
 
-          final url = Uri.https(backendRootUrl,
-              'call/accepted/$callerPhoneNumber');
+          final url =
+              Uri.https(backendRootUrl, 'call/accepted/$callerPhoneNumber');
           http.get(url);
 
           final prefs = await SharedPreferences.getInstance();
@@ -311,11 +313,10 @@ void registerCallkitIncomingListener() {
           final String messageType = myDataInEventBody['messageType'];
           final String recentId = myDataInEventBody['recentId'];
 
-          final url = Uri.https(backendRootUrl,
-              'call/rejected/$callerPhoneNumber');
+          final url =
+              Uri.https(backendRootUrl, 'call/rejected/$callerPhoneNumber');
           http.get(url);
 
-          final db = await getDatabase();
           final newRecent = Recent.withoutContactObject(
             category: RecentCategory.incomingRejected,
             canBeViewed: false,
@@ -328,8 +329,7 @@ void registerCallkitIncomingListener() {
             id: recentId,
             phoneNumber: callerPhoneNumber,
           );
-
-          addRecentToDb(newRecent, db);
+          insertRecentIntoDb(newRecent: newRecent);
           break;
         case Event.actionCallEnded:
           break;
@@ -342,11 +342,10 @@ void registerCallkitIncomingListener() {
           final String messageType = myDataInEventBody['messageType'];
           final String recentId = myDataInEventBody['recentId'];
 
-          final url = Uri.https(backendRootUrl,
-              'call/ignored/$callerPhoneNumber');
+          final url =
+              Uri.https(backendRootUrl, 'call/ignored/$callerPhoneNumber');
           http.get(url);
 
-          final db = await getDatabase();
           final newRecent = Recent.withoutContactObject(
             category: RecentCategory.incomingIgnored,
             canBeViewed: false,
@@ -360,7 +359,7 @@ void registerCallkitIncomingListener() {
             phoneNumber: callerPhoneNumber,
           );
 
-          addRecentToDb(newRecent, db);
+          insertRecentIntoDb(newRecent: newRecent);
           break;
         case Event.actionCallCallback:
           break;
@@ -411,10 +410,12 @@ class NotificationController {
       sendAccessRequestStatus(
           accessRequestStatus: AccessRequestStatus.granted,
           notificationPayload: receivedAction.payload!);
+      deleteAccessRequestFromDb(recentId: receivedAction.payload!['recentId']!);
     } else if (receivedAction.buttonKeyPressed == 'DENY_ACCESS') {
       sendAccessRequestStatus(
           accessRequestStatus: AccessRequestStatus.denied,
           notificationPayload: receivedAction.payload!);
+      deleteAccessRequestFromDb(recentId: receivedAction.payload!['recentId']!);
     }
 
     // for when the notification is tapped and not any buttons
@@ -430,9 +431,8 @@ class NotificationController {
         final notificationPayload = receivedAction.payload!;
         final String? recentId = notificationPayload['recentId'];
 
-        final db = await getDatabase();
-        final data =
-            await db.query('recents', where: 'id = ?', whereArgs: [recentId]);
+        final data = await readRecentsFromDb(whereId: recentId);
+
         if (data.isEmpty) {
           return;
         }

@@ -12,7 +12,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqflite/sqlite_api.dart';
 import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
@@ -23,8 +22,6 @@ import 'package:text_call/utils/constants.dart';
 import 'package:text_call/widgets/camera_or_gallery.dart';
 import 'package:text_call/widgets/dialogs/add_contact_dialog.dart';
 import 'package:text_call/widgets/message_writer.dart';
-import 'package:sqflite/sqflite.dart' as sql;
-import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 
 enum Screen { phone, tablet }
@@ -72,31 +69,6 @@ Future<void> showMessageWriterModalSheet(
   );
 
   // }
-}
-
-Future<sql.Database> getDatabase() async {
-  final databasesPath = await sql.getDatabasesPath();
-
-  final db = await sql.openDatabase(
-    path.join(databasesPath, 'contacts.db'),
-    version: 1,
-    onCreate: (db, version) async {
-      await db.execute(
-          'CREATE TABLE contacts (phoneNumber TEXT PRIMARY KEY, name TEXT, imagePath TEXT)');
-
-      // if you make id primary key, it makes sense but the only thing different between it and making calltime primary key
-      // is that for id as primary key, when you call yourself, both the incoming and outgoing calls will have the same recentid
-      // so you can't insert both into the db, it would ignore the second insert.
-      // but with datetime, you can insert  both since the time you called ain't the same time you picked up.
-      // but the pick up time would be earlier than the outgoing since the user has t o first pick up or decline
-      // before we know what category of recents to insert in the db.
-      await db.execute(
-          'CREATE TABLE recents ( id TEXT, callTime TEXT PRIMARY KEY, phoneNumber TEXT, categoryName TEXT, messageJson TEXT, messageType TEXT, canBeViewed INTEGER)');
-    await db.execute(
-          'CREATE TABLE access_requests ( recentId TEXT PRIMARY KEY, time TEXT, isSent INTEGER, status TEXT)');
-    },
-  );
-  return db;
 }
 
 Future<Contact?> showAddContactDialog(context,
@@ -437,23 +409,6 @@ Future<void> deleteDirectory(String dirPath) async {
   }
 }
 
-void addRecentToDb(Recent newRecent, Database db) {
-  db.insert(
-    'recents',
-    {
-      'id': newRecent.id,
-      'messageJson': newRecent.regularMessage == null
-          ? newRecent.complexMessage!.complexMessageJsonString
-          : newRecent.regularMessage!.toJsonString,
-      'callTime': newRecent.callTime.toString(),
-      'phoneNumber': newRecent.contact.phoneNumber,
-      'categoryName': newRecent.category.name,
-      'messageType': newRecent.regularMessage == null ? 'complex' : 'regular',
-      'canBeViewed': newRecent.canBeViewed ? 1 : 0,
-    },
-    conflictAlgorithm: ConflictAlgorithm.ignore,
-  );
-}
 
 // since the user cannot really choose which medias in a message to keep available offline and so when they
 // save a message offline, the audio, video, image would be made available offline.

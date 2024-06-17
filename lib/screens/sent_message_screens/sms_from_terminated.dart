@@ -8,6 +8,7 @@ import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/rich_message_editor.dart/preview_screen_content.dart';
 import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/utils/crud.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/models/regular_message.dart';
@@ -212,9 +213,10 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
                 .fromTerminatedToShowMessageAfterAccessRequestGranted ||
         howSmsIsOpened ==
             HowSmsIsOpened.fromTerminatedToGrantOrDeyRequestAccess) {
-      final db = getDatabase();
+      final dataFuture =
+          readRecentsFromDb(whereId: notificationPayload!['recentId']!);
       return FutureBuilder(
-        future: db,
+        future: dataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -222,76 +224,56 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
             );
           }
           if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
           }
+          final data = snapshot.data!;
 
-          final data = snapshot.data!.query('recents',
-              where: 'id = ?', whereArgs: [notificationPayload!['recentId']]);
-          return FutureBuilder(
-            future: data,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
+          final regularMessage = data[0]['messageType'] == 'regular'
+              ? RegularMessage.fromJsonString(
+                  data[0]['messageJson'] as String,
+                )
+              : null;
+          final complexMessage = data[0]['messageType'] == 'complex'
+              ? ComplexMessage(
+                  complexMessageJsonString: data[0]['messageJson'] as String,
+                )
+              : null;
 
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error: ${snapshot.error}'),
-                );
-              }
-              final data = snapshot.data!;
-
-              final regularMessage = data[0]['messageType'] == 'regular'
-                  ? RegularMessage.fromJsonString(
-                      data[0]['messageJson'] as String,
-                    )
-                  : null;
-              final complexMessage = data[0]['messageType'] == 'complex'
-                  ? ComplexMessage(
-                      complexMessageJsonString:
-                          data[0]['messageJson'] as String,
-                    )
-                  : null;
-
-              return Scaffold(
-                floatingActionButton: howSmsIsOpened ==
-                            HowSmsIsOpened
-                                .fromTerminatedToShowMessageAfterAccessRequestGranted &&
-                        floatingButtonsVisible
-                    ? FloatingActionButton(
-                        onPressed: () => Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => const PhonePageScreen(),
-                          ),
-                        ),
-                        shape: const CircleBorder(),
-                        backgroundColor: regularMessage == null
-                            ? Colors.black
-                            : makeColorLighter(
-                                regularMessage.backgroundColor, 5),
-                        child: Icon(
-                          Icons.home,
-                          color: regularMessage == null
-                              ? Colors.white
-                              : regularMessage.backgroundColor
-                                          .computeLuminance() >
-                                      0.5
-                                  ? Colors.black
-                                  : Colors.white,
-                        ),
-                      )
-                    : null,
-                body: TheStackWidget(
-                  howSmsIsOpened: howSmsIsOpened,
-                  regularMessage: regularMessage,
-                  complexMessage: complexMessage,
-                  notificationPayload: notificationPayload,
-                ),
-                backgroundColor: regularMessage?.backgroundColor,
-              );
-            },
+          return Scaffold(
+            floatingActionButton: howSmsIsOpened ==
+                        HowSmsIsOpened
+                            .fromTerminatedToShowMessageAfterAccessRequestGranted &&
+                    floatingButtonsVisible
+                ? FloatingActionButton(
+                    onPressed: () => Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const PhonePageScreen(),
+                      ),
+                    ),
+                    shape: const CircleBorder(),
+                    backgroundColor: regularMessage == null
+                        ? Colors.black
+                        : makeColorLighter(regularMessage.backgroundColor, 5),
+                    child: Icon(
+                      Icons.home,
+                      color: regularMessage == null
+                          ? Colors.white
+                          : regularMessage.backgroundColor.computeLuminance() >
+                                  0.5
+                              ? Colors.black
+                              : Colors.white,
+                    ),
+                  )
+                : null,
+            body: TheStackWidget(
+              howSmsIsOpened: howSmsIsOpened,
+              regularMessage: regularMessage,
+              complexMessage: complexMessage,
+              notificationPayload: notificationPayload,
+            ),
+            backgroundColor: regularMessage?.backgroundColor,
           );
         },
       );

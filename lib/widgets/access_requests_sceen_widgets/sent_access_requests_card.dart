@@ -69,12 +69,19 @@ class SentAccessRequestsCard extends StatelessWidget {
             const Spacer(),
             Text(
               'Status: $status',
-              style: const TextStyle(color: Colors.orange),
+              style: TextStyle(
+                color: status == 'Pending'
+                    ? Colors.orange
+                    : status == 'Accepted'
+                        ? Colors.green
+                        : Colors.red,
+              ),
             ),
             const SizedBox(
               width: 10,
             ),
-            const SentAccessRequestsCardMenuAnchor(),
+            if (status == 'Pending' || status == 'Rejected')
+              const SentAccessRequestsCardMenuAnchor(),
           ],
         ),
       ),

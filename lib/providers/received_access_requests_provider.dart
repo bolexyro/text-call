@@ -28,13 +28,9 @@ class ReceivedAccessRequestsProviderNotifier
         .read(recentsProvider)
         .where(
           (recent) {
-            final allRecentsWeHaveSeen = [];
-
-            // if we only take recents that are incoming, we eliminate this
-            if (allRecentsWeHaveSeen.contains(recent.id)) {
+            if (recent.category == RecentCategory.incomingAccepted || recent.category == RecentCategory.incomingIgnored || recent.category == RecentCategory.incomingRejected ){
               return false;
             }
-            allRecentsWeHaveSeen.add(recent.id);
             return allRecentIdsInAccessRequests.contains(recent.id);
           },
         )

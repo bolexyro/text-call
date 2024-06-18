@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:lottie/lottie.dart';
+import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
@@ -29,12 +30,12 @@ class _AccessRequestsSentTabState extends ConsumerState<AccessRequestsSentTab> {
         widget.allSentAccessRequestsRawFromDb.map((row) => row['recentId']);
     final recentsWeNeed = ref.read(recentsProvider).where(
       (recent) {
-        final allRecentsWeHaveSeen = [];
-
-        if (allRecentsWeHaveSeen.contains(recent.id)) {
+        if (recent.category == RecentCategory.outgoingAccepted ||
+            recent.category == RecentCategory.outgoingIgnored ||
+            recent.category == RecentCategory.outgoingUnreachable ||
+            recent.category == RecentCategory.outgoingRejected) {
           return false;
         }
-        allRecentsWeHaveSeen.add(recent.id);
         return allRecentIdsInSentAccessRequests.contains(recent.id);
       },
     ).toList();

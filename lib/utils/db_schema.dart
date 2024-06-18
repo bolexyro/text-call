@@ -43,5 +43,5 @@ Future<void> _databaseVersion1(sql.Database db) async {
   await db.execute(
       'CREATE TABLE recents ( id TEXT, callTime TEXT PRIMARY KEY, phoneNumber TEXT, categoryName TEXT, messageJson TEXT, messageType TEXT, canBeViewed INTEGER, accessRequestPending INTEGER)');
   await db.execute(
-      'CREATE TABLE access_requests ( recentId TEXT PRIMARY KEY, time TEXT, isSent INTEGER, status TEXT)');
+      'CREATE TABLE access_requests ( recentId TEXT PRIMARY KEY, time TEXT, isSent INTEGER)');
 }

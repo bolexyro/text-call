@@ -96,15 +96,17 @@ class ContactDetailsPane extends ConsumerWidget {
                   ),
                   child: const Text('Show message'),
                 )
-              : ElevatedButton(
-                  onPressed: () => sendAccessRequest(recent!, ref),
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+              : recent!.accessRequestPending
+                  ? const Text('Pending')
+                  : ElevatedButton(
+                      onPressed: () => sendAccessRequest(recent!, ref),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Request access'),
                     ),
-                  ),
-                  child: const Text('Request access'),
-                ),
         ],
       );
     }
@@ -113,7 +115,6 @@ class ContactDetailsPane extends ConsumerWidget {
         getRecentsForAContact(allRecents, contact!.phoneNumber);
     return Column(
       children: [
-        
         ContactInfoCard(
           contact: contact!,
           width: stackContainerWidths,

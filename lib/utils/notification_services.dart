@@ -269,8 +269,6 @@ void registerCallkitIncomingListener() {
         case Event.actionCallIncoming:
           break;
         case Event.actionCallStart:
-          // TODO: started an outgoing call
-          // TODO: show screen calling in Flutter
           break;
         case Event.actionCallAccept:
           final Map<String, dynamic> eventBody = event.body;

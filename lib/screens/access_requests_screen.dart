@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:text_call/providers/received_access_requests_provider.dart';
 import 'package:text_call/utils/constants.dart';
+import 'package:text_call/utils/crud.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/access_requests_sceen_widgets/received_access_requests_tab.dart';
 import 'package:text_call/widgets/access_requests_sceen_widgets/sent_access_requests_tab.dart';
@@ -18,9 +19,8 @@ class AccessRequestsScreen extends ConsumerStatefulWidget {
 
 class _AccessRequestsScreenState extends ConsumerState<AccessRequestsScreen> {
   late final PageController _pageController;
-
   int _currentPage = 0;
-  final bool _isRefreshing = false;
+  late Future<List<Map<String, Object?>>> _accessRequestsFuture;
 
   @override
   void initState() {
@@ -30,6 +30,9 @@ class _AccessRequestsScreenState extends ConsumerState<AccessRequestsScreen> {
         _currentPage = _pageController.page!.round();
       });
     });
+
+    _accessRequestsFuture = loadAccessRequests();
+
     super.initState();
   }
 
@@ -37,6 +40,14 @@ class _AccessRequestsScreenState extends ConsumerState<AccessRequestsScreen> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<List<Map<String, Object?>>> loadAccessRequests() async {
+    await ref
+        .read(receivedAccessRequestsProvider.notifier)
+        .loadPendingReceivedAccessRequests(ref);
+
+    return await readAccessRequestsFromDb(isSent: true);
   }
 
   @override
@@ -129,29 +140,32 @@ class _AccessRequestsScreenState extends ConsumerState<AccessRequestsScreen> {
                 }),
               ),
             ),
-            Row(
-              children: [
-                const Spacer(),
-                _isRefreshing
-                    ? SizedBox(
-                        height: Theme.of(context).iconTheme.size,
-                        child: const CircularProgressIndicator(),
-                      )
-                    : IconButton(
-                        onPressed: () => ref
-                            .read(receivedAccessRequestsProvider.notifier)
-                            .loadPendingReceivedAccessRequests(ref),
-                        icon: const Icon(Icons.refresh),
-                      ),
-              ],
-            ),
             Expanded(
-              child: PageView(
-                controller: _pageController,
-                children: const [
-                  AccessRequestsReceivedTab(),
-                  AccessRequestsSentTab(),
-                ],
+              child: FutureBuilder(
+                future: _accessRequestsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  }
+                  print(snapshot.data);
+                  return PageView(
+                    controller: _pageController,
+                    children: [
+                      const AccessRequestsReceivedTab(),
+                      AccessRequestsSentTab(
+                        allSentAccessRequestsRawFromDb: snapshot.data!,
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],

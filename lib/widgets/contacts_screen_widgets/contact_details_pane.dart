@@ -97,7 +97,7 @@ class ContactDetailsPane extends ConsumerWidget {
                   child: const Text('Show message'),
                 )
               : ElevatedButton(
-                  onPressed: () => sendAccessRequest(recent!),
+                  onPressed: () => sendAccessRequest(recent!, ref),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),

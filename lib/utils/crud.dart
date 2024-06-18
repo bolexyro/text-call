@@ -99,7 +99,7 @@ Future<List<Map<String, Object?>>> readRecentsFromDb(
   return await db.query(recentsTableName);
 }
 
-Future<void> updateRecentInDb(
+Future<void> updateRecentComplexMessageJsonStringInDb(
     {required String complexMessageJsonString,
     required DateTime recentCallTime}) async {
   final db = await getDatabase();
@@ -160,3 +160,4 @@ Future<List<Map<String, Object?>>> readAccessRequestsFromDb(
   return db.query(accessRequestsTableName,
       where: 'isSent = ?', whereArgs: [isSent ? 1 : 0]);
 }
+

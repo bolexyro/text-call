@@ -16,22 +16,37 @@ class ReceivedAccessRequestsProviderNotifier
     // then i will get the name of the person, and the message, so when they tap they see that message
     final allRecentIdsInAccessRequests =
         allAccessRquestsReceived.map((row) => row['recentId']);
-    
+
+    // this would be kinda problematic when you are the one that called yourself. And your reject it. Lemme explain
+    // when you call yourself, there would be 2 entries in the db with the same recent id. The outgoing and the incoming.
+    // So, in the access requests tab, there would also be 2 entries. but you can eliminate that by doing a to set and then a to list.
+
+    // the duplicate is in the recents table which is not a mistake.
+    // so when you do allrecentidsinaccessrequests.contains(recent.id) and we are iterating over the duplicates in the recents table,
+    // the above would return true multiple times for when we call ourselves.
     state = ref
         .read(recentsProvider)
         .where(
-          (recent) => allRecentIdsInAccessRequests.contains(recent.id),
+          (recent) {
+            final allRecentsWeHaveSeen = [];
+
+            // if we only take recents that are incoming, we eliminate this
+            if (allRecentsWeHaveSeen.contains(recent.id)) {
+              return false;
+            }
+            allRecentsWeHaveSeen.add(recent.id);
+            return allRecentIdsInAccessRequests.contains(recent.id);
+          },
         )
         .toList();
   }
 
-  Future<void> removeReceivedAccessRequest(String recentId) async{
-     state = List.from(state)
+  Future<void> removeReceivedAccessRequest(String recentId) async {
+    state = List.from(state)
       ..removeWhere(
         (recent) => recent.id == recentId,
       );
-      deleteAccessRequestFromDb(recentId: recentId);
-
+    deleteAccessRequestFromDb(recentId: recentId);
   }
 }
 

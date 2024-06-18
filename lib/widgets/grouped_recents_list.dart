@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
@@ -11,7 +12,7 @@ import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/expandable_list_tile.dart';
 
-class GroupedRecentsList extends StatefulWidget {
+class GroupedRecentsList extends ConsumerStatefulWidget {
   const GroupedRecentsList({
     super.key,
     required this.recents,
@@ -19,10 +20,10 @@ class GroupedRecentsList extends StatefulWidget {
 
   final List<Recent> recents;
   @override
-  State<GroupedRecentsList> createState() => _GroupedRecentsListState();
+  ConsumerState<GroupedRecentsList> createState() => _GroupedRecentsListState();
 }
 
-class _GroupedRecentsListState extends State<GroupedRecentsList> {
+class _GroupedRecentsListState extends ConsumerState<GroupedRecentsList> {
   final Map<Recent, bool> _expandedBoolsMap = {};
 
   void _changeTileExpandedStatus(Recent recent) {
@@ -110,15 +111,17 @@ class _GroupedRecentsListState extends State<GroupedRecentsList> {
                       ),
                       child: const Text('Show Message'),
                     )
-                  : ElevatedButton(
-                      onPressed: () => sendAccessRequest(recentN),
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                  : recentN.accessRequestPending
+                      ? const Text('Pending')
+                      : ElevatedButton(
+                          onPressed: () => sendAccessRequest(recentN, ref),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text('Request access'),
                         ),
-                      ),
-                      child: const Text('Request access'),
-                    ),
               isExpanded: _expandedBoolsMap[recentN]!,
               tileOnTapped: () => _changeTileExpandedStatus(recentN),
             ),

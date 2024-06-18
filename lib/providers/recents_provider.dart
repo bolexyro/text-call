@@ -49,6 +49,8 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
                 db: db, phoneNumber: row['phoneNumber'] as String))[1],
             callTime: DateTime.parse(row['callTime'] as String),
             canBeViewed: row['canBeViewed'] == 1 ? true : false,
+            accessRequestPending:
+                row['accessRequestPending'] == 1 ? true : false,
           ),
         )
         .toList();
@@ -56,7 +58,92 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
     state = resolvedRecents;
   }
 
-  Future<void> updateRecentContact(
+  void addRecent(Recent newRecent) async {
+    final db = await getDatabase();
+    insertRecentIntoDb(newRecent: newRecent);
+
+    final contactAndContactExistsStatus = await getContactAndExistsStatus(
+        db: db, phoneNumber: newRecent.contact.phoneNumber);
+    newRecent = Recent.fromRecent(
+      recent: newRecent,
+      recentIsAContact: contactAndContactExistsStatus[1],
+      contactName: (contactAndContactExistsStatus[0] as Contact).name,
+      contactImagePath: (contactAndContactExistsStatus[0] as Contact).imagePath,
+    );
+
+    if (state.contains(newRecent)) {
+    } else {
+      state = [...state, newRecent];
+    }
+  }
+
+  void updateRecent(
+      {required DateTime recentCallTime,
+      required String complexMessageJsonString}) async {
+    updateRecentComplexMessageJsonStringInDb(
+        complexMessageJsonString: complexMessageJsonString,
+        recentCallTime: recentCallTime);
+
+    late Recent recentToBeRemoved;
+    final List<Recent> newState = List.from(state)
+      ..removeWhere((recent) {
+        if (recent.callTime == recentCallTime) {
+          recentToBeRemoved = recent;
+          return true;
+        }
+        return false;
+      });
+    newState.add(
+      Recent(
+        contact: recentToBeRemoved.contact,
+        category: recentToBeRemoved.category,
+        callTime: recentToBeRemoved.callTime,
+        regularMessage: null,
+        complexMessage:
+            ComplexMessage(complexMessageJsonString: complexMessageJsonString),
+        id: recentToBeRemoved.id,
+        canBeViewed: recentToBeRemoved.canBeViewed,
+        recentIsAContact: recentToBeRemoved.recentIsAContact,
+        accessRequestPending: recentToBeRemoved.accessRequestPending,
+      ),
+    );
+    state = newState;
+  }
+
+  Future<void> updateRecentAccessRequestPendingStatus(
+      {required String recentId, required bool isPending}) async {
+    final List<Recent> updatedRecents = state.map(
+      (recent) {
+        if (recent.id == recentId) {
+          return Recent(
+            contact: recent.contact,
+            callTime: recent.callTime,
+            category: recent.category,
+            complexMessage: recent.complexMessage,
+            regularMessage: recent.regularMessage,
+            id: recent.id,
+            canBeViewed: recent.canBeViewed,
+            recentIsAContact: recent.recentIsAContact,
+            accessRequestPending: isPending,
+          );
+        }
+        return recent;
+      },
+    ).toList();
+
+    state = updatedRecents;
+    final db = await getDatabase();
+    db.update(
+      recentsTableName,
+      {
+        'accessRequestPending': isPending ? 1 : 0,
+      },
+      where: 'id = ?',
+      whereArgs: [recentId],
+    );
+  }
+
+  Future<void> updateRecentContactStateOnly(
       String oldPhoneNumber, Contact newContact) async {
     final List<Recent> updatedRecents = state.map(
       (recent) {
@@ -83,58 +170,7 @@ class RecentsNotifier extends StateNotifier<List<Recent>> {
     state = updatedRecents;
   }
 
-  void addRecent(Recent newRecent) async {
-    final db = await getDatabase();
-    insertRecentIntoDb(newRecent: newRecent);
-
-    final contactAndContactExistsStatus = await getContactAndExistsStatus(
-        db: db, phoneNumber: newRecent.contact.phoneNumber);
-    newRecent = Recent.fromRecent(
-      recent: newRecent,
-      recentIsAContact: contactAndContactExistsStatus[1],
-      contactName: (contactAndContactExistsStatus[0] as Contact).name,
-      contactImagePath: (contactAndContactExistsStatus[0] as Contact).imagePath,
-    );
-
-    if (state.contains(newRecent)) {
-    } else {
-      state = [...state, newRecent];
-    }
-  }
-
-  void updateRecent(
-      {required DateTime recentCallTime,
-      required String complexMessageJsonString}) async {
-    updateRecentInDb(
-        complexMessageJsonString: complexMessageJsonString,
-        recentCallTime: recentCallTime);
-
-    late Recent recentToBeRemoved;
-    final List<Recent> newState = List.from(state)
-      ..removeWhere((recent) {
-        if (recent.callTime == recentCallTime) {
-          recentToBeRemoved = recent;
-          return true;
-        }
-        return false;
-      });
-    newState.add(
-      Recent(
-        contact: recentToBeRemoved.contact,
-        category: recentToBeRemoved.category,
-        callTime: recentToBeRemoved.callTime,
-        regularMessage: null,
-        complexMessage:
-            ComplexMessage(complexMessageJsonString: complexMessageJsonString),
-        id: recentToBeRemoved.id,
-        canBeViewed: recentToBeRemoved.canBeViewed,
-        recentIsAContact: recentToBeRemoved.recentIsAContact,
-      ),
-    );
-    state = newState;
-  }
-
-  // should only be used when we delete a contact and we want to delete the corresponding
+  // should only be used when we delete a contact and we want don' want the name in the recents to still be the name of the deleted contact.
   Future<void> removeNamesFromRecents(String phoneNumber) async {
     final List<Recent> newList = [];
 

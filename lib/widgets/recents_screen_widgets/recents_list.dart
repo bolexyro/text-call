@@ -404,7 +404,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                           context: context,
                                           buttonText: 'Send  access request',
                                           onPressed: () {
-                                            sendAccessRequest(recentN);
+                                            sendAccessRequest(recentN, ref);
                                             Navigator.of(context).pop();
                                           },
                                         );

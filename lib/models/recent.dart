@@ -57,6 +57,7 @@ class Recent {
     this.recentIsAContact = false,
     this.canBeViewed = true,
     required this.id,
+    this.accessRequestPending = true,
   }) : callTime = callTime ?? DateTime.now();
 
   Recent.fromRecent({
@@ -70,6 +71,7 @@ class Recent {
             imagePath: null),
         category = recent.category,
         canBeViewed = recent.canBeViewed,
+        accessRequestPending = recent.accessRequestPending,
         callTime = recent.callTime,
         regularMessage = recent.regularMessage,
         complexMessage = recent.complexMessage,
@@ -84,6 +86,7 @@ class Recent {
     required String phoneNumber,
     this.recentIsAContact = false,
     this.canBeViewed = true,
+    this.accessRequestPending = true,
   })  : callTime = callTime ?? DateTime.now(),
         contact = Contact(
           name: '0${phoneNumber.substring(4)}',
@@ -102,4 +105,5 @@ class Recent {
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;
   final bool canBeViewed;
+  final bool accessRequestPending;
 }

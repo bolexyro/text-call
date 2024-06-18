@@ -103,6 +103,7 @@ Future<void> messageHandler(RemoteMessage message) async {
         'recents',
         {
           'canBeViewed': 1,
+          'accessRequestPending': 0,
         },
         where: 'id = ?',
         whereArgs: [recentId],
@@ -127,6 +128,16 @@ Future<void> messageHandler(RemoteMessage message) async {
       );
     }
     if (accessRequestStatus == 'denied') {
+      final db = await getDatabase();
+
+      await db.update(
+        'recents',
+        {
+          'accessRequestPending': 0,
+        },
+        where: 'id = ?',
+        whereArgs: [recentId],
+      );
       final DateTime currentDate = DateTime.now();
 
       AwesomeNotifications().createNotification(

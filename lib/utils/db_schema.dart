@@ -6,7 +6,7 @@ Future<sql.Database> getDatabase() async {
 
   final db = await sql.openDatabase(
     path.join(databasesPath, 'contacts.db'),
-    version: 2,
+    version: 1,
     onCreate: (db, newVersion) async {
       for (int version = 0; version < newVersion; version++) {
         _performDbOperationsVersionWise(db, version + 1);
@@ -27,9 +27,6 @@ Future<void> _performDbOperationsVersionWise(
     case 1:
       await _databaseVersion1(db);
       break;
-    case 2:
-      await _databaseVersion2(db);
-      break;
   }
 }
 
@@ -44,10 +41,7 @@ Future<void> _databaseVersion1(sql.Database db) async {
   // but the pick up time would be earlier than the outgoing since the user has t o first pick up or decline
   // before we know what category of recents to insert in the db.
   await db.execute(
-      'CREATE TABLE recents ( id TEXT, callTime TEXT PRIMARY KEY, phoneNumber TEXT, categoryName TEXT, messageJson TEXT, messageType TEXT, canBeViewed INTEGER)');
-}
-
-Future<void> _databaseVersion2(sql.Database db) async {
+      'CREATE TABLE recents ( id TEXT, callTime TEXT PRIMARY KEY, phoneNumber TEXT, categoryName TEXT, messageJson TEXT, messageType TEXT, canBeViewed INTEGER, accessRequestPending INTEGER)');
   await db.execute(
       'CREATE TABLE access_requests ( recentId TEXT PRIMARY KEY, time TEXT, isSent INTEGER, status TEXT)');
 }

@@ -32,7 +32,7 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
     state = [...state, newContact];
     await ref
         .read(recentsProvider.notifier)
-        .updateRecentContact(newContact.phoneNumber, newContact);
+        .updateRecentContactStateOnly(newContact.phoneNumber, newContact);
   }
 
   Future<void> updateContact(
@@ -52,7 +52,7 @@ class ContactsNotifier extends StateNotifier<List<Contact>> {
     state = newState;
     await ref
         .read(recentsProvider.notifier)
-        .updateRecentContact(oldContactPhoneNumber, newContact);
+        .updateRecentContactStateOnly(oldContactPhoneNumber, newContact);
   }
 
   void deleteContact(WidgetRef ref, String phoneNumber) async {

@@ -120,6 +120,9 @@ Future<Widget> whichTextCall(
   );
 }
 
+
+// this would be an issue if the user picks up a call early and they close the app and open it back in less than 21 seconds.
+// the app would open to the last call message.
 Future<dynamic> getLastCall() async {
   final calls = await FlutterCallkitIncoming.activeCalls();
   if (calls is List) {

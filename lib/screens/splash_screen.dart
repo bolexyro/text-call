@@ -14,7 +14,7 @@ class SplashScreen extends StatelessWidget {
           children: [
             SvgPicture.asset(
               'assets/icons/message-ring.svg',
-              height: 200,
+              height: 160,
               colorFilter: ColorFilter.mode(
                   Theme.of(context).brightness == Brightness.dark
                       ? makeColorLighter(

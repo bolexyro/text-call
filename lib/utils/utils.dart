@@ -17,8 +17,10 @@ import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/providers/contacts_provider.dart';
+import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/utils/constants.dart';
+import 'package:text_call/utils/crud.dart';
 import 'package:text_call/widgets/camera_or_gallery.dart';
 import 'package:text_call/widgets/dialogs/add_contact_dialog.dart';
 import 'package:text_call/widgets/message_writer.dart';
@@ -252,9 +254,12 @@ Future<void> sendAccessRequestStatus(
   http.get(url);
 }
 
-void sendAccessRequest(Recent recent) async {
+void sendAccessRequest(Recent recent, WidgetRef ref) async {
   final prefs = await SharedPreferences.getInstance();
   final String? requesterPhoneNumber = prefs.getString('myPhoneNumber');
+  insertAccessRequestIntoDb(recentId: recent.id, isSent: true);
+  ref.read(recentsProvider.notifier).updateRecentAccessRequestPendingStatus(
+      recentId: recent.id, isPending: true);
   final url = Uri.https(backendRootUrl,
       'send-access-request/$requesterPhoneNumber/${recent.contact.phoneNumber}/${recent.id}');
   http.get(url);

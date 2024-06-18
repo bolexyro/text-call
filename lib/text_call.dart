@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/providers/blocked_contacts_provider.dart';
 import 'package:text_call/providers/contacts_provider.dart';
-import 'package:text_call/providers/received_access_requests_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/auth_screen.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
@@ -45,9 +44,9 @@ class _TextCallState extends ConsumerState<TextCall> {
     await ref.read(contactsProvider.notifier).loadContacts();
     await ref.read(recentsProvider.notifier).loadRecents();
     await ref.read(blockedContactsProvider.notifier).loadBlockedContacts();
-    await ref
-        .read(receivedAccessRequestsProvider.notifier)
-        .loadPendingReceivedAccessRequests(ref);
+    // await ref
+    //     .read(receivedAccessRequestsProvider.notifier)
+    //     .loadPendingReceivedAccessRequests(ref);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.reload();
     final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
@@ -62,7 +61,6 @@ class _TextCallState extends ConsumerState<TextCall> {
 
   @override
   Widget build(BuildContext context) {
-    print('mkbhd');
     return GetMaterialApp(
       themeMode: widget.themeMode,
       theme: kLightTheme,

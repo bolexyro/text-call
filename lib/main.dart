@@ -47,7 +47,7 @@ void main() async {
         channelGroupKey: 'app_interactions_group',
         channelGroupName: 'App Interactions Group',
       )
-    ],
+    ],  
     debug: true,
   );
 

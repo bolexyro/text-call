@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/providers/blocked_contacts_provider.dart';
 import 'package:text_call/providers/contacts_provider.dart';
+import 'package:text_call/providers/received_access_requests_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/auth_screen.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
@@ -40,13 +41,22 @@ class TextCall extends ConsumerStatefulWidget {
 }
 
 class _TextCallState extends ConsumerState<TextCall> {
+  late Future<Map<String, dynamic>>
+      _variableForGetUserInfoAndloadImportantStuffFUture;
+  @override
+  initState() {
+    _variableForGetUserInfoAndloadImportantStuffFUture =
+        getUserInfoAndLoadImportantStuff();
+    super.initState();
+  }
+
   Future<Map<String, dynamic>> getUserInfoAndLoadImportantStuff() async {
     await ref.read(contactsProvider.notifier).loadContacts();
     await ref.read(recentsProvider.notifier).loadRecents();
     await ref.read(blockedContactsProvider.notifier).loadBlockedContacts();
-    // await ref
-    //     .read(receivedAccessRequestsProvider.notifier)
-    //     .loadPendingReceivedAccessRequests(ref);
+    await ref
+        .read(receivedAccessRequestsProvider.notifier)
+        .loadPendingReceivedAccessRequests(ref);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.reload();
     final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
@@ -68,7 +78,7 @@ class _TextCallState extends ConsumerState<TextCall> {
       navigatorKey: TextCall.navigatorKey,
       debugShowCheckedModeBanner: false,
       home: FutureBuilder(
-        future: getUserInfoAndLoadImportantStuff(),
+        future: _variableForGetUserInfoAndloadImportantStuffFUture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const SplashScreen();
@@ -78,7 +88,6 @@ class _TextCallState extends ConsumerState<TextCall> {
           }
           if (snapshot.hasData) {
             final userInfo = snapshot.data ?? {};
-            print(userInfo);
             if (widget.howAppIsOPened ==
                 HowAppIsOPened.fromTerminatedForPickedCall) {
               final url = Uri.https(backendRootUrl,

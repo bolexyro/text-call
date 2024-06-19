@@ -56,14 +56,14 @@ class SentAccessRequestsCard extends StatelessWidget {
             const SizedBox(
               width: 20,
             ),
-            const Column(
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'To Bolexyro',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  'To ${recent.contact.name}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                Text('Click to view'),
+                const Text('Click to view'),
               ],
             ),
             const Spacer(),

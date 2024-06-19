@@ -77,6 +77,8 @@ dependencies:
   flutter_svg_provider: ^1.0.7
   uuid: ^4.4.0
   custom_sliding_segmented_control: ^1.8.3
+  dropdown_button2: ^2.3.9
+  flutter_email_sender: ^6.0.3
 
 dev_dependencies:
   flutter_test:

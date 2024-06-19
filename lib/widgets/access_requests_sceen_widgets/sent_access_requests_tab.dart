@@ -39,6 +39,7 @@ class _AccessRequestsSentTabState extends ConsumerState<AccessRequestsSentTab> {
         return allRecentIdsInSentAccessRequests.contains(recent.id);
       },
     ).toList();
+    
     return Column(
       children: [
         Row(

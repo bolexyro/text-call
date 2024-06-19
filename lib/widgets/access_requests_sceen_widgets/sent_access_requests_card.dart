@@ -77,8 +77,8 @@ class SentAccessRequestsCard extends StatelessWidget {
                         : Colors.red,
               ),
             ),
-            const SizedBox(
-              width: 10,
+            SizedBox(
+              width: status == 'Accepted' ? 20 : 10,
             ),
             if (status == 'Pending' || status == 'Rejected')
               const SentAccessRequestsCardMenuAnchor(),

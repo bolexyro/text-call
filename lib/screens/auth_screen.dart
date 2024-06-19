@@ -110,7 +110,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
       showFlushBar(
         const Color.fromARGB(255, 0, 63, 114),
-        'You might be redirected to your browsser. But don\'t panick. It is to verify you are not a bot...IKR',
+        'You might be redirected to your browser. But don\'t panick. It is to verify you are not a bot...IKR',
         FlushbarPosition.TOP,
         context,
       );

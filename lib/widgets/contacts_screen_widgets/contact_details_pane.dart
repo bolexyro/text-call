@@ -96,17 +96,19 @@ class ContactDetailsPane extends ConsumerWidget {
                   ),
                   child: const Text('Show message'),
                 )
-              : recent!.accessRequestPending
-                  ? const Text('Pending')
-                  : ElevatedButton(
-                      onPressed: () => sendAccessRequest(recent!, ref),
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text('Request access'),
+              : ElevatedButton(
+                  onPressed: recent!.accessRequestPending
+                      ? null
+                      : () => sendAccessRequest(recent!, ref),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
+                  ),
+                  child: recent!.accessRequestPending
+                      ? const Text('Pending Request')
+                      : const Text('Request access'),
+                ),
         ],
       );
     }

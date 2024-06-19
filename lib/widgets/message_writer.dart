@@ -963,7 +963,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             }
             if (snapshotData['call_status'] == 'accepted') {
               _channel?.sink.close();
-
               final recent = Recent.withoutContactObject(
                 category: RecentCategory.outgoingAccepted,
                 regularMessage: _upToDateBolexyroJson == null

@@ -7,7 +7,6 @@ const String contactsTableName = 'contacts';
 const String recentsTableName = 'recents';
 const String accessRequestsTableName = 'access_requests';
 
-
 Future<List> getContactAndExistsStatus({
   sql.Database? db,
   required String phoneNumber,
@@ -142,6 +141,7 @@ Future<void> insertAccessRequestIntoDb(
       'time': DateTime.now().toString(),
       'isSent': isSent ? 1 : 0,
     },
+    conflictAlgorithm: sql.ConflictAlgorithm.replace,
   );
 }
 
@@ -160,4 +160,3 @@ Future<List<Map<String, Object?>>> readAccessRequestsFromDb(
   return db.query(accessRequestsTableName,
       where: 'isSent = ?', whereArgs: [isSent ? 1 : 0]);
 }
-

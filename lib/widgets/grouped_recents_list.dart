@@ -111,17 +111,19 @@ class _GroupedRecentsListState extends ConsumerState<GroupedRecentsList> {
                       ),
                       child: const Text('Show Message'),
                     )
-                  : recentN.accessRequestPending
-                      ? const Text('Pending')
-                      : ElevatedButton(
-                          onPressed: () => sendAccessRequest(recentN, ref),
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text('Request access'),
+                  : ElevatedButton(
+                      onPressed: recentN.accessRequestPending
+                          ? null
+                          : () => sendAccessRequest(recentN, ref),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
+                      ),
+                      child: recentN.accessRequestPending
+                          ? const Text('Pending Request')
+                          : const Text('Request access'),
+                    ),
               isExpanded: _expandedBoolsMap[recentN]!,
               tileOnTapped: () => _changeTileExpandedStatus(recentN),
             ),

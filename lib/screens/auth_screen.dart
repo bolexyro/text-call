@@ -40,8 +40,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.appOpenedFromPickedCall && !_flushbarShown) {
-        showFlushBar(Colors.blue, 'You have to login to see the message.',
-            FlushbarPosition.TOP, context);
+        showFlushBar(
+            const Color.fromARGB(255, 0, 63, 114),
+            'You have to login to see the message.',
+            FlushbarPosition.TOP,
+            context);
         _flushbarShown = true;
       }
     });
@@ -75,7 +78,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           context,
           mainButton: ElevatedButton(
             onPressed: () async {
-              
               (_flushBarKey!.currentWidget as Flushbar).dismiss();
               _flushBarKey = showFlushBar(
                 const Color.fromARGB(255, 0, 63, 114),

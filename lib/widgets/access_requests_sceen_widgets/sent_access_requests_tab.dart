@@ -39,7 +39,7 @@ class _AccessRequestsSentTabState extends ConsumerState<AccessRequestsSentTab> {
         return allRecentIdsInSentAccessRequests.contains(recent.id);
       },
     ).toList();
-    
+
     return Column(
       children: [
         Row(
@@ -74,9 +74,7 @@ class _AccessRequestsSentTabState extends ConsumerState<AccessRequestsSentTab> {
                   child: Lottie.asset(
                   'assets/animations/empty_box.json',
                   repeat: false,
-                )
-                  // Text('hello'),
-                  )
+                ))
               : GroupedListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   useStickyGroupSeparators: true,

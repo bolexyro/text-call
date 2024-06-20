@@ -81,7 +81,7 @@ class _TextCallState extends ConsumerState<TextCall> {
         future: _variableForGetUserInfoAndloadImportantStuffFUture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const SplashScreen();
+            return  SplashScreen(taskForProgressIndicator: _variableForGetUserInfoAndloadImportantStuffFUture);
           }
           if (snapshot.hasError) {
             return Text('Errordd: ${snapshot.error}');

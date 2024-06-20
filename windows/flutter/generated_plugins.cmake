@@ -5,12 +5,10 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   awesome_notifications
   cloud_firestore
-  connectivity_plus
   file_selector_windows
   firebase_auth
   firebase_core
   firebase_storage
-  gal
   irondash_engine_context
   super_native_extensions
   url_launcher_windows

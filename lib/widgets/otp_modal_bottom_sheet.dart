@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pinput/pinput.dart';
 import 'package:text_call/utils/utils.dart';
 
 class OTPModalBottomSheet extends ConsumerStatefulWidget {
@@ -24,8 +24,8 @@ class OTPModalBottomSheet extends ConsumerStatefulWidget {
 }
 
 class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
-  final List<FocusNode> _focusNodes = [];
-  final List<TextEditingController> _textControllers = [];
+  // final List<FocusNode> _focusNodes = [];
+  // final List<TextEditingController> _textControllers = [];
   final int _totalCounterSeconds = 40;
   late int _counter;
   String _counterText = '';
@@ -40,10 +40,10 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
     _resendToken = widget.resendToken;
     _phoneNumber = widget.phoneNumber;
 
-    for (int i = 0; i < 6; i++) {
-      _focusNodes.add(FocusNode());
-      _textControllers.add(TextEditingController(text: '\u200B'));
-    }
+    // for (int i = 0; i < 6; i++) {
+    //   _focusNodes.add(FocusNode());
+    //   _textControllers.add(TextEditingController(text: '\u200B'));
+    // }
     startCountDownTimer();
   }
 
@@ -54,16 +54,16 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
     }
   }
 
-  @override
-  void dispose() {
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
-    for (final controller in _textControllers) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   for (var node in _focusNodes) {
+  //     node.dispose();
+  //   }
+  //   for (final controller in _textControllers) {
+  //     controller.dispose();
+  //   }
+  //   super.dispose();
+  // }
 
   void startCountDownTimer() {
     Timer.periodic(
@@ -134,6 +134,25 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    const otpMediaQueryOtpFieldRatio = 0.877;
+    final otpTextFieldSize =
+        MediaQuery.sizeOf(context).width * otpMediaQueryOtpFieldRatio;
+    final textFieldPadding = EdgeInsets.symmetric(
+        horizontal: MediaQuery.sizeOf(context).width *
+            (1 - otpMediaQueryOtpFieldRatio));
+    const noFields = 6;
+
+    final defaultPinTheme = PinTheme(
+      padding: const EdgeInsets.only(bottom: 8),
+      textStyle: const TextStyle(fontSize: 20),
+      width: otpTextFieldSize / noFields,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+              color: Theme.of(context).colorScheme.onTertiaryContainer),
+        ),
+      ),
+    );
     return Stack(
       children: [
         Container(
@@ -283,32 +302,38 @@ class _OTPModalBottomSheetState extends ConsumerState<OTPModalBottomSheet> {
                   //       )
                   //   ],
                   // ),
-                  OtpTextField(
-                    autoFocus: true,
-                    numberOfFields: 6,
-                    borderRadius: BorderRadius.circular(8),
-                    borderColor: Colors.white,
-                    margin: const EdgeInsets.only(right: 10.0),
-                    focusedBorderColor: Colors.blue,
-                    showFieldAsBox: false,
-                    keyboardType: TextInputType.number,
-                    onCodeChanged: (String code) {
-                    },
-                    onSubmit: (String verificationCode) {
-                      if (!_codeResent) {
-                        // here we weould be sending the same verificationId and resendToken as the one in widget.<whatever>
-                        Navigator.of(context).pop({
-                          'smsCode': verificationCode,
-                          'verificationId': widget.verificationId,
-                          'resendToken': _resendToken,
-                        });
-                      } else {
-                        _completer.complete(
-                        verificationCode,
-                        );
-                      }
-                    }, // end onSubmit
+
+                  Padding(
+                    padding: textFieldPadding,
+                    child: Pinput(
+                      length: 6,
+                      autofocus: true,
+                      defaultPinTheme: defaultPinTheme,
+                      focusedPinTheme: defaultPinTheme.copyDecorationWith(
+                        border: const Border(
+                          bottom: BorderSide(
+                            color: Color.fromARGB(255, 22, 150, 255),
+                          ),
+                        ),
+                      ),
+                      showCursor: true,
+                      onCompleted: (String verificationCode) {
+                        if (!_codeResent) {
+                          // here we weould be sending the same verificationId and resendToken as the one in widget.<whatever>
+                          Navigator.of(context).pop({
+                            'smsCode': verificationCode,
+                            'verificationId': widget.verificationId,
+                            'resendToken': _resendToken,
+                          });
+                        } else {
+                          _completer.complete(
+                            verificationCode,
+                          );
+                        }
+                      }, // end onSubmi
+                    ),
                   ),
+
                   const SizedBox(height: 15),
                   if (_counter == 0)
                     TextButton(

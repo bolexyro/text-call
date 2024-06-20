@@ -38,6 +38,7 @@ class PreviewScreenContent extends StatelessWidget {
                               ['audioPaths']['local'] ??
                           indexMainMediaMapPair.value['audio']['audioPaths']
                               ['online'],
+                      isNetworkAudio: !isAvailableOffline,
                     ),
                   if (indexMainMediaMapPair.value.keys.first == 'video')
                     MyVideoPlayer(

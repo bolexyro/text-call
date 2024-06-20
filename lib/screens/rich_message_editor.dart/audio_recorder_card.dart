@@ -38,7 +38,8 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
       _recordingStarted = true;
       _path = widget.initialAudioPath!;
     }
-    _recordingDirectory = messagesDirectoryPath(isTemporary: true,specificDirectory: 'audio');
+    _recordingDirectory =
+        messagesDirectoryPath(isTemporary: true, specificDirectory: 'audio');
     _initialiseControllers();
     super.initState();
   }
@@ -155,7 +156,10 @@ class _AudioRecorderCardState extends State<AudioRecorderCard> {
                             ),
                             padding: const EdgeInsets.only(left: 18),
                           )
-                        : WaveBubble(audioPath: _path!),
+                        : WaveBubble(
+                            audioPath: _path!,
+                            isNetworkAudio: false,
+                          ),
                   ),
                 ),
                 const Gap(5),

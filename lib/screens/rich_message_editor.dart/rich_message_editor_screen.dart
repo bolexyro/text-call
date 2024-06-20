@@ -299,7 +299,7 @@ class _RichMessageEditorScreenState extends State<RichMessageEditorScreen> {
     if (!_shownAudioInconsistentMessage) {
       showFlushBar(
         const Color.fromARGB(255, 0, 63, 114),
-        'Audio is currently in alpha and might not work properly',
+        'Audio is currently in alpha and so, you can only record one message for now and it might not work. Good luck 😁',
         FlushbarPosition.TOP,
         context,
       );

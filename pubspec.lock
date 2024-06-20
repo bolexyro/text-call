@@ -177,22 +177,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.0"
-  connectivity_plus:
-    dependency: transitive
-    description:
-      name: connectivity_plus
-      sha256: db7a4e143dc72cc3cb2044ef9b052a7ebfe729513e6a82943bc3526f784365b8
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.3"
-  connectivity_plus_platform_interface:
-    dependency: transitive
-    description:
-      name: connectivity_plus_platform_interface
-      sha256: b6a56efe1e6675be240de39107281d4034b64ac23438026355b4234042a35adb
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   convert:
     dependency: transitive
     description:
@@ -249,14 +233,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "9.3.13"
-  dbus:
-    dependency: transitive
-    description:
-      name: dbus
-      sha256: "365c771ac3b0e58845f39ec6deebc76e3276aa9922b0cc60840712094d9047ac"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.10"
   device_info_plus:
     dependency: transitive
     description:
@@ -494,62 +470,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.3"
-  flutter_inappwebview:
-    dependency: transitive
-    description:
-      name: flutter_inappwebview
-      sha256: "3e9a443a18ecef966fb930c3a76ca5ab6a7aafc0c7b5e14a4a850cf107b09959"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.0"
-  flutter_inappwebview_android:
-    dependency: transitive
-    description:
-      name: flutter_inappwebview_android
-      sha256: d247f6ed417f1f8c364612fa05a2ecba7f775c8d0c044c1d3b9ee33a6515c421
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.13"
-  flutter_inappwebview_internal_annotations:
-    dependency: transitive
-    description:
-      name: flutter_inappwebview_internal_annotations
-      sha256: "5f80fd30e208ddded7dbbcd0d569e7995f9f63d45ea3f548d8dd4c0b473fb4c8"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.1"
-  flutter_inappwebview_ios:
-    dependency: transitive
-    description:
-      name: flutter_inappwebview_ios
-      sha256: f363577208b97b10b319cd0c428555cd8493e88b468019a8c5635a0e4312bd0f
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.13"
-  flutter_inappwebview_macos:
-    dependency: transitive
-    description:
-      name: flutter_inappwebview_macos
-      sha256: b55b9e506c549ce88e26580351d2c71d54f4825901666bd6cfa4be9415bb2636
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.11"
-  flutter_inappwebview_platform_interface:
-    dependency: transitive
-    description:
-      name: flutter_inappwebview_platform_interface
-      sha256: "545fd4c25a07d2775f7d5af05a979b2cac4fbf79393b0a7f5d33ba39ba4f6187"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.10"
-  flutter_inappwebview_web:
-    dependency: transitive
-    description:
-      name: flutter_inappwebview_web
-      sha256: d8c680abfb6fec71609a700199635d38a744df0febd5544c5a020bd73de8ee07
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.8"
   flutter_keyboard_visibility:
     dependency: transitive
     description:
@@ -611,14 +531,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_otp_text_field:
-    dependency: "direct main"
-    description:
-      name: flutter_otp_text_field
-      sha256: c51dc7ce1a6fd9430580decda1104643f14703819e351c4a3074c9fe3d24cdbc
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.3+2"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -632,14 +544,6 @@ packages:
     description:
       name: flutter_quill
       sha256: "490e26fff6788c76e0bcbe7c2defa17dd4745f7d51da1e285c8a058800a89f75"
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.3.13"
-  flutter_quill_extensions:
-    dependency: "direct main"
-    description:
-      name: flutter_quill_extensions
-      sha256: "6a4a3b0a327b7c338bec084f308f41a091c6c0068ce2eaf15959819281fbf12b"
       url: "https://pub.dev"
     source: hosted
     version: "9.3.13"
@@ -685,22 +589,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  gal:
-    dependency: transitive
-    description:
-      name: gal
-      sha256: "54c9b72528efce7c66234f3b6dd01cb0304fd8af8196de15571d7bdddb940977"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.0"
-  gal_linux:
-    dependency: transitive
-    description:
-      name: gal_linux
-      sha256: cbff918888aaa7b86d5a992764ad94d217347d63912e008e8449605b1cc0b38a
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.0"
   gap:
     dependency: "direct main"
     description:
@@ -777,10 +665,10 @@ packages:
     dependency: "direct main"
     description:
       name: image_picker
-      sha256: fe9ee64ccb8d599a5dfb0e21cc6652232c610bcf667af4e79b9eb175cc30a7a5
+      sha256: "021834d9c0c3de46bf0fe40341fa07168407f694d9b2bb18d532dc1261867f7a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.2"
   image_picker_android:
     dependency: transitive
     description:
@@ -837,14 +725,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1+1"
-  internet_connection_checker_plus:
-    dependency: "direct main"
-    description:
-      name: internet_connection_checker_plus
-      sha256: "423480962bda16f10d0a79efe6c4f1b5212d80203f6b8ee921edb0a1d3c17c88"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.0"
   intl:
     dependency: "direct main"
     description:
@@ -973,14 +853,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
-  nm:
-    dependency: transitive
-    description:
-      name: nm
-      sha256: "2c9aae4127bdc8993206464fcc063611e0e36e72018696cd9631023a31b24254"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.0"
   octo_image:
     dependency: transitive
     description:
@@ -1061,14 +933,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.2"
-  photo_view:
-    dependency: transitive
+  pinput:
+    dependency: "direct main"
     description:
-      name: photo_view
-      sha256: "8036802a00bae2a78fc197af8a158e3e2f7b500561ed23b4c458107685e645bb"
+      name: pinput
+      sha256: "7bf9aa7d0eeb3da9f7d49d2087c7bc7d36cd277d2e94cc31c6da52e1ebb048d0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.14.0"
+    version: "5.0.0"
   pixel_snap:
     dependency: transitive
     description:
@@ -1298,22 +1170,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.2"
-  universal_html:
+  universal_platform:
     dependency: transitive
     description:
-      name: universal_html
-      sha256: "56536254004e24d9d8cfdb7dbbf09b74cf8df96729f38a2f5c238163e3d58971"
+      name: universal_platform
+      sha256: "64e16458a0ea9b99260ceb5467a214c1f298d647c659af1bff6d3bf82536b1ec"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.4"
-  universal_io:
-    dependency: transitive
-    description:
-      name: universal_io
-      sha256: "1722b2dcc462b4b2f3ee7d188dad008b6eb4c40bbd03a3de451d82c78bba9aad"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.2"
+    version: "1.1.0"
   url_launcher:
     dependency: transitive
     description:
@@ -1514,14 +1378,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.0"
-  youtube_player_flutter:
-    dependency: transitive
-    description:
-      name: youtube_player_flutter
-      sha256: "899f1fd15e924eb41150c78c5e2adfd7310100c26b2e1996c148d79e42737d72"
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.0.1"
 sdks:
-  dart: ">=3.3.1 <4.0.0"
+  dart: ">=3.3.0 <4.0.0"
   flutter: ">=3.19.2"

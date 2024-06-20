@@ -513,3 +513,19 @@ String groupHeaderText(DateTime headerDateTime) {
   }
   return DateFormat('EEEE, d MMMM').format(headerDateTime);
 }
+
+ String formatDuration(Duration duration) {
+    int totalSeconds = duration.inSeconds;
+    int seconds = totalSeconds % 60;
+    int totalMinutes = totalSeconds ~/ 60;
+    int minutes = totalMinutes % 60;
+    int hours = totalMinutes ~/ 60;
+
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    } else if (minutes > 0) {
+      return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    } else {
+      return '0:${seconds.toString().padLeft(2, '0')}';
+    }
+  }

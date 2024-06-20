@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:text_call/utils/constants.dart';
+import 'package:text_call/utils/utils.dart';
 import 'package:video_player/video_player.dart';
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 
@@ -68,21 +69,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
     super.dispose();
   }
 
-  String _formatDuration(Duration duration) {
-    int totalSeconds = duration.inSeconds;
-    int seconds = totalSeconds % 60;
-    int totalMinutes = totalSeconds ~/ 60;
-    int minutes = totalMinutes % 60;
-    int hours = totalMinutes ~/ 60;
-
-    if (hours > 0) {
-      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    } else if (minutes > 0) {
-      return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    } else {
-      return '0:${seconds.toString().padLeft(2, '0')}';
-    }
-  }
+ 
 
   void _goFullScreen() {
     Navigator.of(context).push(
@@ -90,7 +77,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
         builder: (context) => FullScreenVideoPlayer(
           videoPath: widget.videoPath,
           videoController: _controller,
-          formatDuration: _formatDuration,
+          formatDuration: formatDuration,
         ),
       ),
     );
@@ -173,7 +160,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                   top: 5,
                   child: VideoStatusDisplay(
                     controller: _controller,
-                    formatDuration: _formatDuration,
+                    formatDuration: formatDuration,
                   ),
                 ),
                 Positioned(

@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:audio_waveforms/audio_waveforms.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:text_call/utils/constants.dart';
-import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:http/http.dart' as http;
+
+import 'package:text_call/utils/utils.dart';
 
 class WaveBubble extends StatefulWidget {
   const WaveBubble({
@@ -23,64 +21,61 @@ class WaveBubble extends StatefulWidget {
 }
 
 class _WaveBubbleState extends State<WaveBubble> {
-  late PlayerController _playerController;
-  late StreamSubscription _playerStateSubscription;
+  final _audioPlayer = AudioPlayer();
+  bool _isPlaying = false;
+  Duration _duration = Duration.zero;
+  Duration _position = Duration.zero;
 
-  final playerWaveStyle = const PlayerWaveStyle(
-    fixedWaveColor: Colors.white54,
-    liveWaveColor: Colors.white,
-    spacing: 6,
-  );
+  late final Future _variableToHoldInitializeAudioPlayerSourceFuture;
 
-  Future<void> _loadRemoteAudioToTempDir() async {
-    final response = await http.get(Uri.parse(widget.audioPath));
-    final bytes = response.bodyBytes;
-    final Directory tempDir = await path_provider.getTemporaryDirectory();
-    final String newFileName =
-        FirebaseStorage.instance.refFromURL(widget.audioPath).name;
-    final file = File('${tempDir.path}/$newFileName');
-
-    if (response.statusCode == 200) {
-      await file.writeAsBytes(bytes);
-      _playerController = PlayerController()
-        ..preparePlayer(path: file.path, shouldExtractWaveform: true);
-      _playerStateSubscription =
-          _playerController.onPlayerStateChanged.listen((_) {
-        if (mounted) {
-          setState(() {});
-        }
-      });
+  Future<void> initializeAudioPlayerSource() async {
+    if (widget.isNetworkAudio) {
+      await _audioPlayer.setSourceUrl(widget.audioPath);
+    } else {
+      await _audioPlayer.setSourceDeviceFile(widget.audioPath);
     }
+
+    _duration = await _audioPlayer.getDuration() ?? Duration.zero;
+
+    // listen to states: playing, paused and stopped
+    _audioPlayer.onPlayerStateChanged.listen((state) {
+      if (mounted) {
+        setState(() {
+          _isPlaying = state == PlayerState.playing;
+        });
+      }
+    });
+
+    // listen to audio duration
+    _audioPlayer.onDurationChanged.listen((newDuration) {
+      if (mounted) {
+        setState(() {
+          _duration = newDuration;
+        });
+      }
+    });
+
+    _audioPlayer.onPositionChanged.listen((newPosition) {
+      if (mounted) {
+        setState(() {
+          _position = newPosition;
+        });
+      }
+    });
+    await _audioPlayer.setReleaseMode(ReleaseMode.stop);
   }
 
-  late final Future _variableForHoldingloadRemoteAudioToTempDirFuture;
   @override
   void initState() {
-    super.initState();
+    _variableToHoldInitializeAudioPlayerSourceFuture =
+        initializeAudioPlayerSource();
 
-    if (widget.isNetworkAudio) {
-      _variableForHoldingloadRemoteAudioToTempDirFuture =
-          _loadRemoteAudioToTempDir();
-      return;
-    }
-    _playerController = PlayerController()
-      ..preparePlayer(
-        path: widget.audioPath,
-        shouldExtractWaveform: true,
-      );
-    _playerStateSubscription = _playerController.onPlayerStateChanged.listen(
-      (_) {
-        if (mounted) {
-          setState(() {});
-        }
-      },
-    );
+    super.initState();
   }
 
   @override
   void dispose() {
-    _playerController.dispose();
-    _playerStateSubscription.cancel();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -94,107 +89,62 @@ class _WaveBubbleState extends State<WaveBubble> {
         color: const Color.fromARGB(255, 110, 151, 183),
         border: Border.all(width: 2),
       ),
-      child: widget.isNetworkAudio
-          ? FutureBuilder(
-              future: _variableForHoldingloadRemoteAudioToTempDirFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: null,
-                        icon: Icon(
-                          Icons.play_arrow,
-                        ),
-                        color: Colors.white,
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 18.0),
-                            child: CircularProgressIndicator(),
-                          ),
-                        ),
-                      )
-                    ],
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  );
-                }
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () async {
-                        _playerController.playerState.isPlaying
-                            ? await _playerController.pausePlayer()
-                            : await _playerController.startPlayer(
-                                finishMode: FinishMode.pause,
-                              );
-                      },
-                      icon: Icon(
-                        _playerController.playerState.isPlaying
-                            ? Icons.stop
-                            : Icons.play_arrow,
-                      ),
-                      color: Colors.white,
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                    ),
-                    Expanded(
-                      child: AudioFileWaveforms(
-                        enableSeekGesture: true,
-                        padding: const EdgeInsets.only(right: 10),
-                        size: const Size(double.infinity, 70),
-                        playerController: _playerController,
-                        waveformType: WaveformType.fitWidth,
-                        playerWaveStyle: playerWaveStyle,
-                      ),
-                    ),
-                  ],
-                );
-              },
-            )
-          : Row(
-              mainAxisSize: MainAxisSize.min,
+      height: 70,
+      child: Center(
+        child: FutureBuilder(
+          future: _variableToHoldInitializeAudioPlayerSourceFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Text('Error: ${snapshot.error}'),
+              );
+            }
+            return Row(
               children: [
-                if (!_playerController.playerState.isStopped)
-                  IconButton(
-                    onPressed: () async {
-                      _playerController.playerState.isPlaying
-                          ? await _playerController.pausePlayer()
-                          : await _playerController.startPlayer(
-                              finishMode: FinishMode.pause,
-                            );
-                    },
-                    icon: Icon(
-                      _playerController.playerState.isPlaying
-                          ? Icons.stop
-                          : Icons.play_arrow,
-                    ),
+                IconButton(
+                  onPressed: () async {
+                    if (_isPlaying) {
+                      await _audioPlayer.pause();
+                    } else {
+                      await _audioPlayer.resume();
+                    }
+                  },
+                  icon: Icon(
+                    _isPlaying ? Icons.pause : Icons.play_arrow,
                     color: Colors.white,
-                    splashColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                  ),
-                Expanded(
-                  child: AudioFileWaveforms(
-                    enableSeekGesture: true,
-                    padding: const EdgeInsets.only(right: 10),
-                    size: const Size(double.infinity, 70),
-                    playerController: _playerController,
-                    waveformType: WaveformType.fitWidth,
-                    playerWaveStyle: playerWaveStyle,
+                    size: 28,
                   ),
                 ),
+                Expanded(
+                  child: _duration.inMilliseconds > 0
+                      ? Slider(
+                          min: 0,
+                          max: _duration.inSeconds.toDouble(),
+                          value: _position.inSeconds.toDouble(),
+                          onChanged: (_) async {
+                            final position = Duration(seconds: _.toInt());
+                            await _audioPlayer.seek(position);
+                          },
+                        )
+                      : const SizedBox(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Text(
+                    '${formatDuration(_position)}/${formatDuration(_duration)}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                )
               ],
-            ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

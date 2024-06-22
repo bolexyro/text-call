@@ -34,6 +34,7 @@ class MessageWriter extends ConsumerStatefulWidget {
     required this.calleePhoneNumber,
     this.complexMessageForRecall,
     this.regularMessageForRecall,
+    this.canBeViewed,
   });
 
   final String calleePhoneNumber;
@@ -41,6 +42,7 @@ class MessageWriter extends ConsumerStatefulWidget {
   // these variables are going to be used when we want to recall a user via a recent message we already called them with before.
   final RegularMessage? regularMessageForRecall;
   final ComplexMessage? complexMessageForRecall;
+  final bool? canBeViewed;
 
   @override
   ConsumerState<MessageWriter> createState() => _MessageWriterState();
@@ -94,12 +96,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     _selectedColor = const Color.fromARGB(255, 13, 214, 214);
     _messageController = TextEditingController();
 
-    if (widget.regularMessageForRecall != null) {
-      _messageController = TextEditingController(
-          text: widget.regularMessageForRecall?.messageString);
-      _selectedColor = widget.regularMessageForRecall!.backgroundColor;
-    }
-
     if (widget.regularMessageForRecall == null &&
             widget.complexMessageForRecall == null ||
         widget.regularMessageForRecall != null) {
@@ -119,6 +115,18 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       );
     }
 
+    if (widget.regularMessageForRecall != null) {
+      if (widget.canBeViewed == true) {
+        _messageController = TextEditingController(
+            text: widget.regularMessageForRecall!.messageString);
+        _selectedColor = widget.regularMessageForRecall!.backgroundColor;
+      } else {
+        _messageController = TextEditingController(
+            text: replaceWithAsterisks(
+                widget.regularMessageForRecall!.messageString));
+      }
+    }
+
     if (widget.complexMessageForRecall != null) {
       // first, NB: the media in this bolexyrojson might be in remote storage and not stored locally.
       // in that case we'd have to download it,
@@ -130,6 +138,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         _upToDateBolexyroJson = widget.complexMessageForRecall!.bolexyroJson;
 
         _messageWriterMessageBox = FileUiPlaceHolder(
+          canBeViewed: widget.canBeViewed!,
           onBolexroJsonUpdated: _updateMyOwnDocumentJson,
           onDelete: _resetMessageWriterMessageBox,
           bolexyroJson: _upToDateBolexyroJson!,
@@ -190,6 +199,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
             _filesSavingInTempLocationForRecall = false;
 
             return FileUiPlaceHolder(
+              canBeViewed: widget.canBeViewed!,
               onBolexroJsonUpdated: _updateMyOwnDocumentJson,
               onDelete: _resetMessageWriterMessageBox,
               bolexyroJson: _upToDateBolexyroJson!,
@@ -208,6 +218,10 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     _confettiController.dispose();
     _messageController.dispose();
     super.dispose();
+  }
+
+  String replaceWithAsterisks(String input) {
+    return input.replaceAllMapped(RegExp(r'[^ ]'), (match) => '*');
   }
 
   Future<Map<String, dynamic>> _storeFilesInTempDirOnCompexMessageRecall(
@@ -531,6 +545,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
         _bolexyroJsonContainsOnlyRichText =
             bolexyroJsonContainsOnlyRichText(_upToDateBolexyroJson!);
         _messageWriterMessageBox = FileUiPlaceHolder(
+          canBeViewed: true,
           onBolexroJsonUpdated: _updateMyOwnDocumentJson,
           onDelete: _resetMessageWriterMessageBox,
           bolexyroJson: _upToDateBolexyroJson!,
@@ -1351,23 +1366,30 @@ class FileUiPlaceHolder extends StatelessWidget {
     required this.bolexyroJson,
     required this.onDelete,
     required this.onBolexroJsonUpdated,
+    required this.canBeViewed,
   });
   final Map<String, dynamic> bolexyroJson;
   final void Function() onDelete;
   final void Function(Map<String, dynamic>? newBolexyroJson)
       onBolexroJsonUpdated;
 
+  final bool canBeViewed;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => PreviewScreen(
-            bolexyroJson: bolexyroJson,
-            forExtremePreview: true,
-          ),
-        ),
-      ),
+      onTap: () {
+        if (canBeViewed) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PreviewScreen(
+                bolexyroJson: bolexyroJson,
+                forExtremePreview: true,
+              ),
+            ),
+          );
+        }
+      },
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -1390,34 +1412,35 @@ class FileUiPlaceHolder extends StatelessWidget {
               const SizedBox(
                 width: 20,
               ),
-              const Column(
+              Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  const Text(
                     'Complex_Message.txtcall',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text('Click to view')
+                  if (canBeViewed) const Text('Click to view')
                 ],
               ),
               const Spacer(),
               Column(
                 children: [
-                  IconButton(
-                    onPressed: () async {
-                      final Map<String, dynamic>? newBolexyroJson =
-                          await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => RichMessageEditorScreen(
-                            bolexyroJson: bolexyroJson,
+                  if (canBeViewed)
+                    IconButton(
+                      onPressed: () async {
+                        final Map<String, dynamic>? newBolexyroJson =
+                            await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => RichMessageEditorScreen(
+                              bolexyroJson: bolexyroJson,
+                            ),
                           ),
-                        ),
-                      );
+                        );
 
-                      onBolexroJsonUpdated(newBolexyroJson);
-                    },
-                    icon: const Icon(Icons.edit),
-                  ),
+                        onBolexroJsonUpdated(newBolexyroJson);
+                      },
+                      icon: const Icon(Icons.edit),
+                    ),
                   IconButton(
                     onPressed: () async {
                       final bool? toDiscard = await showAdaptiveDialog(

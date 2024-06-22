@@ -264,7 +264,8 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                 elements: recentsList,
                 groupBy: (recentN) => DateTime(recentN.callTime.year,
                     recentN.callTime.month, recentN.callTime.day),
-                groupSeparatorBuilder: (DateTime groupHeaderDateTime) => Padding(
+                groupSeparatorBuilder: (DateTime groupHeaderDateTime) =>
+                    Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     groupHeaderText(groupHeaderDateTime),
@@ -292,6 +293,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                               calleeName: recentN.contact.name,
                               complexMessage: recentN.complexMessage,
                               regularMessage: recentN.regularMessage,
+                              canBeViewed: recentN.canBeViewed,
                             );
                           },
                           backgroundColor: const Color(0xFF21B7CA),
@@ -380,6 +382,7 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                               recentN.complexMessage,
                                           regularMessage:
                                               recentN.regularMessage,
+                                          canBeViewed: recentN.canBeViewed,
                                         );
                                       },
                                       icon: SvgPicture.asset(
@@ -397,10 +400,23 @@ class _RecentsListState extends ConsumerState<RecentsList> {
                                           widget.onRecentSelected(recentN);
                                           return;
                                         }
+                                        if (recentN.accessRequestPending) {
+                                          showADialog(
+                                            header: 'Alert!!',
+                                            body:
+                                                'Permission to access the message from ${recentN.contact.name} is already requested and is currently pending.',
+                                            context: context,
+                                            buttonText: 'OK',
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          );
+                                          return;
+                                        }
                                         showADialog(
                                           header: 'Alert!!',
                                           body:
-                                              "you have to ask ${recentN.contact.name} for permission to see this message since you ${recentN.category == RecentCategory.incomingRejected ? 'rejected' : 'ignored'} the call.",
+                                              'you have to ask ${recentN.contact.name} for permission to see this message since you ${recentN.category == RecentCategory.incomingRejected ? 'rejected' : 'ignored'} the call.',
                                           context: context,
                                           buttonText: 'Send  access request',
                                           onPressed: () {

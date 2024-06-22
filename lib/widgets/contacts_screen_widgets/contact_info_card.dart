@@ -179,6 +179,7 @@ class _ContactCardWProfilePicStackState extends ConsumerState<ContactInfoCard> {
                             calleePhoneNumber: widget.contact.phoneNumber,
                             regularMessage: widget.recent?.regularMessage,
                             complexMessage: widget.recent?.complexMessage,
+                            canBeViewed: widget.recent?.canBeViewed,
                           );
                         },
                         icon: SvgPicture.asset(

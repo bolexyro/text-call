@@ -55,9 +55,10 @@ class _AccessRequestsReceivedTabState
           child: recentsForReceivedAccessRequests.isEmpty
               ? Center(
                   child: Lottie.asset(
-                  'assets/animations/empty_box.json',
-                  repeat: false,
-                ))
+                    'assets/animations/empty_box.json',
+                    repeat: false,
+                  ),
+                )
               : GroupedListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   useStickyGroupSeparators: true,

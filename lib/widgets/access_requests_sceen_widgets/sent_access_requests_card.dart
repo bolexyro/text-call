@@ -23,17 +23,21 @@ class SentAccessRequestsCard extends StatelessWidget {
             ? 'Pending'
             : 'Rejected';
     return GestureDetector(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => SmsNotFromTerminated(
-            howSmsIsOpened:
-                HowSmsIsOpened.notFromTerminatedToJustDisplayMessage,
-            regularMessage: recent.regularMessage,
-            complexMessage: recent.complexMessage,
-            recentCallTime: recent.callTime,
-          ),
-        ),
-      ),
+      onTap: () {
+        if (recent.canBeViewed) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => SmsNotFromTerminated(
+                howSmsIsOpened:
+                    HowSmsIsOpened.notFromTerminatedToJustDisplayMessage,
+                regularMessage: recent.regularMessage,
+                complexMessage: recent.complexMessage,
+                recentCallTime: recent.callTime,
+              ),
+            ),
+          );
+        }
+      },
       child: Container(
         margin: const EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -58,11 +62,13 @@ class SentAccessRequestsCard extends StatelessWidget {
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'To ${recent.contact.name}',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
+                if (recent.canBeViewed)
                 const Text('Click to view'),
               ],
             ),

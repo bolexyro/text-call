@@ -39,11 +39,6 @@ Future<void> messageHandler(RemoteMessage message) async {
 
   final String notificationPurpose = message.data['purpose'];
 
-  if (notificationPurpose == 'end_call') {
-    await FlutterCallkitIncoming.endAllCalls();
-    return;
-  }
-
   if (notificationPurpose == 'access_request') {
     final String recentId = message.data['message_id'];
     final String requesterPhoneNumber = message.data['requester_phone_number'];
@@ -114,7 +109,9 @@ Future<void> messageHandler(RemoteMessage message) async {
         where: 'id = ?',
         whereArgs: [recentId],
       );
-
+      // this one is to update the access requests that's already in the db.
+      // So, if it were pending before, it would change to either accepted or declined.
+      insertAccessRequestIntoDb(recentId: recentId, isSent: true);
       AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: int.parse(
@@ -198,7 +195,7 @@ Future<void> messageHandler(RemoteMessage message) async {
   await prefs.setString('messageType', messageType);
 
   CallKitParams callKitParams = CallKitParams(
-    id: DateTime.now().toString(),
+    id: recentId,
     nameCaller: callerName,
     appName: 'TextCall',
     handle: callerPhoneNumber,
@@ -246,6 +243,26 @@ Future<void> messageHandler(RemoteMessage message) async {
       ringtonePath: 'system_ringtone_default',
     ),
   );
+  if (notificationPurpose == 'end_call') {
+    // if you do this, it would register an incoming rejected call in the db, and we don't want that. So I will manually try and show missedd call notification
+    // await FlutterCallkitIncoming.endAllCalls();
+
+    await FlutterCallkitIncoming.showMissCallNotification(callKitParams);
+    final newRecent = Recent.withoutContactObject(
+      category: RecentCategory.incomingIgnored,
+      canBeViewed: false,
+      regularMessage: messageType == 'regular'
+          ? RegularMessage.fromJsonString(messageJsonString)
+          : null,
+      complexMessage: messageType == 'complex'
+          ? ComplexMessage(complexMessageJsonString: messageJsonString)
+          : null,
+      id: recentId,
+      phoneNumber: callerPhoneNumber,
+    );
+    insertRecentIntoDb(newRecent: newRecent);
+    return;
+  }
   await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
 }
 
@@ -424,12 +441,10 @@ class NotificationController {
       sendAccessRequestStatus(
           accessRequestStatus: AccessRequestStatus.granted,
           payload: receivedAction.payload!);
-      deleteAccessRequestFromDb(recentId: receivedAction.payload!['recentId']!);
     } else if (receivedAction.buttonKeyPressed == 'DENY_ACCESS') {
       sendAccessRequestStatus(
           accessRequestStatus: AccessRequestStatus.denied,
           payload: receivedAction.payload!);
-      deleteAccessRequestFromDb(recentId: receivedAction.payload!['recentId']!);
     }
 
     // for when the notification is tapped and not any buttons

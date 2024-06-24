@@ -117,9 +117,6 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    deleteAccessRequestFromDb(
-                        recentId: widget.notificationPayload!['recentId']!);
-
                     sendAccessRequestStatus(
                         accessRequestStatus: AccessRequestStatus.granted,
                         payload: widget.notificationPayload!);
@@ -148,9 +145,6 @@ class _TheStackWidgetState extends ConsumerState<TheStackWidget> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    deleteAccessRequestFromDb(
-                        recentId: widget.notificationPayload!['recentId']!);
-
                     sendAccessRequestStatus(
                         accessRequestStatus: AccessRequestStatus.denied,
                         payload: widget.notificationPayload!);

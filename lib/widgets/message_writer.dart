@@ -1097,6 +1097,7 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Stack(
+                    alignment: Alignment.center,
                     children: [
                       SizedBox(
                         child: Lottie.asset(
@@ -1111,8 +1112,42 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                           ),
                           onPressed: () {
                             final url = Uri.https(backendRootUrl,
-                                'end-call/${widget.calleePhoneNumber}');
-                            http.get(url);
+                                'end-call');
+                            http.post(
+                              url,
+                              headers: {'Content-Type': 'application/json'},
+                              body: jsonEncode(
+                                {
+                                  'caller_phone_number': _callerPhoneNumber,
+                                  'callee_phone_number':
+                                      widget.calleePhoneNumber,
+                                  'message_json_string': _messageWriterMessageBox
+                                                  .runtimeType ==
+                                              FileUiPlaceHolder ||
+                                          (_messageWriterMessageBox
+                                                  .runtimeType ==
+                                              FutureBuilder<
+                                                  Map<String, dynamic>>)
+                                      ? jsonEncode(_removeLocalUrlsFromBolexyroJson(
+                                          _bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls!))
+                                      : RegularMessage(
+                                          messageString:
+                                              _messageController.text,
+                                          backgroundColor: _selectedColor,
+                                        ).toJsonString,
+                                  'my_message_type':
+                                      _messageWriterMessageBox.runtimeType ==
+                                                  FileUiPlaceHolder ||
+                                              (_messageWriterMessageBox
+                                                      .runtimeType ==
+                                                  FutureBuilder<
+                                                      Map<String, dynamic>>)
+                                          ? 'complex'
+                                          : 'regular',
+                                  'message_id': _recentId,
+                                },
+                              ),
+                            );
                             setState(() {
                               _callSending = false;
                             });

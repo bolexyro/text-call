@@ -244,6 +244,7 @@ Future<void> sendAccessRequestStatus(
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.reload();
   final requesteePhoneNumber = prefs.getString('myPhoneNumber');
+  deleteAccessRequestFromDb(recentId: payload['recentId']!);
 
   if (accessRequestStatus == AccessRequestStatus.granted) {
     final url = Uri.https(backendRootUrl,

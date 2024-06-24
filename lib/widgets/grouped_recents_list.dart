@@ -3,10 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
-import 'package:text_call/models/complex_message.dart';
-import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
-import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/widgets/sent_message_screen_widgets.dart';
 import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
@@ -38,15 +36,14 @@ class _GroupedRecentsListState extends ConsumerState<GroupedRecentsList> {
   }
 
   void _goToSentMessageScreen(
-      {required DateTime recentCallTime,
-      required RegularMessage? regularMessage,
-      required ComplexMessage? complexMessage}) {
+      {required Recent recent}) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => SmsNotFromTerminated(
-        recentCallTime: recentCallTime,
+        isRecentOutgoing: recentIsOutgoing(recent.category),
+        recentCallTime: recent.callTime,
         howSmsIsOpened: HowSmsIsOpened.notFromTerminatedToJustDisplayMessage,
-        complexMessage: complexMessage,
-        regularMessage: regularMessage,
+        complexMessage: recent.complexMessage,
+        regularMessage: recent.regularMessage,
       ),
     ));
   }
@@ -99,9 +96,8 @@ class _GroupedRecentsListState extends ConsumerState<GroupedRecentsList> {
                   ? ElevatedButton(
                       onPressed: () {
                         _goToSentMessageScreen(
-                          recentCallTime: recentN.callTime,
-                          regularMessage: recentN.regularMessage,
-                          complexMessage: recentN.complexMessage,
+                          recent: recentN,
+                         
                         );
                       },
                       style: ElevatedButton.styleFrom(

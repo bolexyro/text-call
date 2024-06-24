@@ -17,3 +17,5 @@ final kDarkTheme = ThemeData.from(
 const double kSpaceBtwWidgetsInPreviewOrRichTextEditor = 10;
 
 const String backendRootUrl = 'text-call-backend.onrender.com';
+
+const Color primaryFlushBarColor = Color.fromARGB(255, 0, 63, 114);

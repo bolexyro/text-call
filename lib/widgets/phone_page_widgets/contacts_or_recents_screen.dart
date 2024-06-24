@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/screens/contact_details_screen.dart';
-import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/widgets/sent_message_screen_widgets.dart';
 import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
@@ -195,6 +195,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => SmsNotFromTerminated(
+              isRecentOutgoing: recentIsOutgoing(selectedRecent.category),
               recentCallTime: selectedRecent.callTime,
               howSmsIsOpened:
                   HowSmsIsOpened.notFromTerminatedToJustDisplayMessage,

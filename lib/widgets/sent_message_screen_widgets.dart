@@ -91,14 +91,18 @@ class ScaffoldTitle extends StatelessWidget {
   const ScaffoldTitle({
     super.key,
     required this.color,
+    required this.isOutgoing,
   });
 
   final Color color;
+  final bool isOutgoing;
 
   @override
   Widget build(BuildContext context) {
     return Text(
-      'From your loved one or not hehe.',
+      isOutgoing
+          ? 'To your loved one or not hehe.'
+          : 'From your loved one or not hehe.',
       style: TextStyle(
           color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white),
     );

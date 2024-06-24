@@ -531,3 +531,14 @@ String formatDuration(Duration duration) {
     return '0:${seconds.toString().padLeft(2, '0')}';
   }
 }
+
+bool recentIsOutgoing(RecentCategory recentCategory) {
+  if ([
+    RecentCategory.incomingAccepted,
+    RecentCategory.incomingIgnored,
+    RecentCategory.incomingRejected
+  ].contains(recentCategory)) {
+    return false;
+  }
+  return true;
+}

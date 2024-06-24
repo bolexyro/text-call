@@ -95,8 +95,30 @@ class _WaveBubbleState extends State<WaveBubble> {
           future: _variableToHoldInitializeAudioPlayerSourceFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
+              return Row(
+                children: [
+                  const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                  Expanded(
+                    child: Slider(
+                      onChanged: (value) {},
+                      value: 0,
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: Text(
+                      '0:00/0:00',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  )
+                ],
               );
             }
             if (snapshot.hasError) {

@@ -13,7 +13,7 @@ import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/floating_buttons_visible_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/rich_message_editor.dart/preview_screen_content.dart';
-import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/widgets/sent_message_screen_widgets.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:uuid/uuid.dart';
@@ -26,6 +26,7 @@ class SmsNotFromTerminated extends ConsumerWidget {
     required this.complexMessage,
     required this.recentCallTime,
     this.notificationPayload,
+    required this.isRecentOutgoing,
   });
 
   // this messages should not be null if howsmsisopened == notFromTerminatedToShowMessageAfterAccessRequestGranted
@@ -34,10 +35,12 @@ class SmsNotFromTerminated extends ConsumerWidget {
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;
   final Map<String, dynamic>? notificationPayload;
+  final bool isRecentOutgoing;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return WidgetToRenderBasedOnHowAppIsOpened(
+      isRecentOutgoing: isRecentOutgoing,
       notificationPayload: notificationPayload,
       recentCallTime: recentCallTime,
       howSmsIsOpened: howSmsIsOpened,
@@ -175,10 +178,12 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerStatefulWidget {
     required this.complexMessage,
     required this.recentCallTime,
     required this.notificationPayload,
+    this.isRecentOutgoing,
   });
 
   final RegularMessage? regularMessage;
   final ComplexMessage? complexMessage;
+  final bool? isRecentOutgoing;
   final DateTime? recentCallTime;
   final HowSmsIsOpened howSmsIsOpened;
   final Map<String, dynamic>? notificationPayload;
@@ -402,9 +407,11 @@ class _WidgetToRenderBasedOnHowAppIsOpenedState
                       ),
                     ),
         ],
-        title: widget.regularMessage == null
-            ? null
-            : ScaffoldTitle(color: widget.regularMessage!.backgroundColor),
+        title: ScaffoldTitle(
+          color: widget.regularMessage?.backgroundColor ??
+              Theme.of(context).scaffoldBackgroundColor,
+          isOutgoing: widget.isRecentOutgoing ?? true,
+        ),
       ),
       body: SafeArea(
         child: TheStackWidget(

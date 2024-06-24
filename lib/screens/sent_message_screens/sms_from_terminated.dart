@@ -7,7 +7,7 @@ import 'package:text_call/providers/floating_buttons_visible_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
 import 'package:text_call/screens/rich_message_editor.dart/preview_screen_content.dart';
-import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/widgets/sent_message_screen_widgets.dart';
 import 'package:text_call/utils/crud.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/models/recent.dart';
@@ -340,10 +340,11 @@ class WidgetToRenderBasedOnHowAppIsOpened extends ConsumerWidget {
           return Scaffold(
             appBar: AppBar(
               forceMaterialTransparency: true,
-              title: newRecent.regularMessage == null
-                  ? null
-                  : ScaffoldTitle(
-                      color: newRecent.regularMessage!.backgroundColor),
+              title: ScaffoldTitle(
+                color: newRecent.regularMessage?.backgroundColor ??
+                    Theme.of(context).scaffoldBackgroundColor,
+                isOutgoing: false,
+              ),
             ),
             floatingActionButton:
                 howSmsIsOpened == HowSmsIsOpened.fromTerminatedForPickCall &&

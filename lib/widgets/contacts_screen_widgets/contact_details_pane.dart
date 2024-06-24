@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/contact.dart';
-import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/recents_provider.dart';
-import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/widgets/sent_message_screen_widgets.dart';
 import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_info_card.dart';
@@ -25,16 +23,14 @@ class ContactDetailsPane extends ConsumerWidget {
   final double stackContainerWidths;
 
   void _goToSentMessageScreen(
-      {required BuildContext context,
-      required DateTime recentCallTime,
-      required RegularMessage? regularMessage,
-      required ComplexMessage? complexMessage}) {
+      {required BuildContext context, required Recent recent}) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => SmsNotFromTerminated(
-        recentCallTime: recentCallTime,
+        isRecentOutgoing: recentIsOutgoing(recent.category),
+        recentCallTime: recent.callTime,
         howSmsIsOpened: HowSmsIsOpened.notFromTerminatedToJustDisplayMessage,
-        regularMessage: regularMessage,
-        complexMessage: complexMessage,
+        regularMessage: recent.regularMessage,
+        complexMessage: recent.complexMessage,
       ),
     ));
   }
@@ -84,10 +80,9 @@ class ContactDetailsPane extends ConsumerWidget {
               ? ElevatedButton(
                   onPressed: () {
                     _goToSentMessageScreen(
-                        recentCallTime: recent!.callTime,
-                        context: context,
-                        regularMessage: recent!.regularMessage,
-                        complexMessage: recent!.complexMessage);
+                      recent: recent!,
+                      context: context,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(

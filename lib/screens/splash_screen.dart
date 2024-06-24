@@ -28,7 +28,12 @@ class SplashScreen extends StatelessWidget {
                     height: 50,
                     colorFilter: ColorFilter.mode(
                       Theme.of(context).brightness == Brightness.dark
-                          ? Theme.of(context).colorScheme.primary
+                          ? Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withBlue(200)
+                              .withRed(50)
+                              .withGreen(120)
                           : Theme.of(context).colorScheme.primary.withBlue(200),
                       BlendMode.srcIn,
                     ),
@@ -122,7 +127,17 @@ class _SimulatedProgressIndicatorState
   Widget build(BuildContext context) {
     return Column(
       children: [
-        LinearProgressIndicator(value: _progressValue),
+        LinearProgressIndicator(
+          value: _progressValue,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context)
+                  .colorScheme
+                  .primary
+                  .withBlue(200)
+                  .withRed(50)
+                  .withGreen(120)
+              : Theme.of(context).colorScheme.primary.withBlue(200),
+        ),
       ],
     );
   }

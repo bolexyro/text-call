@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/otp_modal_bottom_sheet.dart';
 
@@ -41,7 +42,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.appOpenedFromPickedCall && !_flushbarShown) {
         showFlushBar(
-            const Color.fromARGB(255, 0, 63, 114),
+            primaryFlushBarColor,
             'You have to login to see the message.',
             FlushbarPosition.TOP,
             context);
@@ -80,7 +81,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             onPressed: () async {
               (_flushBarKey!.currentWidget as Flushbar).dismiss();
               _flushBarKey = showFlushBar(
-                const Color.fromARGB(255, 0, 63, 114),
+                primaryFlushBarColor,
                 'NB: If you change your number, people with your previous number won\'t be able to text call you',
                 FlushbarPosition.TOP,
                 context,

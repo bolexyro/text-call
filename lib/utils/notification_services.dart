@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/complex_message.dart';
 import 'package:text_call/models/regular_message.dart';
 import 'package:text_call/models/recent.dart';
-import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/widgets/sent_message_screen_widgets.dart';
 import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
 import 'package:text_call/text_call.dart';
 import 'package:text_call/utils/constants.dart';
@@ -38,6 +38,12 @@ Future<void> messageHandler(RemoteMessage message) async {
   registerCallkitIncomingListener();
 
   final String notificationPurpose = message.data['purpose'];
+
+  if (notificationPurpose == 'end_call') {
+    await FlutterCallkitIncoming.endAllCalls();
+    return;
+  }
+
   if (notificationPurpose == 'access_request') {
     final String recentId = message.data['message_id'];
     final String requesterPhoneNumber = message.data['requester_phone_number'];
@@ -296,6 +302,7 @@ void registerCallkitIncomingListener() {
             Navigator.of(TextCall.navigatorKey.currentContext!).push(
               MaterialPageRoute(
                 builder: (context) => SmsNotFromTerminated(
+                  isRecentOutgoing: false,
                   recentCallTime: null,
                   complexMessage: messageType == 'complex'
                       ? ComplexMessage(
@@ -447,6 +454,7 @@ class NotificationController {
         Navigator.of(TextCall.navigatorKey.currentContext!).push(
           MaterialPageRoute(
             builder: (context) => SmsNotFromTerminated(
+              isRecentOutgoing: false,
               notificationPayload: receivedAction.payload!,
               recentCallTime: DateTime.parse(data[0]['id'] as String),
               howSmsIsOpened: receivedAction.id!.toString().startsWith('10')

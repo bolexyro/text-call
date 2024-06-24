@@ -9,7 +9,7 @@ import 'package:text_call/providers/received_access_requests_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/screens/auth_screen.dart';
 import 'package:text_call/screens/phone_page_screen.dart';
-import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/widgets/sent_message_screen_widgets.dart';
 import 'package:text_call/screens/sent_message_screens/sms_from_terminated.dart';
 import 'package:text_call/screens/splash_screen.dart';
 import 'package:text_call/utils/constants.dart';

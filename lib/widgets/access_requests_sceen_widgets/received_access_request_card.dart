@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/providers/received_access_requests_provider.dart';
-import 'package:text_call/screens/sent_message_screen.dart';
+import 'package:text_call/widgets/sent_message_screen_widgets.dart';
 import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
@@ -22,6 +22,7 @@ class ReceivedAccessRequestCard extends ConsumerWidget {
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => SmsNotFromTerminated(
+            isRecentOutgoing: recentIsOutgoing(recent.category),
             howSmsIsOpened:
                 HowSmsIsOpened.notFromTerminatedToJustDisplayMessage,
             regularMessage: recent.regularMessage,

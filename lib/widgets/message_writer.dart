@@ -27,6 +27,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter_svg_provider/flutter_svg_provider.dart' as svg_provider;
+import 'package:http/http.dart' as http;
 
 class MessageWriter extends ConsumerStatefulWidget {
   const MessageWriter({
@@ -96,6 +97,18 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
     _selectedColor = const Color.fromARGB(255, 13, 214, 214);
     _messageController = TextEditingController();
 
+    if (widget.regularMessageForRecall != null) {
+      if (widget.canBeViewed == true) {
+        _messageController = TextEditingController(
+            text: widget.regularMessageForRecall!.messageString);
+        _selectedColor = widget.regularMessageForRecall!.backgroundColor;
+      } else {
+        _messageController = TextEditingController(
+            text: replaceWithAsterisks(
+                widget.regularMessageForRecall!.messageString));
+      }
+    }
+
     if (widget.regularMessageForRecall == null &&
             widget.complexMessageForRecall == null ||
         widget.regularMessageForRecall != null) {
@@ -113,18 +126,6 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
           labelText: 'Message',
         ),
       );
-    }
-
-    if (widget.regularMessageForRecall != null) {
-      if (widget.canBeViewed == true) {
-        _messageController = TextEditingController(
-            text: widget.regularMessageForRecall!.messageString);
-        _selectedColor = widget.regularMessageForRecall!.backgroundColor;
-      } else {
-        _messageController = TextEditingController(
-            text: replaceWithAsterisks(
-                widget.regularMessageForRecall!.messageString));
-      }
     }
 
     if (widget.complexMessageForRecall != null) {
@@ -615,8 +616,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
       return false;
     }
     if (widget.regularMessageForRecall != null &&
+            _messageController.text ==
+                widget.regularMessageForRecall!.messageString ||
         _messageController.text ==
-            widget.regularMessageForRecall!.messageString) {
+            replaceWithAsterisks(
+                widget.regularMessageForRecall!.messageString)) {
       return false;
     }
 
@@ -1092,8 +1096,37 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
               future: _animationDelay,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Lottie.asset(
-                      'assets/animations/telephone_ringing_3d.json');
+                  return Stack(
+                    children: [
+                      SizedBox(
+                        child: Lottie.asset(
+                            'assets/animations/telephone_ringing_3d.json'),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20.0, left: 20.0),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.call_end,
+                            size: 30,
+                          ),
+                          onPressed: () {
+                            final url = Uri.https(backendRootUrl,
+                                'end-call/${widget.calleePhoneNumber}');
+                            http.get(url);
+                            setState(() {
+                              _callSending = false;
+                            });
+                          },
+                          style: IconButton.styleFrom(
+                            padding: const EdgeInsets.all(15),
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            shape: const CircleBorder(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
                 }
                 final recent = Recent.withoutContactObject(
                   category: RecentCategory.outgoingUnreachable,
@@ -1298,7 +1331,8 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                             padding: EdgeInsets.fromLTRB(0, 0, 0,
                                 MediaQuery.viewInsetsOf(context).vertical),
                             child: SingleChildScrollView(
-                                child: messageWriterContent),
+                              child: messageWriterContent,
+                            ),
                           ),
                         ),
                         ConfettiWidget(
@@ -1379,19 +1413,27 @@ class FileUiPlaceHolder extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (canBeViewed) {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => PreviewScreen(
-                bolexyroJson: bolexyroJson,
-                forExtremePreview: true,
-              ),
-            ),
+        if (!canBeViewed) {
+          showFlushBar(
+            primaryFlushBarColor,
+            'You don\'t have access to view the file.',
+            FlushbarPosition.TOP,
+            context,
           );
+          return;
         }
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => PreviewScreen(
+              bolexyroJson: bolexyroJson,
+              forExtremePreview: true,
+            ),
+          ),
+        );
       },
       child: Container(
         width: double.infinity,
+        height: canBeViewed ? null : 80,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: Theme.of(context).brightness == Brightness.dark
@@ -1424,6 +1466,7 @@ class FileUiPlaceHolder extends StatelessWidget {
               ),
               const Spacer(),
               Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (canBeViewed)
                     IconButton(
@@ -1436,13 +1479,16 @@ class FileUiPlaceHolder extends StatelessWidget {
                             ),
                           ),
                         );
-
                         onBolexroJsonUpdated(newBolexyroJson);
                       },
                       icon: const Icon(Icons.edit),
                     ),
                   IconButton(
                     onPressed: () async {
+                      if (!canBeViewed) {
+                        onDelete();
+                        return;
+                      }
                       final bool? toDiscard = await showAdaptiveDialog(
                         context: context,
                         builder: (context) => const ConfirmDialog(

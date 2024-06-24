@@ -1,4 +1,5 @@
 import 'package:another_flushbar/flushbar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -8,6 +9,7 @@ import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/access_requests_screen.dart';
 import 'package:text_call/screens/auth_screen.dart';
 import 'package:text_call/screens/settings_screen.dart';
+import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 import 'package:text_call/widgets/feedback_dialog.dart';
@@ -64,7 +66,7 @@ class AppDrawer extends ConsumerWidget {
             leading: const Icon(Icons.settings),
             title: const Text('Settings'),
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
+              CupertinoPageRoute(
                 builder: (context) => const SettingsScreen(),
               ),
             ),
@@ -80,7 +82,7 @@ class AppDrawer extends ConsumerWidget {
             ),
             title: const Text('Draft'),
             onTap: () => showFlushBar(
-              const Color.fromARGB(255, 0, 63, 114),
+              primaryFlushBarColor,
               'Drafts are currently unavailable.',
               FlushbarPosition.TOP,
               context,
@@ -93,7 +95,7 @@ class AppDrawer extends ConsumerWidget {
             ),
             title: const Text('Access Requests'),
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
+              CupertinoPageRoute(
                 builder: (context) => const AccessRequestsScreen(),
               ),
             ),

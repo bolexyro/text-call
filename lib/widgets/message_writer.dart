@@ -1103,16 +1103,16 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                         child: Lottie.asset(
                             'assets/animations/telephone_ringing_3d.json'),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20.0, left: 20.0),
+                      Positioned(
+                        top: 20,
+                        left: 20,
                         child: IconButton(
                           icon: const Icon(
                             Icons.call_end,
                             size: 30,
                           ),
                           onPressed: () {
-                            final url = Uri.https(backendRootUrl,
-                                'end-call');
+                            final url = Uri.https(backendRootUrl, 'end-call');
                             http.post(
                               url,
                               headers: {'Content-Type': 'application/json'},
@@ -1148,6 +1148,28 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                                 },
                               ),
                             );
+                            final recent = Recent.withoutContactObject(
+                              category: RecentCategory.outgoingIgnored,
+                              regularMessage: _upToDateBolexyroJson == null
+                                  ? RegularMessage(
+                                      messageString: _messageController.text,
+                                      backgroundColor: _selectedColor,
+                                    )
+                                  : null,
+                              complexMessage: _upToDateBolexyroJson == null
+                                  ? null
+                                  : ComplexMessage(
+                                      complexMessageJsonString: jsonEncode(
+                                          _bolexyroJsonWithPermanentLocalUrlsAndOnlineUrls!),
+                                    ),
+                              id: _recentId,
+                              phoneNumber: widget.calleePhoneNumber,
+                            );
+                            if (index == 1) {
+                              ref
+                                  .read(recentsProvider.notifier)
+                                  .addRecent(recent);
+                            }
                             setState(() {
                               _callSending = false;
                             });

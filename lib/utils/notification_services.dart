@@ -246,7 +246,7 @@ Future<void> messageHandler(RemoteMessage message) async {
   if (notificationPurpose == 'end_call') {
     // if you do this, it would register an incoming rejected call in the db, and we don't want that. So I will manually try and show missedd call notification
     // await FlutterCallkitIncoming.endAllCalls();
-
+    await FlutterCallkitIncoming.hideCallkitIncoming(callKitParams);
     await FlutterCallkitIncoming.showMissCallNotification(callKitParams);
     final newRecent = Recent.withoutContactObject(
       category: RecentCategory.incomingIgnored,

@@ -73,7 +73,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         _shouldUpdateMeContact = true;
 
         _flushBarKey = showFlushBar(
-          const Color.fromARGB(255, 0, 63, 114),
+          primaryFlushBarColor,
           'Wrong number! To change from ${changeIntlToLocal(_originalPhoneNumber!)} to ${changeIntlToLocal(_enteredPhoneNumber)}, you have to verify both numbers.',
           FlushbarPosition.TOP,
           context,
@@ -112,7 +112,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         return;
       }
       showFlushBar(
-        const Color.fromARGB(255, 0, 63, 114),
+        primaryFlushBarColor,
         'You might be redirected to your browser. But don\'t panick. It is to verify you are not a bot...IKR',
         FlushbarPosition.TOP,
         context,

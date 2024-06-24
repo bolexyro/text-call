@@ -1,7 +1,9 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
+import 'package:http/http.dart' as http;
 
 class FeedbackDialog extends StatefulWidget {
   const FeedbackDialog({super.key});
@@ -15,11 +17,18 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
   String _selectedCategory = 'Report bug';
   bool _emailSending = false;
   bool _successFullySent = false;
-  final TextEditingController descriptionTextEditingContoller =
-      TextEditingController();
+  late final TextEditingController _descriptionTextEditingContoller;
   final _formKey = GlobalKey<FormState>();
 
+  @override
+  void initState() {
+    _descriptionTextEditingContoller = TextEditingController();
+    super.initState();
+  }
+
   void _sendEmail() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -27,19 +36,33 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
       _emailSending = true;
     });
 
-    final Email email = Email(
-      body: _selectedCategory == 'Report bug'
-          ? 'BUG IN TEXTCALL'
-          : 'FEATURE REQUEST FOR TEXTCALL',
-      subject: descriptionTextEditingContoller.text,
-      recipients: ['adeboladuf@gmail.com'],
-    );
+    final String emailSubject = _selectedCategory == 'Report bug'
+        ? 'TEXTCALL BUG REPORT'
+        : _selectedCategory == 'Request feature'
+            ? 'TEXTCALL FEATURE REQUEST'
+            : 'TEXTCALL FEEDBACK';
+    final String emailBody = _descriptionTextEditingContoller.text;
 
-    await FlutterEmailSender.send(email);
-    setState(() {
-      _successFullySent = true;
-      _emailSending = false;
-    });
+    final url =
+        Uri.https(backendRootUrl, 'submit-feedback/$emailSubject/$emailBody');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      setState(() {
+        _successFullySent = true;
+        _emailSending = false;
+      });
+    } else {
+      setState(() {
+        _emailSending = false;
+      });
+      showFlushBar(
+          Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).colorScheme.errorContainer
+              : Theme.of(context).colorScheme.error,
+          'Email not sent. Try again',
+          FlushbarPosition.TOP,
+          context);
+    }
   }
 
   @override
@@ -108,7 +131,11 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                             },
                             value: _selectedCategory,
                             // hint: const Text('Report a bug'),
-                            items: ['Report bug', 'Request feature']
+                            items: [
+                              'Report bug',
+                              'Request feature',
+                              'Send Feedback'
+                            ]
                                 .map(
                                   (toElement) => DropdownMenuItem(
                                     value: toElement,
@@ -167,6 +194,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                     child: TextFormField(
                       minLines: 2,
                       maxLines: 20,
+                      controller: _descriptionTextEditingContoller,
                       decoration: InputDecoration(
                         hintText: 'Enter a desceiption',
                         enabledBorder: OutlineInputBorder(

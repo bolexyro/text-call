@@ -1,4 +1,3 @@
-import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,8 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/providers/contacts_provider.dart';
 import 'package:text_call/screens/access_requests_screen.dart';
 import 'package:text_call/screens/auth_screen.dart';
-import 'package:text_call/screens/settings_screen.dart';
-import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/contacts_screen_widgets/contact_avatar_circle.dart';
 import 'package:text_call/widgets/feedback_dialog.dart';
@@ -62,32 +59,32 @@ class AppDrawer extends ConsumerWidget {
             ),
           ),
           const ThemeSwitchListTile(),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () => Navigator.of(context).push(
-              CupertinoPageRoute(
-                builder: (context) => const SettingsScreen(),
-              ),
-            ),
-          ),
-          ListTile(
-            leading: SvgPicture.asset(
-              'assets/icons/draft.svg',
-              height: 24,
-              colorFilter: ColorFilter.mode(
-                Theme.of(context).iconTheme.color!,
-                BlendMode.srcIn,
-              ),
-            ),
-            title: const Text('Draft'),
-            onTap: () => showFlushBar(
-              primaryFlushBarColor,
-              'Drafts are currently unavailable.',
-              FlushbarPosition.TOP,
-              context,
-            ),
-          ),
+          // ListTile(
+          //   leading: const Icon(Icons.settings),
+          //   title: const Text('Settings'),
+          //   onTap: () => Navigator.of(context).push(
+          //     CupertinoPageRoute(
+          //       builder: (context) => const SettingsScreen(),
+          //     ),
+          //   ),
+          // ),
+          // ListTile(
+          //   leading: SvgPicture.asset(
+          //     'assets/icons/draft.svg',
+          //     height: 24,
+          //     colorFilter: ColorFilter.mode(
+          //       Theme.of(context).iconTheme.color!,
+          //       BlendMode.srcIn,
+          //     ),
+          //   ),
+          //   title: const Text('Draft'),
+          //   onTap: () => showFlushBar(
+          //     primaryFlushBarColor,
+          //     'Drafts are currently unavailable.',
+          //     FlushbarPosition.TOP,
+          //     context,
+          //   ),
+          // ),
           ListTile(
             leading: SvgPicture.asset(
               'assets/icons/colorful-mail.svg',

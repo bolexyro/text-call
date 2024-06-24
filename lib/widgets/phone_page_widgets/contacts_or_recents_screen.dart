@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:text_call/models/contact.dart';
@@ -51,7 +52,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
 
   void _goToPage({required Contact selectedContact}) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      CupertinoPageRoute(
         builder: (context) => ContactDetailsScreen(
           selectedContact: selectedContact,
         ),
@@ -193,7 +194,7 @@ class _ContactsScreenState extends ConsumerState<ContactsRecentsScreen> {
           return;
         }
         Navigator.of(context).push(
-          MaterialPageRoute(
+          CupertinoPageRoute(
             builder: (context) => SmsNotFromTerminated(
               isRecentOutgoing: recentIsOutgoing(selectedRecent.category),
               recentCallTime: selectedRecent.callTime,

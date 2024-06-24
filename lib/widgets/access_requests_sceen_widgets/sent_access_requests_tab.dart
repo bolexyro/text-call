@@ -3,29 +3,45 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:lottie/lottie.dart';
 import 'package:text_call/models/recent.dart';
+import 'package:text_call/providers/received_access_requests_provider.dart';
 import 'package:text_call/providers/recents_provider.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/access_requests_sceen_widgets/sent_access_requests_card.dart';
 
-class AccessRequestsSentTab extends ConsumerStatefulWidget {
-  const AccessRequestsSentTab({
+class SentAccessRequestsTab extends ConsumerStatefulWidget {
+  const SentAccessRequestsTab({
     super.key,
     required this.allSentAccessRequestsRawFromDb,
   });
   final List allSentAccessRequestsRawFromDb;
 
   @override
-  ConsumerState<AccessRequestsSentTab> createState() =>
+  ConsumerState<SentAccessRequestsTab> createState() =>
       _AccessRequestsSentTabState();
 }
 
-class _AccessRequestsSentTabState extends ConsumerState<AccessRequestsSentTab> {
+class _AccessRequestsSentTabState extends ConsumerState<SentAccessRequestsTab> {
   bool _isRefreshing = false;
+  late Map<String, String> recentIdToTimeMap;
+
+  @override
+  void initState() {
+    super.initState();
+    recentIdToTimeMap = {
+      for (var item in widget.allSentAccessRequestsRawFromDb)
+        item['recentId']: item['time']
+    };
+  }
+
+  String? findTimeByRecentId(String recentIdToFind) {
+    return recentIdToTimeMap[recentIdToFind];
+  }
+
   @override
   Widget build(BuildContext context) {
-    //  get all the recent id, then query the recents ref, and get all of the recents belonging to that id
-    // and for every id, we check the can be viewed and pending status to determine its status
+    // Get all the recent ids, then query the recents ref, and get all of the recents belonging to that id
+    // And for every id, we check the can be viewed and pending status to determine its status
     final allRecentIdsInSentAccessRequests =
         widget.allSentAccessRequestsRawFromDb.map((row) => row['recentId']);
     final recentsWeNeed = ref.read(recentsProvider).where(
@@ -57,9 +73,9 @@ class _AccessRequestsSentTabState extends ConsumerState<AccessRequestsSentTab> {
                       setState(() {
                         _isRefreshing = true;
                       });
-                      // await ref
-                      //     .read(receivedAccessRequestsProvider.notifier)
-                      //     .loadPendingReceivedAccessRequests(ref);
+                      await ref
+                          .read(receivedAccessRequestsProvider.notifier)
+                          .loadPendingReceivedAccessRequests(ref);
                       setState(() {
                         _isRefreshing = false;
                       });
@@ -96,8 +112,12 @@ class _AccessRequestsSentTabState extends ConsumerState<AccessRequestsSentTab> {
                   order: GroupedListOrder.DESC,
                   itemComparator: (element1, element2) =>
                       element1.callTime.compareTo(element2.callTime),
-                  itemBuilder: (context, recentN) =>
-                      SentAccessRequestsCard(recent: recentN),
+                  itemBuilder: (context, recentN) => SentAccessRequestsCard(
+                    recent: recentN,
+                    sentTime: DateTime.parse(
+                      findTimeByRecentId(recentN.id)!,
+                    ),
+                  ),
                 ),
         ),
       ],

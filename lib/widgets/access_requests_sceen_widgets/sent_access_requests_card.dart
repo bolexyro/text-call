@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:text_call/models/recent.dart';
 import 'package:text_call/widgets/sent_message_screen_widgets.dart';
 import 'package:text_call/screens/sent_message_screens/sms_not_from_terminaed.dart';
@@ -11,9 +12,11 @@ class SentAccessRequestsCard extends StatelessWidget {
   const SentAccessRequestsCard({
     super.key,
     required this.recent,
+    required this.sentTime,
   });
 
   final Recent recent;
+  final DateTime sentTime;
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +72,11 @@ class SentAccessRequestsCard extends StatelessWidget {
                   'To ${recent.contact.name}',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                if (recent.canBeViewed)
-                const Text('Click to view'),
+                Text(
+                  '@${DateFormat('HH:mm').format(sentTime)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                if (recent.canBeViewed) const Text('Click to view'),
               ],
             ),
             const Spacer(),

@@ -25,7 +25,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   bool _isAuthenticating = false;
   bool _flushbarShown = false;
   bool _changeOfPhoneNumberVerification = false;
-  bool _updateMeContact = false;
+  bool _shouldUpdateMeContact = false;
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _textController = TextEditingController();
@@ -70,7 +70,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       if (_originalPhoneNumber != null &&
           _originalPhoneNumber != _enteredPhoneNumber) {
         _changeOfPhoneNumberVerification = true;
-        _updateMeContact = true;
+        _shouldUpdateMeContact = true;
 
         _flushBarKey = showFlushBar(
           const Color.fromARGB(255, 0, 63, 114),
@@ -160,10 +160,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         }
         if (!_changeOfPhoneNumberVerification) {
           await setPreferencesUpdateLocalAndRemoteDb(
-            phoneNumber: phoneNumber,
+            newPhoneNumber: phoneNumber,
             ref: ref,
             context: context,
-            updateMeContact: _updateMeContact,
+            shouldUpdateMeContact: _shouldUpdateMeContact,
             phoneNumberToBeUpdated: _originalPhoneNumber,
           );
         }
@@ -218,10 +218,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       verificationCompleted: (PhoneAuthCredential credential) async {
         if (!_changeOfPhoneNumberVerification) {
           await setPreferencesUpdateLocalAndRemoteDb(
-            phoneNumber: _enteredPhoneNumber,
+            newPhoneNumber: _enteredPhoneNumber,
             ref: ref,
             context: context,
-            updateMeContact: _updateMeContact,
+            shouldUpdateMeContact: _shouldUpdateMeContact,
           );
         }
       },

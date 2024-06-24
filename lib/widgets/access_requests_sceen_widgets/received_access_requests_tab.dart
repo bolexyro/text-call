@@ -7,16 +7,16 @@ import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:text_call/widgets/access_requests_sceen_widgets/received_access_request_card.dart';
 
-class AccessRequestsReceivedTab extends ConsumerStatefulWidget {
-  const AccessRequestsReceivedTab({super.key});
+class ReceivedAccessRequestsTab extends ConsumerStatefulWidget {
+  const ReceivedAccessRequestsTab({super.key});
 
   @override
-  ConsumerState<AccessRequestsReceivedTab> createState() =>
+  ConsumerState<ReceivedAccessRequestsTab> createState() =>
       _AccessRequestsReceivedTabState();
 }
 
 class _AccessRequestsReceivedTabState
-    extends ConsumerState<AccessRequestsReceivedTab> {
+    extends ConsumerState<ReceivedAccessRequestsTab> {
   bool _isRefreshing = false;
 
   @override

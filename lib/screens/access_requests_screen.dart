@@ -159,8 +159,8 @@ class _AccessRequestsScreenState extends ConsumerState<AccessRequestsScreen> {
                   return PageView(
                     controller: _pageController,
                     children: [
-                      const AccessRequestsReceivedTab(),
-                      AccessRequestsSentTab(
+                      const ReceivedAccessRequestsTab(),
+                      SentAccessRequestsTab(
                         allSentAccessRequestsRawFromDb: snapshot.data!,
                       ),
                     ],

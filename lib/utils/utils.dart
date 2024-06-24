@@ -260,11 +260,15 @@ void sendAccessRequest(Recent recent, WidgetRef ref) async {
   final prefs = await SharedPreferences.getInstance();
   final String? requesterPhoneNumber = prefs.getString('myPhoneNumber');
   insertAccessRequestIntoDb(recentId: recent.id, isSent: true);
+  print('rain an difr');
   ref.read(recentsProvider.notifier).updateRecentAccessRequestPendingStatus(
       recentId: recent.id, isPending: true);
+  print('rain an difr2');
   final url = Uri.https(backendRootUrl,
       'send-access-request/$requesterPhoneNumber/${recent.contact.phoneNumber}/${recent.id}');
+  print('rain an difr3');
   http.get(url);
+  print('rain an difr4');
 }
 
 Future<File?> selectImage(BuildContext context) async {
@@ -288,21 +292,20 @@ Future<File?> selectImage(BuildContext context) async {
 }
 
 Future<void> setPreferencesUpdateLocalAndRemoteDb({
-  required String phoneNumber,
+  required String newPhoneNumber,
   required WidgetRef ref,
   required BuildContext context,
-  required bool updateMeContact,
+  required bool shouldUpdateMeContact,
   String? phoneNumberToBeUpdated,
 }) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.setBool('isUserLoggedIn', true);
-  await prefs.setString('myPhoneNumber', phoneNumber);
+  await prefs.setString('myPhoneNumber', newPhoneNumber);
 
   final db = FirebaseFirestore.instance;
   final fcm = FirebaseMessaging.instance;
 
-  if (updateMeContact) {
-    await ref.read(contactsProvider.notifier).loadContacts();
+  if (shouldUpdateMeContact) {
     final originalContact = ref
         .read(contactsProvider)
         .where((contact) => contact.phoneNumber == phoneNumberToBeUpdated)
@@ -312,16 +315,16 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
     // and the previos me should be me(previous)
     final contactAlreadyExistingWithNewPhoneNumber = ref
         .read(contactsProvider)
-        .where((contact) => contact.phoneNumber == phoneNumber)
+        .where((contact) => contact.phoneNumber == newPhoneNumber)
         .toList();
 
     if (contactAlreadyExistingWithNewPhoneNumber.isNotEmpty) {
       ref.read(contactsProvider.notifier).updateContact(
             ref: ref,
-            oldContactPhoneNumber: phoneNumber,
+            oldContactPhoneNumber: newPhoneNumber,
             newContact: Contact(
               name: originalContact.name,
-              phoneNumber: phoneNumber,
+              phoneNumber: newPhoneNumber,
               imagePath: originalContact.imagePath,
             ),
           );
@@ -340,7 +343,7 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
             oldContactPhoneNumber: originalContact.phoneNumber,
             newContact: Contact(
               name: originalContact.name,
-              phoneNumber: phoneNumber,
+              phoneNumber: newPhoneNumber,
               imagePath: originalContact.imagePath,
             ),
           );
@@ -351,7 +354,7 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
           ref,
           Contact(
             name: "Me",
-            phoneNumber: phoneNumber,
+            phoneNumber: newPhoneNumber,
             imagePath: null,
           ),
         );
@@ -359,14 +362,14 @@ Future<void> setPreferencesUpdateLocalAndRemoteDb({
 
   final fcmToken = await fcm.getToken();
   // Add a new document with a specified ID
-  db.collection("users").doc(phoneNumber).set(
+  db.collection("users").doc(newPhoneNumber).set(
     {'fcmToken': fcmToken},
   );
   await ref.read(contactsProvider.notifier).loadContacts();
 
   Navigator.of(context).pushReplacement(
     MaterialPageRoute(
-      builder: (context) => PhonePageScreen(myPhoneNumber: phoneNumber),
+      builder: (context) => PhonePageScreen(myPhoneNumber: newPhoneNumber),
     ),
   );
 }

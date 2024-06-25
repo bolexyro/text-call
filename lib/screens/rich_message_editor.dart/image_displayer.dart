@@ -28,8 +28,6 @@ class ImageDisplayer extends StatelessWidget {
         builder: (context) => FullScreenImageDisplayer(
           imagePath: imagePath,
           imageWidget: imageWidget,
-          minScale: 1.0,
-          maxScale: 3.0,
         ),
       ),
     );
@@ -132,21 +130,16 @@ class ImageDisplayer extends StatelessWidget {
   }
 }
 
-
 // for more info on the magic you performed here, you can check this medium blog - https://medium.com/@lanltn/flutter-interactive-viewer-gallery-with-interactiveviewer-55ae260d2014
 class FullScreenImageDisplayer extends StatefulWidget {
   const FullScreenImageDisplayer({
     super.key,
     required this.imagePath,
     required this.imageWidget,
-    required this.minScale,
-    required this.maxScale,
   });
 
   final String imagePath;
   final Widget imageWidget;
-  final double minScale;
-  final double maxScale;
 
   @override
   State<FullScreenImageDisplayer> createState() =>
@@ -158,7 +151,8 @@ class _FullScreenImageDisplayerState extends State<FullScreenImageDisplayer>
   late TransformationController _transformationController;
   double get _scale => _transformationController.value.row0.x;
   late Offset _doubleTapLocalPosition;
-
+  final minScale = 1.0;
+  final maxScale = 3.0;
   late AnimationController _animationController;
   Animation<Matrix4>? _animation;
   Offset? _dragOffset;
@@ -232,15 +226,15 @@ class _FullScreenImageDisplayerState extends State<FullScreenImageDisplayer>
     Matrix4 matrix = _transformationController.value.clone();
 
     final double currentScale = matrix.row0.x;
-    double targetScale = widget.minScale;
+    double targetScale = minScale;
 
-    if (currentScale <= widget.minScale) {
-      targetScale = widget.maxScale;
+    if (currentScale <= minScale) {
+      targetScale = maxScale;
     }
-    final double offSetX = targetScale == widget.minScale
+    final double offSetX = targetScale == minScale
         ? 0.0
         : -_doubleTapLocalPosition.dx * (targetScale - 1);
-    final double offSetY = targetScale == widget.minScale
+    final double offSetY = targetScale == minScale
         ? 0.0
         : -_doubleTapLocalPosition.dy * (targetScale - 1);
 

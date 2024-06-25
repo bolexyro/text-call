@@ -69,18 +69,18 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
     super.dispose();
   }
 
- 
-
-  void _goFullScreen() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => FullScreenVideoPlayer(
-          videoPath: widget.videoPath,
-          videoController: _controller,
-          formatDuration: formatDuration,
-        ),
-      ),
-    );
+  void _goFullScreen() async {
+    _controller = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => FullScreenVideoPlayer(
+              videoPath: widget.videoPath,
+              videoController: _controller,
+              formatDuration: formatDuration,
+            ),
+          ),
+        ) ??
+        _controller;
+    setState(() {});
   }
 
   @override
@@ -206,14 +206,30 @@ class FullScreenVideoPlayer extends StatefulWidget {
   State<FullScreenVideoPlayer> createState() => _FullScreenVideoPlayerState();
 }
 
-class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
+class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer>
+    with TickerProviderStateMixin {
   late TransformationController _transformationController;
-  double _currentScale = 1.0;
+  double get _scale => _transformationController.value.row0.x;
+  late Offset _doubleTapLocalPosition;
+  final minScale = 1.0;
+  final maxScale = 3.0;
+  late AnimationController _animationController;
+  Animation<Matrix4>? _animation;
+  Offset? _dragOffset;
+  Offset? _previousPosition;
+  bool _enableDrag = true;
 
   @override
   void initState() {
     widget.videoController.addListener(_checkVideoCompletion);
     _transformationController = TransformationController();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    )..addListener(() {
+        _transformationController.value =
+            _animation?.value ?? Matrix4.identity();
+      });
     super.initState();
   }
 
@@ -221,7 +237,96 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
   void dispose() {
     widget.videoController.removeListener(_checkVideoCompletion);
     _transformationController.dispose();
+    _animationController.dispose();
+
     super.dispose();
+  }
+
+  void _onDragStart(ScaleStartDetails scaleDetails) {
+    _previousPosition = scaleDetails.focalPoint;
+  }
+
+  void _onDragUpdate(ScaleUpdateDetails scaleUpdateDetails) {
+    final currentPosition = scaleUpdateDetails.focalPoint;
+    final previousPosition = _previousPosition ?? currentPosition;
+
+    final newY =
+        (_dragOffset?.dy ?? 0.0) + (currentPosition.dy - previousPosition.dy);
+    _previousPosition = currentPosition;
+    if (_enableDrag) {
+      setState(() {
+        _dragOffset = Offset(0, newY);
+      });
+    }
+  }
+
+  void _onOverScrollDragEnd(ScaleEndDetails? scaleEndDetails) {
+    if (_dragOffset == null) return;
+    final dragOffset = _dragOffset!;
+
+    final screenSize = MediaQuery.of(context).size;
+
+    if (scaleEndDetails != null) {
+      if (dragOffset.dy.abs() >= screenSize.height / 3) {
+        Navigator.of(context).pop();
+        return;
+      }
+      final velocity = scaleEndDetails.velocity.pixelsPerSecond;
+      final velocityY = velocity.dy;
+
+      const thresholdOffsetYToEnablePop = 75.0;
+      const thresholdVelocityYToEnablePop = 200.0;
+      if (velocityY.abs() > thresholdOffsetYToEnablePop &&
+          dragOffset.dy.abs() > thresholdVelocityYToEnablePop &&
+          _enableDrag) {
+        Navigator.of(context).pop();
+        return;
+      }
+    }
+  }
+
+  void _onDoubleTap() {
+    Matrix4 matrix = _transformationController.value.clone();
+
+    final double currentScale = matrix.row0.x;
+    double targetScale = minScale;
+
+    if (currentScale <= minScale) {
+      targetScale = maxScale;
+    }
+    final double offSetX = targetScale == minScale
+        ? 0.0
+        : -_doubleTapLocalPosition.dx * (targetScale - 1);
+    final double offSetY = targetScale == minScale
+        ? 0.0
+        : -_doubleTapLocalPosition.dy * (targetScale - 1);
+
+    matrix = Matrix4.fromList([
+      targetScale,
+      matrix.row1.x,
+      matrix.row2.x,
+      matrix.row3.x,
+      matrix.row0.y,
+      targetScale,
+      matrix.row2.y,
+      matrix.row3.y,
+      matrix.row0.z,
+      matrix.row1.z,
+      targetScale,
+      matrix.row3.z,
+      offSetX,
+      offSetY,
+      matrix.row2.w,
+      matrix.row3.w
+    ]);
+
+    _animation = Matrix4Tween(
+      begin: _transformationController.value,
+      end: matrix,
+    ).animate(
+      CurveTween(curve: Curves.easeOut).animate(_animationController),
+    );
+    _animationController.forward(from: 0);
   }
 
   void _checkVideoCompletion() {
@@ -233,52 +338,71 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
     }
   }
 
-  void _handleDoubleTap(TapDownDetails details) {
-    final position = details.localPosition;
-    final scale = _currentScale > 1.0 ? 1.0 : 2.0;
-    setState(() {
-      _currentScale = scale;
-      _transformationController.value = Matrix4.identity()
-        ..translate(-position.dx * (scale - 1), -position.dy * (scale - 1))
-        ..scale(scale);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onDoubleTapDown: _handleDoubleTap,
-      onTap: () {
-        setState(() {
-          widget.videoController.value.isPlaying
-              ? widget.videoController.pause()
-              : widget.videoController.play();
-        });
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          return;
+        }
+        Navigator.of(context).pop(widget.videoController);
       },
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          child: InteractiveViewer(
-            transformationController: _transformationController,
-            child: Center(
-              child: Stack(
-                children: [
-                  Hero(
-                    tag: widget.videoPath,
-                    child: AspectRatio(
-                      aspectRatio: widget.videoController.value.aspectRatio,
-                      child: VideoPlayer(widget.videoController),
+      child: GestureDetector(
+        onDoubleTapDown: (TapDownDetails details) =>
+            _doubleTapLocalPosition = details.localPosition,
+        onDoubleTap: _onDoubleTap,
+        onTap: () {
+          setState(() {
+            widget.videoController.value.isPlaying
+                ? widget.videoController.pause()
+                : widget.videoController.play();
+          });
+        },
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: SafeArea(
+            child: InteractiveViewer(
+              transformationController: _transformationController,
+              onInteractionUpdate: (details) {
+                _onDragUpdate(details);
+                if (_scale == 1.0) {
+                  _enableDrag = true;
+                } else {
+                  _enableDrag = false;
+                }
+                setState(() {});
+              },
+              onInteractionEnd: (details) {
+                if (_enableDrag) {
+                  _onOverScrollDragEnd(details);
+                }
+              },
+              onInteractionStart: (details) {
+                if (_enableDrag) {
+                  _onDragStart(details);
+                }
+              },
+              child: Center(
+                child: Stack(
+                  children: [
+                    Hero(
+                      tag: widget.videoPath,
+                      child: AspectRatio(
+                        aspectRatio: widget.videoController.value.aspectRatio,
+                        child: VideoPlayer(widget.videoController),
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    left: 5,
-                    top: 5,
-                    child: VideoStatusDisplay(
-                      controller: widget.videoController,
-                      formatDuration: widget.formatDuration,
+                    Positioned(
+                      left: 5,
+                      top: 5,
+                      child: VideoStatusDisplay(
+                        controller: widget.videoController,
+                        formatDuration: widget.formatDuration,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

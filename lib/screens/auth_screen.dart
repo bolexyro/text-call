@@ -475,7 +475,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ),
                   child: _isAuthenticating == false
                       ? const Text(
-                          'GET CODE',
+                          'LOGIN',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 20,

@@ -108,22 +108,22 @@ class AppDrawer extends ConsumerWidget {
                     ),
                 context: context),
           ),
-          // const Spacer(),
-          // ListTile(
-          //   leading: SvgPicture.asset(
-          //     'assets/icons/logout.svg',
-          //     height: 24,
-          //     colorFilter: ColorFilter.mode(
-          //       Theme.of(context).iconTheme.color!,
-          //       BlendMode.srcIn,
-          //     ),
-          //   ),
-          //   title: const Text('Log Out'),
-          //   onTap: () => _logout(context),
-          // ),
-          // const SizedBox(
-          //   height: 30,
-          // )
+          const Spacer(),
+          ListTile(
+            leading: SvgPicture.asset(
+              'assets/icons/logout.svg',
+              height: 24,
+              colorFilter: ColorFilter.mode(
+                Theme.of(context).iconTheme.color!,
+                BlendMode.srcIn,
+              ),
+            ),
+            title: const Text('Log Out'),
+            onTap: () => _logout(context),
+          ),
+          const SizedBox(
+            height: 30,
+          )
         ],
       ),
     );

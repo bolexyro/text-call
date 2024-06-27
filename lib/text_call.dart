@@ -52,6 +52,9 @@ class _TextCallState extends ConsumerState<TextCall> {
   }
 
   Future<Map<String, dynamic>> getUserInfoAndLoadImportantStuff() async {
+    // this one is to just wake the backend
+    final url = Uri.https(backendRootUrl);
+    http.get(url);
     await ref.read(contactsProvider.notifier).loadContacts();
     await ref.read(recentsProvider.notifier).loadRecents();
     await ref.read(blockedContactsProvider.notifier).loadBlockedContacts();

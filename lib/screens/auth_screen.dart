@@ -71,6 +71,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     _originalPhoneNumber = prefs.getString('myPhoneNumber');
 
     if (_originalPhoneNumber == _enteredPhoneNumber) {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isUserLoggedInq', true);
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) =>

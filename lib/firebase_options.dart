@@ -65,4 +65,5 @@ class DefaultFirebaseOptions {
     projectId: 'text-call-7f4b1',
     storageBucket: 'text-call-7f4b1.appspot.com',
   );
+
 }

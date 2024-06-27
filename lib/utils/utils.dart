@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -249,26 +250,38 @@ Future<void> sendAccessRequestStatus(
   if (accessRequestStatus == AccessRequestStatus.granted) {
     final url = Uri.https(backendRootUrl,
         'request_status/granted/${payload['requesterPhoneNumber']}/$requesteePhoneNumber/${payload['recentId']}');
-    http.get(url);
+    http.get(
+      url,
+      headers: {
+        'x-api-key': dotenv.env['TEXTCALL_BACKEND_API_KEY']!,
+      },
+    );
     return;
   }
   final url = Uri.https(backendRootUrl,
       'request_status/denied/${payload['requesterPhoneNumber']}/$requesteePhoneNumber/${payload['recentId']}');
-  http.get(url);
+  http.get(
+    url,
+    headers: {
+      'x-api-key': dotenv.env['TEXTCALL_BACKEND_API_KEY']!,
+    },
+  );
 }
 
 void sendAccessRequest(Recent recent, WidgetRef ref) async {
   final prefs = await SharedPreferences.getInstance();
   final String? requesterPhoneNumber = prefs.getString('myPhoneNumber');
   insertAccessRequestIntoDb(recentId: recent.id, isSent: true);
-  print('rain an difr');
   ref.read(recentsProvider.notifier).updateRecentAccessRequestPendingStatus(
       recentId: recent.id, isPending: true);
-  print('rain an difr2');
   final url = Uri.https(backendRootUrl,
       'send-access-request/$requesterPhoneNumber/${recent.contact.phoneNumber}/${recent.id}');
-  print('rain an difr3');
-  http.get(url);
+  http.get(
+    url,
+    headers: {
+      'x-api-key': dotenv.env['TEXTCALL_BACKEND_API_KEY']!,
+    },
+  );
   print('rain an difr4');
 }
 

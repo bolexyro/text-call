@@ -7,6 +7,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:collection/collection.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:lottie/lottie.dart';
@@ -1115,7 +1116,11 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                             final url = Uri.https(backendRootUrl, 'end-call');
                             http.post(
                               url,
-                              headers: {'Content-Type': 'application/json'},
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'x-api-key':
+                                    dotenv.env['TEXTCALL_BACKEND_API_KEY']!,
+                              },
                               body: jsonEncode(
                                 {
                                   'caller_phone_number': _callerPhoneNumber,
@@ -1176,7 +1181,10 @@ class _MessageWriterState extends ConsumerState<MessageWriter> {
                           },
                           style: IconButton.styleFrom(
                             padding: const EdgeInsets.all(15),
-                            backgroundColor: Colors.red,
+                            backgroundColor: Theme.of(context).brightness ==
+                                    Brightness.dark
+                                ? Theme.of(context).colorScheme.errorContainer
+                                : Theme.of(context).colorScheme.error,
                             foregroundColor: Colors.white,
                             shape: const CircleBorder(),
                           ),

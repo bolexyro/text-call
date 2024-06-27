@@ -10,6 +10,7 @@ import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_callkit_incoming/entities/ios_params.dart';
 import 'package:flutter_callkit_incoming/entities/notification_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_call/models/complex_message.dart';
@@ -183,7 +184,12 @@ Future<void> messageHandler(RemoteMessage message) async {
   }).contains(callerPhoneNumber)) {
     final url = Uri.https(
         backendRootUrl, 'call/blocked/$callerPhoneNumber/$blockMessage');
-    await http.get(url);
+    await http.get(
+      url,
+      headers: {
+        'x-api-key': dotenv.env['TEXTCALL_BACKEND_API_KEY']!,
+      },
+    );
     return;
   }
 
@@ -304,7 +310,12 @@ void registerCallkitIncomingListener() {
 
           final url =
               Uri.https(backendRootUrl, 'call/accepted/$callerPhoneNumber');
-          http.get(url);
+          http.get(
+            url,
+            headers: {
+              'x-api-key': dotenv.env['TEXTCALL_BACKEND_API_KEY']!,
+            },
+          );
 
           final prefs = await SharedPreferences.getInstance();
           final bool? isUserLoggedIn = prefs.getBool('isUserLoggedIn');
@@ -346,7 +357,12 @@ void registerCallkitIncomingListener() {
 
           final url =
               Uri.https(backendRootUrl, 'call/rejected/$callerPhoneNumber');
-          http.get(url);
+          http.get(
+            url,
+            headers: {
+              'x-api-key': dotenv.env['TEXTCALL_BACKEND_API_KEY']!,
+            },
+          );
 
           final newRecent = Recent.withoutContactObject(
             category: RecentCategory.incomingRejected,
@@ -375,7 +391,12 @@ void registerCallkitIncomingListener() {
 
           final url =
               Uri.https(backendRootUrl, 'call/ignored/$callerPhoneNumber');
-          http.get(url);
+          http.get(
+            url,
+            headers: {
+              'x-api-key': dotenv.env['TEXTCALL_BACKEND_API_KEY']!,
+            },
+          );
 
           final newRecent = Recent.withoutContactObject(
             category: RecentCategory.incomingIgnored,

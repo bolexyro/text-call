@@ -1,6 +1,7 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:text_call/utils/constants.dart';
 import 'package:text_call/utils/utils.dart';
 import 'package:http/http.dart' as http;
@@ -45,7 +46,12 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
 
     final url =
         Uri.https(backendRootUrl, 'submit-feedback/$emailSubject/$emailBody');
-    final response = await http.get(url);
+    final response = await http.get(
+      url,
+      headers: {
+        'x-api-key': dotenv.env['TEXTCALL_BACKEND_API_KEY']!,
+      },
+    );
     if (response.statusCode == 200) {
       setState(() {
         _successFullySent = true;
@@ -93,7 +99,10 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
+                        foregroundColor:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(_borderRadius),
                         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:http/http.dart' as http;
@@ -81,7 +82,9 @@ class _TextCallState extends ConsumerState<TextCall> {
         future: _variableForGetUserInfoAndloadImportantStuffFUture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return  SplashScreen(taskForProgressIndicator: _variableForGetUserInfoAndloadImportantStuffFUture);
+            return SplashScreen(
+                taskForProgressIndicator:
+                    _variableForGetUserInfoAndloadImportantStuffFUture);
           }
           if (snapshot.hasError) {
             return Text('Errordd: ${snapshot.error}');
@@ -92,7 +95,13 @@ class _TextCallState extends ConsumerState<TextCall> {
                 HowAppIsOPened.fromTerminatedForPickedCall) {
               final url = Uri.https(backendRootUrl,
                   'call/accepted/${userInfo['callerPhoneNumber']}');
-              http.get(url);
+
+              http.get(
+                url,
+                headers: {
+                  'x-api-key': dotenv.env['TEXTCALL_BACKEND_API_KEY']!,
+                },
+              );
 
               if (userInfo['isUserLoggedIn'] != true) {
                 return const AuthScreen(
